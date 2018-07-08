@@ -1,3 +1,4 @@
 Zahnriemen HTD 5M 24 Zähen 25mm breit: https://keilriemen24.eu/120-5M-25-Zahnriemen-HTD/RPP-24-Zaehne-25mm-Breit-120mm-Laenge-Teilung-5mm
 
 Discussion on cheap IMUs https://github.com/kriswiner/MPU6050/wiki/affordable-9-dof-sensor-fusion
+timing belts and pulleys : http://www.beltingonline.com/rubber-timing-belts-40/
