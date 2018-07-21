@@ -2,3 +2,25 @@ Zahnriemen HTD 5M 24 Zähen 25mm breit: https://keilriemen24.eu/120-5M-25-Zahnri
 
 Discussion on cheap IMUs https://github.com/kriswiner/MPU6050/wiki/affordable-9-dof-sensor-fusion
 timing belts and pulleys : http://www.beltingonline.com/rubber-timing-belts-40/
+
+
+cycloidal gear:
+http://blogs.solidworks.com/teacher/wp-content/uploads/sites/3/Building-a-Cycloidal-Drive-with-SOLIDWORKS.pdf
+
+X = (R*cos(t))-(Rr*cos(t+arctan(sin((1-N)*t)/((R/(E*N))-cos((1-N)*t)))))-(E*cos(N*t))
+Y = (-R*sin(t))+(Rr*sin(t+arctan(sin((1-N)*t)/((R/(E*N))-cos((1-N)*t)))))+(E*sin(N*t))
+
+“
+R”is the radius of the Rotor d31
+E is the eccentricity d34
+Rr is the radius of the Rollers 18
+“N” which is the number of Rollers
+
+X = (d31*cos(t))-(d18*cos(t+atan(sin((1-12)*t)/((d31/12/d34))-cos((1-12)*t)))))-(d34*cos(12*t))
+Y = (-d31*sin(t))+(d18*sin(t+atan(sin((1-12)*t)/((d31/12/d34))-cos((1-12)*t)))))+(d34*sin(12*t))
+X =  (40*cos(t))-(6*cos(t+atan(sin(-9*t)/((40/3/10)-cos(-9*t)))))-(3*cos(10*t))
+Y = (-40*sin(t))+(6*sin(t+atan(sin(-9*t)/((40/3/10)-cos(-9*t)))))+(3*sin(10*t))
+
+
+ (10*cos(t))-(1.5*cos(t+atan(sin(-9*t)/((10/0.75/10)-cos(-9*t)))))-(0.75*cos(10*t))
+(-10*sin(t))+(1.5*sin(t+atan(sin(-9*t)/((10/0.75/10)-cos(-9*t)))))+(0.75*sin(10*t))
