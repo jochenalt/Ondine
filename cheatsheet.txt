@@ -3,6 +3,8 @@ Zahnriemen HTD 5M 24 Zähen 25mm breit: https://keilriemen24.eu/120-5M-25-Zahnri
 Discussion on cheap IMUs https://github.com/kriswiner/MPU6050/wiki/affordable-9-dof-sensor-fusion
 timing belts and pulleys : http://www.beltingonline.com/rubber-timing-belts-40/
 
+https://www.reisenauer.de/kid-41-Reisenauer-Micro-Edition.html
+
 
 cycloidal gear:
 http://blogs.solidworks.com/teacher/wp-content/uploads/sites/3/Building-a-Cycloidal-Drive-with-SOLIDWORKS.pdf
@@ -24,3 +26,4 @@ Y = (-40*sin(t))+(6*sin(t+atan(sin(-9*t)/((40/3/10)-cos(-9*t)))))+(3*sin(10*t))
 
  (10*cos(t))-(1.5*cos(t+atan(sin(-9*t)/((10/0.75/10)-cos(-9*t)))))-(0.75*cos(10*t))
 (-10*sin(t))+(1.5*sin(t+atan(sin(-9*t)/((10/0.75/10)-cos(-9*t)))))+(0.75*sin(10*t))
+
