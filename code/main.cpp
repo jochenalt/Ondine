@@ -26,12 +26,16 @@ void setup()
 
 	Serial1.begin(115200);
 	Serial1.println("startup1");
+
+	analogWriteResolution(8);
+	analogWriteFrequency(3, 300000);
 }
 
 void loop()
 {
 	uint32_t now = millis();
 	ledBlinker.loop(now);    	// LED on Teensy board and LED on power switch
+	/*
 
 	  long newPosition = myEnc.read();
 	  if (newPosition != oldPosition) {
@@ -39,4 +43,25 @@ void loop()
 	    Serial1.print("new position");
 	    Serial1.println(newPosition);
 	  }
+	 */
+	static int c = 0;
+	static uint32_t lastTime  = 0;
+	if (now - lastTime > 2000) {
+		Serial1.println("now");
+		Serial1.print("0");
+		analogWrite(3, 0);
+		delay(2000);
+		analogWrite(3, 255);
+		Serial1.print("255");
+		delay(2000);
+		analogWrite(3, 64);
+		Serial1.print("64");
+		delay(2000);
+
+		Serial1.print("now ");
+		Serial1.print(c % 256);
+		Serial1.println();
+
+		lastTime = now;
+	}
 }
