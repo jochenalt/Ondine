@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name FlowerPot)(type Legacy)(uri D:/Projects/FlowerPot/schematics/FlowerPot.lib)(options "")(descr ""))
+  (lib (name teensy)(type Legacy)(uri D:/Projects/FlowerPot/schematics/teensy.lib)(options "")(descr ""))
+)

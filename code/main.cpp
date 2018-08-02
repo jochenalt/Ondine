@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "BLDCController.h"
 
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
