@@ -11,72 +11,51 @@
 #include <ClassInterrupt.h>
 
 
-const int pwmSinArraySize = 360;
+const int pwmSinArraySize = 512;
 
-#define INIT_WAVE
-#ifdef INIT_WAVE
-	// SPWM (Sine Wave)
-	const int pwmSin[pwmSinArraySize] = {127, 138, 149, 160, 170, 181, 191, 200, 209, 217, 224, 231, 237, 242, 246, 250, 252, 254, 254, 254, 252, 250, 246, 242, 237, 231, 224, 217, 209, 200, 191, 181, 170, 160, 149, 138, 127, 116, 105, 94, 84, 73, 64, 54, 45, 37, 30, 23, 17, 12, 8, 4, 2, 0, 0, 0, 2, 4, 8, 12, 17, 23, 30, 37, 45, 54, 64, 73, 84, 94, 105, 116 };
-	// SVPWM (Space Vector Wave)
-	const int pwmSpaceVector[pwmSinArraySize] = {128, 147, 166, 185, 203, 221, 238, 243, 248, 251, 253, 255, 255, 255, 253, 251, 248, 243, 238, 243, 248, 251, 253, 255, 255, 255, 253, 251, 248, 243, 238, 221, 203, 185, 166, 147, 128, 109, 90, 71, 53, 35, 18, 13, 8, 5, 3, 1, 1, 1, 3, 5, 8, 13, 18, 13, 8, 5, 3, 1, 1, 1, 3, 5, 8, 13, 18, 35, 53, 71, 90, 109};
 
-#else
-	int pwmSin[pwmSinArraySize];
-	// SVPWM (Space Vector Wave)
-	int pwmSpaceVector[360];
-#endif
+const int pwmResolution = 10;
+// SVPWM (Space Vector Wave)
+float pwmSpaceVector[pwmSinArraySize];
 
 
 void initializeWaves() {
+	const int maxPWMValue = (1<<pwmResolution)-1;
+	const float spaceVectorFactor = 1.0 + sin(M_PI/4.0 + 2.0*M_PI/3)/2.0;
+
 	static boolean initialized = false;
 	if (!initialized) {
 		for (int i = 0;i<pwmSinArraySize;i++) {
-			float angle = float(i)/ float(pwmSinArraySize) * 360.0 / M_PI_2;
-			float phaseA = sin(angle)*255.0;
-			float phaseB = sin(angle - M_PI_2/3)*255.0;
-			float phaseC = sin(angle + M_PI_2/3)*255.0;
-
+			float angle = float(i)/ float(pwmSinArraySize) * (M_PI*2.0);
+			float phaseA = sin(angle);
+			float phaseB = sin(angle - M_PI*2.0/3.0);
+			float phaseC = sin(angle + M_PI*2.0/3.0);
 			float voff = (min(phaseA, min(phaseB, phaseC)) + max(phaseA, max(phaseB, phaseC)))/2.0;
-			int pwmSinValue = phaseA/2.0 + 127.0;
-			int pwmSpaceVectorValue = (phaseA - voff)/2.0 + 128.0;
-#ifdef INIT_WAVE
-			char buf[80];
-			if (pwmSinValue != pwmSin[i]) {
-				sprintf(buf, "pwmSin[%i] = %i != %i",i, pwmSinValue, pwmSin[i]);
-				fatalError(buf);
-			}
-			if (pwmSpaceVectorValue != pwmSpaceVector[i]) {
-				sprintf(buf, "pwmSpaceVector[%i] = %i != %i",i, pwmSpaceVectorValue, pwmSpaceVector[i]);
-				fatalError(buf);
-			}
-#else
-			pwmSin[i] = pwmSinValue;
+			float pwmSpaceVectorValue =  ((phaseA - voff)/2.0*spaceVectorFactor + 0.5)*maxPWMValue;
+
+			Serial1.print("i=");
+			Serial1.print(i);
+			Serial1.print("voff=");
+			Serial1.print(voff);
+
+			Serial1.print(" SPPWM=");
+			Serial1.print(pwmSpaceVectorValue);
+
 			pwmSpaceVector[i] = pwmSpaceVectorValue;
-#endif
 		}
 		initialized = true;
 	}
 }
 
-int BLDCController::getWaveSize() {
-	return pwmSinArraySize;
-}
 
 int BLDCController::getPWMValue(int idx) {
-	if (pwmType == SIN_WAVE)
-		return pwmSin[idx % pwmSinArraySize];
-	else
-		return pwmSpaceVector[idx % pwmSinArraySize];
+	return torque* pwmSpaceVector[idx % pwmSinArraySize];
 }
 
 void BLDCController::getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValueC) {
-	if (currentWaveIndex < 0)
-		currentWaveIndex += getWaveSize();
-	if (currentWaveIndex > getWaveSize())
-		currentWaveIndex = 0;
 	pwmValueA = getPWMValue(currentWaveIndex);
-	pwmValueB = getPWMValue(currentWaveIndex + (1*getWaveSize() / 3));
-	pwmValueC = getPWMValue(currentWaveIndex + (2*getWaveSize() / 3));
+	pwmValueB = getPWMValue(currentWaveIndex + pwmSinArraySize / 3);
+	pwmValueC = getPWMValue(currentWaveIndex + 2*pwmSinArraySize / 3);
 }
 
 BLDCController::BLDCController() {
@@ -88,6 +67,10 @@ BLDCController::~BLDCController() {
 
 
 void BLDCController::setup( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
+
+	// initialize waves (only once)
+	initializeWaves();
+
 	// there's only one enable pin that has a short cut to EN1, EN2, and EN3 from L6234
 	enablePin = EnablePin;
 
@@ -96,9 +79,12 @@ void BLDCController::setup( int EnablePin, int Input1Pin, int Input2Pin, int Inp
 	input3Pin = Input3Pin;
 
 	// setup L6234 input PWM pins
-	analogWriteFrequency(input1Pin, 100000); // max frequency of L6234 is 150Khz
-	analogWriteFrequency(input2Pin, 100000);
-	analogWriteFrequency(input3Pin, 100000);
+	analogWriteResolution(pwmResolution);
+
+	analogWriteFrequency(input1Pin, 58593.75); // max frequency of L6234 is 150Khz. This number comes from Teensy datasheet, it seems to be the optimal frequency.
+	analogWriteFrequency(input2Pin, 58593.75);
+	analogWriteFrequency(input3Pin, 58593.75);
+
 
 	pinMode(input1Pin, OUTPUT);
 	pinMode(input1Pin, OUTPUT);
@@ -107,6 +93,8 @@ void BLDCController::setup( int EnablePin, int Input1Pin, int Input2Pin, int Inp
 	// enable all enable lines at once
 	pinMode(enablePin, OUTPUT);
 	digitalWrite(enablePin, HIGH);
+
+	computeNextStep();
 }
 
 void hallSensor1(void* object) {
@@ -161,7 +149,7 @@ void BLDCController::ensureSensoredCommutation() {
 		if (hallSensorsStep == -1) {
 			fatalError("hall sensors gave 0 sequence mapping");
 		}
-		int commutationStepLength = getWaveSize() / 6;
+		int commutationStepLength = pwmSinArraySize / 6;
 		int toBeWaveIndex = hallSensorsStep*commutationStepLength;
 
 		if (currentWaveIndex != toBeWaveIndex) {
@@ -176,59 +164,101 @@ void BLDCController::computeNextStep() {
 	// read hall sensors to adapt the phase of the wave to the current position
 	ensureSensoredCommutation();
 
+
 	float speedDiff = targetSpeed - currentSpeed;
-	speedDiff = constrain(speedDiff, -abs(targetAcc)*stepInterval_us/1000000.0, +abs(targetAcc)*stepInterval_us/1000000.0);
+	speedDiff = constrain(speedDiff, -abs(targetAcc)*stepInterval, +abs(targetAcc)*stepInterval);
 	currentSpeed += speedDiff;
 	if (currentSpeed < 0) {
 		direction = BACKWARD;
-		waveStep = -1;
 	}
 	else  {
 		direction = FORWARD;
-		waveStep = 1;
 	}
 
-	float timePerRevolution;
-
-	// if we dont move, set timePerRevolution to infinite
-	if (currentSpeed < 0.00001) {
-		timePerRevolution = 1.0/abs(0.00001);
-		waveStep = 0; // we stick to the same position
-	}
+	// default loop: assume one wave step per loop and compute the delay in between
+	waveStep = 1.0;
+	float const floatPrecision = 0.00001;
+	if (abs(currentSpeed) > floatPrecision)
+		stepInterval =  1.0/abs(currentSpeed)/pwmSinArraySize; // if currentSpeed = 0, this gets infinite and corrected later on
 	else
-		timePerRevolution = 1.0/abs(currentSpeed);
+		stepInterval =  1.0/floatPrecision/pwmSinArraySize;
 
-	float newTimePerWaveIdx = timePerRevolution/getWaveSize();
-	stepInterval_us = newTimePerWaveIdx / 1000000.0;
-
-	// high speed mode: when the wave frequency goes above 1KHz (> 3 revolution/s), take multiple steps in one loop at stay at 1KHz
-	if (stepInterval_us < 1000) {
-		waveStep = 1000.0/stepInterval_us;
-		stepInterval_us = 1000.0;
+	// check if we control via high speed more or slow speed mode.
+	// in slow speed more we generate pwm waves that give a sin-curve
+	// which is carries out in small steps of (360/pwmSinArraySize)°.
+	// Once this results in a step frequency above 1KHz (which is > 3 revolutions/s) we increase the step size
+	// such that we stay at approx. 1KHz.
+	const float maxWaveFrequency = 500.0;
+	const float minStepInterval = 1.0/maxWaveFrequency;
+	if (stepInterval < minStepInterval) {
+		Serial.println("min");
+		waveStep = minStepInterval/stepInterval; // >= 1 or <= -1
+		stepInterval = minStepInterval;
 	}
 
-	if (stepInterval_us > 1000)
+	// lower limit of step interval is 100Hz
+	const float minWaveFrequency = 100.0;
+	const float maxStepInterval = 1.0/minWaveFrequency;
+		if (stepInterval > maxStepInterval) {
+		waveStep = maxStepInterval/stepInterval;
+		stepInterval = maxStepInterval;
+	}
+
+	if ((abs(lastStepInterval-stepInterval) > 0.0000001) || (abs(lastWaveStep-waveStep)> 0.000001)) {
+		/*
+		Serial1.print("ws=");
+		Serial1.print(waveStep);
+		Serial1.print(" v=");
+		Serial1.print(currentSpeed);
+		Serial1.print(" dv=");
+		Serial1.print(speedDiff);
+
+		Serial1.print(" dt=");
+		Serial1.print(stepInterval);
+		Serial1.println();
+		*/
+		lastStepInterval = stepInterval;
+		lastWaveStep = waveStep;
+	}
 
 	// next step happens in stepInterval_us
-	lastStepTime_us = stepInterval_us;
+	nextStep_us = nextStep_us + stepInterval*1000000.0;
 }
 
 // call me as often as possible
 void BLDCController::loop() {
 
 	long now_us = micros();
-	if (now_us > lastStepTime_us + stepInterval_us) {
+	if (now_us > nextStep_us) {
 		int pwmValueA, pwmValueB, pwmValueC;
 		getPWMValues (pwmValueA, pwmValueB, pwmValueC);
 		analogWrite(input1Pin, pwmValueA);
 		analogWrite(input2Pin, pwmValueB);
 		analogWrite(input3Pin, pwmValueC);
-
 		// increase wave index for next loop
-		currentWaveIndex += waveStep;
+		if (direction == FORWARD)
+			currentWaveIndex += waveStep;
+		else
+			currentWaveIndex -= waveStep;
+
+		int waveSize=pwmSinArraySize;
+		while (currentWaveIndex < 0)
+			currentWaveIndex += waveSize;
+		while (currentWaveIndex >= waveSize)
+			currentWaveIndex -= waveSize;
+
+		// Serial1.print("idx=");
+		// Serial1.print(currentWaveIndex);
 
 		computeNextStep();
+		// Serial1.println();
+
+
 	}
+}
+
+void BLDCController::setTorque(float newTorque) {
+	torque = newTorque;
 }
 
 void BLDCController::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
@@ -236,5 +266,87 @@ void BLDCController::setSpeed(float speed /* rotations per second */, float acc 
 	targetAcc = acc;
 
 	computeNextStep();
+}
+
+
+void BLDCController::printHelp() {
+	Serial1.println("BLDC controller");
+	Serial1.println("0 - stop");
+	Serial1.println("+ - inc speed");
+	Serial1.println("- - dec speed");
+	Serial1.println("* - inc acc");
+	Serial1.println("_ - dec acc");
+	Serial1.println("r - revert direction");
+	Serial1.println("t - increase torque");
+	Serial1.println("T - decrease torque");
+
+	Serial1.println("ESC");
+}
+
+void BLDCController::runMenu() {
+	printHelp();
+	while (true) { // terminates with return
+		loop();
+		char ch = Serial1.read();
+		bool cmd = true;
+		switch (ch) {
+		case '0':
+			menuSpeed = 0;
+			setSpeed(menuSpeed,  menuAcc);
+			break;
+		case '+':
+			menuSpeed++;
+			setSpeed(menuSpeed,  menuAcc);
+			break;
+		case '-':
+			menuSpeed--;
+			setSpeed(menuSpeed,  menuAcc);
+			break;
+		case '*':
+			menuAcc++;
+			setSpeed(menuSpeed,  menuAcc);
+			break;
+		case '_':
+			menuAcc--;
+			setSpeed(menuSpeed,  menuAcc);
+			break;
+		case 'r':
+			menuSpeed = -menuSpeed;
+			setSpeed(menuSpeed,  menuAcc);
+			break;
+		case 'T':
+			menuTorque += 0.05;
+			if (menuTorque > 1.0)
+				menuTorque = 1.0;
+			setTorque(menuTorque);
+			break;
+		case 't':
+			menuTorque -= 0.05;
+			if (menuTorque < 0.0)
+				menuTorque = 0.0;
+			setTorque(menuTorque);
+			break;
+
+		case 'h':
+			printHelp();
+			break;
+		case 27:
+			return;
+			break;
+		default:
+			cmd = false;
+			break;
+		}
+		if (cmd) {
+			Serial1.print("v=");
+			Serial1.print(menuSpeed);
+			Serial1.print(" a=");
+			Serial1.print(menuAcc);
+			Serial1.print(" t=");
+			Serial1.print(menuTorque);
+
+			Serial1.println(">");
+		}
+	}
 }
 
