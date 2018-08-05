@@ -7,5 +7,5 @@
 
 #include <ClassInterrupt.h>
 
-InterruptState interruptArgs[CORE_NUM_INTERRUPT];
+// InterruptState interruptArgs[CORE_NUM_INTERRUPT];
 

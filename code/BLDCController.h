@@ -9,18 +9,16 @@
 #define BLDCCONTROLLER_H_
 
 
-class BLDCController {
-	friend void hallSensor1(void* object);
-	friend void hallSensor2(void* object);
-	friend void hallSensor3(void* object);
+#define ENCODER_USE_INTERRUPTS
+#include <Encoder/Encoder.h>
 
+class BLDCController {
 public:
 	BLDCController();
 	virtual ~BLDCController();
 
-	void setup( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
-	void setupHallSensors( int hallSensor1Pin, int hallSensor2Pin, int hallSensor3Pin);
-
+	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
+	void setupEncoder( int EncoderAPin, int EncoderBPin);
 	void loop( );
 
 	void setSpeed(float speed /* [rotations per second] */, float acc /* [rotations per second^2] */);
@@ -31,42 +29,45 @@ public:
 
 	void runMenu();
 private:
-	 int enablePin = 0;
-	 int input1Pin = 0;
-	 int input2Pin = 0;
-	 int input3Pin = 0;
-	 int hallSensor1Pin = 0;
-	 int hallSensor2Pin = 0;
-	 int hallSensor3Pin = 0;
 
-	 float currentWaveIndex = 0;
+	// PINs for Drotek L6234 EN, IN1, IN2, IN3
+	int enablePin = 0;
+	int input1Pin = 0;
+	int input2Pin = 0;
+	int input3Pin = 0;
 
-	 DirectionType direction = FORWARD;
-	 float currentSpeed = 0;
-	 float targetAcc = 0;				// [rev/s^2]
-	 float targetSpeed = 0;				// [rev/s]
+	int encoderAPin = 0;
+	int encoderBPin = 0;
 
-	 float stepInterval = 0;			// interval time to increase wave index
-	 float lastStepInterval = 0.0;
 
-	 uint32_t nextStep_us = 0;				// next time in [us] when step happens
-	 uint32_t lastStep_us = 0;
+	float targetAcc = 0;				// [rev/s^2]
+	float targetSpeed = 0;				// [rev/s]
+	float torque = 0;					// [0..1], ratio of full torque, ends up in pwm ratio
 
-	 float waveStep = 0.0;				// number of indexes the wave is incremented
-	 float lastWaveStep = 0.0;
-	 int commutationStep = 0;
-	 int lastHallSensorValue = 0;
-	 float torque = 0;
-	 int getPWMValue( int idx);
+	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
+	float currentSpeed = 0;				// [rev/s]
+	float referenceAngle = 0;			// [rad]
+	float encoderAngle = 0;				// [rad]
+	int lastEncoderPosition = 0;		// last call of encoder value
+
+	 int getPWMValue( float angle_rad);
 	 void getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValueC);
-	 void computeNextStep();
-	 void sixStepCommutation();
+	 float turnReferenceAngle();
+	 void setMagneticFieldAngle(float angle);
+	 void readEncoder();
+	 void setPWM();
+	 uint32_t lastStepTime_us = 0;
 
-	 int hallSensorValue1 = 0;
-	 int hallSensorValue2 = 0;
-	 int hallSensorValue3 = 0;
+	 // data of PI controller
+	 static float pid_k;
+	 static float pid_i;
+
+	 float errorAngleIntegral = 0;
 
 	 bool isEnabled = false;
+
+	 // Encoder library
+	 Encoder* encoder = NULL;
 
 	 // ascii menu functionality
 	 void printHelp();

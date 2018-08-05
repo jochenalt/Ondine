@@ -11,18 +11,22 @@
 #include <ClassInterrupt.h>
 
 
+float BLDCController::pid_k = 0.8;
+float BLDCController::pid_i = 0.05;
+
+const float maxSpeed = 40.0; // [rev/s]
+const float minTorque = 0.1; // [PWM ratio]
+
+// max PWM value is (1<<pwmResolution)-1
 const int pwmResolution = 8;
 
-// array to store space vector wave form (SVPWM)
+// array to store pre-computed values of space vector wave form (SVPWM)
 const int svpwmArraySize = 244;
 int svpwmTable[svpwmArraySize];
 
-
 void initializeSVPWM() {
 	const int maxPWMValue = (1<<pwmResolution)-1;
-
-	const float spaceVectorFactor = 1.13;
-
+	const float spaceVectorFactor = 1.13; // empiric to reach full pwm scale
 	static boolean initialized = false;
 	if (!initialized) {
 		for (int i = 0;i<svpwmArraySize;i++) {
@@ -52,30 +56,29 @@ void initializeSVPWM() {
 	}
 }
 
-
-int BLDCController::getPWMValue(int idx) {
-	return torque* svpwmTable[idx % svpwmArraySize];
+int BLDCController::getPWMValue(float angle_rad) {
+	// torque is increased with speed. When reaching max speed, torque becomes 1
+	return  (torque + (1.0-torque)*currentSpeed/maxSpeed)
+			* svpwmTable[(int)(angle_rad / (2.0*M_PI) * svpwmArraySize) % svpwmArraySize];
 }
 
+// return pwm values that give the magnetic field angle
 void BLDCController::getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValueC) {
-	pwmValueA = getPWMValue(currentWaveIndex);
-	pwmValueB = getPWMValue(currentWaveIndex + 1.0*svpwmArraySize / 3.0);
-	pwmValueC = getPWMValue(currentWaveIndex + 2.0*svpwmArraySize / 3.0);
+	pwmValueA = getPWMValue(magneticFieldAngle);
+	pwmValueB = getPWMValue(magneticFieldAngle + 1.0*(2.0*M_PI)/3.0);
+	pwmValueC = getPWMValue(magneticFieldAngle + 2.0*(2.0*M_PI)/3.0);
 }
 
 BLDCController::BLDCController() {
+	// initialize precomputed spvm values (only once)
+	initializeSVPWM();
 }
 
 BLDCController::~BLDCController() {
 }
 
 
-
-void BLDCController::setup( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
-
-	// initialize waves (only once)
-	initializeSVPWM();
-
+void BLDCController::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
 	// there's only one enable pin that has a short cut to EN1, EN2, and EN3 from L6234
 	enablePin = EnablePin;
 
@@ -86,173 +89,108 @@ void BLDCController::setup( int EnablePin, int Input1Pin, int Input2Pin, int Inp
 	// setup L6234 input PWM pins
 	analogWriteResolution(pwmResolution);
 
-	analogWriteFrequency(input1Pin, 20000); // max frequency of L6234 is 150Khz. This number comes from Teensy datasheet, it seems to be the optimal frequency.
+	// choose the frequency that it just can't be heard
+	analogWriteFrequency(input1Pin, 20000);
 	analogWriteFrequency(input2Pin, 20000);
 	analogWriteFrequency(input3Pin, 20000);
 
-
+	// has to be pwm pins
 	pinMode(input1Pin, OUTPUT);
 	pinMode(input1Pin, OUTPUT);
 	pinMode(input1Pin, OUTPUT);
 
-	// enable all enable lines at once
+	// enable all enable lines at once (Drotek L6234 board has all enable lines connected)
 	pinMode(enablePin, OUTPUT);
 	digitalWrite(enablePin, HIGH);
 
-	computeNextStep();
+	// initialize magnetic field values
+	setMagneticFieldAngle(0);
 }
 
-void hallSensor1(void* object) {
-	BLDCController* c = (BLDCController*)object;
-	c->hallSensorValue1 = digitalRead(c->hallSensor1Pin)==HIGH?1:0;
+void BLDCController::setupEncoder(int EncoderAPin, int EncoderBPin) {
+	encoderAPin = EncoderAPin;
+	encoderBPin = EncoderBPin;
+
+	encoder = new Encoder(encoderAPin, encoderBPin);
 }
 
-void hallSensor2(void* object) {
-	BLDCController* c = (BLDCController*)object;
-	c->hallSensorValue2 = digitalRead(c->hallSensor2Pin)==HIGH?1:0;
+// turn magnetic field of the motor according to current speed
+void BLDCController::setMagneticFieldAngle(float angle) {
+	// increase angle of magnetic field
+	magneticFieldAngle = angle;
 }
 
-void hallSensor3(void* object) {
-	BLDCController* c = (BLDCController*)object;
-	c->hallSensorValue3 = digitalRead(c->hallSensor3Pin)==HIGH?1:0;
-}
+float BLDCController::turnReferenceAngle() {
+	uint32_t now_us = micros();
+	uint32_t timePassed_us = now_us - lastStepTime_us;
 
-void BLDCController::setupHallSensors( int HallSensor1Pin, int HallSensor2Pin, int HallSensor3Pin) {
-	hallSensor1Pin = HallSensor1Pin;
-	hallSensor2Pin = HallSensor2Pin;
-	hallSensor3Pin = HallSensor3Pin;
+	// check for overflow on micros() (happens every 70 minutes)
+	if (now_us < lastStepTime_us)
+		timePassed_us = 4294967295 - timePassed_us;
 
-	// setup hall sensor pins with pulldown (required by L6234 datasheet)
-	pinMode(hallSensor1Pin, INPUT_PULLUP);
-	pinMode(hallSensor2Pin, INPUT_PULLUP);
-	pinMode(hallSensor3Pin, INPUT_PULLUP);
+	float timePassed_s = (float)timePassed_us/1000000.0;
+	lastStepTime_us = now_us;
 
-	// use hall sensors with interrupt to be really in time
-	attachInterruptClass(hallSensor1Pin, (void*)this, hallSensor1);
-	attachInterruptClass(hallSensor2Pin, (void*)this, hallSensor2);
-	attachInterruptClass(hallSensor3Pin, (void*)this, hallSensor3);
-}
-
-void BLDCController::sixStepCommutation() {
-	// if no hall sensors are configured, return
-	if ((hallSensor1Pin == 0) && (hallSensor2Pin == 0) && (hallSensor3Pin == 0))
-		return;
-
-	int hallSensorsValue =
-			hallSensorValue1
-			+ hallSensorValue2 * 2
-			+ hallSensorValue3 * 4;
-
-	// do something only if we just changed the hall sensor value, so every 60°
-	if (hallSensorsValue != lastHallSensorValue) {
-		lastHallSensorValue = hallSensorsValue;
-
-		// six step commutation: Map binary position to sequence step
-		static int hallSensorCommutationMapping[] = { 0 /* dummy */,  5,3,4,1,6,2,  0 /* dummy */ };
-
-		commutationStep = hallSensorCommutationMapping[hallSensorsValue] - 1; // starting at 0
-
-		if (commutationStep == -1) {
-			fatalError("hall sensors are not connected properly");
-		}
-
-		const int commutationStepLength = svpwmArraySize / 6;
-		int toBeWaveIndex = commutationStep*commutationStepLength;
-		if (currentWaveIndex != toBeWaveIndex) {
-			/*
-			Serial1.print("comm:");
-			Serial1.print(currentWaveIndex);
-			Serial1.print("/");
-			Serial1.print(toBeWaveIndex);
-			Serial1.print("/");
-			Serial1.print((toBeWaveIndex-currentWaveIndex)*360/pwmSinArraySize);
-			Serial1.println("°");
-
-			warnMsg("commutation correction");
-			*/
-			//currentWaveIndex  = toBeWaveIndex;
-		}
-	}
-}
-
-void BLDCController::computeNextStep() {
-
-	// read hall sensors to adapt the phase of the wave to the current position
-	sixStepCommutation();
-
+	// accelerate to target speed
 	float speedDiff = targetSpeed - currentSpeed;
-	speedDiff = constrain(speedDiff, -abs(targetAcc)*stepInterval, +abs(targetAcc)*stepInterval);
+	speedDiff = constrain(speedDiff, -abs(targetAcc)*timePassed_s, +abs(targetAcc)*timePassed_s);
 	currentSpeed += speedDiff;
-	if (currentSpeed < 0) {
-		direction = BACKWARD;
-	}
-	else  {
-		direction = FORWARD;
-	}
 
-	// default loop: assume one wave step per loop and compute the delay in between
-	waveStep = 1.0;
-	float const floatPrecision = 0.00001;
-	if (abs(currentSpeed) > floatPrecision)
-		stepInterval =  1.0/abs(currentSpeed)/svpwmArraySize; // if currentSpeed = 0, this gets infinite and corrected later on
-	else
-		stepInterval =  1.0/floatPrecision/svpwmArraySize;
+	// compute angle difference compared to last invokation
+	referenceAngle = currentSpeed*timePassed_s *2.0*M_PI;
 
-	// lower limit of step interval is 1000Hz
-	const float minWaveFrequency = 1000.0;
-	const float maxStepInterval = 1.0/minWaveFrequency;
-	if (stepInterval > maxStepInterval) {
-		waveStep = maxStepInterval/stepInterval;
-		stepInterval = maxStepInterval;
+	return timePassed_s;
+}
+
+void BLDCController::readEncoder() {
+	if (encoder == NULL) {
+		// without encoder assume perfect motor
+		encoderAngle = referenceAngle;
 	}
 
-	if ((abs(lastStepInterval-stepInterval) > 0.0001) || (abs(lastWaveStep-waveStep)> 0.000001)) {
-		Serial1.print("ws=");
-		Serial1.print(waveStep);
-		Serial1.print(" v=");
-		Serial1.print(currentSpeed);
-		Serial1.print(" dv=");
-		Serial1.print(speedDiff);
+	// find encoder position and increment the encoderAngle accordingly
+	long encoderPosition= encoder->read();
+	encoderAngle += lastEncoderPosition - encoderPosition;
+	lastEncoderPosition = encoderPosition;
+}
 
-		Serial1.print(" dt=");
-		Serial1.print(stepInterval);
-		Serial1.println();
-		lastStepInterval = stepInterval;
-		lastWaveStep = waveStep;
-	}
-
-	// next step happens in stepInterval_us
-	lastStep_us = nextStep_us;
-	nextStep_us += stepInterval*1000000.0; // every 30 minutes, there is an overflow here
+// set the pwm values matching the current magnetic field angle
+void BLDCController::setPWM() {
+	int pwmValueA, pwmValueB, pwmValueC;
+	getPWMValues (pwmValueA, pwmValueB, pwmValueC);
+	analogWrite(input1Pin, pwmValueA);
+	analogWrite(input2Pin, pwmValueB);
+	analogWrite(input3Pin, pwmValueC);
 }
 
 // call me as often as possible
 void BLDCController::loop() {
+	float timePassed_s = turnReferenceAngle();
+	readEncoder();
 
-	uint32_t now_us = micros();
+	// compute the angle of the magnetic field
+	// - starting point is reference angle
+	// - compute difference as given by the encoder
+	// - feed into PI controller, result is magnetic field
+	// set torque linear to error
+	float errorAngle = encoderAngle - referenceAngle;
 
-	if (now_us > nextStep_us) {
-		int pwmValueA, pwmValueB, pwmValueC;
-		getPWMValues (pwmValueA, pwmValueB, pwmValueC);
-		analogWrite(input1Pin, pwmValueA);
-		analogWrite(input2Pin, pwmValueB);
-		analogWrite(input3Pin, pwmValueC);
+	// carry out PI controller to compute advance angle
+	float p_out = pid_k*errorAngle;
+	errorAngleIntegral += errorAngle * timePassed_s;
+	errorAngleIntegral = constrain(errorAngleIntegral, - M_PI/12.0, M_PI/12.0); // limit error integral by 30°
+	float i_out = pid_i *errorAngleIntegral;
+	float advanceAngle = p_out + i_out;
+	advanceAngle = constrain(advanceAngle, - M_PI/12.0, M_PI/12.0); 				// limit outcome by 30°
 
-		computeNextStep();
+	// outcome of pid controller is advance angle
+	magneticFieldAngle = referenceAngle + advanceAngle;
 
-		// increase wave index for next loop
-		if (direction == FORWARD)
-			currentWaveIndex += waveStep;
-		else
-			currentWaveIndex -= waveStep;
-		int waveSize=svpwmArraySize;
+	// torque increases along the pid's outcome
+	torque = min(minTorque + (1.0-minTorque)*abs(advanceAngle)/(M_PI/12.0),
+			     1.0);
 
-		// check for overflow of wave index
-		while (currentWaveIndex < 0)
-			currentWaveIndex += waveSize;
-		while (currentWaveIndex >= waveSize)
-			currentWaveIndex -= waveSize;
-	}
+	setPWM();
 }
 
 void BLDCController::setTorque(float newTorque) {
@@ -262,15 +200,50 @@ void BLDCController::setTorque(float newTorque) {
 void BLDCController::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
 	targetSpeed = speed;
 	targetAcc = acc;
-
-	computeNextStep();
 }
 
 
 void BLDCController::enable(bool doit) {
 	isEnabled = doit;
-	if (isEnabled)
+	if (isEnabled) {
+		// reset speed before enabling. Dont reset the target speed
+		currentSpeed = 0;
+
 		digitalWrite(enablePin, HIGH);
+
+		// startup procedure to find the angle of the motor's rotor
+		// - turn magnetic field with min torque (120° max) until encoder recognizes a significant movement
+		// - turn in other direction until this movement until encoder gives original position
+		// if the encoder does not indicate a movement, increase torque and try again
+
+		encoderAngle = 0;
+		magneticFieldAngle = 0;
+		referenceAngle = 0;
+		torque = minTorque;
+		const float significantAngle = 5.0/360.0*2.0*M_PI;
+
+		Serial.print("calibration ");
+		readEncoder();
+		torque = minTorque;
+		bool encoderMoved = false;
+		while (!encoderMoved) {
+			while ((abs(encoderAngle) < significantAngle) && (encoderAngle < 2.0*M_PI/3.0) && (magneticFieldAngle < 2.0*M_PI/3)) {
+				magneticFieldAngle += significantAngle;
+				setPWM();
+				delay(1000/ (360.0/significantAngle)); // wait such that we ave 1 revolution per second
+				readEncoder();
+			}
+			torque += 0.05;
+		}
+		if (encoderAngle > significantAngle) {
+			Serial1.println("done");
+
+			// let the regular loop turn back to original position
+			referenceAngle = encoderAngle - significantAngle;
+		} else {
+			Serial1.println("impossible");
+		}
+	}
 	else
 		digitalWrite(enablePin, LOW);
 }
@@ -283,8 +256,10 @@ void BLDCController::printHelp() {
 	Serial1.println("* - inc acc");
 	Serial1.println("_ - dec acc");
 	Serial1.println("r - revert direction");
-	Serial1.println("t - increase torque");
-	Serial1.println("T - decrease torque");
+	Serial1.println("T/t - increase torque");
+	Serial1.println("P/p - increase PIs controller p");
+	Serial1.println("I/i - increase PIs controller i");
+
 	Serial1.println("e - enable");
 
 	Serial1.println("ESC");
@@ -340,6 +315,20 @@ void BLDCController::runMenu() {
 				menuTorque = 0.0;
 			setTorque(menuTorque);
 			break;
+		case 'P':
+			pid_k += 0.02;
+			break;
+		case 'p':
+			pid_k -= 0.02;
+			break;
+
+		case 'I':
+			pid_i += 0.02;
+			break;
+		case 'i':
+			pid_i -= 0.02;
+			break;
+
 		case 'e':
 			menuEnable = menuEnable?false:true;
 			enable(menuEnable);
@@ -360,8 +349,10 @@ void BLDCController::runMenu() {
 			Serial1.print(menuSpeed);
 			Serial1.print(" a=");
 			Serial1.print(menuAcc);
-			Serial1.print(" t=");
+			Serial1.print(" T=");
 			Serial1.print(menuTorque);
+			Serial1.print(" t=");
+			Serial1.print(micros());
 			if (menuEnable)
 				Serial1.print(" enabled");
 			else

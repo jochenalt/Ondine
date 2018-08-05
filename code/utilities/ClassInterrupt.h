@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 
+/*
 typedef struct {
 	void* object;
 	void (*function)(void*);
@@ -577,6 +578,6 @@ static uint8_t attachInterruptClass(uint8_t pin, void* object, void (*function)(
 		return 1;
 	}
 
-
+*/
 
 #endif /* UTIL_H_ */
