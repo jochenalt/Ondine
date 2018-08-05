@@ -25,6 +25,7 @@ public:
 
 	void setSpeed(float speed /* [rotations per second] */, float acc /* [rotations per second^2] */);
 	void setTorque(float torqueRatio /* [0.0-1.0] */);
+	void enable(bool doit);
 
 	enum DirectionType { FORWARD, BACKWARD };
 
@@ -48,27 +49,31 @@ private:
 	 float stepInterval = 0;			// interval time to increase wave index
 	 float lastStepInterval = 0.0;
 
-	 long nextStep_us = 0;				// next time in [us] when step happens
+	 uint32_t nextStep_us = 0;				// next time in [us] when step happens
+	 uint32_t lastStep_us = 0;
 
 	 float waveStep = 0.0;				// number of indexes the wave is incremented
 	 float lastWaveStep = 0.0;
-	 int hallSensorsStep = 0;
+	 int commutationStep = 0;
 	 int lastHallSensorValue = 0;
 	 float torque = 0;
 	 int getPWMValue( int idx);
 	 void getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValueC);
 	 void computeNextStep();
-	 void ensureSensoredCommutation();
+	 void sixStepCommutation();
 
 	 int hallSensorValue1 = 0;
 	 int hallSensorValue2 = 0;
 	 int hallSensorValue3 = 0;
 
-	void printHelp();
-	int menuSpeed = 0;
-	int menuAcc = 1;
-	float menuTorque = 0.0;
+	 bool isEnabled = false;
 
+	 // ascii menu functionality
+	 void printHelp();
+	 float menuSpeed = 0;
+	 int menuAcc = 500;
+	 float menuTorque = 0.0;
+	 bool menuEnable = false;
 };
 
 #endif /* BLDCCONTROLLER_H_ */

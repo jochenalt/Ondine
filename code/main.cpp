@@ -15,6 +15,10 @@ static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// ni
 #define L6234_PWM1 3
 #define L6234_PWM2 4
 #define L6234_PWM3 5
+#define HALL1_PIN 30
+#define HALL2_PIN 31
+#define HALL3_PIN 32
+
 
 PatternBlinker ledBlinker(LED_PIN, 50 /* ms */); // one bit in the patterns above is active for 100ms
 
@@ -38,6 +42,8 @@ void setup()
 	// analogWriteResolution(8);
 	// analogWriteFrequency(3, 300000);
 	ctrl.setup(L6234_ENABLE_PIN, L6234_PWM1, L6234_PWM2, L6234_PWM3);
+	ctrl.setupHallSensors(HALL1_PIN,  HALL2_PIN,  HALL3_PIN);
+
 	Serial1.println("setup done");
 
 	// ctrl.setSpeed(1 /*rev/s */, 1 /* rev / s^2 */);
