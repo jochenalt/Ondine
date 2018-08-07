@@ -28,7 +28,7 @@ void setup()
 	Serial1.println("startup");
 
 	ctrl.setupMotor(L6234_ENABLE_PIN, L6234_PWM1, L6234_PWM2, L6234_PWM3);
-	// ctrl.setupEncoder(ENCODERA_PIN, ENCODERB_PIN);
+	// ctrl.setupEncoder(ENCODERA_PIN, ENCODERB_PIN, 1024);
 
 	Serial1.println("setup done");
 

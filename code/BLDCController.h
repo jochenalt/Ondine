@@ -18,7 +18,7 @@ public:
 	virtual ~BLDCController();
 
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
-	void setupEncoder( int EncoderAPin, int EncoderBPin);
+	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
 	void loop( );
 
 	void setSpeed(float speed /* [rotations per second] */, float acc /* [rotations per second^2] */);
@@ -39,6 +39,7 @@ private:
 	int encoderAPin = 0;
 	int encoderBPin = 0;
 
+	float encoderCPR = 0;
 
 	float targetAcc = 0;				// [rev/s^2]
 	float targetSpeed = 0;				// [rev/s]

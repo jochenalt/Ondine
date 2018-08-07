@@ -24,7 +24,7 @@ const int pwmResolution = 8;
 const int svpwmArraySize = 244;
 int svpwmTable[svpwmArraySize];
 
-void initializeSVPWM() {
+void precomputeSVPMWave() {
 	const int maxPWMValue = (1<<pwmResolution)-1;
 	const float spaceVectorFactor = 1.13; // empiric to reach full pwm scale
 	static boolean initialized = false;
@@ -71,7 +71,7 @@ void BLDCController::getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValue
 
 BLDCController::BLDCController() {
 	// initialize precomputed spvm values (only once)
-	initializeSVPWM();
+	precomputeSVPMWave();
 }
 
 BLDCController::~BLDCController() {
@@ -107,10 +107,11 @@ void BLDCController::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, in
 	setMagneticFieldAngle(0);
 }
 
-void BLDCController::setupEncoder(int EncoderAPin, int EncoderBPin) {
+void BLDCController::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR) {
 	encoderAPin = EncoderAPin;
 	encoderBPin = EncoderBPin;
 
+	encoderCPR = CPR;
 	encoder = new Encoder(encoderAPin, encoderBPin);
 }
 
@@ -150,7 +151,7 @@ void BLDCController::readEncoder() {
 
 	// find encoder position and increment the encoderAngle accordingly
 	long encoderPosition= encoder->read();
-	encoderAngle += lastEncoderPosition - encoderPosition;
+	encoderAngle += (lastEncoderPosition - encoderPosition)/encoderCPR;
 	lastEncoderPosition = encoderPosition;
 }
 
