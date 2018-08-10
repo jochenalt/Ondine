@@ -14,7 +14,7 @@
 float BLDCController::pid_k = 0.8;
 float BLDCController::pid_i = 0.05;
 
-const float maxSpeed = 40.0; // [rev/s]
+const float maxSpeed = 50.0; // [rev/s]
 const float minTorque = 0.1; // [PWM ratio]
 
 // max PWM value is (1<<pwmResolution)-1
@@ -38,6 +38,7 @@ void precomputeSVPMWave() {
 			float pwmSpaceVectorValue =  ((phaseA - voff)/2.0*spaceVectorFactor + 0.5)*maxPWMValue;
 			float pwmSinValue =  (phaseA/2.0 + 0.5)*maxPWMValue;
 
+			/*
 			Serial1.print("i=");
 			Serial1.print(i);
 			Serial1.print(" voff=");
@@ -47,7 +48,9 @@ void precomputeSVPMWave() {
 			Serial1.print(pwmSpaceVectorValue);
 			Serial1.print(" SPWM=");
 			Serial1.println(pwmSinValue);
-
+*/
+			if (pwmSpaceVectorValue<10)
+				pwmSpaceVectorValue = 0;
 			svpwmTable[i] =  pwmSpaceVectorValue;
 			svpwmTable[i] =  pwmSinValue;
 
@@ -57,9 +60,19 @@ void precomputeSVPMWave() {
 }
 
 int BLDCController::getPWMValue(float angle_rad) {
+
 	// torque is increased with speed. When reaching max speed, torque becomes 1
-	return  (torque + (1.0-torque)*currentSpeed/maxSpeed)
-			* svpwmTable[(int)(angle_rad / (2.0*M_PI) * svpwmArraySize) % svpwmArraySize];
+	// torque increases along the pid's outcome
+	torque = targetTorque + (1.0-targetTorque)*( min(abs(currentSpeed)/maxSpeed + abs(advanceAngle)/(M_PI/12.0),1.0) );
+
+	// map input angle to 0..2*PI
+	if (angle_rad < 0)
+		angle_rad += (int)(abs(angle_rad)/(2.0*M_PI) + 1)*2.0*M_PI;
+	int angleIndex = ((int)(angle_rad / ( 2.0*M_PI) * svpwmArraySize)) % svpwmArraySize;
+	if ((angleIndex <0) || (angleIndex > svpwmArraySize))
+		fatalError("cvpwm table look up error");
+
+	return  torque * svpwmTable[angleIndex];
 }
 
 // return pwm values that give the magnetic field angle
@@ -70,8 +83,6 @@ void BLDCController::getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValue
 }
 
 BLDCController::BLDCController() {
-	// initialize precomputed spvm values (only once)
-	precomputeSVPMWave();
 }
 
 BLDCController::~BLDCController() {
@@ -79,6 +90,10 @@ BLDCController::~BLDCController() {
 
 
 void BLDCController::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
+
+	// initialize precomputed spvm values (only once)
+	precomputeSVPMWave();
+
 	// there's only one enable pin that has a short cut to EN1, EN2, and EN3 from L6234
 	enablePin = EnablePin;
 
@@ -138,7 +153,8 @@ float BLDCController::turnReferenceAngle() {
 	currentSpeed += speedDiff;
 
 	// compute angle difference compared to last invokation
-	referenceAngle = currentSpeed*timePassed_s *2.0*M_PI;
+	referenceAngle += currentSpeed * timePassed_s * 2.0 * M_PI;
+
 
 	return timePassed_s;
 }
@@ -148,11 +164,12 @@ void BLDCController::readEncoder() {
 		// without encoder assume perfect motor
 		encoderAngle = referenceAngle;
 	}
-
-	// find encoder position and increment the encoderAngle accordingly
-	long encoderPosition= encoder->read();
-	encoderAngle += (lastEncoderPosition - encoderPosition)/encoderCPR;
-	lastEncoderPosition = encoderPosition;
+	else {
+		// find encoder position and increment the encoderAngle accordingly
+		long encoderPosition= encoder->read();
+		encoderAngle += (lastEncoderPosition - encoderPosition)/encoderCPR;
+		lastEncoderPosition = encoderPosition;
+	}
 }
 
 // set the pwm values matching the current magnetic field angle
@@ -169,6 +186,7 @@ void BLDCController::loop() {
 	float timePassed_s = turnReferenceAngle();
 	readEncoder();
 
+
 	// compute the angle of the magnetic field
 	// - starting point is reference angle
 	// - compute difference as given by the encoder
@@ -181,21 +199,38 @@ void BLDCController::loop() {
 	errorAngleIntegral += errorAngle * timePassed_s;
 	errorAngleIntegral = constrain(errorAngleIntegral, - M_PI/12.0, M_PI/12.0); // limit error integral by 30°
 	float i_out = pid_i *errorAngleIntegral;
-	float advanceAngle = p_out + i_out;
+	advanceAngle = p_out + i_out;
 	advanceAngle = constrain(advanceAngle, - M_PI/12.0, M_PI/12.0); 				// limit outcome by 30°
 
 	// outcome of pid controller is advance angle
 	magneticFieldAngle = referenceAngle + advanceAngle;
 
-	// torque increases along the pid's outcome
-	torque = min(minTorque + (1.0-minTorque)*abs(advanceAngle)/(M_PI/12.0),
-			     1.0);
+
+
+
+	Serial1.print("t=");
+	Serial1.print(timePassed_s);
+	Serial1.print(" v=");
+	Serial1.print(currentSpeed);
+	Serial1.print(" r=");
+	Serial1.print(referenceAngle);
+	Serial1.print(" e=");
+	Serial1.print(encoderAngle);
+	Serial1.print(" m=");
+	Serial1.print(magneticFieldAngle);
+	Serial1.print(" ut=");
+	Serial1.print(targetTorque);
+	Serial1.print(" t=");
+	Serial1.print(torque);
+
+	Serial1.println();
+
 
 	setPWM();
 }
 
 void BLDCController::setTorque(float newTorque) {
-	torque = newTorque;
+	targetTorque = newTorque;
 }
 
 void BLDCController::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
@@ -220,12 +255,13 @@ void BLDCController::enable(bool doit) {
 		encoderAngle = 0;
 		magneticFieldAngle = 0;
 		referenceAngle = 0;
-		torque = minTorque;
+		targetTorque = minTorque;
+		/*
 		const float significantAngle = 5.0/360.0*2.0*M_PI;
 
 		Serial.print("calibration ");
 		readEncoder();
-		torque = minTorque;
+		targetTorque = minTorque;
 		bool encoderMoved = false;
 		while (!encoderMoved) {
 			while ((abs(encoderAngle) < significantAngle) && (encoderAngle < 2.0*M_PI/3.0) && (magneticFieldAngle < 2.0*M_PI/3)) {
@@ -234,7 +270,7 @@ void BLDCController::enable(bool doit) {
 				delay(1000/ (360.0/significantAngle)); // wait such that we ave 1 revolution per second
 				readEncoder();
 			}
-			torque += 0.05;
+			targetTorque += 0.05;
 		}
 		if (encoderAngle > significantAngle) {
 			Serial1.println("done");
@@ -244,6 +280,8 @@ void BLDCController::enable(bool doit) {
 		} else {
 			Serial1.println("impossible");
 		}
+		*/
+
 	}
 	else
 		digitalWrite(enablePin, LOW);

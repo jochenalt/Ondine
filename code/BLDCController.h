@@ -43,9 +43,11 @@ private:
 
 	float targetAcc = 0;				// [rev/s^2]
 	float targetSpeed = 0;				// [rev/s]
-	float torque = 0;					// [0..1], ratio of full torque, ends up in pwm ratio
+	float targetTorque = 0;					// [0..1], ratio of full torque, ends up in pwm ratio
 
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
+	float advanceAngle = 0;
+	float torque = 0;
 	float currentSpeed = 0;				// [rev/s]
 	float referenceAngle = 0;			// [rad]
 	float encoderAngle = 0;				// [rad]
