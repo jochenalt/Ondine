@@ -173,7 +173,7 @@ void BLDCController::readEncoder() {
 }
 
 // set the pwm values matching the current magnetic field angle
-void BLDCController::setPWM() {
+void BLDCController::sendPWMDuty() {
 	int pwmValueA, pwmValueB, pwmValueC;
 	getPWMValues (pwmValueA, pwmValueB, pwmValueC);
 	analogWrite(input1Pin, pwmValueA);
@@ -183,9 +183,11 @@ void BLDCController::setPWM() {
 
 // call me as often as possible
 void BLDCController::loop() {
+	// turn reference angle along the set speed
 	float timePassed_s = turnReferenceAngle();
-	readEncoder();
 
+	// read the current encoder value
+	readEncoder();
 
 	// compute the angle of the magnetic field
 	// - starting point is reference angle
@@ -208,7 +210,7 @@ void BLDCController::loop() {
 	// if the motor is not able to carry out the torque required, then the reference angle cant move
 	// referenceAngle = constrain(referenceAngle, encoderAngle - M_PI/6.0, encoderAngle  + M_PI/6.0);
 
-	setPWM();
+	sendPWMDuty();
 
 	/*
 	Serial1.print("time=");
@@ -270,45 +272,42 @@ void BLDCController::enable(bool doit) {
 		currentSpeed = 0;
 		targetTorque = 0;
 		torque = 0;
-		setPWM();
+
+		// enable driver, but PWM has no duty cycle yet.
+		sendPWMDuty();
 		digitalWrite(enablePin, HIGH);
 		delay(50); // settle
 
-		targetTorque = 0.00;
+		// startup calibration works by turning the magnetic field until the encoder indicates that the rotor
+		// is right in the direction of the field.
+		// run a loop that
+		// - measures the encoders deviation
+		// - turns the magnetic field in the direction of the deviation, the more deviation, the higher is the turning angle
+		// - if the encoders indicates no movement, increase torque
+		// quit the loop if torque is above a certain threshold with encoder at 0
+		// end calibration by setting the current reference angle to the measured rotors position
 		float lastLoopEncoderAngle = 0;
-		Serial1.print("calibration");
 		targetTorque = 0;
-		while ((targetTorque < 0.2)) {
-			magneticFieldAngle -= encoderAngle*2.0;
-			setPWM();
+		while ((targetTorque < 0.2)) { // quit above 20% torque which is reached only when no movement happens anymore
+			// P controller with p=4.0
+			magneticFieldAngle -= encoderAngle*4.0;
+			sendPWMDuty();
 			delay(20);
 			readEncoder();
-			if (abs(lastLoopEncoderAngle-encoderAngle) < radians(1.0))
-				targetTorque += 0.01;
-			/*
+			float encoderLoopDiff = encoderAngle - lastLoopEncoderAngle;
+			// if encoder indicates no movement, we can increase torque a bit.
+			if (abs(encoderLoopDiff) < radians(0.5))
+				targetTorque += 0.005;
 			lastLoopEncoderAngle = encoderAngle;
-			Serial1.print("enc=");
-			Serial1.print(degrees(encoderAngle));
-			Serial1.print(" m=");
-			Serial1.print(degrees(magneticFieldAngle));
-			Serial1.print(" t=");
-			Serial1.print(targetTorque);
-			*/
-		}
-		Serial1.println(" done");
 
-		// Serial1.println("calibration end");
-		// Serial1.print(" m=");
-		// Serial1.print(degrees(magneticFieldAngle));
+		}
 
 		referenceAngle = magneticFieldAngle;
 		encoderAngle = magneticFieldAngle;
-		targetTorque = minTorque;
-		setPWM();
-		advanceAnglePhase = 0;
-		advanceAngleError = 0;
-		lastStepTime_us = micros();
 
+		// set default torque
+		targetTorque = minTorque;
+		sendPWMDuty();
 	}
 	else
 		digitalWrite(enablePin, LOW);

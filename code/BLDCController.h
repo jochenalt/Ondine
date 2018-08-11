@@ -59,7 +59,7 @@ private:
 	 float turnReferenceAngle();
 	 void setMagneticFieldAngle(float angle);
 	 void readEncoder();
-	 void setPWM();
+	 void sendPWMDuty();
 	 uint32_t lastStepTime_us = 0;
 
 	 // data of PI controller
