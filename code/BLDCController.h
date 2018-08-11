@@ -47,6 +47,9 @@ private:
 
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAngle = 0;
+	float advanceAnglePhase = 0;
+	float advanceAngleError= 0;
+
 	float torque = 0;
 	float currentSpeed = 0;				// [rev/s]
 	float referenceAngle = 0;			// [rad]
@@ -64,8 +67,6 @@ private:
 	 // data of PI controller
 	 static float pid_k;
 	 static float pid_i;
-
-	 float errorAngleIntegral = 0;
 
 	 bool isEnabled = false;
 
