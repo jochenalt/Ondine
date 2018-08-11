@@ -9,13 +9,14 @@
 #include <Util.h>
 #include <BLDCController.h>
 #include <ClassInterrupt.h>
+#include <utilities/TimePassedBy.h>
 
 
 float BLDCController::pid_k = .5;
 float BLDCController::pid_i = 0.8;
 
-const float maxSpeed = 50.0; // [rev/s]
 const float minTorque = 0.05; // [PWM ratio]
+const float maxAdvanceAngle = radians(15); // [rad]
 
 // max PWM value is (1<<pwmResolution)-1
 const int pwmResolution = 8;
@@ -38,17 +39,6 @@ void precomputeSVPMWave() {
 			float pwmSpaceVectorValue =  ((phaseA - voff)/2.0*spaceVectorFactor + 0.5)*maxPWMValue;
 			float pwmSinValue =  (phaseA/2.0 + 0.5)*maxPWMValue;
 
-			/*
-			Serial1.print("i=");
-			Serial1.print(i);
-			Serial1.print(" voff=");
-			Serial1.print(voff);
-
-			Serial1.print(" SPPWM=");
-			Serial1.print(pwmSpaceVectorValue);
-			Serial1.print(" SPWM=");
-			Serial1.println(pwmSinValue);
-			*/
 			if (pwmSpaceVectorValue<maxPWMValue/2)
 				pwmSpaceVectorValue = 0;
 			svpwmTable[i] =  pwmSpaceVectorValue;
@@ -61,9 +51,9 @@ void precomputeSVPMWave() {
 
 int BLDCController::getPWMValue(float angle_rad) {
 
-	// torque is increased with speed. When reaching max speed, torque becomes 1
-	// torque increases along the pid's outcome
-	torque = targetTorque + (1.0-targetTorque)*( min(abs(currentSpeed)/maxSpeed + abs(advanceAngleError)/(M_PI/12.0),1.0) );
+	// torque is increased with squared advance angle error, which is the difference
+	// between to-be reference angle and actual angle as indicated by the encoder
+	float torque = targetTorque + (1.0-targetTorque)*(min(sqr(abs(advanceAngleError)/maxAdvanceAngle),1.0));
 
 	// map input angle to 0..2*PI
 	if (angle_rad < 0)
@@ -83,17 +73,12 @@ void BLDCController::getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValue
 }
 
 BLDCController::BLDCController() {
-}
-
-BLDCController::~BLDCController() {
+	// initialize precomputed spvm values (only once)
+	precomputeSVPMWave();
 }
 
 
 void BLDCController::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
-
-	// initialize precomputed spvm values (only once)
-	precomputeSVPMWave();
-
 	// there's only one enable pin that has a short cut to EN1, EN2, and EN3 from L6234
 	enablePin = EnablePin;
 
@@ -155,7 +140,6 @@ float BLDCController::turnReferenceAngle() {
 	// compute angle difference compared to last invokation
 	referenceAngle += currentSpeed * timePassed_s * 2.0 * M_PI;
 
-
 	return timePassed_s;
 }
 
@@ -183,6 +167,7 @@ void BLDCController::sendPWMDuty() {
 
 // call me as often as possible
 void BLDCController::loop() {
+
 	// turn reference angle along the set speed
 	float timePassed_s = turnReferenceAngle();
 
@@ -199,16 +184,20 @@ void BLDCController::loop() {
 	// carry out PI controller to compute advance angle
 	advanceAngleError = pid_k*errorAngle;
 	advanceAnglePhase += errorAngle * timePassed_s;
-	advanceAnglePhase = constrain(advanceAnglePhase, - M_PI/6.0, M_PI/6.0); // limit error integral by 30°
+	advanceAnglePhase = constrain(advanceAnglePhase, -radians(30), radians(30)); // limit error integral by 30°
 	float i_out = pid_i * advanceAnglePhase;
 	float advanceAngle = advanceAngleError + i_out;
-	advanceAngle = constrain(advanceAngle, - M_PI/6.0, M_PI/6.0); 				// limit outcome by 30°
+	advanceAngle = constrain(advanceAngle, -radians(30), radians(30)); 			// limit outcome by 30°
 
 	// outcome of pid controller is advance angle
 	magneticFieldAngle = referenceAngle + advanceAngle;
 
-	// if the motor is not able to carry out the torque required, then the reference angle cant move
-	// referenceAngle = constrain(referenceAngle, encoderAngle - M_PI/6.0, encoderAngle  + M_PI/6.0);
+	// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
+	referenceAngle = constrain(referenceAngle, encoderAngle - radians(30), encoderAngle  + radians(30));
+
+	// recompute speed, since set speed might not be achieved
+	currentSpeed = (referenceAngle-lastReferenceAngle)/timePassed_s/radians(360);
+	lastReferenceAngle = referenceAngle;
 
 	sendPWMDuty();
 
@@ -229,7 +218,6 @@ void BLDCController::loop() {
 	Serial1.print(degrees(i_out));
 	Serial1.print(" aae=");
 	Serial1.print(degrees(advanceAngleError));
-
 	Serial1.print(" a=");
 	Serial1.print(degrees(advanceAngle));
 	Serial1.print("° m=");
@@ -239,8 +227,8 @@ void BLDCController::loop() {
 	Serial1.print(" torque=");
 	Serial1.print(torque);
 	Serial1.println();
-
 	*/
+
 }
 
 void BLDCController::setTorque(float newTorque) {
@@ -250,6 +238,14 @@ void BLDCController::setTorque(float newTorque) {
 void BLDCController::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
 	targetSpeed = speed;
 	targetAcc = acc;
+}
+
+float BLDCController::getSpeed() {
+	return currentSpeed;
+}
+
+float BLDCController::getRevolution() {
+	return referenceAngle;
 }
 
 
@@ -271,15 +267,14 @@ void BLDCController::enable(bool doit) {
 		advanceAngleError = 0;
 		currentSpeed = 0;
 		targetTorque = 0;
-		torque = 0;
 
 		// enable driver, but PWM has no duty cycle yet.
 		sendPWMDuty();
 		digitalWrite(enablePin, HIGH);
 		delay(50); // settle
 
-		// startup calibration works by turning the magnetic field until the encoder indicates that the rotor
-		// is right in the direction of the field.
+		// startup calibration works by turning the magnetic field until the encoder indicates the rotor
+		// aligned with the field
 		// run a loop that
 		// - measures the encoders deviation
 		// - turns the magnetic field in the direction of the deviation, the more deviation, the higher is the turning angle
@@ -332,8 +327,11 @@ void BLDCController::printHelp() {
 
 void BLDCController::runMenu() {
 	printHelp();
+	TimePassedBy timer(1);
+
 	while (true) { // terminates with return
-		loop();
+		if (timer.isDue())
+			loop();
 		char ch = Serial1.read();
 		bool cmd = true;
 		switch (ch) {
@@ -382,16 +380,28 @@ void BLDCController::runMenu() {
 			break;
 		case 'P':
 			pid_k += 0.02;
+			Serial1.print("p=");
+			Serial1.println(pid_k);
+
 			break;
 		case 'p':
 			pid_k -= 0.02;
+			Serial1.print("p=");
+			Serial1.println(pid_k);
+
 			break;
 
 		case 'I':
 			pid_i += 0.02;
+			Serial1.print("i=");
+			Serial1.println(pid_i);
+
 			break;
 		case 'i':
 			pid_i -= 0.02;
+			Serial1.print("i=");
+			Serial1.println(pid_i);
+
 			break;
 
 		case 'e':
@@ -412,6 +422,8 @@ void BLDCController::runMenu() {
 		if (cmd) {
 			Serial1.print("v=");
 			Serial1.print(menuSpeed);
+			Serial1.print(" actual v=");
+			Serial1.print(getSpeed());
 			Serial1.print(" a=");
 			Serial1.print(menuAcc);
 			Serial1.print(" T=");

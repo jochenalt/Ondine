@@ -30,6 +30,7 @@ class TimePassedBy {
 	}
 	TimePassedBy(uint32_t rate) {
 		mRate = rate;
+		mLastCall_ms = millis();
 		firstCalldT = true;
 	}
 

@@ -15,17 +15,19 @@
 class BLDCController {
 public:
 	BLDCController();
-	virtual ~BLDCController();
+	virtual ~BLDCController() {};
 
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
 	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
 	void loop( );
 
 	void setSpeed(float speed /* [rotations per second] */, float acc /* [rotations per second^2] */);
-	void setTorque(float torqueRatio /* [0.0-1.0] */);
-	void enable(bool doit);
+	float getSpeed();
 
-	enum DirectionType { FORWARD, BACKWARD };
+	void setTorque(float torqueRatio /* [0.0-1.0] */);
+	float getRevolution();
+
+	void enable(bool doit);
 
 	void runMenu();
 private:
@@ -48,9 +50,10 @@ private:
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAnglePhase = 0;
 	float advanceAngleError= 0;
-	float torque = 0;
 	float currentSpeed = 0;				// [rev/s]
 	float referenceAngle = 0;			// [rad]
+	float lastReferenceAngle = 0;		// [rad]
+
 	float encoderAngle = 0;				// [rad]
 	int lastEncoderPosition = 0;		// last call of encoder value
 

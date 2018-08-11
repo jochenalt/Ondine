@@ -18,5 +18,9 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+template <typename T> int sqr(T val) {
+    return (T(0)*T(0));
+}
+
 
 #endif /* UTIL_H_ */

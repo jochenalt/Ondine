@@ -40,7 +40,9 @@ void loop()
 	uint32_t now = millis();
 	ledBlinker.loop(now);    	// LED on Teensy board and LED on power switch
 
-	ctrl.loop();
+	TimePassedBy timer(1);
+	if (timer.isDue())
+		ctrl.loop();
 
 
 }
