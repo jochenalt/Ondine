@@ -51,9 +51,9 @@ void precomputeSVPMWave() {
 
 int BLDCController::getPWMValue(float angle_rad) {
 
-	// torque is increased with squared advance angle error, which is the difference
+	// torque is increased with advance angle error, which is the difference
 	// between to-be reference angle and actual angle as indicated by the encoder
-	float torque = targetTorque + (1.0-targetTorque)*(min(sqr(abs(advanceAngleError)/maxAdvanceAngle),1.0));
+	float torque = targetTorque + (1.0-targetTorque)*(min(abs(advanceAngleError)/maxAdvanceAngle,1.0));
 
 	// map input angle to 0..2*PI
 	if (angle_rad < 0)
