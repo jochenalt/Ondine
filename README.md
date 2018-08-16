@@ -5,13 +5,11 @@ Ondine is a lovely ballet of robots. Right in the middle of development. Check t
 
 
 ### Contents
-    /cad 	    CAD designs 
-    /theory     mainly kinematics
-    /code       code of Cortex, Trajectory Planner, and Webserver  
-    /schematics schematics 
-    /docs		source of Ondine's [Documentation](https://http://walter.readthedocs.io)
+    /cad 	    CAD designs in Inventor 2018
+    /theory     mainly on kinematics
+    /code       source code (mainly C++)
+    /schematics schematics in EAGLE 
+    /docs		source of Ondine's [Documentation](https://http://ondine.readthedocs.io)
     /datasheets datasheets of components Ondine is made of
     
-
-<img align="left" width="800px" src="https://github.com/jochenalt/Ondine/blob/master/docs/images/IMG_20170305_161053.jpg" >
 

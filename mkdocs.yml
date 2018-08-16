@@ -1,17 +1,13 @@
-site_name: Walter
-repo_url: https://github.com/jochenalt/Walter
+site_name: Ondine
+repo_url: https://github.com/jochenalt/Ondine
 edit_uri: edit/master/docs
-repo_name: Walter
+repo_name: Ondine
 repo_authorr: 'Jochen Alt'
-site_description: Walter a vintage robot Arm 
+site_description: Ondine, the beautiful ballet 
 pages:
-    - 'Home - Walter?!': 'index.md'
-    - 'Construction - How is Walter built?': 'Construction.md'
-    - 'Trajectory - How does Walter move?': 'Trajectory.md'
+    - 'Home - Ondine?!': 'index.md'
+    - 'Construction - How is Ondine built?': 'Construction.md'
     - 'Kinematics - How are angles computed?': 'Kinematics.md'
-    - 'Webserver - Where are trajectories executed?': 'Webserver.md'
-    - 'Cortex - How are motors controlled?': 'Cortex.md'
-    - 'Control Cabinet - GBR style': 'Control-Cabinet.md'
-    - 'Bill of Material - What is Walter made of?': 'Bill-of-Material.md'
+    - 'Bill of Material - What is Ondine made of?': 'Bill-of-Material.md'
     - 'Gallery - Selfies': 'Gallery.md'
     - 'Sources - C++ Code, CAD models, FAQ, etc.': 'Sources.md'
