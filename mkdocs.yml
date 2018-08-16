@@ -7,7 +7,5 @@ site_description: Ondine, the beautiful ballet
 pages:
     - 'Home - Ondine?!': 'index.md'
     - 'Construction - How is Ondine built?': 'Construction.md'
-    - 'Kinematics - How are angles computed?': 'Kinematics.md'
     - 'Bill of Material - What is Ondine made of?': 'Bill-of-Material.md'
-    - 'Gallery - Selfies': 'Gallery.md'
     - 'Sources - C++ Code, CAD models, FAQ, etc.': 'Sources.md'
