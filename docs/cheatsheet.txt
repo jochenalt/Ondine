@@ -1,0 +1,38 @@
+
+***** MINGW Installation on Windows 10 *****
+from https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/5.1.0/threads-posix/dwarf/
+
+environment variables
+MINGW_HOME=D:\Programme\mingw-w64\i686-5.1.0-posix-dwarf-rt_v4-rev0\mingw32
+MSYS_HOME=C:\MinGW\msys\1.0
+
+**** FREEGLUT Installation on Windows 10 ****
+from http://www.transmissionzero.co.uk/software/freeglut-devel/
+follow installation of https://www3.ntu.edu.sg/home/ehchua/programming/opengl/HowTo_OpenGL_C.html
+
+*** OPENGL on Windows 10 ****
+Introduction Basics
+https://www.ntu.edu.sg/home/ehchua/programming/opengl/CG_Introduction.html
+Introduction 3D
+https://www.ntu.edu.sg/home/ehchua/programming/opengl/CG_Examples.html#zz-3.
+
+**** Arduino IDE für Teensy installer on Windows 10
+
+gemäß  http://www.pjrc.com/teensy/td_download.html Arduino IDE und Teensuino installieren
+
+Instructions from https://trippylighting.com/teensy-arduino-ect/arduino-eclipse-plugin/arduino-eclipse-ide-and-plugin-v2-2-installation/
+Download Arduino Eclipse IDE Product from http://eclipse.baeyens.it/stable.php?OS=Windows
+
+***** Installing Poco on Windows 10 with MingW
+- Install MinGW and MSYS.
+- download POCO
+
+- goto poco-1.4.6p1\build\config\ and open “MinGW” File with a Texteditor
+- Search for “SHLIB =” and “SYSFLAGS =” in both lines is a entry “-mno-cygwin” remove those.
+- Search for “STRIP = strip” set it to “STRIP = “
+- Search for “SYSLIBS = -L/usr/local/lib -L/usr/lib -liphlpapi -lws2_32 -lssl -lcrypto -lws2_32 -lgdi32”  remove “-lssl” and “-lcrypto”
+
+- start Msys (D:\Programme\MinGW\msys\1.0\msys.bat), go to your poco directory where the file configure is.
+- call configure --static --no-sharedlibs --no-sharedlibs --config=MinGW --no-tests --no-samples
+- make -j 4
+All using programmes must define -DPOCO_STATIC and link against -lPocoNet -lPocoFoundation -lCppUnit -lws2_32 -lIphlpapi
