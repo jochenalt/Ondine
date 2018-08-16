@@ -1,22 +1,11 @@
 *.lck
-CAD/OldVersions/
 ~$*
-CAD/Baugruppe1/Konstruktions-Assistent/OldVersions/Stirnzahnrad21.0009.ipt
-CAD/Baugruppe1/Konstruktions-Assistent/OldVersions/
-CAD/Baugruppe1/OldVersions/
-CAD/PlanetaryGear/OldVersions/
-CAD/PlanetaryGear/Konstruktions-Assistent/OldVersions/
-CAD/PlanetaryGear/PlanetaryGearConstr/Konstruktions-Assistent/OldVersions/
+CAD/OldVersions
+CAD/*/OldVersions
+CAD/*/*/OldVersions
+CAD/*/*/*/OldVersions
 zcode/
-CAD/Encoder/OldVersions/
 code/Release/
-CAD/CycloidalGear/OldVersions/
-CAD/CycloidalGear2/OldVersions/
-CAD/Spindle/OldVersions/
-CAD/Beltdrive/OldVersions/
-CAD/Beltdrive/Konstruktions-Assistent/OldVersions/
 cortex-workspace/
 code/.settings/
-CAD/Beltdrive/BeltDriveConstruction/Konstruktions-Assistent/OldVersions/
-CAD/Spindle/Konstruktions-Assistent/OldVersions/
-CAD/Pololu Motor 25D/OldVersions/
+pcb/*#*
