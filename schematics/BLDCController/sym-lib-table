@@ -1,6 +1,0 @@
-(sym_lib_table
-  (lib (name FlowerPot)(type Legacy)(uri D:/Projects/FlowerPot/schematics/FlowerPot.lib)(options "")(descr ""))
-  (lib (name teensy)(type Legacy)(uri D:/Projects/FlowerPot/schematics/teensy.lib)(options "")(descr ""))
-  (lib (name common-ICs)(type Legacy)(uri D:/Projects/FlowerPot/schematics/common-ICs.lib)(options "")(descr ""))
-  (lib (name common-micros)(type Legacy)(uri D:/Projects/FlowerPot/schematics/common-micros.lib)(options "")(descr ""))
-)

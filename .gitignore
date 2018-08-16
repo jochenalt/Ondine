@@ -8,4 +8,5 @@ zcode/
 code/Release/
 cortex-workspace/
 code/.settings/
-pcb/*#*
+schematics/*/*#*
+schematics/*#*
