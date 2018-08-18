@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.1.0">
+<eagle version="9.1.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -614,26 +614,25 @@
 <library name="Drotek L6234">
 <packages>
 <package name="DROTEKL6234">
-<pad name="IN1" x="-8.89" y="5.08" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="IN2" x="-8.89" y="2.54" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="M3" x="1.27" y="8.89" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="LIPO+" x="-1.27" y="8.89" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="IN3" x="-8.89" y="0" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="EN" x="-8.89" y="-2.54" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="M2" x="3.81" y="8.89" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="M1" x="6.35" y="8.89" drill="0.8128" diameter="1.27" rot="R180"/>
-<text x="3.556" y="5.969" size="1.27" layer="25" ratio="10" rot="R180">&gt;NAME</text>
-<text x="-2.286" y="1.905" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
-<pad name="GND" x="-3.81" y="8.89" drill="0.6" shape="square"/>
-<wire x1="12.7" y1="11.43" x2="-11.43" y2="11.43" width="0.127" layer="21"/>
-<wire x1="-11.43" y1="11.43" x2="-11.43" y2="-10.16" width="0.127" layer="21"/>
-<wire x1="-11.43" y1="-10.16" x2="12.7" y2="-10.16" width="0.127" layer="21"/>
-<wire x1="12.7" y1="-10.16" x2="12.7" y2="11.43" width="0.127" layer="21"/>
-<circle x="-8.89" y="-7.62" radius="1.79605" width="0.127" layer="21"/>
-<circle x="-8.89" y="8.89" radius="1.79605" width="0.127" layer="21"/>
-<circle x="10.16" y="8.89" radius="1.79605" width="0.127" layer="21"/>
-<circle x="10.16" y="-7.62" radius="1.79605" width="0.127" layer="21"/>
-<text x="0" y="-5.08" size="1.27" layer="20">DROTEK
+<pad name="IN1" x="-11.43" y="1.27" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="IN2" x="-11.43" y="-1.27" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="M3" x="1.27" y="11.43" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="LIPO+" x="-1.778" y="10.414" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="IN3" x="-11.43" y="-3.81" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="EN" x="-11.43" y="-6.35" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="M2" x="3.81" y="11.43" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="M1" x="6.35" y="11.43" drill="0.8128" diameter="1.27" rot="R180"/>
+<text x="3.556" y="8.509" size="1.27" layer="25" ratio="10" rot="R180">&gt;NAME</text>
+<text x="-2.286" y="4.445" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<pad name="GND" x="-4.318" y="10.414" drill="0.6" shape="square"/>
+<wire x1="12.7" y1="13.97" x2="-13.97" y2="13.97" width="0.127" layer="21"/>
+<wire x1="-13.97" y1="13.97" x2="-13.97" y2="-12.7" width="0.127" layer="21"/>
+<wire x1="-13.97" y1="-12.7" x2="12.7" y2="-12.7" width="0.127" layer="21"/>
+<wire x1="12.7" y1="-12.7" x2="12.7" y2="13.97" width="0.127" layer="21"/>
+<circle x="-11.43" y="-10.16" radius="1.79605" width="0.127" layer="21"/>
+<circle x="10.16" y="11.43" radius="1.79605" width="0.127" layer="21"/>
+<circle x="10.16" y="-10.16" radius="1.79605" width="0.127" layer="21"/>
+<text x="0" y="-7.62" size="1.27" layer="20">DROTEK
 L6234</text>
 </package>
 </packages>
@@ -7257,6 +7256,62 @@ diameter 5.6 mm, horizontal, grid 15.24 mm</description>
 <rectangle x1="-5.969" y1="-0.635" x2="-5.08" y2="0.635" layer="21"/>
 <rectangle x1="5.08" y1="-0.635" x2="5.969" y2="0.635" layer="21"/>
 </package>
+<package name="DO35-10" urn="urn:adsk.eagle:footprint:43092/1" library_version="3">
+<description>&lt;B&gt;DIODE&lt;/B&gt;&lt;p&gt;
+diameter 2 mm, horizontal, grid 10.16 mm</description>
+<wire x1="5.08" y1="0" x2="4.191" y2="0" width="0.508" layer="51"/>
+<wire x1="-5.08" y1="0" x2="-4.191" y2="0" width="0.508" layer="51"/>
+<wire x1="-0.635" y1="0" x2="0" y2="0" width="0.1524" layer="21"/>
+<wire x1="1.016" y1="0.635" x2="1.016" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="1.016" y1="-0.635" x2="0" y2="0" width="0.1524" layer="21"/>
+<wire x1="0" y1="0" x2="1.524" y2="0" width="0.1524" layer="21"/>
+<wire x1="0" y1="0" x2="1.016" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="0" y1="0.635" x2="0" y2="0" width="0.1524" layer="21"/>
+<wire x1="0" y1="0" x2="0" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="2.032" y1="1.016" x2="2.286" y2="0.762" width="0.1524" layer="21" curve="-90"/>
+<wire x1="-2.286" y1="0.762" x2="-2.032" y2="1.016" width="0.1524" layer="21" curve="-90"/>
+<wire x1="-2.286" y1="-0.762" x2="-2.032" y2="-1.016" width="0.1524" layer="21" curve="90"/>
+<wire x1="2.032" y1="-1.016" x2="2.286" y2="-0.762" width="0.1524" layer="21" curve="90"/>
+<wire x1="2.286" y1="-0.762" x2="2.286" y2="0.762" width="0.1524" layer="21"/>
+<wire x1="-2.286" y1="0.762" x2="-2.286" y2="-0.762" width="0.1524" layer="21"/>
+<wire x1="-2.032" y1="1.016" x2="2.032" y2="1.016" width="0.1524" layer="21"/>
+<wire x1="-2.032" y1="-1.016" x2="2.032" y2="-1.016" width="0.1524" layer="21"/>
+<pad name="C" x="-5.08" y="0" drill="0.8128" shape="long"/>
+<pad name="A" x="5.08" y="0" drill="0.8128" shape="long"/>
+<text x="-2.159" y="1.27" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-2.159" y="-2.667" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<rectangle x1="-1.905" y1="-1.016" x2="-1.397" y2="1.016" layer="21"/>
+<rectangle x1="2.286" y1="-0.254" x2="4.191" y2="0.254" layer="21"/>
+<rectangle x1="-4.191" y1="-0.254" x2="-2.286" y2="0.254" layer="21"/>
+</package>
+<package name="DO35-7" urn="urn:adsk.eagle:footprint:43093/1" library_version="3">
+<description>&lt;B&gt;DIODE&lt;/B&gt;&lt;p&gt;
+diameter 2 mm, horizontal, grid 7.62 mm</description>
+<wire x1="3.81" y1="0" x2="2.921" y2="0" width="0.508" layer="51"/>
+<wire x1="-3.81" y1="0" x2="-2.921" y2="0" width="0.508" layer="51"/>
+<wire x1="-0.635" y1="0" x2="0" y2="0" width="0.1524" layer="21"/>
+<wire x1="1.016" y1="0.635" x2="1.016" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="1.016" y1="-0.635" x2="0" y2="0" width="0.1524" layer="21"/>
+<wire x1="0" y1="0" x2="1.524" y2="0" width="0.1524" layer="21"/>
+<wire x1="0" y1="0" x2="1.016" y2="0.635" width="0.1524" layer="21"/>
+<wire x1="0" y1="0.635" x2="0" y2="0" width="0.1524" layer="21"/>
+<wire x1="0" y1="0" x2="0" y2="-0.635" width="0.1524" layer="21"/>
+<wire x1="2.032" y1="1.016" x2="2.286" y2="0.762" width="0.1524" layer="21" curve="-90"/>
+<wire x1="2.286" y1="0.762" x2="2.286" y2="-0.762" width="0.1524" layer="21"/>
+<wire x1="2.032" y1="-1.016" x2="2.286" y2="-0.762" width="0.1524" layer="21" curve="90"/>
+<wire x1="-2.286" y1="0.762" x2="-2.032" y2="1.016" width="0.1524" layer="21" curve="-90"/>
+<wire x1="-2.286" y1="-0.762" x2="-2.032" y2="-1.016" width="0.1524" layer="21" curve="90"/>
+<wire x1="-2.032" y1="-1.016" x2="2.032" y2="-1.016" width="0.1524" layer="21"/>
+<wire x1="-2.286" y1="0.762" x2="-2.286" y2="-0.762" width="0.1524" layer="21"/>
+<wire x1="-2.032" y1="1.016" x2="2.032" y2="1.016" width="0.1524" layer="21"/>
+<pad name="C" x="-3.81" y="0" drill="0.8128" shape="long"/>
+<pad name="A" x="3.81" y="0" drill="0.8128" shape="long"/>
+<text x="-2.286" y="1.27" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-2.286" y="-2.667" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<rectangle x1="-1.905" y1="-1.016" x2="-1.397" y2="1.016" layer="21"/>
+<rectangle x1="2.286" y1="-0.254" x2="2.921" y2="0.254" layer="21"/>
+<rectangle x1="-2.921" y1="-0.254" x2="-2.286" y2="0.254" layer="21"/>
+</package>
 </packages>
 <packages3d>
 <package3d name="DO201-15" urn="urn:adsk.eagle:package:43365/1" type="box" library_version="3">
@@ -7264,6 +7319,20 @@ diameter 5.6 mm, horizontal, grid 15.24 mm</description>
 diameter 5.6 mm, horizontal, grid 15.24 mm</description>
 <packageinstances>
 <packageinstance name="DO201-15"/>
+</packageinstances>
+</package3d>
+<package3d name="DO35-10" urn="urn:adsk.eagle:package:43344/2" type="model" library_version="3">
+<description>DIODE
+diameter 2 mm, horizontal, grid 10.16 mm</description>
+<packageinstances>
+<packageinstance name="DO35-10"/>
+</packageinstances>
+</package3d>
+<package3d name="DO35-7" urn="urn:adsk.eagle:package:43339/1" type="box" library_version="3">
+<description>DIODE
+diameter 2 mm, horizontal, grid 7.62 mm</description>
+<packageinstances>
+<packageinstance name="DO35-7"/>
 </packageinstances>
 </package3d>
 </packages3d>
@@ -7297,6 +7366,39 @@ standard rectifier, 3 A, 50 V (Motorola)</description>
 </connects>
 <package3dinstances>
 <package3dinstance package3d_urn="urn:adsk.eagle:package:43365/1"/>
+</package3dinstances>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="1N4148" urn="urn:adsk.eagle:component:43496/2" prefix="D" library_version="3">
+<description>&lt;B&gt;DIODE&lt;/B&gt;&lt;p&gt;
+high speed (Philips)</description>
+<gates>
+<gate name="G$1" symbol="D" x="0" y="0"/>
+</gates>
+<devices>
+<device name="DO35-10" package="DO35-10">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="C"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:43344/2"/>
+</package3dinstances>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="DO35-7" package="DO35-7">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="C"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:43339/1"/>
 </package3dinstances>
 <technologies>
 <technology name=""/>
@@ -21919,7 +22021,7 @@ part number 2062-2P from STA</description>
 <part name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330"/>
 <part name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330"/>
 <part name="K1" library="relay" library_urn="urn:adsk.eagle:library:339" deviceset="35701331" device="" package3d_urn="urn:adsk.eagle:package:24297/1"/>
-<part name="T1" library="transistor" library_urn="urn:adsk.eagle:library:402" deviceset="*-NPN-" device="TO92" package3d_urn="urn:adsk.eagle:package:28523/2"/>
+<part name="T1" library="transistor" library_urn="urn:adsk.eagle:library:402" deviceset="*-NPN-" device="TO92" package3d_urn="urn:adsk.eagle:package:28523/2" value="BC338"/>
 <part name="R10" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="1K"/>
 <part name="ENCODER1" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA04-1" device="" package3d_urn="urn:adsk.eagle:package:8337/1" value="1"/>
 <part name="ENCODER3" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA04-1" device="" package3d_urn="urn:adsk.eagle:package:8337/1" value="1"/>
@@ -21928,18 +22030,19 @@ part number 2062-2P from STA</description>
 <part name="CONTROL-I2C" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA03-1" device="" package3d_urn="urn:adsk.eagle:package:8339/1" value="1"/>
 <part name="DC-MOTOR" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA06-1" device="" package3d_urn="urn:adsk.eagle:package:8340/1" value="1"/>
 <part name="D1" library="diode" library_urn="urn:adsk.eagle:library:210" deviceset="1N5400" device="" package3d_urn="urn:adsk.eagle:package:43365/1"/>
-<part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-EU" device="E7.5-16" package3d_urn="urn:adsk.eagle:package:23382/2"/>
-<part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-EU" device="E7.5-16" package3d_urn="urn:adsk.eagle:package:23382/2"/>
-<part name="C3" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" deviceset="C" device="2.5/2" package3d_urn="urn:adsk.eagle:package:5415/1"/>
+<part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-EU" device="E7.5-16" package3d_urn="urn:adsk.eagle:package:23382/2" value="470uF"/>
+<part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-EU" device="E7.5-16" package3d_urn="urn:adsk.eagle:package:23382/2" value="470uF"/>
+<part name="C3" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" deviceset="C" device="2.5/2" package3d_urn="urn:adsk.eagle:package:5415/1" value="100nF"/>
 <part name="DC_MOTOR_DRIVER" library="pololu motor driver" deviceset="SINGLE_MOTOR_DRIVER" device=""/>
 <part name="MOTOR1" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="5566-4" device=""/>
 <part name="MOTOR2" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="5566-4" device=""/>
 <part name="MOTOR3" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="5566-4" device=""/>
 <part name="LOG-UART" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA03-1" device="" package3d_urn="urn:adsk.eagle:package:8339/1" value="1"/>
-<part name="IC1" library="v-reg" library_urn="urn:adsk.eagle:library:409" deviceset="78XXL" device="" package3d_urn="urn:adsk.eagle:package:30361/1"/>
-<part name="LED1" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="3MM" package3d_urn="urn:adsk.eagle:package:15797/1"/>
+<part name="IC1" library="v-reg" library_urn="urn:adsk.eagle:library:409" deviceset="78XXL" device="" package3d_urn="urn:adsk.eagle:package:30361/1" value="7805"/>
+<part name="LED1" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="3MM" package3d_urn="urn:adsk.eagle:package:15797/1" value="green"/>
 <part name="R11" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/5" package3d_urn="urn:adsk.eagle:package:23488/1" value="1K"/>
-<part name="POWER_IN" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="3.5MM" package3d_urn="urn:adsk.eagle:package:38050/1"/>
+<part name="POWER_IN" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="3.5MM" package3d_urn="urn:adsk.eagle:package:38050/1" value="12V"/>
+<part name="D2" library="diode" library_urn="urn:adsk.eagle:library:210" deviceset="1N4148" device="DO35-7" package3d_urn="urn:adsk.eagle:package:43339/1"/>
 </parts>
 <sheets>
 <sheet>
@@ -21995,11 +22098,12 @@ part number 2062-2P from STA</description>
 <instance part="LED1" gate="G$1" x="-93.98" y="0" rot="R180"/>
 <instance part="R11" gate="G$1" x="-93.98" y="20.32" rot="R90"/>
 <instance part="POWER_IN" gate="G$1" x="-142.24" y="55.88"/>
+<instance part="D2" gate="G$1" x="-60.96" y="33.02" rot="R90"/>
 </instances>
 <busses>
 </busses>
 <nets>
-<net name="ENC_VCC" class="0">
+<net name="VCC" class="0">
 <segment>
 <pinref part="P+1" gate="VCC" pin="VCC"/>
 <pinref part="PRJ1" gate="G$1" pin="VIN"/>
@@ -22022,10 +22126,12 @@ part number 2062-2P from STA</description>
 <wire x1="177.8" y1="149.86" x2="177.8" y2="116.84" width="0.1524" layer="91"/>
 <wire x1="124.46" y1="124.46" x2="124.46" y2="149.86" width="0.1524" layer="91"/>
 <junction x="124.46" y="149.86"/>
-<wire x1="-71.12" y1="45.72" x2="-53.34" y2="45.72" width="0.1524" layer="91"/>
-<wire x1="-53.34" y1="45.72" x2="-71.12" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="-71.12" y1="45.72" x2="-60.96" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="-60.96" y1="45.72" x2="-53.34" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="-53.34" y1="45.72" x2="-60.96" y2="45.72" width="0.1524" layer="91"/>
 <pinref part="K1" gate="1" pin="3"/>
 <junction x="-53.34" y="45.72"/>
+<wire x1="-60.96" y1="45.72" x2="-71.12" y2="45.72" width="0.1524" layer="91"/>
 <wire x1="-71.12" y1="45.72" x2="-71.12" y2="149.86" width="0.1524" layer="91"/>
 <junction x="-71.12" y="45.72"/>
 <junction x="-71.12" y="149.86"/>
@@ -22045,7 +22151,7 @@ part number 2062-2P from STA</description>
 <wire x1="213.36" y1="149.86" x2="213.36" y2="139.7" width="0.1524" layer="91"/>
 <pinref part="DC-MOTOR" gate="1" pin="4"/>
 <wire x1="246.38" y1="124.46" x2="231.14" y2="124.46" width="0.1524" layer="91"/>
-<label x="238.76" y="124.46" size="1.778" layer="95"/>
+<label x="236.22" y="124.46" size="1.778" layer="95"/>
 <wire x1="231.14" y1="124.46" x2="213.36" y2="124.46" width="0.1524" layer="91"/>
 <junction x="213.36" y="124.46"/>
 <pinref part="IC1" gate="A" pin="OUT"/>
@@ -22055,9 +22161,12 @@ part number 2062-2P from STA</description>
 <wire x1="-93.98" y1="45.72" x2="-83.82" y2="45.72" width="0.1524" layer="91"/>
 <wire x1="-93.98" y1="45.72" x2="-93.98" y2="25.4" width="0.1524" layer="91"/>
 <junction x="-93.98" y="45.72"/>
+<pinref part="D2" gate="G$1" pin="C"/>
+<wire x1="-60.96" y1="35.56" x2="-60.96" y2="45.72" width="0.1524" layer="91"/>
+<junction x="-60.96" y="45.72"/>
 </segment>
 </net>
-<net name="ENC_GND" class="1">
+<net name="GND" class="1">
 <segment>
 <pinref part="GND1" gate="1" pin="GND"/>
 <wire x1="-7.62" y1="-25.4" x2="-7.62" y2="-22.86" width="0.1524" layer="91"/>
@@ -22138,10 +22247,9 @@ part number 2062-2P from STA</description>
 <wire x1="88.9" y1="134.62" x2="88.9" y2="121.92" width="0.1524" layer="91"/>
 <wire x1="88.9" y1="121.92" x2="68.58" y2="121.92" width="0.1524" layer="91"/>
 <junction x="68.58" y="121.92"/>
-<label x="238.76" y="121.92" size="1.778" layer="95"/>
 <pinref part="DC-MOTOR" gate="1" pin="3"/>
 <wire x1="246.38" y1="127" x2="228.6" y2="127" width="0.1524" layer="91"/>
-<label x="238.76" y="127" size="1.778" layer="95"/>
+<label x="236.22" y="127" size="1.778" layer="95"/>
 <wire x1="228.6" y1="127" x2="228.6" y2="101.6" width="0.1524" layer="91"/>
 <wire x1="228.6" y1="101.6" x2="208.28" y2="101.6" width="0.1524" layer="91"/>
 <wire x1="208.28" y1="101.6" x2="208.28" y2="86.36" width="0.1524" layer="91"/>
@@ -22158,27 +22266,6 @@ part number 2062-2P from STA</description>
 <pinref part="POWER_IN" gate="G$1" pin="1"/>
 <wire x1="-134.62" y1="55.88" x2="-127" y2="55.88" width="0.1524" layer="91"/>
 <wire x1="-127" y1="55.88" x2="-127" y2="53.34" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$1" class="0">
-<segment>
-<pinref part="DRK1" gate="G$1" pin="M1"/>
-<wire x1="43.18" y1="-7.62" x2="43.18" y2="-10.16" width="0.1524" layer="91"/>
-<pinref part="MOTOR1" gate="-3" pin="S"/>
-</segment>
-</net>
-<net name="N$2" class="0">
-<segment>
-<pinref part="DRK1" gate="G$1" pin="M2"/>
-<wire x1="45.72" y1="-7.62" x2="45.72" y2="-10.16" width="0.1524" layer="91"/>
-<pinref part="MOTOR1" gate="-2" pin="S"/>
-</segment>
-</net>
-<net name="N$3" class="0">
-<segment>
-<pinref part="DRK1" gate="G$1" pin="M3"/>
-<wire x1="48.26" y1="-7.62" x2="48.26" y2="-10.16" width="0.1524" layer="91"/>
-<pinref part="MOTOR1" gate="-1" pin="S"/>
 </segment>
 </net>
 <net name="N$4" class="0">
@@ -22260,9 +22347,6 @@ part number 2062-2P from STA</description>
 <wire x1="55.88" y1="25.4" x2="119.38" y2="25.4" width="0.1524" layer="91"/>
 <junction x="55.88" y="25.4"/>
 <wire x1="119.38" y1="25.4" x2="119.38" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="119.38" y1="15.24" x2="106.68" y2="15.24" width="0.1524" layer="91"/>
-<pinref part="DRK2" gate="G$1" pin="LIPO+"/>
-<wire x1="106.68" y1="15.24" x2="116.84" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="119.38" y1="25.4" x2="172.72" y2="25.4" width="0.1524" layer="91"/>
 <junction x="119.38" y="25.4"/>
 <wire x1="172.72" y1="25.4" x2="172.72" y2="15.24" width="0.1524" layer="91"/>
@@ -22276,6 +22360,8 @@ part number 2062-2P from STA</description>
 <wire x1="195.58" y1="83.82" x2="195.58" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="195.58" y1="25.4" x2="172.72" y2="25.4" width="0.1524" layer="91"/>
 <junction x="172.72" y="25.4"/>
+<pinref part="DRK2" gate="G$1" pin="LIPO+"/>
+<wire x1="116.84" y1="15.24" x2="119.38" y2="15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$13" class="0">
@@ -22426,7 +22512,11 @@ part number 2062-2P from STA</description>
 <segment>
 <pinref part="K1" gate="1" pin="5"/>
 <pinref part="T1" gate="G$1" pin="C"/>
-<wire x1="-53.34" y1="35.56" x2="-53.34" y2="12.7" width="0.1524" layer="91"/>
+<wire x1="-53.34" y1="35.56" x2="-53.34" y2="30.48" width="0.1524" layer="91"/>
+<pinref part="D2" gate="G$1" pin="A"/>
+<wire x1="-53.34" y1="30.48" x2="-53.34" y2="12.7" width="0.1524" layer="91"/>
+<wire x1="-60.96" y1="30.48" x2="-53.34" y2="30.48" width="0.1524" layer="91"/>
+<junction x="-53.34" y="30.48"/>
 </segment>
 </net>
 <net name="N$30" class="0">
@@ -22528,12 +22618,11 @@ part number 2062-2P from STA</description>
 </net>
 <net name="N$43" class="0">
 <segment>
-<pinref part="PRJ1" gate="G$1" pin="38/A19"/>
-<wire x1="73.66" y1="116.84" x2="73.66" y2="114.3" width="0.1524" layer="91"/>
 <pinref part="CONTROL-I2C" gate="G$1" pin="2"/>
-<wire x1="73.66" y1="119.38" x2="73.66" y2="114.3" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="134.62" x2="66.04" y2="119.38" width="0.1524" layer="91"/>
 <wire x1="66.04" y1="119.38" x2="73.66" y2="119.38" width="0.1524" layer="91"/>
+<pinref part="PRJ1" gate="G$1" pin="38/A19"/>
+<wire x1="73.66" y1="116.84" x2="73.66" y2="119.38" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="CTRL-SDA" class="0">
@@ -22585,9 +22674,9 @@ part number 2062-2P from STA</description>
 <net name="N$45" class="0">
 <segment>
 <pinref part="DC_MOTOR_DRIVER" gate="G$1" pin="EN"/>
-<wire x1="215.9" y1="63.5" x2="205.74" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="205.74" y1="63.5" x2="205.74" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="205.74" y1="104.14" x2="157.48" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="215.9" y1="63.5" x2="193.04" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="193.04" y1="63.5" x2="193.04" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="193.04" y1="104.14" x2="157.48" y2="104.14" width="0.1524" layer="91"/>
 <wire x1="157.48" y1="104.14" x2="157.48" y2="71.12" width="0.1524" layer="91"/>
 <wire x1="157.48" y1="71.12" x2="93.98" y2="71.12" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="71.12" x2="83.82" y2="71.12" width="0.1524" layer="91"/>
@@ -22599,7 +22688,7 @@ part number 2062-2P from STA</description>
 <segment>
 <pinref part="DC-MOTOR" gate="1" pin="2"/>
 <wire x1="246.38" y1="129.54" x2="226.06" y2="129.54" width="0.1524" layer="91"/>
-<label x="238.76" y="129.54" size="1.778" layer="95"/>
+<label x="236.22" y="129.54" size="1.778" layer="95"/>
 <pinref part="DC_MOTOR_DRIVER" gate="G$1" pin="OUT1"/>
 <wire x1="259.08" y1="66.04" x2="266.7" y2="66.04" width="0.1524" layer="91"/>
 <wire x1="266.7" y1="66.04" x2="266.7" y2="99.06" width="0.1524" layer="91"/>
@@ -22640,7 +22729,7 @@ part number 2062-2P from STA</description>
 <segment>
 <pinref part="DC-MOTOR" gate="1" pin="1"/>
 <wire x1="246.38" y1="132.08" x2="228.6" y2="132.08" width="0.1524" layer="91"/>
-<label x="238.76" y="132.08" size="1.778" layer="95"/>
+<label x="236.22" y="132.08" size="1.778" layer="95"/>
 <wire x1="228.6" y1="132.08" x2="223.52" y2="132.08" width="0.1524" layer="91"/>
 <wire x1="223.52" y1="132.08" x2="223.52" y2="96.52" width="0.1524" layer="91"/>
 <wire x1="223.52" y1="96.52" x2="264.16" y2="96.52" width="0.1524" layer="91"/>
@@ -22649,26 +22738,27 @@ part number 2062-2P from STA</description>
 <wire x1="264.16" y1="68.58" x2="259.08" y2="68.58" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="ENC_B" class="0">
+<net name="WH_ENC_B" class="0">
 <segment>
-<pinref part="DC-MOTOR" gate="1" pin="6"/>
-<wire x1="246.38" y1="119.38" x2="236.22" y2="119.38" width="0.1524" layer="91"/>
-<label x="238.76" y="119.38" size="1.778" layer="95"/>
 <pinref part="PRJ1" gate="G$1" pin="35/A16"/>
-<wire x1="236.22" y1="119.38" x2="228.6" y2="119.38" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="127" x2="81.28" y2="116.84" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="127" x2="208.28" y2="127" width="0.1524" layer="91"/>
 <wire x1="208.28" y1="127" x2="208.28" y2="119.38" width="0.1524" layer="91"/>
-<wire x1="208.28" y1="119.38" x2="236.22" y2="119.38" width="0.1524" layer="91"/>
+<pinref part="DC-MOTOR" gate="1" pin="6"/>
+<wire x1="208.28" y1="119.38" x2="246.38" y2="119.38" width="0.1524" layer="91"/>
+<label x="236.22" y="119.38" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="N$46" class="0">
+<net name="Y_ENC_A" class="0">
 <segment>
 <pinref part="PRJ1" gate="G$1" pin="36/A17"/>
 <wire x1="78.74" y1="116.84" x2="78.74" y2="129.54" width="0.1524" layer="91"/>
 <wire x1="238.76" y1="121.92" x2="210.82" y2="121.92" width="0.1524" layer="91"/>
 <wire x1="210.82" y1="121.92" x2="210.82" y2="129.54" width="0.1524" layer="91"/>
 <wire x1="210.82" y1="129.54" x2="78.74" y2="129.54" width="0.1524" layer="91"/>
+<pinref part="DC-MOTOR" gate="1" pin="5"/>
+<wire x1="238.76" y1="121.92" x2="246.38" y2="121.92" width="0.1524" layer="91"/>
+<label x="236.22" y="121.92" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$40" class="0">
@@ -22684,6 +22774,27 @@ part number 2062-2P from STA</description>
 <wire x1="-35.56" y1="48.26" x2="-35.56" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="D1" gate="1" pin="C"/>
 <wire x1="-106.68" y1="58.42" x2="-35.56" y2="58.42" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$1" class="0">
+<segment>
+<pinref part="DRK1" gate="G$1" pin="M1"/>
+<pinref part="MOTOR1" gate="-3" pin="S"/>
+<wire x1="43.18" y1="-7.62" x2="43.18" y2="-10.16" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$2" class="0">
+<segment>
+<pinref part="DRK1" gate="G$1" pin="M2"/>
+<pinref part="MOTOR1" gate="-2" pin="S"/>
+<wire x1="45.72" y1="-7.62" x2="45.72" y2="-10.16" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$3" class="0">
+<segment>
+<pinref part="DRK1" gate="G$1" pin="M3"/>
+<pinref part="MOTOR1" gate="-1" pin="S"/>
+<wire x1="48.26" y1="-7.62" x2="48.26" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
