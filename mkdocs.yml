@@ -6,6 +6,6 @@ repo_authorr: 'Jochen Alt'
 site_description: Ondine, the beautiful ballet 
 pages:
     - 'Home - Ondine?!': 'index.md'
-    - 'Construction - How is Ondine built?': 'Construction.md'
+    - 'OmniWheels - Make or Buy?': 'OmniWheels.md'
     - 'Bill of Material - What is Ondine made of?': 'Bill-of-Material.md'
     - 'Sources - C++ Code, CAD models, FAQ, etc.': 'Sources.md'
