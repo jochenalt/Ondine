@@ -13,20 +13,20 @@ My [CAD model](https://github.com/jochenalt/Ondine/blob/master/CAD/OmniWheel.iam
 
 I ended up with that design, that has an identical width of all rolls and two bearings each. 
 
-<img align="left" width="200px" src="../images/omniwheel/omniwheel CAD total.png"/>
-<img width="200px" src="../images/omniwheel/omniwheel CAD cut.png"/>
+<img align="left" width="300px" src="../images/omniwheel/omniwheel CAD total.png"/>
+<img width="300px" src="../images/omniwheel/omniwheel CAD cut.png"/>
 
 As a courtesy to the japanese patent, the 3D-printed parts are arranged in beautiful manner:
 
-<img width="200px" src="../images/omniwheel/arrangement total.jpg"/>
+<img width="400px" src="../images/omniwheel/arrangement total.jpg"/>
 
 The first assembly looked like this
 
-<img  width="200px" src="../images/omniwheel/first assembly.jpg"/>
+<img  width="300px" src="../images/omniwheel/first assembly.jpg"/>
 
 Then I realized, that the friction of ABS rolls on a ball made of rubber or something was quite poor. There's little you can do about the 3d printed material, so I needed some kind of cover. I was thinking of rubber spray, but found out, that sand paper has a perfect friction on rubber. So, I looked for a material similar to sand paper and found corundum, which is sand with sharp edges. Originally it is used for blasting, so it is quite cheap to get. Thing is, that you can it order in quantities of at least 5kg only. The remaining 4,95kg can be put in the garden to attract and fool ants.
 
 To glue corundum to the rolls I used 2-component epoxy glue. It is a messy experience to coat small rolls with glue and rolling them in a can of corundum sand.
 
-<img  width="200px" src="../images/omniwheel/rolling in glue.png"/>
+<img  width="300px" src="../images/omniwheel/rolling in glue.png"/>
 
