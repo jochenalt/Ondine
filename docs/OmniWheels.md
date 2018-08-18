@@ -1,16 +1,14 @@
-# Omniwheels - Make or Buy
+# Omniwheels
 
-What a stupid question. The omniwheel I was looking for should follow the idea of the [japanese patent 2001-191704](https://astamuse.com/ja/published/JP/No/2001191704) from 2001.
+The omniwheel I was looking for should follow the idea of the [japanese patent 2001-191704](https://astamuse.com/ja/published/JP/No/2001191704) from 2001.
 
 <img align="left" width="300px" src="../images/omniwheel/japanese patent.jpg" >
 
-The [CAD model](https://github.com/jochenalt/Ondine/blob/master/CAD/OmniWheel.iam) has been designed to be 3D printed, which means that the space between the rolls and the spoke holding the wheels should be really tight in order to gain stability of the spoke. Omniwheels of this type that are made of steel can have a much simpler spoke, but having in mind that the full load is carried by typically one spoke with only some mm thickness requires carefull use of space available. This leads to a spoke with a constant distance to the rolls. 
+The original patent has a surprising design of the big roll. Its width is much smaller than the small rolls, and it runs one one bearing only. Due to my poor japanese I was not able to find out why the authors chose a design so complex to manufacture. My [CAD model](https://github.com/jochenalt/Ondine/blob/master/CAD/OmniWheel.iam) needs to be 3d-printed, and the spoke of the patent is so thin, that this would never work. The spoke needs to carry the full weight, so it requires much more material on the spots where the bearings are held. In order to allow more material  in the little space available, I designed the spoke with a constant distant to the roll.
 
-When designing this, I played with the dimensions of the original patent, which big rolls are of a smaller width than the small rolls, running with one bearing only. 
 <img align="left" width="300px" src="../images/omniwheel/japanese patent big roll.png" >
 
-A spoke like that is not 3d-printable, and due to my poor japanese I was not able to find out why the patent did the design of the big roll in a way so complex to manufacture.
-I ended up with big rolls of the same width like the small rolls, and spending two bearings to all rolls.
+I ended up with that design, that has an identical width of all rolls and two bearings each. 
 
 <img align="left" width="100" src=""../images/omniwheel/omniwheel CAD total.jpg"/>
 <img width="200" src=""../images/omniwheel/omniwheel CAD cut.jpg"/>
@@ -23,6 +21,9 @@ The first assembly looked like this
 
 <img align="left" width="100" src=""../images/omniwheel/first assembly.jpg"/>
 
-Then, I realized, that the friction of ABS on a ball made of rubber or something was quite poor. There's little you can do about the 3d printed material, so I needed some kind of cover, and ended up with corundum of grain size 0.1-0.2mm. Corundum has sharp edges (compared with plain sand), and gives quite a good friction with rubber. Luckily, this material is used for blasting and easily available. That only thing is, that you need to order 5kg at least. The 4,9kg left can be put in the garden to attract and fool ants.
+Then I realized, that the friction of ABS rolls on a ball made of rubber or something was quite poor. There's little you can do about the 3d printed material, so I needed some kind of cover. I was thinking of rubber spray, but found out, that sand paper has a perfect friction on rubber. So, I looked for a material similar to sand paper and found corundum, which is sand with sharp edges. Originally it is used for blasting, so it is quite cheap to get. Thing is, that you can it order in quantities of at least 5kg only. The remaining 4,95kg can be put in the garden to attract and fool ants.
 
-To glue corundum to the rolls I used 2-component epoxy glue. It is  a messy experience to coat small rolls with glue and rolling them in a can of corundum sand.
+To glue corundum to the rolls I used 2-component epoxy glue. It is a messy experience to coat small rolls with glue and rolling them in a can of corundum sand.
+
+<img align="left" width="100" src=""../images/omniwheel/rolling in glue.png"/>
+
