@@ -616,21 +616,21 @@
 <package name="DROTEKL6234">
 <pad name="IN1" x="-11.43" y="1.27" drill="0.8128" diameter="1.27" rot="R90"/>
 <pad name="IN2" x="-11.43" y="-1.27" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="M3" x="1.27" y="11.43" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="LIPO+" x="-1.778" y="10.414" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="M3" x="1.27" y="10.922" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="LIPO+" x="-1.778" y="9.906" drill="0.8128" diameter="1.27" rot="R90"/>
 <pad name="IN3" x="-11.43" y="-3.81" drill="0.8128" diameter="1.27" rot="R90"/>
 <pad name="EN" x="-11.43" y="-6.35" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="M2" x="3.81" y="11.43" drill="0.8128" diameter="1.27" rot="R90"/>
-<pad name="M1" x="6.35" y="11.43" drill="0.8128" diameter="1.27" rot="R180"/>
+<pad name="M2" x="3.81" y="10.922" drill="0.8128" diameter="1.27" rot="R90"/>
+<pad name="M1" x="6.35" y="10.922" drill="0.8128" diameter="1.27" rot="R180"/>
 <text x="3.556" y="8.509" size="1.27" layer="25" ratio="10" rot="R180">&gt;NAME</text>
 <text x="-2.286" y="4.445" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
-<pad name="GND" x="-4.318" y="10.414" drill="0.6" shape="square"/>
+<pad name="GND" x="-4.318" y="9.906" drill="0.6" shape="square"/>
 <wire x1="12.7" y1="13.97" x2="-13.97" y2="13.97" width="0.127" layer="21"/>
 <wire x1="-13.97" y1="13.97" x2="-13.97" y2="-12.7" width="0.127" layer="21"/>
 <wire x1="-13.97" y1="-12.7" x2="12.7" y2="-12.7" width="0.127" layer="21"/>
 <wire x1="12.7" y1="-12.7" x2="12.7" y2="13.97" width="0.127" layer="21"/>
-<circle x="-11.43" y="-10.16" radius="1.79605" width="0.127" layer="21"/>
-<circle x="10.16" y="11.43" radius="1.79605" width="0.127" layer="21"/>
+<circle x="-10.922" y="-10.16" radius="1.79605" width="0.127" layer="21"/>
+<circle x="10.16" y="10.922" radius="1.79605" width="0.127" layer="21"/>
 <circle x="10.16" y="-10.16" radius="1.79605" width="0.127" layer="21"/>
 <text x="0" y="-7.62" size="1.27" layer="20">DROTEK
 L6234</text>
@@ -18557,10 +18557,10 @@ naming: grid - package width</description>
 <pad name="!D2" x="-3.81" y="2.54" drill="0.9" diameter="1.778"/>
 <pad name="D1" x="-3.81" y="0" drill="0.9" diameter="1.778"/>
 <pad name="!SF" x="-3.81" y="-2.54" drill="0.9" diameter="1.778"/>
-<pad name="VIN(5-28V)" x="16.51" y="3.81" drill="0.9" diameter="1.778"/>
-<pad name="GND" x="16.51" y="0" drill="0.9" diameter="1.778"/>
-<pad name="OUT2" x="16.51" y="-3.81" drill="0.9" diameter="1.778"/>
-<pad name="OUT1" x="16.51" y="-7.62" drill="0.9" diameter="1.778"/>
+<pad name="VIN(5-28V)" x="16.764" y="0.889" drill="0.9" diameter="1.778"/>
+<pad name="GND" x="16.764" y="-2.413" drill="0.9" diameter="1.778"/>
+<pad name="OUT2" x="16.764" y="-5.842" drill="0.9" diameter="1.778"/>
+<pad name="OUT1" x="16.764" y="-9.779" drill="0.9" diameter="1.778"/>
 <text x="-7.112" y="9.906" size="0.6096" layer="21">GND</text>
 <text x="-6.985" y="12.446" size="0.6096" layer="21">VIN</text>
 <text x="-7.62" y="-10.414" size="0.6096" layer="21">SLEW</text>
@@ -18575,10 +18575,10 @@ naming: grid - package width</description>
 <text x="18.161" y="-0.254" size="0.6096" layer="21">GND</text>
 <text x="18.161" y="3.556" size="0.6096" layer="21">VIN(5-28V)</text>
 <text x="5.08" y="12.065" size="1.016" layer="21" ratio="12">&gt;NAME</text>
-<wire x1="-5.08" y1="13.97" x2="-5.08" y2="-13.97" width="0.127" layer="21"/>
-<wire x1="-5.08" y1="-13.97" x2="21.59" y2="-13.97" width="0.127" layer="21"/>
-<wire x1="21.59" y1="-13.97" x2="21.59" y2="13.97" width="0.127" layer="21"/>
-<wire x1="21.59" y1="13.97" x2="-5.08" y2="13.97" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="13.97" x2="-5.08" y2="-16.51" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="-16.51" x2="20.193" y2="-16.51" width="0.127" layer="21"/>
+<wire x1="20.193" y1="-16.51" x2="20.193" y2="13.97" width="0.127" layer="21"/>
+<wire x1="20.193" y1="13.97" x2="-5.08" y2="13.97" width="0.127" layer="21"/>
 <pad name="FB" x="-3.81" y="-5.08" drill="0.9" diameter="1.778"/>
 <pad name="EN" x="-3.81" y="-7.62" drill="0.9" diameter="1.778"/>
 <pad name="SLEW" x="-3.81" y="-10.16" drill="0.9" diameter="1.778"/>
@@ -18586,6 +18586,9 @@ naming: grid - package width</description>
 <text x="-7.62" y="-5.334" size="0.6096" layer="21">FB</text>
 <text x="-7.62" y="-7.874" size="0.6096" layer="21">EN</text>
 <text x="-7.62" y="-5.334" size="0.6096" layer="21">FB</text>
+<circle x="17.78" y="12.065" radius="1.27" width="0.127" layer="21"/>
+<pad name="INV1" x="-3.81" y="-15.24" drill="0.9" diameter="1.778"/>
+<circle x="17.78" y="-14.097" radius="1.419903125" width="0.127" layer="21"/>
 </package>
 </packages>
 <symbols>
@@ -19876,13 +19879,6 @@ Source: http://www.ledtronics.com/ds/smd-0603/Dstr0092.pdf</description>
 </package>
 </packages>
 <packages3d>
-<package3d name="1206" urn="urn:adsk.eagle:package:15796/1" type="box" library_version="2">
-<description>CHICAGO MINIATURE LAMP, INC.
-7022X Series SMT LEDs 1206 Package Size</description>
-<packageinstances>
-<packageinstance name="1206"/>
-</packageinstances>
-</package3d>
 <package3d name="LD260" urn="urn:adsk.eagle:package:15794/1" type="box" library_version="2">
 <description>LED
 5 mm, square, Siemens</description>
@@ -20171,6 +20167,13 @@ Source: http://www.ledtronics.com/ds/smd-0603/Dstr0092.pdf</description>
 <packageinstance name="SML0603"/>
 </packageinstances>
 </package3d>
+<package3d name="1206" urn="urn:adsk.eagle:package:15796/2" type="model" library_version="3">
+<description>CHICAGO MINIATURE LAMP, INC.
+7022X Series SMT LEDs 1206 Package Size</description>
+<packageinstances>
+<packageinstance name="1206"/>
+</packageinstances>
+</package3d>
 </packages3d>
 <symbols>
 <symbol name="LED" urn="urn:adsk.eagle:symbol:15639/1" library_version="2">
@@ -20200,7 +20203,7 @@ Source: http://www.ledtronics.com/ds/smd-0603/Dstr0092.pdf</description>
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="LED" urn="urn:adsk.eagle:component:15916/7" prefix="LED" uservalue="yes" library_version="2">
+<deviceset name="LED" urn="urn:adsk.eagle:component:15916/8" prefix="LED" uservalue="yes" library_version="3">
 <description>&lt;b&gt;LED&lt;/b&gt;&lt;p&gt;
 &lt;u&gt;OSRAM&lt;/u&gt;:&lt;br&gt;
 
@@ -20286,7 +20289,7 @@ Source: www.kingbright.com</description>
 <connect gate="G$1" pin="C" pad="C"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:15796/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:15796/2"/>
 </package3dinstances>
 <technologies>
 <technology name=""/>
