@@ -16,11 +16,11 @@ I ended up with that design, that has an identical width of all rolls and two be
 <img align="left" width="300px" src="../images/omniwheel/omniwheel CAD total.png"/>
 <img width="300px" src="../images/omniwheel/omniwheel CAD cut.png"/>
 
-As a courtesy to the japanese patent, the 3D-printed parts are arranged in beautiful manner:
+As a courtesy to the japanese patent, I arranged the 3D-printed parts in beautiful manner:
 
-<img width="400px" src="../images/omniwheel/arrangement total.jpg"/>
+<img width="600px" src="../images/omniwheel/arrangement total.jpg"/>
 
-The first assembly looked like this
+The first assembly is necessary to check the tolerances. The slightest amount of warping during the print would would make the roll wobble against the spoke, so the perfect rolls need to be selected in this phase.
 
 <img  width="300px" src="../images/omniwheel/first assembly.jpg"/>
 
@@ -32,4 +32,4 @@ To adhere corundum to the rolls I used 2-component epoxy glue. It is a messy exp
 
 To improve the quality of the adhesive layer, it might be appropriate to add instant adhesive with low viscosity (intended for porose surfaces) on rolls. This is the way sandpaper is manufactured and supports a grain at its flanks. Finally, the wheel looks like this
 
-<img  width="300px" src="../images/omniwheel/final.jpg"/>
+<img  width="400px" src="../images/omniwheel/final.jpg"/>
