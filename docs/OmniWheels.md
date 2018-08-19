@@ -20,7 +20,7 @@ As a courtesy to the japanese patent, I arranged the 3D-printed parts in beautif
 
 <img width="600px" src="../images/omniwheel/arrangement total.jpg"/>
 
-The first assembly is necessary to check the tolerances. The slightest amount of warping during the print would would make the roll wobble against the spoke, so the perfect rolls need to be selected in this phase.
+The first assembly is necessary to check the tolerances. The slightest amount of warping during printing would would make the rolls wobble against the spoke, so perfect rolls need to be selected in this phase.
 
 <img  width="300px" src="../images/omniwheel/first assembly.jpg"/>
 

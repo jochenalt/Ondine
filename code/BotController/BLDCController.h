@@ -45,41 +45,41 @@ private:
 
 	float targetAcc = 0;				// [rev/s^2]
 	float targetSpeed = 0;				// [rev/s]
-	float targetTorque = 0;					// [0..1], ratio of full torque, ends up in pwm ratio
+	float targetTorque = 0;				// [0..1], ratio of full torque, ends up in pwm ratio
 
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
-	float advanceAnglePhase = 0;
-	float advanceAngleError= 0;
+	float advanceAnglePhase = 0;		// [rad] integration of angle errors (used by PI controller)
+	float advanceAngleError= 0;			// [rad] current angle error (computed by PI controller, determines torque)
 	float currentSpeed = 0;				// [rev/s]
-	float referenceAngle = 0;			// [rad]
+	float referenceAngle = 0;			// [rad] target angle of the rotor
 	float lastReferenceAngle = 0;		// [rad]
 
 	float encoderAngle = 0;				// [rad]
 	int lastEncoderPosition = 0;		// last call of encoder value
 
-	 int getPWMValue( float angle_rad);
-	 void getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValueC);
-	 float turnReferenceAngle();
-	 void setMagneticFieldAngle(float angle);
-	 void readEncoder();
-	 void sendPWMDuty();
-	 uint32_t lastStepTime_us = 0;
+	int getPWMValue( float angle_rad);
+	void getPWMValues (int &pwmValueA, int &pwmValueB, int &pwmValueC);
+	float turnReferenceAngle();
+	void setMagneticFieldAngle(float angle);
+	void readEncoder();
+	void sendPWMDuty();
+	uint32_t lastStepTime_us = 0;
 
-	 // data of PI controller
-	 static float pid_k;
-	 static float pid_i;
+	// data of PI controller
+	static float pid_k;
+	static float pid_i;
 
-	 bool isEnabled = false;
+	bool isEnabled = false;
 
-	 // Encoder library
-	 Encoder* encoder = NULL;
+	// Encoder library
+	Encoder* encoder = NULL;
 
-	 // ascii menu functionality
-	 void printHelp();
-	 float menuSpeed = 0;
-	 int menuAcc = 500;
-	 float menuTorque = 0.0;
-	 bool menuEnable = false;
+	// ascii menu functionality
+	void printHelp();
+	float menuSpeed = 0;
+	int menuAcc = 500;
+	float menuTorque = 0.0;
+	bool menuEnable = false;
 };
 
 #endif /* BLDCCONTROLLER_H_ */
