@@ -6,7 +6,7 @@ The omniwheel I was looking for should follow the idea of the [japanese patent 2
 
 This patent has a surprising design of the big roll. Its width is much smaller than the small rolls, and it runs with one bearing only. Due to my poor japanese language skills I was not able to find out why the authors chose a design so complex to manufacture. 
 
-<img  width="250px" src="../images/omniwheel/japanese patent big roll.png" >
+<img  width="350px" src="../images/omniwheel/japanese patent big roll.png" >
 
 My [CAD model](https://github.com/jochenalt/Ondine/blob/master/CAD/OmniWheel.iam) needs to be 3d-printed, and the spoke of the patent is so thin, that this would never work. The spoke needs to carry the full weight, so it requires much more material on the spots where the bearings are mounted. In order to allow more material  in the little space available, I designed the spoke with a constant distant to the roll.
 
