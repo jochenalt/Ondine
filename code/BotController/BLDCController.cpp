@@ -35,7 +35,10 @@ void precomputeSVPMWave() {
 			float phaseA = sin(angle);
 			float phaseB = sin(angle + M_PI*2.0/3.0);
 			float phaseC = sin(angle + M_PI*4.0/3.0);
+
+			// neat software trick to avoid the switch of 6 phases everyone else is doing
 			float voff = (min(phaseA, min(phaseB, phaseC)) + max(phaseA, max(phaseB, phaseC)))/2.0;
+
 			float pwmSpaceVectorValue =  ((phaseA - voff)/2.0*spaceVectorFactor + 0.5)*maxPWMValue;
 			float pwmSinValue =  (phaseA/2.0 + 0.5)*maxPWMValue;
 
