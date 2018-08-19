@@ -30,6 +30,6 @@ To adhere corundum to the rolls I used 2-component epoxy glue. It is a messy exp
 
 <img  width="300px" src="../images/omniwheel/rolling in glue.png"/>
 
-To improve the quality of the adhesive layer, it might be appropriate to add instant adhesive with low viscosity (intended for porose surfaces) on rolls. This is the way sandpaper is manufactured and supports a grain at its flanks. Finally, the wheel looks like this
+To improve the quality of the adhesive layer, you can add instant adhesive with low viscosity (intended for porose surfaces) on the rolls. This is the way sandpaper is manufactured and supports a grain at its flanks. Finally, the wheel looks like this
 
 <img  width="400px" src="../images/omniwheel/final.jpg"/>
