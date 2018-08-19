@@ -1,10 +1,10 @@
 # Omniwheels
 
-The omniwheel I was looking for should follow the idea of the [japanese patent 2001-191704](https://astamuse.com/ja/published/JP/No/2001191704) from 2001.
+The omniwheel I was looking for should follow the idea of the [japanese patent 2001-191704](https://astamuse.com/ja/published/JP/No/2001191704) from 2001. For your convinience, [this](https://translate.google.com/translate?hl=en&sl=ja&tl=en&u=https%3A%2F%2Fastamuse.com%2Fja%2Fpublished%2FJP%2FNo%2F2001191704) is the google translation of it.
 
 <img width="250px" src="../images/omniwheel/japanese patent.jpg" >
 
-This patent has a surprising design of the big roll. Its width is much smaller than the small rolls, and it runs with one bearing only. Due to my poor japanese language skills I was not able to find out why the authors chose a design so complex to manufacture. 
+This patent has a surprising design of the big roll. Its width is much smaller than the small rolls, and it runs with one bearing only. I was not able to find out why the authors chose a design so complex to manufacture. 
 
 <img  width="350px" src="../images/omniwheel/japanese patent big roll.png" >
 
