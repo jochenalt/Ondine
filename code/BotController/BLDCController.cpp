@@ -80,7 +80,6 @@ BLDCController::BLDCController() {
 	precomputeSVPMWave();
 }
 
-
 void BLDCController::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
 	// there's only one enable pin that has a short cut to EN1, EN2, and EN3 from L6234
 	enablePin = EnablePin;
@@ -313,6 +312,7 @@ void BLDCController::enable(bool doit) {
 		digitalWrite(enablePin, LOW);
 }
 
+
 void BLDCController::printHelp() {
 	Serial1.println("BLDC controller");
 	Serial1.println("0 - stop");
@@ -330,14 +330,8 @@ void BLDCController::printHelp() {
 	Serial1.println("ESC");
 }
 
-void BLDCController::runMenu() {
-	printHelp();
-	TimePassedBy timer(1);
+void BLDCController::loopMenu(char ch) {
 
-	while (true) { // terminates with return
-		if (timer.isDue())
-			loop();
-		char ch = Serial1.read();
 		bool cmd = true;
 		switch (ch) {
 		case '0':
@@ -442,6 +436,5 @@ void BLDCController::runMenu() {
 
 			Serial1.println(" >");
 		}
-	}
 }
 

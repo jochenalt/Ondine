@@ -8,11 +8,12 @@
 #ifndef BLDCCONTROLLER_H_
 #define BLDCCONTROLLER_H_
 
+#include <MenuController.h>
 
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
 
-class BLDCController {
+class BLDCController : virtual public Menuable {
 public:
 	BLDCController();
 	virtual ~BLDCController() {};
@@ -29,7 +30,8 @@ public:
 
 	void enable(bool doit);
 
-	void runMenu();
+	virtual void printHelp();
+	virtual void loopMenu(char ch);
 private:
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3
@@ -75,7 +77,6 @@ private:
 	Encoder* encoder = NULL;
 
 	// ascii menu functionality
-	void printHelp();
 	float menuSpeed = 0;
 	int menuAcc = 500;
 	float menuTorque = 0.0;

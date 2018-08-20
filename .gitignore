@@ -10,3 +10,5 @@ cortex-workspace/
 code/.settings/
 schematics/*/*#*
 schematics/*#*
+*.o
+code/*/Release
