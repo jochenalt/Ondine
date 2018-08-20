@@ -128,7 +128,7 @@ float BLDCController::turnReferenceAngle() {
 	uint32_t now_us = micros();
 	uint32_t timePassed_us = now_us - lastStepTime_us;
 
-	// check for overflow on micros() (happens every 70 minutes)
+	// check for overflow on micros() (happens every 70 minutes at teensy's frequency)
 	if (now_us < lastStepTime_us)
 		timePassed_us = 4294967295 - timePassed_us;
 
@@ -200,8 +200,10 @@ void BLDCController::loop() {
 
 	// recompute speed, since set speed might not be achieved
 	currentSpeed = (referenceAngle-lastReferenceAngle)/timePassed_s/radians(360);
-	lastReferenceAngle = referenceAngle;
+	lastReferenceAngle = referenceAngle; // required to compute speed
 
+	// send new pwm value to motor
+	// set torque proportional to advanceAngleError
 	sendPWMDuty();
 
 	/*
@@ -276,19 +278,19 @@ void BLDCController::enable(bool doit) {
 		digitalWrite(enablePin, HIGH);
 		delay(50); // settle
 
-		// startup calibration works by turning the magnetic field until the encoder indicates the rotor
-		// aligned with the field
-		// run a loop that
-		// - measures the encoders deviation
-		// - turns the magnetic field in the direction of the deviation, the more deviation, the higher is the turning angle
+		// startup calibration works by turning the magnetic field until the encoder
+		// indicates the rotor being aligned with the field
+		// During calibration, run a loop that
+		// - measure the encoder
+		// - turn the magnetic field in the direction of the deviation as indicated by the encoder
 		// - if the encoders indicates no movement, increase torque
 		// quit the loop if torque is above a certain threshold with encoder at 0
 		// end calibration by setting the current reference angle to the measured rotors position
 		float lastLoopEncoderAngle = 0;
 		targetTorque = 0;
-		while ((targetTorque < 0.2)) { // quit above 20% torque which is reached only when no movement happens anymore
+		while ((targetTorque < 0.2)) { // quit when above 20% torque
 			// P controller with p=4.0
-			magneticFieldAngle -= encoderAngle*4.0;
+			magneticFieldAngle -= encoderAngle*4.0; // this is a P-controller that turns the magnetic field towards the direction of the encoder
 			sendPWMDuty();
 			delay(20);
 			readEncoder();
