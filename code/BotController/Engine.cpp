@@ -30,31 +30,52 @@
 #define W3_ENCODERA_PIN 18
 #define W3_ENCODERB_PIN 19
 
-void Engine::setup(MenuController& newMenuCtrl) {
-	menuCtrl = &newMenuCtrl;
-	menuCtrl->registerMenu(this);
+void Engine::setup() {
+	// register out menu
+	registerMenuController(menuCtrl);
 
-	ctrl[0] = new BLDCController();
-	menuCtrl->registerMenu(ctrl[0]);
-	ctrl[0]->setupMotor(W1_L6234_ENABLE_PIN, W1_L6234_PWM1, W1_L6234_PWM2, W1_L6234_PWM3);
-	ctrl[0]->setupEncoder(W1_ENCODERA_PIN, W1_ENCODERB_PIN, 1024);
+	// initialize all brushless motors and their encoders
+	wheel[0] = new OmniWheel();
+	wheel[0]->registerMenuController(menuCtrl);
+	wheel[0]->setupMotor(W1_L6234_ENABLE_PIN, W1_L6234_PWM1, W1_L6234_PWM2, W1_L6234_PWM3);
+	wheel[0]->setupEncoder(W1_ENCODERA_PIN, W1_ENCODERB_PIN, 1024);
 
-	ctrl[1] = new BLDCController();
-	menuCtrl->registerMenu(ctrl[1]);
-	ctrl[1]->setupMotor(W2_L6234_ENABLE_PIN, W2_L6234_PWM1, W2_L6234_PWM2, W2_L6234_PWM3);
-	ctrl[1]->setupEncoder(W2_ENCODERA_PIN, W2_ENCODERB_PIN, 1024);
-	menuCtrl->registerMenu(ctrl[1]);
+	wheel[1] = new OmniWheel();
+	wheel[1]->registerMenuController(menuCtrl);
+	wheel[1]->setupMotor(W2_L6234_ENABLE_PIN, W2_L6234_PWM1, W2_L6234_PWM2, W2_L6234_PWM3);
+	wheel[1]->setupEncoder(W2_ENCODERA_PIN, W2_ENCODERB_PIN, 1024);
+	menuCtrl->registerMenu(wheel[1]);
 
-	ctrl[2] = new BLDCController();
-	menuCtrl->registerMenu(ctrl[2]);
-	ctrl[2]->setupMotor(W3_L6234_ENABLE_PIN, W3_L6234_PWM1, W3_L6234_PWM2, W3_L6234_PWM3);
-	ctrl[2]->setupEncoder(W3_ENCODERA_PIN, W3_ENCODERB_PIN, 1024);
+	wheel[2] = new OmniWheel();
+	wheel[2]->registerMenuController(menuCtrl);
+	wheel[2]->setupMotor(W3_L6234_ENABLE_PIN, W3_L6234_PWM1, W3_L6234_PWM2, W3_L6234_PWM3);
+	wheel[2]->setupEncoder(W3_ENCODERA_PIN, W3_ENCODERB_PIN, 1024);
 }
 
 void Engine::loop() {
-	ctrl[0]->loop();
-	ctrl[1]->loop();
-	ctrl[2]->loop();
+	uint32_t start = millis();
+	wheel[0]->loop();
+	wheel[1]->loop();
+	wheel[2]->loop();
+	uint32_t end = millis();
+
+	uint32_t duration_ms = end - start;
+	averageTime_ms += duration_ms;
+	averageTime_ms /= 2;
+}
+
+void Engine::setWheelSpeed(float revPerSec[3]) {
+	wheel[0]->setSpeed(revPerSec[0]);
+	wheel[1]->setSpeed(revPerSec[1]);
+	wheel[2]->setSpeed(revPerSec[2]);
+}
+
+// get angle of all wheels since invocation of resetWheelAngle
+void Engine::getIntegratedWheelAngle(float wheelAngle[3]) {
+	wheelAngle[0] = wheel[0]->getIntegratedAngle();
+	wheelAngle[1] = wheel[1]->getIntegratedAngle();
+	wheelAngle[2] = wheel[2]->getIntegratedAngle();
+
 }
 
 void Engine::printHelp() {
@@ -71,20 +92,21 @@ void Engine::menuLoop(char ch) {
 	switch (ch) {
 	case '0':
 		activeMenuWheel = 0;
-		menuCtrl->activateMenu(ctrl[0]);
+		wheel[0]->activateMenu();
 		break;
 	case '1':
 		activeMenuWheel = 1;
-		menuCtrl->activateMenu(ctrl[1]);
+		wheel[1]->activateMenu();
 		break;
 	case '2':
 		activeMenuWheel = 2;
-		menuCtrl->activateMenu(ctrl[2]);
+		wheel[2]->activateMenu();
 		break;
 	case 'h':
 		printHelp();
 		break;
 	case 27:
+		deactivateMenu();
 		return;
 		break;
 	default:
@@ -92,8 +114,29 @@ void Engine::menuLoop(char ch) {
 		break;
 	}
 	if (cmd) {
-		Serial1.print("active wheel");
+		Serial1.print("loop t=");
+		Serial1.print(averageTime_ms);
+		Serial1.print("ms");
+
+		Serial1.print(" active wheel");
 		Serial1.print(activeMenuWheel);
+
+		Serial1.print(" angle=(");
+		Serial1.print(degrees(wheel[0]->getIntegratedAngle()));
+		Serial1.print(",");
+		Serial1.print(degrees(wheel[1]->getIntegratedAngle()));
+		Serial1.print(",");
+		Serial1.print(degrees(wheel[2]->getIntegratedAngle()));
+		Serial1.print(")");
+
+		Serial1.print(" speed=(");
+		Serial1.print((wheel[0]->getSpeed()));
+		Serial1.print(",");
+		Serial1.print((wheel[1]->getSpeed()));
+		Serial1.print(",");
+		Serial1.print((wheel[2]->getSpeed()));
+		Serial1.print(")");
+
 		Serial1.println(" >");
 	}
 }

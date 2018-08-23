@@ -12,3 +12,5 @@ schematics/*/*#*
 schematics/*#*
 *.o
 code/*/Release
+*.pro
+*.job

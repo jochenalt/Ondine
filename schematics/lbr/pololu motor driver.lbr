@@ -7,7 +7,7 @@
 <setting keepoldvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="20" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
+<grid distance="50" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -268,43 +268,44 @@
 <description>MC33926 Motor Driver  Carrier Footprint</description>
 <pad name="GND1" x="-3.81" y="10.16" drill="0.9" diameter="1.778" shape="square"/>
 <pad name="VIN" x="-3.81" y="12.7" drill="0.9" diameter="1.778"/>
-<pad name="IN2" x="-3.81" y="7.62" drill="0.9" diameter="1.778"/>
-<pad name="IN1" x="-3.81" y="5.08" drill="0.9" diameter="1.778"/>
-<pad name="!D2" x="-3.81" y="2.54" drill="0.9" diameter="1.778"/>
-<pad name="D1" x="-3.81" y="0" drill="0.9" diameter="1.778"/>
-<pad name="!SF" x="-3.81" y="-2.54" drill="0.9" diameter="1.778"/>
+<pad name="IN2" x="-3.81" y="5.08" drill="0.9" diameter="1.778"/>
+<pad name="IN1" x="-3.81" y="2.54" drill="0.9" diameter="1.778"/>
+<pad name="!D2" x="-3.81" y="0" drill="0.9" diameter="1.778"/>
+<pad name="D1" x="-3.81" y="-2.54" drill="0.9" diameter="1.778"/>
+<pad name="!SF" x="-3.81" y="-5.08" drill="0.9" diameter="1.778"/>
 <pad name="VIN(5-28V)" x="16.764" y="0.889" drill="0.9" diameter="1.778"/>
 <pad name="GND" x="16.764" y="-2.413" drill="0.9" diameter="1.778"/>
 <pad name="OUT2" x="16.764" y="-5.842" drill="0.9" diameter="1.778"/>
 <pad name="OUT1" x="16.764" y="-9.779" drill="0.9" diameter="1.778"/>
 <text x="-7.112" y="9.906" size="0.6096" layer="21">GND</text>
 <text x="-6.985" y="12.446" size="0.6096" layer="21">VIN</text>
-<text x="-7.62" y="-10.414" size="0.6096" layer="21">SLEW</text>
-<text x="-7.493" y="-12.954" size="0.6096" layer="21">INV</text>
-<text x="-7.493" y="2.286" size="0.6096" layer="21">!D2</text>
-<text x="-7.493" y="-0.254" size="0.6096" layer="21">D1</text>
-<text x="-7.112" y="-2.921" size="0.6096" layer="21">!SF</text>
-<text x="18.161" y="-7.874" size="0.6096" layer="21">OUT1</text>
-<text x="18.161" y="-3.937" size="0.6096" layer="21">OUT2</text>
-<text x="-7.239" y="4.826" size="0.6096" layer="21">IN1</text>
-<text x="-7.239" y="7.366" size="0.6096" layer="21">IN2</text>
-<text x="18.161" y="-0.254" size="0.6096" layer="21">GND</text>
-<text x="18.161" y="3.556" size="0.6096" layer="21">VIN(5-28V)</text>
+<text x="-7.62" y="-12.954" size="0.6096" layer="21">SLEW</text>
+<text x="-7.493" y="-15.494" size="0.6096" layer="21">INV</text>
+<text x="-7.493" y="-0.254" size="0.6096" layer="21">!D2</text>
+<text x="-7.493" y="-2.794" size="0.6096" layer="21">D1</text>
+<text x="-7.112" y="-5.461" size="0.6096" layer="21">!SF</text>
+<text x="18.161" y="-10.414" size="0.6096" layer="21">OUT1</text>
+<text x="18.161" y="-6.477" size="0.6096" layer="21">OUT2</text>
+<text x="-7.239" y="2.286" size="0.6096" layer="21">IN1</text>
+<text x="-7.239" y="4.826" size="0.6096" layer="21">IN2</text>
+<text x="18.161" y="-2.794" size="0.6096" layer="21">GND</text>
+<text x="18.161" y="1.016" size="0.6096" layer="21">VIN(5-28V)</text>
 <text x="5.08" y="12.065" size="1.016" layer="21" ratio="12">&gt;NAME</text>
 <wire x1="-5.08" y1="13.97" x2="-5.08" y2="-16.51" width="0.127" layer="21"/>
 <wire x1="-5.08" y1="-16.51" x2="20.193" y2="-16.51" width="0.127" layer="21"/>
 <wire x1="20.193" y1="-16.51" x2="20.193" y2="13.97" width="0.127" layer="21"/>
 <wire x1="20.193" y1="13.97" x2="-5.08" y2="13.97" width="0.127" layer="21"/>
-<pad name="FB" x="-3.81" y="-5.08" drill="0.9" diameter="1.778"/>
-<pad name="EN" x="-3.81" y="-7.62" drill="0.9" diameter="1.778"/>
-<pad name="SLEW" x="-3.81" y="-10.16" drill="0.9" diameter="1.778"/>
-<pad name="INV" x="-3.81" y="-12.7" drill="0.9" diameter="1.778"/>
-<text x="-7.62" y="-5.334" size="0.6096" layer="21">FB</text>
-<text x="-7.62" y="-7.874" size="0.6096" layer="21">EN</text>
-<text x="-7.62" y="-5.334" size="0.6096" layer="21">FB</text>
+<pad name="FB" x="-3.81" y="-7.62" drill="0.9" diameter="1.778"/>
+<pad name="EN" x="-3.81" y="-10.16" drill="0.9" diameter="1.778"/>
+<pad name="SLEW" x="-3.81" y="-12.7" drill="0.9" diameter="1.778"/>
+<pad name="VDD" x="-3.81" y="7.62" drill="0.9" diameter="1.778"/>
+<text x="-7.62" y="-7.874" size="0.6096" layer="21">FB</text>
+<text x="-7.62" y="-10.414" size="0.6096" layer="21">EN</text>
+<text x="-7.62" y="-7.874" size="0.6096" layer="21">FB</text>
 <circle x="17.78" y="12.065" radius="1.27" width="0.127" layer="21"/>
 <pad name="INV1" x="-3.81" y="-15.24" drill="0.9" diameter="1.778"/>
 <circle x="17.78" y="-14.097" radius="1.419903125" width="0.127" layer="21"/>
+<text x="-7.62" y="7.62" size="0.6096" layer="21">VDD</text>
 </package>
 </packages>
 <symbols>
@@ -367,26 +368,26 @@
 </symbol>
 <symbol name="SINGLE_MOTOR_DRIVER_SYMBOL">
 <description>Single motor driver</description>
-<wire x1="-38.1" y1="20.32" x2="-38.1" y2="-15.24" width="0.254" layer="94"/>
-<wire x1="-38.1" y1="-15.24" x2="-5.08" y2="-15.24" width="0.254" layer="94"/>
-<wire x1="-5.08" y1="-15.24" x2="-5.08" y2="20.32" width="0.254" layer="94"/>
-<wire x1="-5.08" y1="20.32" x2="-38.1" y2="20.32" width="0.254" layer="94"/>
-<pin name="GND" x="-43.18" y="17.78" length="middle"/>
-<pin name="VIN(5-28V)" x="-43.18" y="15.24" length="middle"/>
-<pin name="VDD(+5V)" x="-43.18" y="12.7" length="middle"/>
-<pin name="!D2" x="-43.18" y="5.08" length="middle"/>
-<pin name="D1" x="-43.18" y="2.54" length="middle"/>
-<pin name="!SF" x="-43.18" y="0" length="middle"/>
-<pin name="OUT2" x="0" y="0" length="middle" rot="R180"/>
-<pin name="OUT1" x="0" y="-2.54" length="middle" rot="R180"/>
-<pin name="FB" x="-43.18" y="-2.54" length="middle"/>
-<pin name="EN" x="-43.18" y="-5.08" length="middle"/>
-<pin name="SLEW" x="-43.18" y="-7.62" length="middle"/>
-<pin name="INV" x="-43.18" y="-10.16" length="middle"/>
-<pin name="IN2" x="-43.18" y="10.16" length="middle"/>
-<pin name="IN1" x="-43.18" y="7.62" length="middle"/>
-<text x="-38.1" y="22.86" size="1.778" layer="94">&gt;NAME</text>
-<text x="-38.1" y="-17.78" size="1.778" layer="94">&gt;VALUE</text>
+<wire x1="-27.94" y1="20.32" x2="-27.94" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="-27.94" y1="-15.24" x2="5.08" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="5.08" y1="-15.24" x2="5.08" y2="20.32" width="0.254" layer="94"/>
+<wire x1="5.08" y1="20.32" x2="-27.94" y2="20.32" width="0.254" layer="94"/>
+<pin name="GND" x="-33.02" y="17.78" length="middle"/>
+<pin name="VIN(5-28V)" x="-33.02" y="15.24" length="middle"/>
+<pin name="VDD(+5V)" x="-33.02" y="12.7" length="middle"/>
+<pin name="!D2" x="-33.02" y="5.08" length="middle"/>
+<pin name="D1" x="-33.02" y="2.54" length="middle"/>
+<pin name="!SF" x="-33.02" y="0" length="middle"/>
+<pin name="OUT2" x="10.16" y="0" length="middle" rot="R180"/>
+<pin name="OUT1" x="10.16" y="-2.54" length="middle" rot="R180"/>
+<pin name="FB" x="-33.02" y="-2.54" length="middle"/>
+<pin name="EN" x="-33.02" y="-5.08" length="middle"/>
+<pin name="SLEW" x="-33.02" y="-7.62" length="middle"/>
+<pin name="INV" x="-33.02" y="-10.16" length="middle"/>
+<pin name="IN2" x="-33.02" y="10.16" length="middle"/>
+<pin name="IN1" x="-33.02" y="7.62" length="middle"/>
+<text x="-27.94" y="22.86" size="1.778" layer="94">&gt;NAME</text>
+<text x="-27.94" y="-17.78" size="1.778" layer="94">&gt;VALUE</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -518,7 +519,7 @@
 <connect gate="G$1" pin="GND" pad="GND"/>
 <connect gate="G$1" pin="IN1" pad="IN1"/>
 <connect gate="G$1" pin="IN2" pad="IN2"/>
-<connect gate="G$1" pin="INV" pad="INV"/>
+<connect gate="G$1" pin="INV" pad="VDD"/>
 <connect gate="G$1" pin="OUT1" pad="OUT1"/>
 <connect gate="G$1" pin="OUT2" pad="OUT2"/>
 <connect gate="G$1" pin="SLEW" pad="SLEW"/>

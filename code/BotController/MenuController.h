@@ -9,16 +9,26 @@
 #define MENUCONTROLLER_H_
 
 
+class MenuController;
+
 class Menuable {
+	friend class MenuController;
 public:
 	Menuable () {};
 	virtual ~Menuable () {};
 
+	virtual void activateMenu();
+	virtual void deactivateMenu();
+	virtual void registerMenuController(MenuController* menuCtrl);
 	virtual void printHelp();
 	virtual void menuLoop(char ch) {};
+
+protected:
+	MenuController* menuCtrl = 0;
 };
 
 class MenuController {
+	friend class Menuable;
 public:
 	MenuController() {};
 	~MenuController() {};
@@ -26,14 +36,16 @@ public:
 	void loop();
 	void setup();
 
+
 	void registerMenu(const Menuable* menu);
 	void activateMenu(const Menuable* menu);
-
+	void deactivateMenu();
 private:
-	static const int MaxNumberOfMenues = 16;
+	static const int MaxNumberOfMenues = 8;
 	Menuable* menus[MaxNumberOfMenues];
 	int menuSize = 0;
-	int activeMenu = -1;
+	int activeMenuStackPtr = 0;
+	int activeMenuStack[MaxNumberOfMenues];
 };
 
 

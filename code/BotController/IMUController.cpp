@@ -1,0 +1,160 @@
+/*
+ * IMUController.cpp
+ *
+ *  Created on: 21.08.2018
+ *      Author: JochenAlt
+ */
+
+#include <Arduino.h>
+#include <IMUController.h>
+#include <MPU9250/src/MPU9250.h>
+#include <utilities/TimePassedBy.h>
+#include <Kalman/Kalman.h>
+
+#define IMU_INTERRUPT_PIN 20
+
+volatile bool newDataAvailable = false;
+TimePassedBy updateTimer(20);
+
+
+void imuInterrupt() {
+	newDataAvailable = true;
+}
+
+void IMUController::setup(MenuController *newMenuCtrl) {
+	registerMenuController(newMenuCtrl);
+
+	// i2c frequency
+	Wire.setClock(400000);
+
+	mpu9250 = new MPU9250(Wire,0x68 /* I2C address */);
+	int status = mpu9250->begin();
+	if (status < 0) {
+	    Serial.print("IMU setup failed ");
+	    Serial.println(status);
+	}
+
+	// setting the accelerometer full scale range to +/-8G
+	mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_8G);
+
+	// setting the gyroscope full scale range to +/-500 deg/s
+	status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_500DPS);
+
+	// setting low pass bandwith
+	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ);
+
+	// set update rate of gyro to 100 Hz
+	const int UpdateRate = 100; // [Hz]
+	status = mpu9250->setSrd(1000/UpdateRate-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
+
+	// enable interrupt
+	mpu9250->enableDataReadyInterrupt();
+
+	attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
+
+	// initialize Kalman filter
+	filterX.setup(0);
+	filterY.setup(0);
+	filterZ.setup(0);
+}
+
+void IMUController::calibrate() {
+	mpu9250->calibrateAccel();
+	mpu9250->calibrateGyro();
+
+	mpu9250->readSensor();
+
+	// reset Kalman filter
+	filterX.setAngle(0);
+	filterY.setAngle(0);
+	filterZ.setAngle(0);
+}
+
+void IMUController::loop() {
+	if (newDataAvailable || updateTimer.isDue()) {
+		uint32_t start = millis();
+
+		// read raw values
+		mpu9250->readSensor();
+
+		// compute dT for kalman filter
+		uint32_t now = millis();
+		float dT = ((float)(now - lastInvocationTime_ms))/1000.0;
+		lastInvocationTime_ms = now;
+
+		// invoke kalman filter separately per plane
+		filterX.update(mpu9250->getAccelX_mss(), mpu9250->getGyroX_rads(), dT);
+		filterY.update(mpu9250->getAccelY_mss(), mpu9250->getGyroY_rads(), dT);
+		filterZ.update(mpu9250->getMagZ_uT(), mpu9250->getGyroZ_rads(), dT);
+
+		// indicate that new value is available
+		valueIsUpdated = true;
+
+		uint32_t end = millis();
+
+		uint32_t duration_ms = end - start;
+		averageTime_ms += duration_ms;
+		averageTime_ms /= 2;
+	}
+}
+
+// returns true once when a new value is available.
+bool IMUController::newValueAvailable() {
+	bool tmp = valueIsUpdated;
+	valueIsUpdated = false;
+	return tmp;
+}
+
+float IMUController::getAngleXRad() {
+	return filterX.getAngle();
+}
+
+float IMUController::getAngleYRad() {
+	return filterX.getAngle();
+}
+
+float IMUController::getAngleZRad() {
+	return filterZ.getAngle();
+}
+
+void IMUController::printHelp() {
+	Serial1.println("IMU controller");
+	Serial1.println("r - read values");
+	Serial1.println("c - calibrate ");
+
+	Serial1.println("ESC");
+}
+
+void IMUController::menuLoop(char ch) {
+	bool cmd = true;
+	switch (ch) {
+	case 'r':
+		menuPrintValues = !menuPrintValues;
+		break;
+	case 'h':
+		printHelp();
+		break;
+	case 'c':
+		calibrate();
+		break;
+	case 27:
+		deactivateMenu();
+		return;
+		break;
+	default:
+		cmd = false;
+		break;
+	}
+
+	if (menuPrintValues) {
+		Serial1.print("angle=(");
+		Serial1.print(degrees(getAngleXRad()));
+		Serial1.print(",");
+		Serial1.print(degrees(getAngleYRad()));
+		Serial1.println(")");
+	}
+	if (cmd) {
+		Serial1.print("read IMU values");
+		Serial1.println(" >");
+	}
+}

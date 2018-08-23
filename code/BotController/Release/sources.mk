@@ -37,6 +37,17 @@ CPP_DEPS :=
 SUBDIRS := \
 . \
 Encoder \
+Kalman \
+MPU9250/examples/Advanced_I2C \
+MPU9250/examples/Basic_I2C \
+MPU9250/examples/Basic_SPI \
+MPU9250/examples/FIFO_SPI \
+MPU9250/examples/Interrupt_SPI \
+MPU9250/examples/WOM_I2C \
+MPU9250/src \
 core/core \
+libraries/SPI \
+libraries/Wire \
+libraries/Wire/utility \
 utilities \
 

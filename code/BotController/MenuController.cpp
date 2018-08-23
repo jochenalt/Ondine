@@ -5,33 +5,63 @@
  *      Author: JochenAlt
  */
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Util.h>
 #include <MenuController.h>
+
+
+void Menuable::registerMenuController(MenuController* newMenuCtrl) {
+	menuCtrl = newMenuCtrl;
+	menuCtrl->registerMenu(this);
+}
 
 void MenuController::setup() {
 	menuSize = 0;
-	activeMenu = -1;
+	activeMenuStackPtr = 0;
+	activeMenuStack[activeMenuStackPtr] = 0;
 }
 
 void MenuController::registerMenu(const Menuable* menu) {
 	menus[menuSize++] = (Menuable*)menu;
 }
 
+void Menuable::deactivateMenu() {
+	menuCtrl->deactivateMenu();
+}
+
+void Menuable::activateMenu() {
+	menuCtrl->activateMenu(this);
+}
+
+void MenuController::deactivateMenu() {
+	if (activeMenuStackPtr == 0)
+		fatalError("MC stack underflow");
+
+	activeMenuStackPtr--;
+	menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
+}
+
 void MenuController::activateMenu(const Menuable* menu) {
-	for (int i = 0;i<activeMenu;i++) {
+	if (activeMenuStackPtr == MaxNumberOfMenues)
+		fatalError("MC stack overflow");
+
+	for (int i = 0;i<menuSize;i++) {
 		if (menu == menus[i]) {
-			menuSize = i;
+			activeMenuStack[++activeMenuStackPtr] = i;
+			menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
 			break;
 		}
 	}
-	activeMenu = 0;
-}
 
+	// fatal, reset everything
+	activeMenuStackPtr = 0;
+	activeMenuStack[activeMenuStackPtr] = 0;
+
+}
 
 void MenuController::loop() {
 	if 	(Serial1.available()) {
 		char ch = Serial1.read();
-		if (activeMenu >= 0)
-			menus[activeMenu]->menuLoop(ch);
+		menus[activeMenuStack[activeMenuStackPtr]]->menuLoop(ch);
 	}
 }

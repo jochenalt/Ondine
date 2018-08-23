@@ -2,24 +2,24 @@ EAGLE AutoRouter Statistics:
 
 Job           : d:/Projects/Ondine/schematics/MotorController.brd
 
-Start at      : 21:03:11 (20.08.2018)
-End at        : 21:03:58 (20.08.2018)
-Elapsed time  : 00:00:45
+Start at      : 15:31:35 (21.08.2018)
+End at        : 15:32:11 (21.08.2018)
+Elapsed time  : 00:00:35
 
-Signals       :    62   RoutingGrid: 8.75 mil  Layers: 2
-Connections   :    95   predefined:  0 ( 0 Vias )
+Signals       :    64   RoutingGrid: 8.75 mil  Layers: 2
+Connections   :    99   predefined:  0 ( 0 Vias )
 
-Router memory :   1088416
+Router memory :   1023120
 
-Passname          : TopRouter     Route Optimize1 Optimize2 Optimize3 Optimize4 Optimize5 Optimize6 Optimize7 Optimize8
+Passname          : TopRouter     Route Optimize1 Optimize2 Optimize3 Optimize4 Optimize5 Optimize6 Optimize7 Optimize8 Optimize9Optimize10Optimize11Optimize12
 
-Time per pass     :  00:00:08  00:00:04  00:00:05  00:00:03  00:00:03  00:00:03  00:00:05  00:00:04  00:00:05  00:00:05
-Number of Ripups  :         0         4         0         0         0         0         0         0         0         0
-max. Level        :         0         1         0         0         0         0         0         0         0         0
-max. Total        :         0         2         0         0         0         0         0         0         0         0
+Time per pass     :  00:00:08  00:00:00  00:00:03  00:00:03  00:00:02  00:00:02  00:00:02  00:00:02  00:00:02  00:00:03  00:00:02  00:00:02  00:00:02  00:00:02
+Number of Ripups  :         0         0         0         0         0         0         0         0         0         0         0         0         0         0
+max. Level        :         0         0         0         0         0         0         0         0         0         0         0         0         0         0
+max. Total        :         0         0         0         0         0         0         0         0         0         0         0         0         0         0
 
-Routed            :        69        93        90        93        93        93        93        93        93        93
-Vias              :         0        33        71        43        37        36        36        34        33        33
-Resolution        :    72.6 %    97.9 %    94.7 %    97.9 %    97.9 %    97.9 %    97.9 %    97.9 %    97.9 %    97.9 %
+Routed            :        90        99        98        99        99        99        99        99        99        99        99        99        99        99
+Vias              :         0         4        46        30        25        25        25        25        31        22        22        23        23        23
+Resolution        :    90.9 %   100.0 %    99.0 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %   100.0 %
 
-Final             : 97.9% beendet
+Final             : 100.0% beendet
