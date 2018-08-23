@@ -8,8 +8,7 @@ This patent has a surprising design of the big roll. Its width is much smaller t
 
 <img  width="350px" src="../images/omniwheel/japanese patent big roll.png" >
 
-My [CAD model](https://github.com/jochenalt/Ondine/blob/master/CAD/OmniWheel.iam) needs to be 3d-printed, and the spoke of the patent is so thin, that this would never work. The spoke needs to carry the full weight, so it requires much more material on the spots where the bearings are mounted. In order to allow more material  in the little space available, I designed the spoke with a constant distant to the roll.
-
+My [CAD model](https://github.com/jochenalt/Ondine/blob/master/CAD/OmniWheel.iam) needs to be 3d-printed, and the spoke of the patent is so thin, that this would never work. It  carries the bot's full weight, so it requires more material on the spots where the bearings are mounted. So, I designed the spoke with a constant distant to the roll giving the spoke a round surface where it faces the roll.
 
 I ended up with that design, that has an identical width of all rolls and two bearings each. 
 
