@@ -25,7 +25,7 @@ The kinematic parameters are
 
 In the formula above, <i>R</i> is the rotation matrix of the current tilt of the bot, it is a regular rotation matrix 
 
-<img width="600" src="../images/kinematics/image021.png" >
+<img width="650" src="../images/kinematics/image021.png" >
 
 with <br>
 φ<sub>y</sub> tilt angle of the bot in y direction in [rad]<br>	
@@ -41,10 +41,10 @@ This gives you the speed in x and y direction out oft he speed of all omniwheels
 
 During setup of the bot, we can precompute the so-called construction matrix <i>CM</i>.
 
-<img  width="300" src="../images/kinematics/image031.png" >
+<img  width="250" src="../images/kinematics/image031.png" >
 
 During runtime a continously running loop, we have the tilt angles coming from the IMU, and compute the tilt correction matrix <i>R</i>i We are lucky that al that is finally multiplied with the sparse matrix 
 
-<img  width="200" src="../images/kinematics/image033.png" >
+<img  width="80" src="../images/kinematics/image033.png" >
 
 which means that we do not have to compute a full matrix multiplication of CM*R with 81 floating point multiplications, but we can omit the computation where the matrix above is zero requiring 10 multiplications only.
