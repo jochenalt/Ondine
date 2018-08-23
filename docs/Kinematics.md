@@ -43,8 +43,11 @@ During setup of the bot, we can precompute the so-called construction matrix <i>
 
 <img  width="250" src="../images/kinematics/image031.png" >
 
-During runtime a continously running loop, we have the tilt angles coming from the IMU, and compute the tilt correction matrix <i>R</i>i We are lucky that al that is finally multiplied with the sparse matrix 
+During runtime within a continously running loop, we need to apply formula above with the precomputed construction matrix. Luckily, the tilt correction matrix <i>R</i>i does not need to be multiplied completely with the construction matrix, since we have the sparse matrix
 
-<img  width="80" src="../images/kinematics/image033.png" >
+<img  width="100" src="../images/kinematics/image033.png" >
 
-which means that we do not have to compute a full matrix multiplication of CM*R with 81 floating point multiplications, but we can omit the computation where the matrix above is zero requiring 10 multiplications only.
+that reduces the amount of necessray multiplications drastically. Instead of the full matrix multiplication of CM*R with 81 floating point operations,  we can omit the cells where the sparse matrix is zero leading to 10 multiplications only.
+
+
+All this is implemented in [Kinematics.cpp](https://github.com/jochenalt/ondine/tree/master/code/BotController/Kinematics.cpp)
