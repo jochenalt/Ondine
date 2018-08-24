@@ -8,6 +8,7 @@
 
 #include "Arduino.h"
 #include "Kinematics.h"
+#include "Util.h"
 
 Kinematix kin;
 
@@ -212,7 +213,7 @@ void Kinematix::menuLoop(char ch) {
 		break;
 	}
 	if (cmd) {
-		Serial1.println(">");
+		command->println(">");
 	}
 }
 
@@ -230,40 +231,40 @@ void Kinematix::testKinematics() {
 	float cm21 = cm[2][1];
 	float cm22 = cm[2][2];
 	
-	Serial1.println(F("construction matrix"));
-	Serial1.print(cm00);
-	Serial1.print(cm01);
-	Serial1.print(cm02);Serial1.println();
-	Serial1.print(cm10);
-	Serial1.print(cm11);
-	Serial1.print(cm12);Serial1.println();
-	Serial1.print(cm20);
-	Serial1.print(cm21);
-	Serial1.print(cm22);Serial1.println(" ");
+	command->println(F("construction matrix"));
+	command->print(cm00);
+	command->print(cm01);
+	command->print(cm02);command->println();
+	command->print(cm10);
+	command->print(cm11);
+	command->print(cm12);command->println();
+	command->print(cm20);
+	command->print(cm21);
+	command->print(cm22);command->println(" ");
 
 		
 	float lVx,lVy,lOmega;
 	lVx = 0;
 	lVy = 0;
 	lOmega=35.0;
-	Serial1.print(F("Vx="));
+	command->print(F("Vx="));
 	
-	Serial1.print(lVx);
-	Serial1.print(F(" Vy="));
-	Serial1.print(lVy);
-	Serial1.print(F(" Omega="));
-	Serial1.print(lOmega);
-	Serial1.println();
+	command->print(lVx);
+	command->print(F(" Vy="));
+	command->print(lVy);
+	command->print(F(" Omega="));
+	command->print(lOmega);
+	command->println();
 
 	float lTiltX,lTiltY;
 	lTiltX = 0;
 	lTiltY = 0;
 
-	Serial1.print(F("TiltX="));
-	Serial1.print(lTiltX);
-	Serial1.print(F(" TiltY="));
-	Serial1.print(lTiltY);
-	Serial1.println();
+	command->print(F("TiltX="));
+	command->print(lTiltX);
+	command->print(F(" TiltY="));
+	command->print(lTiltY);
+	command->println();
 	
 	float pWheel_speed[3] = {0,0,0};
 	 computeWheelSpeed( lVx, lVy, lOmega,
@@ -273,13 +274,13 @@ void Kinematix::testKinematics() {
 	float lWheel2 = pWheel_speed[1];
 	float lWheel3 = pWheel_speed[2];
 	
-	Serial1.print(F("W1="));
-	Serial1.print(lWheel1);
-	Serial1.print(F(" W2="));
-	Serial1.print(lWheel2);
-	Serial1.print(F(" W3="));
-	Serial1.print(lWheel3);
-	Serial1.println();
+	command->print(F("W1="));
+	command->print(lWheel1);
+	command->print(F(" W2="));
+	command->print(lWheel2);
+	command->print(F(" W3="));
+	command->print(lWheel3);
+	command->println();
 }	
 
 void Kinematix::testInverseKinematics() {
@@ -295,37 +296,37 @@ void Kinematix::testInverseKinematics() {
 	float icm21 = icm[2][1];
 	float icm22 = icm[2][2];
 
-	Serial1.println(F("inverse construction matrix"));
-	Serial1.print(icm00);
-	Serial1.print(icm01);
-	Serial1.print(icm02);Serial1.println(" ");
-	Serial1.print(icm10);
-	Serial1.print(icm11);
-	Serial1.print(icm12);Serial1.println(" ");
-	Serial1.print(icm20);
-	Serial1.print(icm21);
-	Serial1.print(icm22);Serial1.println(" ");
+	command->println(F("inverse construction matrix"));
+	command->print(icm00);
+	command->print(icm01);
+	command->print(icm02);command->println(" ");
+	command->print(icm10);
+	command->print(icm11);
+	command->print(icm12);command->println(" ");
+	command->print(icm20);
+	command->print(icm21);
+	command->print(icm22);command->println(" ");
 
 	// speed of wheels in °/s
 	float lWheel1 = -758.9;
 	float lWheel2 = 36.4;
 	float lWheel3 = -133.7;
 	
-	Serial1.print(F("W1="));
-	Serial1.print(lWheel1);
-	Serial1.print(F(" W2="));
-	Serial1.print(lWheel2);
-	Serial1.print(F(" W3="));
-	Serial1.print(lWheel3);
-	Serial1.println();
+	command->print(F("W1="));
+	command->print(lWheel1);
+	command->print(F(" W2="));
+	command->print(lWheel2);
+	command->print(F(" W3="));
+	command->print(lWheel3);
+	command->println();
 						
 	float  lTiltX,lTiltY;
 	lTiltX = 20.0;
 	lTiltY = -15;
-	Serial1.print(F("TiltX="));
-	Serial1.print(lTiltX);
-	Serial1.print(F(" TiltY="));
-	Serial1.print(lTiltY);Serial1.println();
+	command->print(F("TiltX="));
+	command->print(lTiltX);
+	command->print(F(" TiltY="));
+	command->print(lTiltY);command->println();
 	
 	// this matrix depends on the tilt angle and corrects the 
 	computeTiltRotationMatrix(lTiltX,lTiltY);
@@ -343,26 +344,26 @@ void Kinematix::testInverseKinematics() {
 				lVx, lVy, lTiltX, lTiltY,lOmega);
 				
 
-	Serial1.print(F("Vx="));
-	Serial1.print(lVx);
-	Serial1.print(F(" Vy="));
-	Serial1.print(lVy);
-	Serial1.print(F(" Omega="));
-	Serial1.print(lOmega);
-	Serial1.println();
+	command->print(F("Vx="));
+	command->print(lVx);
+	command->print(F(" Vy="));
+	command->print(lVy);
+	command->print(F(" Omega="));
+	command->print(lOmega);
+	command->println();
 }
 
 
 void Kinematix::testPerformanceKinematics() {
 	
-	Serial1.println(F("Kinematics performance"));
+	command->println(F("Kinematics performance"));
 	unsigned long start =	millis();
 	unsigned long end =	millis();
-	Serial1.print("End ms=");
-	Serial1.println(end-start);
+	command->print("End ms=");
+	command->println(end-start);
 	
 	int i = 0;
-	Serial1.println(F("Start"));
+	command->println(F("Start"));
 	start =	millis();
 	for (i = 0;i<1000;i++) {
 		float lVx,lVy,lOmega;
@@ -381,14 +382,14 @@ void Kinematix::testPerformanceKinematics() {
 					lVx, lVy, lOmega);
 	}
 	end = millis();
-	Serial1.println(F("Stop"));
+	command->println(F("Stop"));
 
-	Serial1.print((end-start),DEC);
-	Serial1.print("ms for ");
-	Serial1.print(i,DEC);
-	Serial1.print(" loops, ");
-	Serial1.print(float((end-start)) / float(i));
-	Serial1.println("ms");
+	command->print((end-start),DEC);
+	command->print("ms for ");
+	command->print(i,DEC);
+	command->print(" loops, ");
+	command->print(float((end-start)) / float(i));
+	command->println("ms");
 }
 
 void Kinematix::testTRM() {
@@ -417,15 +418,15 @@ void Kinematix::testTRM() {
 			error += (sin_tilt_x==0)?0:abs ((((trm[2][1]),14) - sin_tilt_x) / sin_tilt_x);
 			error += (cos_tilt_x*cos_tilt_y==0)?0:abs ((((trm[2][2]),14) - cos_tilt_x*cos_tilt_y) / (cos_tilt_x*cos_tilt_y));
 
-			Serial1.print(int(error),DEC);
+			command->print(int(error),DEC);
 		}	
 		error = 0;
 	}	
 }
 
 void Kinematix::printHelp() {
-	Serial1.println(F("Kinematics"));
-	Serial1.println(F("t - test kinematics"));
-	Serial1.println(F("h   - help"));
-	Serial1.println(F("0   - exit"));
+	command->println(F("Kinematics"));
+	command->println(F("t - test kinematics"));
+	command->println(F("h   - help"));
+	command->println(F("0   - exit"));
 }

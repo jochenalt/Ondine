@@ -6,18 +6,26 @@
  */
 
 #include <types.h>
+#include <Util.h>
+
 #include <BotController.h>
+#include <BotMemory.h>
 
 
 void BotController::setup() {
+	registerMenuController(&menuController);
 	engine.setup(&menuController);
 	imu.setup(&menuController);
 	state.setup(&menuController);
 }
 
 void BotController::printHelp() {
-	Serial1.println("Bot Menu");
-	Serial1.println("e - engine");
+	command->println();
+	command->println("Bot Menu");
+	command->println();
+	command->println("e - engine");
+	command->println("m - save configuration to epprom");
+
 }
 
 void BotController::menuLoop(char ch) {
@@ -25,6 +33,9 @@ void BotController::menuLoop(char ch) {
 	switch (ch) {
 	case 'e':
 		engine.pushMenu();
+		break;
+	case 'm':
+		memory.save();
 		break;
 	case 'h':
 		printHelp();
@@ -34,14 +45,14 @@ void BotController::menuLoop(char ch) {
 		break;
 	}
 	if (cmd) {
-		Serial1.println(" >");
+		command->print(">");
 	}
 }
 
 void BotController::loop() {
 	engine.loop();
 	menuController.loop();
-	imu.loop();
+	// imu.loop();
 
 	// run main balance loop. Timing is 1determined by IMU sending an
 	// interrupt that a new value is there.

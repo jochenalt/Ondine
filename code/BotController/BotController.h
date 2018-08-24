@@ -36,7 +36,6 @@ private:
 	MenuController menuController;
 	IMU imu;
 	StateController state;
-
 	BotMovement targetBotMovement;
 
 	Mode mode = OFF;

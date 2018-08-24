@@ -148,9 +148,10 @@ float StateController::getOmega() {
 }
 
 void StateController::printHelp() {
-	Serial1.println("State controller");
-
-	Serial1.println("ESC");
+	command->println();
+	command->println("State controller");
+	command->println();
+	command->println("ESC");
 }
 
 void StateController::menuLoop(char ch) {
@@ -160,16 +161,12 @@ void StateController::menuLoop(char ch) {
 		case 'h':
 			printHelp();
 			break;
-		case 27:
-			popMenu();
-			return;
-			break;
 		default:
 			cmd = false;
 			break;
 		}
 		if (cmd) {
-			Serial1.println(" >");
+			command->print(">");
 		}
 }
 

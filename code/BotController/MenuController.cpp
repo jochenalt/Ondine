@@ -37,7 +37,8 @@ void MenuController::popMenu() {
 	if (activeMenuStackPtr == 0)
 		fatalError("MC stack underflow");
 	else {
-		menus[activeMenuStack[--activeMenuStackPtr]]->printHelp();
+		activeMenuStackPtr--;
+		menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
 	}
 }
 
@@ -47,12 +48,14 @@ void MenuController::pushMenu(const Menuable* menu) {
 	else {
 		for (int i = 0;i<menuSize;i++) {
 			if (menu == menus[i]) {
-				activeMenuStack[activeMenuStackPtr++] = i;
+				activeMenuStackPtr++;
+				activeMenuStack[activeMenuStackPtr] = i;
 				menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
-				break;
+				return;
 			}
 		}
 
+		fatalError("menu not found");
 		// fatal, reset everything
 		activeMenuStackPtr = 0;
 		activeMenuStack[activeMenuStackPtr] = 0;
@@ -60,8 +63,11 @@ void MenuController::pushMenu(const Menuable* menu) {
 }
 
 void MenuController::loop() {
-	if 	(Serial1.available()) {
-		char ch = Serial1.read();
-		menus[activeMenuStack[activeMenuStackPtr]]->menuLoop(ch);
+	if 	(command->available()) {
+		char ch = command->read();
+		if (ch == 27)
+			popMenu();
+		else
+			menus[activeMenuStack[activeMenuStackPtr]]->menuLoop(ch);
 	}
 }

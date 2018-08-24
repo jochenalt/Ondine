@@ -11,6 +11,7 @@
 #include <Filter/KalmanFilter.h>
 #include <IMU.h>
 #include <setup.h>
+#include <Util.h>
 
 
 volatile bool newDataAvailable = false;
@@ -175,11 +176,11 @@ float IMU::getAnglularVelocityZ() {
 }
 
 void IMU::printHelp() {
-	Serial1.println("IMU controller");
-	Serial1.println("r - read values");
-	Serial1.println("c - calibrate ");
+	command->println("IMU controller");
+	command->println("r - read values");
+	command->println("c - calibrate ");
 
-	Serial1.println("ESC");
+	command->println("ESC");
 }
 
 void IMU::menuLoop(char ch) {
@@ -204,14 +205,14 @@ void IMU::menuLoop(char ch) {
 	}
 
 	if (menuPrintValues) {
-		Serial1.print("angle=(");
-		Serial1.print(degrees(getAngleXRad()));
-		Serial1.print(",");
-		Serial1.print(degrees(getAngleYRad()));
-		Serial1.println(")");
+		command->print("angle=(");
+		command->print(degrees(getAngleXRad()));
+		command->print(",");
+		command->print(degrees(getAngleYRad()));
+		command->println(")");
 	}
 	if (cmd) {
-		Serial1.print("read IMU values");
-		Serial1.println(" >");
+		command->print("read IMU values");
+		command->println(" >");
 	}
 }

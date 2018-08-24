@@ -7,16 +7,19 @@
 
 #include <Arduino.h>
 #include <Util.h>
+#include <BotMemory.h>
+
 #include <OmniWheel.h>
 #include <ClassInterrupt.h>
 #include <utilities/TimePassedBy.h>
 
 
-float OmniWheel::pid_k = .5;
+float OmniWheel::pid_k = 1.0;
 float OmniWheel::pid_i = 0.8;
 
 const float minMotorTorque = 0.05; // [PWM ratio]
-const float maxAdvanceAngle = radians(15); // [rad]
+const float maxAdvanceAngle = radians(30); // [rad]
+const float maxTorqueAdvanceAngle = radians(20); // [rad]
 
 // max PWM value is (1<<pwmResolution)-1
 const int pwmResolution = 8;
@@ -133,7 +136,7 @@ float OmniWheel::turnReferenceAngle() {
 	currentSpeed += speedDiff;
 
 	// compute angle difference compared to last invokation
-	referenceAngle += currentSpeed * timePassed_s * 2.0 * M_PI;
+	referenceAngle += currentSpeed * timePassed_s * TWO_PI;
 
 	return timePassed_s;
 }
@@ -146,7 +149,7 @@ void OmniWheel::readEncoder() {
 	else {
 		// find encoder position and increment the encoderAngle accordingly
 		int32_t encoderPosition= encoder->read();
-		encoderAngle += ((float)(lastEncoderPosition - encoderPosition))/(float)encoderCPR*2.0*M_PI/4.0;
+		encoderAngle += ((float)(lastEncoderPosition - encoderPosition))/(float)encoderCPR*TWO_PI/4.0;
 		lastEncoderPosition = encoderPosition;
 	}
 }
@@ -155,11 +158,11 @@ void OmniWheel::readEncoder() {
 void OmniWheel::sendPWMDuty() {
 	// torque is increased with advance angle error, which is the difference
 	// between to-be reference angle and actual angle as indicated by the encoder
-	float torque = targetTorque + (1.0-targetTorque)*(min(abs(advanceAngleError)/maxAdvanceAngle,1.0));
+	float torque = targetTorque + (1.0-targetTorque)*(min(abs(advanceAngleError)/maxTorqueAdvanceAngle,1.0));
 
 	int pwmValueA = getPWMValue(torque, magneticFieldAngle);
-	int pwmValueB = getPWMValue(torque, magneticFieldAngle + 1.0*(2.0*M_PI)/3.0);
-	int pwmValueC = getPWMValue(torque, magneticFieldAngle + 2.0*(2.0*M_PI)/3.0);
+	int pwmValueB = getPWMValue(torque, magneticFieldAngle + 1.0*TWO_PI/3.0);
+	int pwmValueC = getPWMValue(torque, magneticFieldAngle + 2.0*TWO_PI/3.0);
 	analogWrite(input1Pin, pwmValueA);
 	analogWrite(input2Pin, pwmValueB);
 	analogWrite(input3Pin, pwmValueC);
@@ -167,9 +170,19 @@ void OmniWheel::sendPWMDuty() {
 
 // call me as often as possible
 void OmniWheel::loop() {
+	// run only if at least one ms passed
+	uint32_t now = millis();
+	if (now - lastCall < 1)
+		return;
+	lastCall = now;
 
 	// turn reference angle along the set speed
 	float timePassed_s = turnReferenceAngle();
+	// logger->print("loop t=");
+	// logger->print(timePassed_s);
+	// logger->print(" r=");
+	// logger->print(referenceAngle);
+	// logger->print("  ");
 
 	// read the current encoder value
 	readEncoder();
@@ -182,21 +195,21 @@ void OmniWheel::loop() {
 	float errorAngle = referenceAngle - encoderAngle;
 
 	// carry out PI controller to compute advance angle
-	advanceAngleError = pid_k*errorAngle;
+	advanceAngleError = memory.persistentMem.motorControllerConfig.Kp*errorAngle;
 	advanceAnglePhase += errorAngle * timePassed_s;
-	advanceAnglePhase = constrain(advanceAnglePhase, -radians(30), radians(30)); // limit error integral by 30°
-	float i_out = pid_i * advanceAnglePhase;
+	advanceAnglePhase = constrain(advanceAnglePhase, -maxAdvanceAngle,maxAdvanceAngle); // limit error integral by 30°
+	float i_out = memory.persistentMem.motorControllerConfig.Ki * advanceAnglePhase;
 	float advanceAngle = advanceAngleError + i_out;
-	advanceAngle = constrain(advanceAngle, -radians(30), radians(30)); 			// limit outcome by 30°
+	advanceAngle = constrain(advanceAngle, -maxAdvanceAngle, maxAdvanceAngle); 			// limit outcome by 30°
 
 	// outcome of pid controller is advance angle
 	magneticFieldAngle = referenceAngle + advanceAngle;
 
 	// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
-	referenceAngle = constrain(referenceAngle, encoderAngle - radians(30), encoderAngle  + radians(30));
 
+	referenceAngle = constrain(referenceAngle, encoderAngle - maxAdvanceAngle, encoderAngle  + maxAdvanceAngle);
 	// recompute speed, since set speed might not be achieved
-	currentSpeed = (referenceAngle-lastReferenceAngle)/timePassed_s/radians(360);
+	currentSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
 	lastReferenceAngle = referenceAngle; // required to compute speed
 
 	// send new pwm value to motor
@@ -204,31 +217,31 @@ void OmniWheel::loop() {
 	sendPWMDuty();
 
 	/*
-	Serial1.print("time=");
-	Serial1.print(timePassed_s);
-	Serial1.print(" v=");
-	Serial1.print(currentSpeed);
-	Serial1.print(" r=");
-	Serial1.print(degrees(referenceAngle));
-	Serial1.print("° e=");
-	Serial1.print(degrees(encoderAngle));
-	Serial1.print("° err=");
-	Serial1.print(errorAngle);
-	Serial1.print(" int=");
-	Serial1.print(advanceAnglePhase);
-	Serial1.print(" iout=");
-	Serial1.print(degrees(i_out));
-	Serial1.print(" aae=");
-	Serial1.print(degrees(advanceAngleError));
-	Serial1.print(" a=");
-	Serial1.print(degrees(advanceAngle));
-	Serial1.print("° m=");
-	Serial1.print(degrees(magneticFieldAngle));
-	Serial1.print("° ut=");
-	Serial1.print(targetTorque);
-	Serial1.print(" torque=");
-	Serial1.print(torque);
-	Serial1.println();
+	command->print("time=");
+	command->print(timePassed_s);
+	command->print(" v=");
+	command->print(currentSpeed);
+	command->print(" r=");
+	command->print(degrees(referenceAngle));
+	command->print("° e=");
+	command->print(degrees(encoderAngle));
+	command->print("° err=");
+	command->print(errorAngle);
+	command->print(" int=");
+	command->print(advanceAnglePhase);
+	command->print(" iout=");
+	command->print(degrees(i_out));
+	command->print(" aae=");
+	command->print(degrees(advanceAngleError));
+	command->print(" a=");
+	command->print(degrees(advanceAngle));
+	command->print("° m=");
+	command->print(degrees(magneticFieldAngle));
+	command->print("° ut=");
+	command->print(targetTorque);
+	command->print(" torque=");
+	command->print(torque);
+	command->println();
 	*/
 
 }
@@ -299,7 +312,7 @@ void OmniWheel::enable(bool doit) {
 		targetTorque = 0;
 		while ((targetTorque < 0.2)) { // quit when above 20% torque
 			// P controller with p=4.0
-			magneticFieldAngle -= encoderAngle*4.0; // this is a P-controller that turns the magnetic field towards the direction of the encoder
+			magneticFieldAngle -= encoderAngle*1.0; // this is a P-controller that turns the magnetic field towards the direction of the encoder
 			sendPWMDuty();
 			delay(20);
 			readEncoder();
@@ -308,11 +321,11 @@ void OmniWheel::enable(bool doit) {
 			if (abs(encoderLoopDiff) < radians(0.5))
 				targetTorque += 0.005;
 			lastLoopEncoderAngle = encoderAngle;
-
 		}
 
 		referenceAngle = magneticFieldAngle;
 		encoderAngle = magneticFieldAngle;
+		lastReferenceAngle = magneticFieldAngle;
 
 		// set default torque
 		targetTorque = minMotorTorque;
@@ -324,20 +337,23 @@ void OmniWheel::enable(bool doit) {
 
 
 void OmniWheel::printHelp() {
-	Serial1.println("BLDC controller");
-	Serial1.println("0 - stop");
-	Serial1.println("+ - inc speed");
-	Serial1.println("- - dec speed");
-	Serial1.println("* - inc acc");
-	Serial1.println("_ - dec acc");
-	Serial1.println("r - revert direction");
-	Serial1.println("T/t - increase torque");
-	Serial1.println("P/p - increase PIs controller p");
-	Serial1.println("I/i - increase PIs controller i");
+	command->println();
 
-	Serial1.println("e - enable");
+	command->println("brushless motor menu");
+	command->println();
+	command->println("0 - stop");
+	command->println("+ - inc speed");
+	command->println("- - dec speed");
+	command->println("* - inc acc");
+	command->println("_ - dec acc");
+	command->println("r - revert direction");
+	command->println("T/t - increase torque");
+	command->println("P/p - increase PIs controller p");
+	command->println("I/i - increase PIs controller i");
 
-	Serial1.println("ESC");
+	command->println("e - enable");
+
+	command->println("ESC");
 }
 
 void OmniWheel::menuLoop(char ch) {
@@ -388,64 +404,61 @@ void OmniWheel::menuLoop(char ch) {
 			setTorque(menuTorque);
 			break;
 		case 'P':
-			pid_k += 0.02;
-			Serial1.print("p=");
-			Serial1.println(pid_k);
+			memory.persistentMem.motorControllerConfig.Kp  += 0.02;
+			command->print("Kp=");
+			command->println(memory.persistentMem.motorControllerConfig.Kp);
 
 			break;
 		case 'p':
-			pid_k -= 0.02;
-			Serial1.print("p=");
-			Serial1.println(pid_k);
+			memory.persistentMem.motorControllerConfig.Kp -= 0.02;
+			command->print("Kp=");
+			command->println(memory.persistentMem.motorControllerConfig.Kp);
 
 			break;
 
 		case 'I':
-			pid_i += 0.02;
-			Serial1.print("i=");
-			Serial1.println(pid_i);
+			memory.persistentMem.motorControllerConfig.Ki  += 0.02;
+			command->print("Ki=");
+			command->println(memory.persistentMem.motorControllerConfig.Ki);
 
 			break;
 		case 'i':
-			pid_i -= 0.02;
-			Serial1.print("i=");
-			Serial1.println(pid_i);
-
+			memory.persistentMem.motorControllerConfig.Ki -= 0.02;
+			command->print("Ki=");
+			command->println(memory.persistentMem.motorControllerConfig.Ki);
 			break;
-
 		case 'e':
 			menuEnable = menuEnable?false:true;
 			enable(menuEnable);
 			break;
-
 		case 'h':
 			printHelp();
-			break;
-		case 27:
-			popMenu();
-			return;
 			break;
 		default:
 			cmd = false;
 			break;
 		}
 		if (cmd) {
-			Serial1.print("v=");
-			Serial1.print(menuSpeed);
-			Serial1.print(" actual v=");
-			Serial1.print(getMotorSpeed());
-			Serial1.print(" a=");
-			Serial1.print(menuAcc);
-			Serial1.print(" T=");
-			Serial1.print(menuTorque);
-			Serial1.print(" t=");
-			Serial1.print(micros());
-			if (menuEnable)
-				Serial1.print(" enabled");
-			else
-				Serial1.print(" disabled");
+			command->print("v=");
+			command->print(menuSpeed);
+			command->print(" actual v=");
+			command->print(getMotorSpeed());
+			command->print(" a=");
+			command->print(menuAcc);
+			command->print(" T=");
+			command->print(menuTorque);
+			command->print(" t=");
+			command->print(" ref=");
+			command->print(degrees(referenceAngle));
 
-			Serial1.println(" >");
+			command->print(micros());
+			if (menuEnable)
+				command->print(" enabled");
+			else
+				command->print(" disabled");
+			command->println();
+
+			command->print(">");
 		}
 }
 

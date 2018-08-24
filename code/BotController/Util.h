@@ -23,5 +23,6 @@ template <typename T> int sqr(T val) {
 }
 
 extern HardwareSerial* logger;
+extern HardwareSerial* command;
 
 #endif /* UTIL_H_ */

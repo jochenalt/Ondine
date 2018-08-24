@@ -5,51 +5,36 @@
  *      Author: JochenAlt
  */
 
+#include <Util.h>
 #include <MenuController.h>
 #include <Engine.h>
 
 
-#define W1_L6234_ENABLE_PIN 2
-#define W1_L6234_PWM1 3
-#define W1_L6234_PWM2 4
-#define W1_L6234_PWM3 5
-#define W1_ENCODERA_PIN 6
-#define W1_ENCODERB_PIN 7
+// Pins for Drotek L6234 breakout
+//                             PWM1,PWM2,PWM3
+const int WheelPins[3][3] = { { 2,    3,   4},
+                              { 5,    6,   7},
+							  { 8,    9,   10}};
 
-#define W2_L6234_ENABLE_PIN 8
-#define W2_L6234_PWM1 9
-#define W2_L6234_PWM2 10
-#define W2_L6234_PWM3 11
-#define W2_ENCODERA_PIN 12
-#define W2_ENCODERB_PIN 13
+//                                ENCA, ENCB
+const int EncoderPins[3][2] = { { 11,   12 },
+                                { 25,   26 },
+							    { 27,   28 }};
 
-#define W3_L6234_ENABLE_PIN 14
-#define W3_L6234_PWM1 15
-#define W3_L6234_PWM2 16
-#define W3_L6234_PWM3 17
-#define W3_ENCODERA_PIN 18
-#define W3_ENCODERB_PIN 19
+const int EnablePin = 24;
+
 
 void Engine::setup(MenuController* menuCtrl) {
 	// register out menu
 	registerMenuController(menuCtrl);
 
 	// initialize all brushless motors and their encoders
-	wheel[0] = new OmniWheel();
-	wheel[0]->setup(menuCtrl);
-	wheel[0]->setupMotor(W1_L6234_ENABLE_PIN, W1_L6234_PWM1, W1_L6234_PWM2, W1_L6234_PWM3);
-	wheel[0]->setupEncoder(W1_ENCODERA_PIN, W1_ENCODERB_PIN, 1024);
-
-	wheel[1] = new OmniWheel();
-	wheel[1]->setup(menuCtrl);
-	wheel[1]->setupMotor(W2_L6234_ENABLE_PIN, W2_L6234_PWM1, W2_L6234_PWM2, W2_L6234_PWM3);
-	wheel[1]->setupEncoder(W2_ENCODERA_PIN, W2_ENCODERB_PIN, 1024);
-	menuCtrl->registerMenu(wheel[1]);
-
-	wheel[2] = new OmniWheel();
-	wheel[2]->setup(menuCtrl);
-	wheel[2]->setupMotor(W3_L6234_ENABLE_PIN, W3_L6234_PWM1, W3_L6234_PWM2, W3_L6234_PWM3);
-	wheel[2]->setupEncoder(W3_ENCODERA_PIN, W3_ENCODERB_PIN, 1024);
+	for (int i = 0;i<3;i++) {
+		wheel[i] = new OmniWheel();
+		wheel[i]->setup(menuCtrl);
+		wheel[i]->setupMotor(EnablePin, WheelPins[i][0], WheelPins[i][1], WheelPins[i][2]);
+		wheel[i]->setupEncoder(EncoderPins[i][0],EncoderPins[i][1], 1024);
+	}
 }
 
 void Engine::loop() {
@@ -85,12 +70,14 @@ void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
 
 
 void Engine::printHelp() {
-	Serial1.println("Engine");
-	Serial1.println("0 - set wheel 0");
-	Serial1.println("1 - set wheel 1");
-	Serial1.println("2 - set wheel 2");
+	command->println();
+	command->println("Engine Menu");
+	command->println();
+	command->println("0 - set wheel 0");
+	command->println("1 - set wheel 1");
+	command->println("2 - set wheel 2");
 
-	Serial1.println("ESC");
+	command->println("ESC");
 }
 
 void Engine::menuLoop(char ch) {
@@ -111,39 +98,35 @@ void Engine::menuLoop(char ch) {
 	case 'h':
 		printHelp();
 		break;
-	case 27:
-		popMenu();
-		return;
-		break;
 	default:
 		cmd = false;
 		break;
 	}
 	if (cmd) {
-		Serial1.print("loop t=");
-		Serial1.print(averageTime_ms);
-		Serial1.print("ms");
+		command->print("loop t=");
+		command->print(averageTime_ms);
+		command->print("ms");
 
-		Serial1.print(" active wheel");
-		Serial1.print(activeMenuWheel);
+		command->print(" active wheel");
+		command->print(activeMenuWheel);
 
-		Serial1.print(" angle=(");
-		Serial1.print(degrees(wheel[0]->getIntegratedAngle()));
-		Serial1.print(",");
-		Serial1.print(degrees(wheel[1]->getIntegratedAngle()));
-		Serial1.print(",");
-		Serial1.print(degrees(wheel[2]->getIntegratedAngle()));
-		Serial1.print(")");
+		command->print(" angle=(");
+		command->print(degrees(wheel[0]->getIntegratedAngle()));
+		command->print(",");
+		command->print(degrees(wheel[1]->getIntegratedAngle()));
+		command->print(",");
+		command->print(degrees(wheel[2]->getIntegratedAngle()));
+		command->print(")");
 
-		Serial1.print(" speed=(");
-		Serial1.print((wheel[0]->getSpeed()));
-		Serial1.print(",");
-		Serial1.print((wheel[1]->getSpeed()));
-		Serial1.print(",");
-		Serial1.print((wheel[2]->getSpeed()));
-		Serial1.print(")");
+		command->print(" speed=(");
+		command->print((wheel[0]->getSpeed()));
+		command->print(",");
+		command->print((wheel[1]->getSpeed()));
+		command->print(",");
+		command->print((wheel[2]->getSpeed()));
+		command->print(")");
 
-		Serial1.println(" >");
+		command->println(" >");
 	}
 }
 

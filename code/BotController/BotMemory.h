@@ -37,7 +37,7 @@ public:
 class MotorConfig {
 public:
 	void initDefaultValues() {
-		Kp = 0.5;
+		Kp = 0.8;
 		Ki = 0.8;
 	}
 
@@ -76,5 +76,6 @@ class BotMemory : public MemoryBase {
 		} persistentMem;
 };
 
+extern BotMemory memory;
 
 #endif //__BOTMEMORY_H__

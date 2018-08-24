@@ -93,6 +93,7 @@ private:
 	int menuAcc = MaxAcceleration;
 	float menuTorque = 0.0;
 	bool menuEnable = false;
+	uint32_t lastCall = 0;
 };
 
 #endif /* BLDCCONTROLLER_H_ */
