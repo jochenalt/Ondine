@@ -8,12 +8,16 @@
 #ifndef BOTCONTROLLER_H_
 #define BOTCONTROLLER_H_
 
+#include <types.h>
 #include <MenuController.h>
+#include <StateController.h>
 #include <Engine.h>
+#include <IMU.h>
 #include <Kinematics.h>
 
 class BotController : public Menuable {
 public:
+	enum Mode { OFF, BALANCE };
 	void setup();
 	void loop();
 	BotController() {};
@@ -22,10 +26,20 @@ public:
 	void printHelp();
 	void menuLoop(char ch);
 
+	// turn on/off the balancing mode
+	void balanceMode(Mode mode) {
+		this->mode = mode;
+	}
 private:
 	Engine engine;
 	Kinematix kinematics;
 	MenuController menuController;
+	IMU imu;
+	StateController state;
+
+	BotMovement targetBotMovement;
+
+	Mode mode = OFF;
 };
 
 #endif /* BOTCONTROLLER_H_ */

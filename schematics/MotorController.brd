@@ -3470,7 +3470,7 @@ design rules under a new name.</description>
 </designrules>
 <autorouter>
 <pass name="Default">
-<param name="RoutingGrid" value="25mil"/>
+<param name="RoutingGrid" value="6.25mil"/>
 <param name="AutoGrid" value="1"/>
 <param name="Efforts" value="2"/>
 <param name="TopRouterVariant" value="1"/>
@@ -3565,25 +3565,25 @@ design rules under a new name.</description>
 </pass>
 </autorouter>
 <elements>
-<element name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" package="E7,5-16" package3d_urn="urn:adsk.eagle:package:23382/2" value="470uF" x="29.21" y="33.02" rot="R90">
-<attribute name="SPICEPREFIX" value="C" x="29.21" y="33.02" size="1.778" layer="27" rot="R90" display="off"/>
+<element name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" package="E7,5-16" package3d_urn="urn:adsk.eagle:package:23382/2" value="470uF" x="27.94" y="33.02" rot="R90">
+<attribute name="SPICEPREFIX" value="C" x="27.94" y="33.02" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
-<element name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" package="E7,5-16" package3d_urn="urn:adsk.eagle:package:23382/2" value="470uF" x="13.97" y="5.08" rot="R270">
-<attribute name="SPICEPREFIX" value="C" x="13.97" y="5.08" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" package="E7,5-16" package3d_urn="urn:adsk.eagle:package:23382/2" value="470uF" x="12.7" y="7.62" rot="R270">
+<attribute name="SPICEPREFIX" value="C" x="12.7" y="7.62" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="C3" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" package="C2.5-2" package3d_urn="urn:adsk.eagle:package:5415/1" value="100nF" x="-16.51" y="78.74" rot="R270"/>
-<element name="CONTROL-I2C" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA03-1" package3d_urn="urn:adsk.eagle:package:8339/1" value="1" x="44.45" y="3.81" rot="R90">
-<attribute name="MF" value="" x="44.45" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="MPN" value="" x="44.45" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="OC_FARNELL" value="unknown" x="44.45" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="OC_NEWARK" value="unknown" x="44.45" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
+<element name="CONTROL-I2C" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA03-1" package3d_urn="urn:adsk.eagle:package:8339/1" value="1" x="40.64" y="3.81" rot="R90">
+<attribute name="MF" value="" x="40.64" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="MPN" value="" x="40.64" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="OC_FARNELL" value="unknown" x="40.64" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="OC_NEWARK" value="unknown" x="40.64" y="3.81" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="D1" library="diode" library_urn="urn:adsk.eagle:library:210" package="DO201-15" package3d_urn="urn:adsk.eagle:package:43365/1" value="1N5400" x="-5.08" y="8.89"/>
-<element name="DC-MOTOR" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA06-1" package3d_urn="urn:adsk.eagle:package:8340/1" value="1" x="44.45" y="72.39" rot="R90">
-<attribute name="MF" value="" x="44.45" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="MPN" value="" x="44.45" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="OC_FARNELL" value="unknown" x="44.45" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
-<attribute name="OC_NEWARK" value="unknown" x="44.45" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
+<element name="DC-MOTOR" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA06-1" package3d_urn="urn:adsk.eagle:package:8340/1" value="1" x="40.64" y="72.39" rot="R90">
+<attribute name="MF" value="" x="40.64" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="MPN" value="" x="40.64" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="OC_FARNELL" value="unknown" x="40.64" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
+<attribute name="OC_NEWARK" value="unknown" x="40.64" y="72.39" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="DRK1" library="Drotek L6234" package="DROTEKL6234" value="DROTEKL6234" x="-39.37" y="67.31" rot="R180"/>
 <element name="DRK2" library="Drotek L6234" package="DROTEKL6234" value="DROTEKL6234" x="-39.37" y="39.37" rot="R180"/>
@@ -3606,18 +3606,18 @@ design rules under a new name.</description>
 <attribute name="OC_FARNELL" value="unknown" x="-58.42" y="57.15" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="OC_NEWARK" value="unknown" x="-58.42" y="57.15" size="1.778" layer="27" rot="R180" display="off"/>
 </element>
-<element name="IC1" library="v-reg" library_urn="urn:adsk.eagle:library:409" package="78XXL" package3d_urn="urn:adsk.eagle:package:30361/1" value="7805" x="30.48" y="5.08"/>
-<element name="IMU-I2C" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA05-1" package3d_urn="urn:adsk.eagle:package:8332/1" value="1" x="44.45" y="35.56" rot="R270">
-<attribute name="MF" value="" x="44.45" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MPN" value="" x="44.45" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="OC_FARNELL" value="unknown" x="44.45" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="OC_NEWARK" value="unknown" x="44.45" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="IC1" library="v-reg" library_urn="urn:adsk.eagle:library:409" package="78XXL" package3d_urn="urn:adsk.eagle:package:30361/1" value="7805" x="27.94" y="5.08"/>
+<element name="IMU-I2C" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA05-1" package3d_urn="urn:adsk.eagle:package:8332/1" value="1" x="40.64" y="35.56" rot="R270">
+<attribute name="MF" value="" x="40.64" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MPN" value="" x="40.64" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="OC_FARNELL" value="unknown" x="40.64" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="OC_NEWARK" value="unknown" x="40.64" y="35.56" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
-<element name="LOG-UART" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA03-1" package3d_urn="urn:adsk.eagle:package:8339/1" value="1" x="44.45" y="19.05" rot="R270">
-<attribute name="MF" value="" x="44.45" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MPN" value="" x="44.45" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="OC_FARNELL" value="unknown" x="44.45" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="OC_NEWARK" value="unknown" x="44.45" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="LOG-UART" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA03-1" package3d_urn="urn:adsk.eagle:package:8339/1" value="1" x="40.64" y="19.05" rot="R270">
+<attribute name="MF" value="" x="40.64" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MPN" value="" x="40.64" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="OC_FARNELL" value="unknown" x="40.64" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="OC_NEWARK" value="unknown" x="40.64" y="19.05" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="MOTOR1" library="con-molex" library_urn="urn:adsk.eagle:library:165" package="5566-4" value="5566-4" x="-58.42" y="71.12" rot="R90">
 <attribute name="MF" value="MOLEX" x="-58.42" y="71.12" size="1.778" layer="27" rot="R90" display="off"/>
@@ -3641,26 +3641,26 @@ design rules under a new name.</description>
 <attribute name="PROD_ID" value="CONN-08399" x="-8.89" y="1.27" size="1.778" layer="27" display="off"/>
 </element>
 <element name="PRJ1" library="Teensy356" package="TEENSY_3.5/3.6" value="TEENSY_3.5/3.6" x="-3.81" y="49.53" rot="R270"/>
-<element name="R1" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-17.78" y="69.85" rot="R180"/>
+<element name="R1" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-19.05" y="69.85" rot="R180"/>
 <element name="R10" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="1K" x="-17.78" y="36.83"/>
-<element name="R2" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-17.78" y="72.39" rot="R180"/>
-<element name="R3" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-17.78" y="74.93" rot="R180"/>
-<element name="R4" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-17.78" y="62.23" rot="R180"/>
-<element name="R5" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-17.78" y="64.77" rot="R180"/>
-<element name="R6" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-17.78" y="67.31" rot="R180"/>
-<element name="R7" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-13.97" y="50.8" rot="R270"/>
-<element name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-19.05" y="53.34" rot="R270"/>
-<element name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-16.51" y="55.88" rot="R270"/>
+<element name="R2" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-19.05" y="72.39" rot="R180"/>
+<element name="R3" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-19.05" y="74.93" rot="R180"/>
+<element name="R4" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-19.05" y="62.23" rot="R180"/>
+<element name="R5" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-19.05" y="64.77" rot="R180"/>
+<element name="R6" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-19.05" y="67.31" rot="R180"/>
+<element name="R7" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-15.24" y="50.8" rot="R270"/>
+<element name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-20.32" y="53.34" rot="R270"/>
+<element name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330" x="-17.78" y="55.88" rot="R270"/>
 <element name="D2" library="diode" library_urn="urn:adsk.eagle:library:210" package="DO35-7" package3d_urn="urn:adsk.eagle:package:43339/1" value="1N4148DO35-7" x="-7.62" y="15.24"/>
-<element name="SV1" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA04-1" package3d_urn="urn:adsk.eagle:package:8337/1" value="" x="44.45" y="53.34" rot="R270">
-<attribute name="MF" value="" x="44.45" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MPN" value="" x="44.45" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="OC_FARNELL" value="unknown" x="44.45" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="OC_NEWARK" value="unknown" x="44.45" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
+<element name="SV1" library="con-lstb" library_urn="urn:adsk.eagle:library:162" package="MA04-1" package3d_urn="urn:adsk.eagle:package:8337/1" value="" x="40.64" y="53.34" rot="R270">
+<attribute name="MF" value="" x="40.64" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MPN" value="" x="40.64" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="OC_FARNELL" value="unknown" x="40.64" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="OC_NEWARK" value="unknown" x="40.64" y="53.34" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 <element name="Q1" library="transistor-pnp" library_urn="urn:adsk.eagle:library:399" package="TO92" package3d_urn="urn:adsk.eagle:package:29211/2" value="BC307" x="-19.05" y="31.75"/>
 <element name="R11" library="resistor" library_urn="urn:adsk.eagle:library:348" package="0204V" package3d_urn="urn:adsk.eagle:package:23495/1" value="0" x="-16.51" y="1.27" rot="R180"/>
-<element name="U$1" library="pololu motor driver" package="MOTOR_DRIVER_MC33926_FOOTPRINT_" value="SINGLE_MOTOR_DRIVER" x="17.78" y="64.77"/>
+<element name="U$1" library="pololu motor driver" package="MOTOR_DRIVER_MC33926_FOOTPRINT_" value="SINGLE_MOTOR_DRIVER" x="13.97" y="64.77"/>
 <element name="S1" library="switch-dil" library_urn="urn:adsk.eagle:library:375" package="DA-02" package3d_urn="urn:adsk.eagle:package:27208/1" value="" x="8.89" y="35.56" rot="R90">
 <attribute name="MF" value="" x="8.89" y="35.56" size="1.778" layer="27" rot="R90" display="off"/>
 <attribute name="MPN" value="" x="8.89" y="35.56" size="1.778" layer="27" rot="R90" display="off"/>
@@ -3681,15 +3681,15 @@ design rules under a new name.</description>
 <contactref element="IC1" pad="OUT"/>
 <contactref element="Q1" pad="1"/>
 <contactref element="U$1" pad="VIN"/>
-<wire x1="13.97" y1="77.47" x2="44.45" y2="73.66" width="0" layer="19" extent="1-1"/>
-<wire x1="3.81" y1="77.47" x2="13.97" y2="77.47" width="0" layer="19" extent="1-1"/>
+<wire x1="10.16" y1="77.47" x2="40.64" y2="73.66" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="77.47" x2="10.16" y2="77.47" width="0" layer="19" extent="1-1"/>
 <wire x1="-16.51" y1="80.01" x2="3.81" y2="77.47" width="0" layer="19" extent="1-1"/>
 <wire x1="-54.61" y1="57.15" x2="-16.51" y2="80.01" width="0" layer="19" extent="1-1"/>
 <wire x1="-54.61" y1="29.21" x2="-54.61" y2="57.15" width="0" layer="19" extent="1-1"/>
 <wire x1="-54.61" y1="2.54" x2="-54.61" y2="29.21" width="0" layer="19" extent="1-1"/>
 <wire x1="-17.78" y1="31.75" x2="-54.61" y2="29.21" width="0" layer="19" extent="1-1"/>
-<wire x1="29.21" y1="29.21" x2="-17.78" y2="31.75" width="0" layer="19" extent="1-1"/>
-<wire x1="33.02" y1="1.27" x2="29.21" y2="29.21" width="0" layer="19" extent="1-1"/>
+<wire x1="27.94" y1="29.21" x2="-17.78" y2="31.75" width="0" layer="19" extent="1-1"/>
+<wire x1="30.48" y1="1.27" x2="27.94" y2="29.21" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="GND">
 <contactref element="PRJ1" pad="GND"/>
@@ -3710,18 +3710,18 @@ design rules under a new name.</description>
 <contactref element="S1" pad="1"/>
 <contactref element="S1" pad="2"/>
 <contactref element="REL1" pad="2"/>
-<wire x1="44.45" y1="49.53" x2="44.45" y2="71.12" width="0" layer="19" extent="1-1"/>
-<wire x1="44.45" y1="30.48" x2="44.45" y2="49.53" width="0" layer="19" extent="1-1"/>
-<wire x1="29.21" y1="36.83" x2="44.45" y2="30.48" width="0" layer="19" extent="1-1"/>
-<wire x1="44.45" y1="16.51" x2="44.45" y2="30.48" width="0" layer="19" extent="1-1"/>
-<wire x1="44.45" y1="6.35" x2="44.45" y2="16.51" width="0" layer="19" extent="1-1"/>
-<wire x1="10.16" y1="34.29" x2="29.21" y2="36.83" width="0" layer="19" extent="1-1"/>
-<wire x1="10.16" y1="36.83" x2="10.16" y2="34.29" width="0" layer="19" extent="1-1"/>
-<wire x1="-3.81" y1="15.24" x2="10.16" y2="34.29" width="0" layer="19" extent="1-1"/>
+<wire x1="40.64" y1="49.53" x2="40.64" y2="71.12" width="0" layer="19" extent="1-1"/>
+<wire x1="27.94" y1="36.83" x2="40.64" y2="49.53" width="0" layer="19" extent="1-1"/>
+<wire x1="40.64" y1="30.48" x2="27.94" y2="36.83" width="0" layer="19" extent="1-1"/>
+<wire x1="40.64" y1="16.51" x2="40.64" y2="30.48" width="0" layer="19" extent="1-1"/>
+<wire x1="40.64" y1="6.35" x2="40.64" y2="16.51" width="0" layer="19" extent="1-1"/>
+<wire x1="27.94" y1="1.27" x2="40.64" y2="6.35" width="0" layer="19" extent="1-1"/>
+<wire x1="12.7" y1="3.81" x2="27.94" y2="1.27" width="0" layer="19" extent="1-1"/>
+<wire x1="10.16" y1="36.83" x2="27.94" y2="36.83" width="0" layer="19" extent="1-1"/>
+<wire x1="10.16" y1="34.29" x2="10.16" y2="36.83" width="0" layer="19" extent="1-1"/>
+<wire x1="-3.81" y1="15.24" x2="12.7" y2="3.81" width="0" layer="19" extent="1-1"/>
 <wire x1="-17.78" y1="21.59" x2="-3.81" y2="15.24" width="0" layer="19" extent="1-1"/>
 <wire x1="-17.78" y1="1.27" x2="-3.81" y2="15.24" width="0" layer="19" extent="1-1"/>
-<wire x1="13.97" y1="1.27" x2="-3.81" y2="15.24" width="0" layer="19" extent="1-1"/>
-<wire x1="30.48" y1="1.27" x2="13.97" y2="1.27" width="0" layer="19" extent="1-1"/>
 <wire x1="-62.23" y1="2.54" x2="-17.78" y2="1.27" width="0" layer="19" extent="1-1"/>
 <wire x1="-62.23" y1="29.21" x2="-62.23" y2="2.54" width="0" layer="19" extent="1-1"/>
 <wire x1="-62.23" y1="57.15" x2="-62.23" y2="29.21" width="0" layer="19" extent="1-1"/>
@@ -3731,32 +3731,32 @@ design rules under a new name.</description>
 <signal name="N$4">
 <contactref element="DRK1" pad="IN1"/>
 <contactref element="R1" pad="2"/>
-<wire x1="-27.94" y1="66.04" x2="-21.59" y2="69.85" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="66.04" x2="-22.86" y2="69.85" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$5">
 <contactref element="DRK1" pad="IN2"/>
 <contactref element="R2" pad="2"/>
-<wire x1="-27.94" y1="68.58" x2="-21.59" y2="72.39" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="68.58" x2="-22.86" y2="72.39" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$6">
 <contactref element="DRK1" pad="IN3"/>
 <contactref element="R3" pad="2"/>
-<wire x1="-27.94" y1="71.12" x2="-21.59" y2="74.93" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="71.12" x2="-22.86" y2="74.93" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$7">
 <contactref element="R1" pad="1"/>
 <contactref element="PRJ1" pad="2"/>
-<wire x1="-13.97" y1="69.85" x2="-11.43" y2="69.85" width="0" layer="19" extent="1-1"/>
+<wire x1="-15.24" y1="69.85" x2="-11.43" y2="69.85" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$8">
 <contactref element="PRJ1" pad="1/TX"/>
 <contactref element="R2" pad="1"/>
-<wire x1="-13.97" y1="72.39" x2="-11.43" y2="72.39" width="0" layer="19" extent="1-1"/>
+<wire x1="-15.24" y1="72.39" x2="-11.43" y2="72.39" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$9">
 <contactref element="R3" pad="1"/>
 <contactref element="PRJ1" pad="0/RX"/>
-<wire x1="-13.97" y1="74.93" x2="-11.43" y2="74.93" width="0" layer="19" extent="1-1"/>
+<wire x1="-15.24" y1="74.93" x2="-11.43" y2="74.93" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$10">
 <contactref element="DRK1" pad="EN"/>
@@ -3771,37 +3771,37 @@ design rules under a new name.</description>
 <contactref element="DRK2" pad="LIPO+"/>
 <contactref element="U$1" pad="VIN(5-28V)"/>
 <contactref element="REL1" pad="3"/>
-<wire x1="-37.592" y1="57.404" x2="34.544" y2="65.659" width="0" layer="19" extent="1-1"/>
+<wire x1="-37.592" y1="57.404" x2="30.734" y2="65.659" width="0" layer="19" extent="1-1"/>
 <wire x1="-37.592" y1="29.464" x2="-37.592" y2="57.404" width="0" layer="19" extent="1-1"/>
 <wire x1="-17.78" y1="13.97" x2="-37.592" y2="29.464" width="0" layer="19" extent="1-1"/>
 <wire x1="-37.592" y1="1.524" x2="-17.78" y2="13.97" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$13">
+<signal name="N$13" class="1">
 <contactref element="DRK2" pad="M1"/>
 <contactref element="MOTOR2" pad="3"/>
 <wire x1="-61.17" y1="45.28" x2="-45.72" y2="28.448" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$14">
+<signal name="N$14" class="1">
 <contactref element="DRK2" pad="M2"/>
 <contactref element="MOTOR2" pad="2"/>
 <wire x1="-55.67" y1="41.08" x2="-43.18" y2="28.448" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$15">
+<signal name="N$15" class="1">
 <contactref element="DRK2" pad="M3"/>
 <contactref element="MOTOR2" pad="1"/>
 <wire x1="-55.67" y1="45.28" x2="-40.64" y2="28.448" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$16">
+<signal name="N$16" class="1">
 <contactref element="DRK3" pad="M1"/>
 <contactref element="MOTOR3" pad="3"/>
 <wire x1="-61.17" y1="18.61" x2="-45.72" y2="0.508" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$17">
+<signal name="N$17" class="1">
 <contactref element="DRK3" pad="M2"/>
 <contactref element="MOTOR3" pad="2"/>
 <wire x1="-55.67" y1="14.41" x2="-43.18" y2="0.508" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$18">
+<signal name="N$18" class="1">
 <contactref element="DRK3" pad="M3"/>
 <contactref element="MOTOR3" pad="1"/>
 <wire x1="-55.67" y1="18.61" x2="-40.64" y2="0.508" width="0" layer="19" extent="1-1"/>
@@ -3809,62 +3809,62 @@ design rules under a new name.</description>
 <signal name="N$11">
 <contactref element="R4" pad="2"/>
 <contactref element="DRK2" pad="IN1"/>
-<wire x1="-27.94" y1="38.1" x2="-21.59" y2="62.23" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="38.1" x2="-22.86" y2="62.23" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$19">
 <contactref element="R5" pad="2"/>
 <contactref element="DRK2" pad="IN2"/>
-<wire x1="-27.94" y1="40.64" x2="-21.59" y2="64.77" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="40.64" x2="-22.86" y2="64.77" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$20">
 <contactref element="R6" pad="2"/>
 <contactref element="DRK2" pad="IN3"/>
-<wire x1="-27.94" y1="43.18" x2="-21.59" y2="67.31" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="43.18" x2="-22.86" y2="67.31" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$21">
 <contactref element="PRJ1" pad="3/CANTX"/>
 <contactref element="R6" pad="1"/>
-<wire x1="-13.97" y1="67.31" x2="-11.43" y2="67.31" width="0" layer="19" extent="1-1"/>
+<wire x1="-15.24" y1="67.31" x2="-11.43" y2="67.31" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$22">
 <contactref element="PRJ1" pad="4/CANRX"/>
 <contactref element="R5" pad="1"/>
-<wire x1="-13.97" y1="64.77" x2="-11.43" y2="64.77" width="0" layer="19" extent="1-1"/>
+<wire x1="-15.24" y1="64.77" x2="-11.43" y2="64.77" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$23">
 <contactref element="PRJ1" pad="5"/>
 <contactref element="R4" pad="1"/>
-<wire x1="-13.97" y1="62.23" x2="-11.43" y2="62.23" width="0" layer="19" extent="1-1"/>
+<wire x1="-15.24" y1="62.23" x2="-11.43" y2="62.23" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$24">
 <contactref element="DRK3" pad="IN2"/>
 <contactref element="R8" pad="2"/>
-<wire x1="-27.94" y1="12.7" x2="-19.05" y2="49.53" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="12.7" x2="-20.32" y2="49.53" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$25">
 <contactref element="R7" pad="2"/>
 <contactref element="DRK3" pad="IN1"/>
-<wire x1="-27.94" y1="10.16" x2="-13.97" y2="46.99" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="10.16" x2="-15.24" y2="46.99" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$26">
 <contactref element="R9" pad="2"/>
 <contactref element="DRK3" pad="IN3"/>
-<wire x1="-27.94" y1="15.24" x2="-16.51" y2="52.07" width="0" layer="19" extent="1-1"/>
+<wire x1="-27.94" y1="15.24" x2="-17.78" y2="52.07" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$27">
 <contactref element="PRJ1" pad="6"/>
 <contactref element="R9" pad="1"/>
-<wire x1="-16.51" y1="59.69" x2="-11.43" y2="59.69" width="0" layer="19" extent="1-1"/>
+<wire x1="-17.78" y1="59.69" x2="-11.43" y2="59.69" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$28">
 <contactref element="R8" pad="1"/>
 <contactref element="PRJ1" pad="7"/>
-<wire x1="-19.05" y1="57.15" x2="-11.43" y2="57.15" width="0" layer="19" extent="1-1"/>
+<wire x1="-20.32" y1="57.15" x2="-11.43" y2="57.15" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$29">
 <contactref element="PRJ1" pad="8"/>
 <contactref element="R7" pad="1"/>
-<wire x1="-13.97" y1="54.61" x2="-11.43" y2="54.61" width="0" layer="19" extent="1-1"/>
+<wire x1="-15.24" y1="54.61" x2="-11.43" y2="54.61" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$30">
 <contactref element="R10" pad="1"/>
@@ -3876,8 +3876,8 @@ design rules under a new name.</description>
 <contactref element="IC1" pad="IN"/>
 <contactref element="D1" pad="A"/>
 <contactref element="POWER_IN" pad="2"/>
-<wire x1="13.97" y1="8.89" x2="27.94" y2="1.27" width="0" layer="19" extent="1-1"/>
-<wire x1="2.54" y1="8.89" x2="13.97" y2="8.89" width="0" layer="19" extent="1-1"/>
+<wire x1="12.7" y1="11.43" x2="25.4" y2="1.27" width="0" layer="19" extent="1-1"/>
+<wire x1="2.54" y1="8.89" x2="12.7" y2="11.43" width="0" layer="19" extent="1-1"/>
 <wire x1="-5.39" y1="1.27" x2="2.54" y2="8.89" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$33">
@@ -3913,22 +3913,22 @@ design rules under a new name.</description>
 <signal name="IMU-SCL">
 <contactref element="PRJ1" pad="19/A5/SCL"/>
 <contactref element="IMU-I2C" pad="2"/>
-<wire x1="3.81" y1="59.69" x2="44.45" y2="38.1" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="59.69" x2="40.64" y2="38.1" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="IMU-SDA">
 <contactref element="PRJ1" pad="18/A4/SDA"/>
 <contactref element="IMU-I2C" pad="3"/>
-<wire x1="3.81" y1="57.15" x2="44.45" y2="35.56" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="57.15" x2="40.64" y2="35.56" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$43">
 <contactref element="CONTROL-I2C" pad="2"/>
 <contactref element="PRJ1" pad="38/A19"/>
-<wire x1="3.81" y1="31.75" x2="44.45" y2="3.81" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="31.75" x2="40.64" y2="3.81" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="CTRL-SDA">
 <contactref element="PRJ1" pad="37/A18"/>
 <contactref element="CONTROL-I2C" pad="1"/>
-<wire x1="3.81" y1="29.21" x2="44.45" y2="1.27" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="29.21" x2="40.64" y2="1.27" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$42">
 <contactref element="PRJ1" pad="25"/>
@@ -3938,69 +3938,69 @@ design rules under a new name.</description>
 <signal name="N$47">
 <contactref element="PRJ1" pad="30"/>
 <contactref element="U$1" pad="IN2"/>
-<wire x1="-11.43" y1="24.13" x2="13.97" y2="69.85" width="0" layer="19" extent="1-1"/>
+<wire x1="-11.43" y1="24.13" x2="10.16" y2="69.85" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$44">
 <contactref element="PRJ1" pad="29"/>
 <contactref element="U$1" pad="IN1"/>
-<wire x1="-11.43" y1="26.67" x2="13.97" y2="67.31" width="0" layer="19" extent="1-1"/>
+<wire x1="-11.43" y1="26.67" x2="10.16" y2="67.31" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$45">
 <contactref element="PRJ1" pad="31/A12"/>
 <contactref element="U$1" pad="EN"/>
-<wire x1="-11.43" y1="21.59" x2="13.97" y2="54.61" width="0" layer="19" extent="1-1"/>
+<wire x1="-11.43" y1="21.59" x2="10.16" y2="54.61" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="BLCK-M2" class="1">
 <contactref element="DC-MOTOR" pad="2"/>
 <contactref element="U$1" pad="OUT2"/>
-<wire x1="34.544" y1="58.928" x2="44.45" y2="68.58" width="0" layer="19" extent="1-1"/>
+<wire x1="30.734" y1="58.928" x2="40.64" y2="68.58" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$41">
 <contactref element="PRJ1" pad="32/A13"/>
 <contactref element="U$1" pad="VDD"/>
-<wire x1="-11.43" y1="19.05" x2="13.97" y2="72.39" width="0" layer="19" extent="1-1"/>
+<wire x1="-11.43" y1="19.05" x2="10.16" y2="72.39" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="RX5">
 <contactref element="LOG-UART" pad="1"/>
 <contactref element="PRJ1" pad="34/A15"/>
-<wire x1="3.81" y1="21.59" x2="44.45" y2="21.59" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="21.59" x2="40.64" y2="21.59" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="TX5">
 <contactref element="LOG-UART" pad="2"/>
 <contactref element="PRJ1" pad="33/A14"/>
-<wire x1="3.81" y1="19.05" x2="44.45" y2="19.05" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="19.05" x2="40.64" y2="19.05" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="RED-M1" class="1">
 <contactref element="DC-MOTOR" pad="1"/>
 <contactref element="U$1" pad="OUT1"/>
-<wire x1="34.544" y1="54.991" x2="44.45" y2="66.04" width="0" layer="19" extent="1-1"/>
+<wire x1="30.734" y1="54.991" x2="40.64" y2="66.04" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="WH_ENC_B">
 <contactref element="PRJ1" pad="35/A16"/>
 <contactref element="DC-MOTOR" pad="6"/>
-<wire x1="3.81" y1="24.13" x2="44.45" y2="78.74" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="24.13" x2="40.64" y2="78.74" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="Y_ENC_A">
 <contactref element="PRJ1" pad="36/A17"/>
 <contactref element="DC-MOTOR" pad="5"/>
-<wire x1="3.81" y1="26.67" x2="44.45" y2="76.2" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="26.67" x2="40.64" y2="76.2" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$39" class="1">
 <contactref element="D1" pad="C"/>
 <contactref element="REL1" pad="4"/>
 <wire x1="-12.7" y1="8.89" x2="-17.78" y2="8.89" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$1">
+<signal name="N$1" class="1">
 <contactref element="DRK1" pad="M1"/>
 <contactref element="MOTOR1" pad="3"/>
 <wire x1="-61.17" y1="73.22" x2="-45.72" y2="56.388" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$2">
+<signal name="N$2" class="1">
 <contactref element="DRK1" pad="M2"/>
 <contactref element="MOTOR1" pad="2"/>
 <wire x1="-43.18" y1="56.388" x2="-55.67" y2="69.02" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$3">
+<signal name="N$3" class="1">
 <contactref element="DRK1" pad="M3"/>
 <contactref element="MOTOR1" pad="1"/>
 <wire x1="-40.64" y1="56.388" x2="-55.67" y2="73.22" width="0" layer="19" extent="1-1"/>
@@ -4008,27 +4008,27 @@ design rules under a new name.</description>
 <signal name="N$46">
 <contactref element="PRJ1" pad="3V3_LO"/>
 <contactref element="IMU-I2C" pad="4"/>
-<wire x1="3.81" y1="72.39" x2="44.45" y2="33.02" width="0" layer="19" extent="1-1"/>
+<wire x1="40.64" y1="33.02" x2="3.81" y2="72.39" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$48">
 <contactref element="IMU-I2C" pad="1"/>
 <contactref element="PRJ1" pad="20/A6"/>
-<wire x1="3.81" y1="62.23" x2="44.45" y2="40.64" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="62.23" x2="40.64" y2="40.64" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$49">
 <contactref element="SV1" pad="1"/>
 <contactref element="PRJ1" pad="23/A9"/>
-<wire x1="3.81" y1="69.85" x2="44.45" y2="57.15" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="69.85" x2="40.64" y2="57.15" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$50">
 <contactref element="SV1" pad="2"/>
 <contactref element="PRJ1" pad="22/A8"/>
-<wire x1="3.81" y1="67.31" x2="44.45" y2="54.61" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="67.31" x2="40.64" y2="54.61" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$51">
 <contactref element="SV1" pad="3"/>
 <contactref element="PRJ1" pad="21/A7"/>
-<wire x1="3.81" y1="64.77" x2="44.45" y2="52.07" width="0" layer="19" extent="1-1"/>
+<wire x1="3.81" y1="64.77" x2="40.64" y2="52.07" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$31">
 <contactref element="D2" pad="C"/>
@@ -4044,7 +4044,7 @@ design rules under a new name.</description>
 <contactref element="DRK3" pad="GND"/>
 <contactref element="R11" pad="1"/>
 <contactref element="U$1" pad="GND"/>
-<wire x1="-35.052" y1="57.404" x2="34.544" y2="62.357" width="0" layer="19" extent="1-1"/>
+<wire x1="-35.052" y1="57.404" x2="30.734" y2="62.357" width="0" layer="19" extent="1-1"/>
 <wire x1="-35.052" y1="29.464" x2="-35.052" y2="57.404" width="0" layer="19" extent="1-1"/>
 <wire x1="-35.052" y1="1.524" x2="-35.052" y2="29.464" width="0" layer="19" extent="1-1"/>
 <wire x1="-15.24" y1="1.27" x2="-35.052" y2="1.524" width="0" layer="19" extent="1-1"/>

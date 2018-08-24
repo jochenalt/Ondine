@@ -8,23 +8,23 @@
 #ifndef KALMAN_KALMAN_H_
 #define KALMAN_KALMAN_H_
 
-class Kalman {
+class KalmanFilter {
 public:
-    Kalman();
-    virtual ~Kalman() {};
+    KalmanFilter();
+    virtual ~KalmanFilter() {};
 
     void setup(float angle);
-
-    // The angle should be in degrees and the rate should be in degrees per second and the delta time in seconds
-    float update(float newAngle, float newRate, float dt);
-
-    // return the filtered angle
-    float getAngle();
 
     // Set the starting angle
     void setAngle(float angle);
 
-    // Return the unbiased rate
+    // The angle should be in degrees and the rate should be in degrees per second and the delta time in seconds
+    void update(float newAngle, float newRate, float dt);
+
+    // return the filtered angle
+    float getAngle();
+
+    // Return the biased input rate
     float getRate();
 
     void setQangle(float Q_angle);

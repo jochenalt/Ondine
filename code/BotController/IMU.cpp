@@ -6,22 +6,68 @@
  */
 
 #include <Arduino.h>
-#include <IMUController.h>
 #include <MPU9250/src/MPU9250.h>
 #include <utilities/TimePassedBy.h>
-#include <Kalman/Kalman.h>
+#include <Filter/KalmanFilter.h>
+#include <IMU.h>
+#include <setup.h>
 
-#define IMU_INTERRUPT_PIN 20
 
 volatile bool newDataAvailable = false;
 TimePassedBy updateTimer(20);
 
 
+
+// interrupt that is called whenever MPU9250 has a new value (which is set to happens every 10ms)
 void imuInterrupt() {
 	newDataAvailable = true;
 }
 
-void IMUController::setup(MenuController *newMenuCtrl) {
+IMUSamplePlane::IMUSamplePlane() {
+	angle = 0;
+	angularVelocity = 0;
+}
+
+IMUSamplePlane::IMUSamplePlane(float angle, float angularVelocity) {
+	this->angle = angle;
+	this->angularVelocity = angularVelocity;
+}
+
+IMUSamplePlane::IMUSamplePlane(const IMUSamplePlane& t) {
+	this->angle = t.angle;
+	this->angularVelocity = t.angularVelocity;
+}
+
+IMUSamplePlane& IMUSamplePlane::operator=(const IMUSamplePlane& t) {
+	this->angle = t.angle;
+	this->angularVelocity = t.angularVelocity;
+	return * this;
+}
+
+IMUSample::IMUSample() {};
+
+IMUSample::IMUSample(const IMUSamplePlane& x, const IMUSamplePlane& y, const IMUSamplePlane& z) {
+	this->x = x;
+	this->y = y;
+	this->z = z;
+}
+
+IMUSample::IMUSample(const IMUSample& t) {
+	this->x = t.x;
+	this->y = t.y;
+	this->z = t.z;
+
+}
+
+IMUSample& IMUSample::operator=(const IMUSample& t) {
+	this->x = t.x;
+	this->y = t.y;
+	this->z = t.z;
+	return *this;
+}
+
+
+void IMU::setup(MenuController *newMenuCtrl) {
 	registerMenuController(newMenuCtrl);
 
 	// i2c frequency
@@ -44,8 +90,7 @@ void IMUController::setup(MenuController *newMenuCtrl) {
 	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ);
 
 	// set update rate of gyro to 100 Hz
-	const int UpdateRate = 100; // [Hz]
-	status = mpu9250->setSrd(1000/UpdateRate-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
+	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
 
 	// enable interrupt
 	mpu9250->enableDataReadyInterrupt();
@@ -58,7 +103,7 @@ void IMUController::setup(MenuController *newMenuCtrl) {
 	filterZ.setup(0);
 }
 
-void IMUController::calibrate() {
+void IMU::calibrate() {
 	mpu9250->calibrateAccel();
 	mpu9250->calibrateGyro();
 
@@ -70,7 +115,7 @@ void IMUController::calibrate() {
 	filterZ.setAngle(0);
 }
 
-void IMUController::loop() {
+void IMU::loop() {
 	if (newDataAvailable || updateTimer.isDue()) {
 		uint32_t start = millis();
 
@@ -79,7 +124,7 @@ void IMUController::loop() {
 
 		// compute dT for kalman filter
 		uint32_t now = millis();
-		float dT = ((float)(now - lastInvocationTime_ms))/1000.0;
+		dT = ((float)(now - lastInvocationTime_ms))/1000.0;
 		lastInvocationTime_ms = now;
 
 		// invoke kalman filter separately per plane
@@ -99,25 +144,37 @@ void IMUController::loop() {
 }
 
 // returns true once when a new value is available.
-bool IMUController::newValueAvailable() {
+bool IMU::isNewValueAvailable(float &dT) {
 	bool tmp = valueIsUpdated;
 	valueIsUpdated = false;
 	return tmp;
 }
 
-float IMUController::getAngleXRad() {
+float IMU::getAngleXRad() {
 	return filterX.getAngle();
 }
 
-float IMUController::getAngleYRad() {
-	return filterX.getAngle();
+float IMU::getAngleYRad() {
+	return filterY.getAngle();
 }
 
-float IMUController::getAngleZRad() {
+float IMU::getAngleZRad() {
 	return filterZ.getAngle();
 }
 
-void IMUController::printHelp() {
+float IMU::getAngularVelocityX() {
+	return filterX.getRate();
+}
+
+float IMU::getAngularVelocityY() {
+	return filterY.getRate();
+}
+
+float IMU::getAnglularVelocityZ() {
+	return filterZ.getRate();
+}
+
+void IMU::printHelp() {
 	Serial1.println("IMU controller");
 	Serial1.println("r - read values");
 	Serial1.println("c - calibrate ");
@@ -125,7 +182,7 @@ void IMUController::printHelp() {
 	Serial1.println("ESC");
 }
 
-void IMUController::menuLoop(char ch) {
+void IMU::menuLoop(char ch) {
 	bool cmd = true;
 	switch (ch) {
 	case 'r':
@@ -138,7 +195,7 @@ void IMUController::menuLoop(char ch) {
 		calibrate();
 		break;
 	case 27:
-		deactivateMenu();
+		popMenu();
 		return;
 		break;
 	default:

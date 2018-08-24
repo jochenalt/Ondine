@@ -25,38 +25,38 @@ void MenuController::registerMenu(const Menuable* menu) {
 	menus[menuSize++] = (Menuable*)menu;
 }
 
-void Menuable::deactivateMenu() {
-	menuCtrl->deactivateMenu();
+void Menuable::popMenu() {
+	menuCtrl->popMenu();
 }
 
-void Menuable::activateMenu() {
-	menuCtrl->activateMenu(this);
+void Menuable::pushMenu() {
+	menuCtrl->pushMenu(this);
 }
 
-void MenuController::deactivateMenu() {
+void MenuController::popMenu() {
 	if (activeMenuStackPtr == 0)
 		fatalError("MC stack underflow");
-
-	activeMenuStackPtr--;
-	menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
+	else {
+		menus[activeMenuStack[--activeMenuStackPtr]]->printHelp();
+	}
 }
 
-void MenuController::activateMenu(const Menuable* menu) {
+void MenuController::pushMenu(const Menuable* menu) {
 	if (activeMenuStackPtr == MaxNumberOfMenues)
 		fatalError("MC stack overflow");
-
-	for (int i = 0;i<menuSize;i++) {
-		if (menu == menus[i]) {
-			activeMenuStack[++activeMenuStackPtr] = i;
-			menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
-			break;
+	else {
+		for (int i = 0;i<menuSize;i++) {
+			if (menu == menus[i]) {
+				activeMenuStack[activeMenuStackPtr++] = i;
+				menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
+				break;
+			}
 		}
+
+		// fatal, reset everything
+		activeMenuStackPtr = 0;
+		activeMenuStack[activeMenuStackPtr] = 0;
 	}
-
-	// fatal, reset everything
-	activeMenuStackPtr = 0;
-	activeMenuStack[activeMenuStackPtr] = 0;
-
 }
 
 void MenuController::loop() {

@@ -3,7 +3,7 @@
 
 |Category           |  #| What                                               |              | Supplier        |
 |:------------------|--:|:---------------------------------------------------|:-------------|:----------------|
-|3D Print           | 1 | ABS 3D printer                                     | <img width="100" src="https://store.zortrax.com/image/cache/catalog/new_carousel/M200_FI_U_02_C50_04-489x489.png"/> | [Zortrax M200](https://store.zortrax.com/M200) |
+|3D Print           | 1 | ABS 3D printer                                     | <img width="100" src="https://github.com/jochenalt/ondine/tree/master/docs/images/bom/ortrax-M200-professional-desktop-3D-printer.jpg"/> | [Zortrax M200](https://store.zortrax.com/M200) |
 |                   |   | Petroleum, Acetone                                 | <img width="100" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Acetone-structural.png/255px-Acetone-structural.png"/> | Local Dealer    | 																																			        |
 |Electronics        | 1 | ODroid C2, 1.5 GHz Quadcore board                  | <img width="100" src="http://www.hardkernel.com/main/_Files/prdt/2016/201602/ODROID-C2.png"/>                       |  [ODroid C2](http://www.hardkernel.com/main/products/prdt_info.php?g_code=G145457216438) |
 |                   | 1 | Teensy 3.5, Arm M4 board                           | <img width="100" src="https://www.pjrc.com/store/teensy35.jpg"/>                                                    | [Teensy 3.5](https://www.pjrc.com/store/teensy35.html ) |

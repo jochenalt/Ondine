@@ -6,12 +6,13 @@
  */
 
 #include "Arduino.h"
+#include <Util.h>
 
 void fatalError(const char s[]) {
-	Serial1.print("FATAL");
-	Serial1.println(s);
+	logger->print("FATAL");
+	logger->println(s);
 }
 void warnMsg(const char s[]) {
-	Serial1.print("WARN:");
-	Serial1.println(s);
+	logger->print("WARN:");
+	logger->println(s);
 }

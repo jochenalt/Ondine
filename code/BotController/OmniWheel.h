@@ -13,13 +13,17 @@
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
 
+
+const float MaxAcceleration = 500.0; // [rev/s^2]
+const float GearBoxRatio = 24.0/50.0;
+
 class OmniWheel : virtual public Menuable {
 public:
-	static const int MaxAcceleration = 500.0; // [rev/s^2]
-	static constexpr float GearBoxRatio = 24.0/50.0;
+
 	OmniWheel();
 	virtual ~OmniWheel() {};
 
+	void setup(MenuController* menuCtrl);
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
 	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
 	void loop( );

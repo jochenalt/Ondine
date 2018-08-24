@@ -20,13 +20,11 @@ const float MaxWheelSpeed = 2000.;
 #define VECTOR_SET(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
 
 // return the construction matrix (CM) and compute its inverse matrix used for inverse kinematics
-// for conveniency use floats, since this matrix is computed during startup only
 void Kinematix::setupConstructionMatrix() {
 		float a = -1.0/WheelRadius;
 		float cos_phi = cos(WheelAngleRad);
 		float sin_phi = sin(WheelAngleRad);
 		
-
 		// define the construction matrix
 		VECTOR_SET(cm[0],                      0, a*cos_phi,          -a*sin_phi);
 		VECTOR_SET(cm[1], -a*sqrt(3.)/2.*cos_phi, -a*cos_phi/2.,      -a*sin_phi);
@@ -63,17 +61,14 @@ void Kinematix::setupConstructionMatrix() {
 // this angle needs to be taken into account when the wheel speed is computed out of x,y, omega
 void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 	
-	// do it only if tilt angles have really changed
-	// This is important, since forward and inverse kinematics per loop have the same angles, this doubles performance
-	static bool alreadyComputed = false; // compute at least the first time, even if angles are all zero
-	static float lastTiltX, lastTiltY;
-	
-	if  (alreadyComputed && 
+	// do it only if tilt angles have changed
+	// This is important, since forward and inverse kinematics per loop have the same angles, so this trick doubles performance
+	if  (titleCompensationMatrixComputed &&
 		(lastTiltX == pTiltX) &&
 		(lastTiltY == pTiltY))
 		return;
 	
-	alreadyComputed = true;
+	titleCompensationMatrixComputed = true;
 	lastTiltX = pTiltX;
 	lastTiltY = pTiltY;
 	
@@ -102,7 +97,7 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 	kin.computeTiltRotationMatrix(pTiltX,pTiltY);
 
 	// rotate construction matrix by tilt (by multiplying with tilt rotation matrix)
-	// compute only those fields that are required afterwards (so we need only 10 multiplications instead 9* (3*3) of a regular of matrix multiplcation)
+	// compute only those fields that are required afterwards (so we need only 10 out of 81 multiplications of a regular matrix multiplication)
 	float m01_11=  cm[0][1]*trm[1][1];
 	float m01_21 = cm[0][1]*trm[2][1];
 	float m10_00 = cm[1][0]*trm[0][0];
@@ -114,13 +109,12 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 	float m02_22 = cm[0][2]*trm[2][2];
 	float m02_12 = cm[0][2]*trm[1][2];
 
-	// convert to radian
 	float  lBotZSpeed = -pOmegaZ * BallRadius;
 
 	// final computation of kinematics:
 	// compute wheel's speed in °/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
-	float wheelSpeed0 = ((m01_11 + m02_12)*pVx	         - m02_02*pVy             + (m01_21 + m02_22)*lBotZSpeed)           ;
-	float wheelSpeed1 = ((m10_10 + m11_11 + m02_12)*pVx  - (m10_00 + m02_02)*pVy  + (m10_20 + m11_21 + m02_22)*lBotZSpeed ) ;
+	float wheelSpeed0 = ((m01_11 + m02_12)*pVx	         - m02_02*pVy             + ( m01_21 + m02_22         )*lBotZSpeed)  ;
+	float wheelSpeed1 = ((m10_10 + m11_11 + m02_12)*pVx  - (m10_00 + m02_02)*pVy  + ( m10_20 + m11_21 + m02_22)*lBotZSpeed ) ;
 	float wheelSpeed2 = ((-m10_10+ m11_11 + m02_12)*pVx  + (m10_00 - m02_02)*pVy  + (-m10_20 + m11_21 + m02_22)*lBotZSpeed) ;
 
 	// alarm: if one wheel is supposed to run faster than it can
@@ -180,14 +174,14 @@ void Kinematix::computeActualSpeed( float pWheel[3],
 	int16_t m21_11 = trm[2][1] * icm[1][1];
 	int16_t m22_20 = trm[2][2] * icm[2][0];
 							
-	// compute inverse kinematics matrix					
-	pVx    =     ( m11_10 + m12_20)              * pWheel[0]
+	// compute inverse kinematics
+	pVx    =        ( m11_10 + m12_20)           * pWheel[0]
 			      + ( m10_01 + m11_11 + m12_20)  * pWheel[1]
 				  + (-m10_01 + m11_11 + m12_20)  * pWheel[2];
-	pVy    =     (-m02_20)                       * pWheel[0]
+	pVy    =        (-m02_20)                    * pWheel[0]
   				  + (-m00_01 - m02_20)           * pWheel[1]
 		          + ( m00_01 - m02_20)           * pWheel[2];
-	pOmega = (   (-m21_10 - m22_20)              * pWheel[0]
+	pOmega =     (  (-m21_10 - m22_20)           * pWheel[0]
 				  + (-m20_01 - m21_11 - m22_20)  * pWheel[1]
 				  + ( m20_01 - m21_11 - m22_20)  * pWheel[2]) / BallRadius;
 }
@@ -210,7 +204,7 @@ void Kinematix::menuLoop(char ch) {
 		printHelp();
 		break;
 	case 27:
-		deactivateMenu();
+		popMenu();
 		return;
 		break;
 	default:
@@ -251,7 +245,6 @@ void Kinematix::testKinematics() {
 	float lVx,lVy,lOmega;
 	lVx = 0;
 	lVy = 0;
-
 	lOmega=35.0;
 	Serial1.print(F("Vx="));
 	
@@ -337,7 +330,6 @@ void Kinematix::testInverseKinematics() {
 	// this matrix depends on the tilt angle and corrects the 
 	computeTiltRotationMatrix(lTiltX,lTiltY);
 
-	
 	float lVx = 0;
 	float lVy = 0;
 	float lOmega = 0;
@@ -404,9 +396,8 @@ void Kinematix::testTRM() {
 		float error  = 0;
 		for (float i = 0.0;i<2*PI;i=i+0.1) {
 			float x,y;
-			x = sin(float(i))*j;
-			y = cos(float(i)) *j;
-
+			x = sin(float(i)) * j;
+			y = cos(float(i)) * j;
 
 			kin.computeTiltRotationMatrix(x,y);
 

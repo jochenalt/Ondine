@@ -18897,42 +18897,42 @@ distributor Buerklin, 17G580</description>
 <pinref part="REL1" gate="G$1" pin="P"/>
 </segment>
 </net>
-<net name="N$13" class="0">
+<net name="N$13" class="1">
 <segment>
 <pinref part="DRK2" gate="G$1" pin="M1"/>
 <wire x1="104.14" y1="-7.62" x2="104.14" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR2" gate="-3" pin="S"/>
 </segment>
 </net>
-<net name="N$14" class="0">
+<net name="N$14" class="1">
 <segment>
 <pinref part="DRK2" gate="G$1" pin="M2"/>
 <wire x1="106.68" y1="-7.62" x2="106.68" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR2" gate="-2" pin="S"/>
 </segment>
 </net>
-<net name="N$15" class="0">
+<net name="N$15" class="1">
 <segment>
 <pinref part="DRK2" gate="G$1" pin="M3"/>
 <wire x1="109.22" y1="-7.62" x2="109.22" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR2" gate="-1" pin="S"/>
 </segment>
 </net>
-<net name="N$16" class="0">
+<net name="N$16" class="1">
 <segment>
 <pinref part="DRK3" gate="G$1" pin="M1"/>
 <wire x1="157.48" y1="-7.62" x2="157.48" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR3" gate="-3" pin="S"/>
 </segment>
 </net>
-<net name="N$17" class="0">
+<net name="N$17" class="1">
 <segment>
 <pinref part="DRK3" gate="G$1" pin="M2"/>
 <wire x1="160.02" y1="-7.62" x2="160.02" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR3" gate="-2" pin="S"/>
 </segment>
 </net>
-<net name="N$18" class="0">
+<net name="N$18" class="1">
 <segment>
 <pinref part="DRK3" gate="G$1" pin="M3"/>
 <wire x1="162.56" y1="-7.62" x2="162.56" y2="-10.16" width="0.1524" layer="91"/>
@@ -19284,21 +19284,21 @@ distributor Buerklin, 17G580</description>
 <wire x1="-35.56" y1="43.18" x2="-35.56" y2="48.26" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$1" class="0">
+<net name="N$1" class="1">
 <segment>
 <pinref part="DRK1" gate="G$1" pin="M1"/>
 <pinref part="MOTOR1" gate="-3" pin="S"/>
 <wire x1="43.18" y1="-7.62" x2="43.18" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$2" class="0">
+<net name="N$2" class="1">
 <segment>
 <pinref part="DRK1" gate="G$1" pin="M2"/>
 <pinref part="MOTOR1" gate="-2" pin="S"/>
 <wire x1="45.72" y1="-7.62" x2="45.72" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$3" class="0">
+<net name="N$3" class="1">
 <segment>
 <pinref part="DRK1" gate="G$1" pin="M3"/>
 <pinref part="MOTOR1" gate="-1" pin="S"/>

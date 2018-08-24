@@ -17,8 +17,8 @@ public:
 	Menuable () {};
 	virtual ~Menuable () {};
 
-	virtual void activateMenu();
-	virtual void deactivateMenu();
+	virtual void pushMenu();
+	virtual void popMenu();
 	virtual void registerMenuController(MenuController* menuCtrl);
 	virtual void printHelp();
 	virtual void menuLoop(char ch) {};
@@ -38,8 +38,8 @@ public:
 
 
 	void registerMenu(const Menuable* menu);
-	void activateMenu(const Menuable* menu);
-	void deactivateMenu();
+	void pushMenu(const Menuable* menu);
+	void popMenu();
 private:
 	static const int MaxNumberOfMenues = 8;
 	Menuable* menus[MaxNumberOfMenues];

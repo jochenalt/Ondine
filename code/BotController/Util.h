@@ -22,5 +22,6 @@ template <typename T> int sqr(T val) {
     return (T(0)*T(0));
 }
 
+extern HardwareSerial* logger;
 
 #endif /* UTIL_H_ */

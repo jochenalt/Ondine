@@ -15,7 +15,7 @@
 float OmniWheel::pid_k = .5;
 float OmniWheel::pid_i = 0.8;
 
-const float minTorque = 0.05; // [PWM ratio]
+const float minMotorTorque = 0.05; // [PWM ratio]
 const float maxAdvanceAngle = radians(15); // [rad]
 
 // max PWM value is (1<<pwmResolution)-1
@@ -67,6 +67,10 @@ int OmniWheel::getPWMValue(float torque, float angle_rad) {
 OmniWheel::OmniWheel() {
 	// initialize precomputed spvm values (only once)
 	precomputeSVPMWave();
+}
+
+void OmniWheel::setup(MenuController* menuCtrl) {
+	registerMenuController(menuCtrl);
 }
 
 void OmniWheel::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
@@ -311,7 +315,7 @@ void OmniWheel::enable(bool doit) {
 		encoderAngle = magneticFieldAngle;
 
 		// set default torque
-		targetTorque = minTorque;
+		targetTorque = minMotorTorque;
 		sendPWMDuty();
 	}
 	else
@@ -418,7 +422,7 @@ void OmniWheel::menuLoop(char ch) {
 			printHelp();
 			break;
 		case 27:
-			deactivateMenu();
+			popMenu();
 			return;
 			break;
 		default:

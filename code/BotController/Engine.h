@@ -26,7 +26,10 @@ public:
 	// get angle of all wheels. Accumulates when turning
 	void getIntegratedWheelAngle(float wheelAngle[3]);
 
-	void setup();
+	// get the change of angles since last invocation
+	void getWheelAngleChange(float wheelAngleChange[3]);
+
+	void setup(MenuController* menuCtrl);
 	void loop();
 	virtual void menuLoop(char ch);
 	virtual void printHelp();
@@ -35,6 +38,7 @@ private:
 	int activeMenuWheel = 0;
 	uint32_t averageTime_ms = 0;
 	uint32_t lastLoop_ms = 0;
+	float lastWheelAngle[3] = {0,0,0};
 };
 
 #endif /* ENGINE_H_ */

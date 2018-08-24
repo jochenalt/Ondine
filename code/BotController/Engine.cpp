@@ -30,24 +30,24 @@
 #define W3_ENCODERA_PIN 18
 #define W3_ENCODERB_PIN 19
 
-void Engine::setup() {
+void Engine::setup(MenuController* menuCtrl) {
 	// register out menu
 	registerMenuController(menuCtrl);
 
 	// initialize all brushless motors and their encoders
 	wheel[0] = new OmniWheel();
-	wheel[0]->registerMenuController(menuCtrl);
+	wheel[0]->setup(menuCtrl);
 	wheel[0]->setupMotor(W1_L6234_ENABLE_PIN, W1_L6234_PWM1, W1_L6234_PWM2, W1_L6234_PWM3);
 	wheel[0]->setupEncoder(W1_ENCODERA_PIN, W1_ENCODERB_PIN, 1024);
 
 	wheel[1] = new OmniWheel();
-	wheel[1]->registerMenuController(menuCtrl);
+	wheel[1]->setup(menuCtrl);
 	wheel[1]->setupMotor(W2_L6234_ENABLE_PIN, W2_L6234_PWM1, W2_L6234_PWM2, W2_L6234_PWM3);
 	wheel[1]->setupEncoder(W2_ENCODERA_PIN, W2_ENCODERB_PIN, 1024);
 	menuCtrl->registerMenu(wheel[1]);
 
 	wheel[2] = new OmniWheel();
-	wheel[2]->registerMenuController(menuCtrl);
+	wheel[2]->setup(menuCtrl);
 	wheel[2]->setupMotor(W3_L6234_ENABLE_PIN, W3_L6234_PWM1, W3_L6234_PWM2, W3_L6234_PWM3);
 	wheel[2]->setupEncoder(W3_ENCODERA_PIN, W3_ENCODERB_PIN, 1024);
 }
@@ -65,21 +65,27 @@ void Engine::loop() {
 }
 
 void Engine::setWheelSpeed(float revPerSec[3]) {
-	wheel[0]->setSpeed(revPerSec[0]);
-	wheel[1]->setSpeed(revPerSec[1]);
-	wheel[2]->setSpeed(revPerSec[2]);
+	for (int i = 0;i<3;i++)
+		wheel[i]->setSpeed(revPerSec[i]);
 }
 
 // get angle of all wheels since invocation of resetWheelAngle
 void Engine::getIntegratedWheelAngle(float wheelAngle[3]) {
-	wheelAngle[0] = wheel[0]->getIntegratedAngle();
-	wheelAngle[1] = wheel[1]->getIntegratedAngle();
-	wheelAngle[2] = wheel[2]->getIntegratedAngle();
-
+	for (int i = 0;i<3;i++)
+		wheelAngle[i] = wheel[i]->getIntegratedAngle();
 }
 
+void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
+	for (int i = 0;i<3;i++) {
+		float angle = wheel[i]->getIntegratedAngle();
+		wheelAngleChange[i] = angle - lastWheelAngle[i];
+		lastWheelAngle[i] = angle;
+	}
+}
+
+
 void Engine::printHelp() {
-	Serial1.println("Engine controller");
+	Serial1.println("Engine");
 	Serial1.println("0 - set wheel 0");
 	Serial1.println("1 - set wheel 1");
 	Serial1.println("2 - set wheel 2");
@@ -92,21 +98,21 @@ void Engine::menuLoop(char ch) {
 	switch (ch) {
 	case '0':
 		activeMenuWheel = 0;
-		wheel[0]->activateMenu();
+		wheel[0]->pushMenu();
 		break;
 	case '1':
 		activeMenuWheel = 1;
-		wheel[1]->activateMenu();
+		wheel[1]->pushMenu();
 		break;
 	case '2':
 		activeMenuWheel = 2;
-		wheel[2]->activateMenu();
+		wheel[2]->pushMenu();
 		break;
 	case 'h':
 		printHelp();
 		break;
 	case 27:
-		deactivateMenu();
+		popMenu();
 		return;
 		break;
 	default:

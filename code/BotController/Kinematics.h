@@ -21,7 +21,6 @@
 typedef float matrix33_t[3][3];
 typedef float vector3[3];
 
-
 class Kinematix : virtual public Menuable {
 	public:
 		Kinematix () {}
@@ -62,6 +61,11 @@ class Kinematix : virtual public Menuable {
 		float cm[3][3];	    // construction matrix, computed once during startup
 		float icm[3][3];	    // inverse construction matrix, computed once during startup
 		float trm[3][3];     // tilt rotation matrix to correct speed/omega depending on the tilt angle, computed in each loop
+
+		bool titleCompensationMatrixComputed = false;
+		float lastTiltX = 0;
+		float lastTiltY = 0;
+
 };
 
 
