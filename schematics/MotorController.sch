@@ -622,8 +622,8 @@
 <pad name="EN" x="-11.43" y="-6.35" drill="0.8128" diameter="1.27" rot="R90"/>
 <pad name="M2" x="3.81" y="10.922" drill="0.8128" diameter="1.27" rot="R90"/>
 <pad name="M1" x="6.35" y="10.922" drill="0.8128" diameter="1.27" rot="R180"/>
-<text x="3.556" y="8.509" size="1.27" layer="25" ratio="10" rot="R180">&gt;NAME</text>
-<text x="-2.286" y="4.445" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<text x="3.556" y="4.699" size="1.27" layer="25" ratio="10" rot="R180">&gt;NAME</text>
+<text x="-2.286" y="0.635" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
 <pad name="GND" x="-4.318" y="9.906" drill="0.6" shape="square"/>
 <wire x1="12.7" y1="13.97" x2="-13.97" y2="13.97" width="0.127" layer="21"/>
 <wire x1="-13.97" y1="13.97" x2="-13.97" y2="-12.7" width="0.127" layer="21"/>
@@ -632,8 +632,6 @@
 <circle x="-10.922" y="-10.16" radius="1.79605" width="0.127" layer="21"/>
 <circle x="10.16" y="10.922" radius="1.79605" width="0.127" layer="21"/>
 <circle x="10.16" y="-10.16" radius="1.79605" width="0.127" layer="21"/>
-<text x="0" y="-7.62" size="1.27" layer="20">DROTEK
-L6234</text>
 </package>
 </packages>
 <symbols>

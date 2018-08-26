@@ -37,8 +37,8 @@ public:
 class MotorConfig {
 public:
 	void initDefaultValues() {
-		Kp = 0.8;
-		Ki = 0.8;
+		Kp = 5.0;
+		Ki = 2.0;
 	}
 
 	void print();

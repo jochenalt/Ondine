@@ -14,15 +14,11 @@
 #include <utilities/TimePassedBy.h>
 
 
-float OmniWheel::pid_k = 1.0;
-float OmniWheel::pid_i = 0.8;
-
-const float minMotorTorque = 0.05; // [PWM ratio]
-const float maxAdvanceAngle = radians(30); // [rad]
-const float maxTorqueAdvanceAngle = radians(20); // [rad]
+const float maxAdvanceAngle = radians(60); // [rad]
+const float maxTorqueAdvanceAngle = radians(45); // [rad]
 
 // max PWM value is (1<<pwmResolution)-1
-const int pwmResolution = 8;
+const int pwmResolution = 10;
 
 // array to store pre-computed values of space vector wave form (SVPWM)
 const int svpwmArraySize = 244;
@@ -45,8 +41,6 @@ void precomputeSVPMWave() {
 			float pwmSpaceVectorValue =  ((phaseA - voff)/2.0*spaceVectorFactor + 0.5)*maxPWMValue;
 			float pwmSinValue =  (phaseA/2.0 + 0.5)*maxPWMValue;
 
-			if (pwmSpaceVectorValue<maxPWMValue/2)
-				pwmSpaceVectorValue = 0;
 			svpwmTable[i] =  pwmSpaceVectorValue;
 			svpwmTable[i] =  pwmSinValue;
 
@@ -88,9 +82,9 @@ void OmniWheel::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Inp
 	analogWriteResolution(pwmResolution);
 
 	// choose the frequency that it just can't be heard
-	analogWriteFrequency(input1Pin, 20000);
-	analogWriteFrequency(input2Pin, 20000);
-	analogWriteFrequency(input3Pin, 20000);
+	analogWriteFrequency(input1Pin, 50000);
+	analogWriteFrequency(input2Pin, 50000);
+	analogWriteFrequency(input3Pin, 50000);
 
 	// has to be pwm pins
 	pinMode(input1Pin, OUTPUT);
@@ -158,7 +152,7 @@ void OmniWheel::readEncoder() {
 void OmniWheel::sendPWMDuty() {
 	// torque is increased with advance angle error, which is the difference
 	// between to-be reference angle and actual angle as indicated by the encoder
-	float torque = targetTorque + (1.0-targetTorque)*(min(abs(advanceAngleError)/maxTorqueAdvanceAngle,1.0));
+	float torque = targetTorque + (1.0-targetTorque)*min(abs(advanceAngleError/maxTorqueAdvanceAngle),1.0);
 
 	int pwmValueA = getPWMValue(torque, magneticFieldAngle);
 	int pwmValueB = getPWMValue(torque, magneticFieldAngle + 1.0*TWO_PI/3.0);
@@ -196,37 +190,40 @@ void OmniWheel::loop() {
 
 	// carry out PI controller to compute advance angle
 	advanceAngleError = memory.persistentMem.motorControllerConfig.Kp*errorAngle;
+
 	advanceAnglePhase += errorAngle * timePassed_s;
-	advanceAnglePhase = constrain(advanceAnglePhase, -maxAdvanceAngle,maxAdvanceAngle); // limit error integral by 30°
+	advanceAnglePhase = constrain(advanceAnglePhase, -maxTorqueAdvanceAngle,maxTorqueAdvanceAngle); // limit error integral by 30°
 	float i_out = memory.persistentMem.motorControllerConfig.Ki * advanceAnglePhase;
-	float advanceAngle = advanceAngleError + i_out;
-	advanceAngle = constrain(advanceAngle, -maxAdvanceAngle, maxAdvanceAngle); 			// limit outcome by 30°
+	advanceAngle = advanceAngleError + i_out;
+	advanceAngle = constrain(advanceAngle, -maxTorqueAdvanceAngle, +maxTorqueAdvanceAngle); 			// limit outcome by 30°
 
 	// outcome of pid controller is advance angle
-	magneticFieldAngle = referenceAngle + advanceAngle;
+	magneticFieldAngle = encoderAngle + advanceAngle;
 
 	// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
-
-	referenceAngle = constrain(referenceAngle, encoderAngle - maxAdvanceAngle, encoderAngle  + maxAdvanceAngle);
+	// referenceAngle = constrain(referenceAngle, encoderAngle - maxTorqueAdvanceAngle, encoderAngle  + maxTorqueAdvanceAngle);
 	// recompute speed, since set speed might not be achieved
-	currentSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
+	// currentSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
 	lastReferenceAngle = referenceAngle; // required to compute speed
 
 	// send new pwm value to motor
 	// set torque proportional to advanceAngleError
 	sendPWMDuty();
 
-	/*
+	static uint32_t lastoutput = 0;
+
+	if (millis() - lastoutput >  100) {
+		lastoutput = millis();
 	command->print("time=");
-	command->print(timePassed_s);
-	command->print(" v=");
+	command->print(timePassed_s*1000.0);
+	command->print("ms v=");
 	command->print(currentSpeed);
 	command->print(" r=");
 	command->print(degrees(referenceAngle));
 	command->print("° e=");
 	command->print(degrees(encoderAngle));
 	command->print("° err=");
-	command->print(errorAngle);
+	command->print(degrees(errorAngle));
 	command->print(" int=");
 	command->print(advanceAnglePhase);
 	command->print(" iout=");
@@ -237,17 +234,9 @@ void OmniWheel::loop() {
 	command->print(degrees(advanceAngle));
 	command->print("° m=");
 	command->print(degrees(magneticFieldAngle));
-	command->print("° ut=");
-	command->print(targetTorque);
-	command->print(" torque=");
-	command->print(torque);
 	command->println();
-	*/
+	}
 
-}
-
-void OmniWheel::setTorque(float newTorque) {
-	targetTorque = newTorque;
 }
 
 void OmniWheel::setMotorSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
@@ -293,7 +282,7 @@ void OmniWheel::enable(bool doit) {
 		advanceAnglePhase = 0;
 		advanceAngleError = 0;
 		currentSpeed = 0;
-		targetTorque = 0;
+		advanceAngle = 0;
 
 		// enable driver, but PWM has no duty cycle yet.
 		sendPWMDuty();
@@ -313,12 +302,13 @@ void OmniWheel::enable(bool doit) {
 		while ((targetTorque < 0.2)) { // quit when above 20% torque
 			// P controller with p=4.0
 			magneticFieldAngle -= encoderAngle*1.0; // this is a P-controller that turns the magnetic field towards the direction of the encoder
+
 			sendPWMDuty();
 			delay(20);
 			readEncoder();
 			float encoderLoopDiff = encoderAngle - lastLoopEncoderAngle;
 			// if encoder indicates no movement, we can increase torque a bit.
-			if (abs(encoderLoopDiff) < radians(0.5))
+			if (abs(encoderLoopDiff) < radians(1.0))
 				targetTorque += 0.005;
 			lastLoopEncoderAngle = encoderAngle;
 		}
@@ -326,9 +316,8 @@ void OmniWheel::enable(bool doit) {
 		referenceAngle = magneticFieldAngle;
 		encoderAngle = magneticFieldAngle;
 		lastReferenceAngle = magneticFieldAngle;
-
-		// set default torque
-		targetTorque = minMotorTorque;
+		advanceAnglePhase = 0;
+		targetTorque = 0;
 		sendPWMDuty();
 	}
 	else
@@ -390,18 +379,6 @@ void OmniWheel::menuLoop(char ch) {
 		case 'r':
 			menuSpeed = -menuSpeed;
 			setMotorSpeed(menuSpeed,  menuAcc);
-			break;
-		case 'T':
-			menuTorque += 0.05;
-			if (menuTorque > 1.0)
-				menuTorque = 1.0;
-			setTorque(menuTorque);
-			break;
-		case 't':
-			menuTorque -= 0.05;
-			if (menuTorque < 0.0)
-				menuTorque = 0.0;
-			setTorque(menuTorque);
 			break;
 		case 'P':
 			memory.persistentMem.motorControllerConfig.Kp  += 0.02;

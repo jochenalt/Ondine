@@ -40,8 +40,8 @@ void Engine::setup(MenuController* menuCtrl) {
 void Engine::loop() {
 	uint32_t start = millis();
 	wheel[0]->loop();
-	wheel[1]->loop();
-	wheel[2]->loop();
+	// wheel[1]->loop();
+	// wheel[2]->loop();
 	uint32_t end = millis();
 
 	uint32_t duration_ms = end - start;

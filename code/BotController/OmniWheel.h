@@ -38,9 +38,6 @@ public:
 	float getSpeed();
 	float getIntegratedAngle();
 
-
-	void setTorque(float torqueRatio /* [0.0-1.0] */);
-
 	void enable(bool doit);
 
 	virtual void printHelp();
@@ -60,15 +57,16 @@ private:
 
 	float targetAcc = 0;				// [rev/s^2]
 	float targetSpeed = 0;				// [rev/s]
-	float targetTorque = 0;				// [0..1], ratio of full torque, ends up in pwm ratio
 
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAnglePhase = 0;		// [rad] integration of angle errors (used by PI controller)
+	float advanceAngle = 0;
 	float advanceAngleError= 0;			// [rad] current angle error (computed by PI controller, determines torque)
 	float currentSpeed = 0;				// [rev/s]
 	float referenceAngle = 0;			// [rad] target angle of the rotor
 	float lastReferenceAngle = 0;		// [rad]
-
+	float targetTorque = 0;
+ 	float torque = 0;
 	float encoderAngle = 0;				// [rad]
 	int lastEncoderPosition = 0;		// last call of encoder value
 
@@ -78,10 +76,6 @@ private:
 	void readEncoder();
 	void sendPWMDuty();
 	uint32_t lastStepTime_us = 0;
-
-	// data of PI controller
-	static float pid_k;
-	static float pid_i;
 
 	bool isEnabled = false;
 
