@@ -149,11 +149,7 @@ void OmniWheel::readEncoder() {
 }
 
 // set the pwm values matching the current magnetic field angle
-void OmniWheel::sendPWMDuty() {
-	// torque is increased with advance angle error, which is the difference
-	// between to-be reference angle and actual angle as indicated by the encoder
-	float torque = targetTorque + (1.0-targetTorque)*min(abs(advanceAngleError/maxTorqueAdvanceAngle),1.0);
-
+void OmniWheel::sendPWMDuty(float torque) {
 	int pwmValueA = getPWMValue(torque, magneticFieldAngle);
 	int pwmValueB = getPWMValue(torque, magneticFieldAngle + 1.0*TWO_PI/3.0);
 	int pwmValueC = getPWMValue(torque, magneticFieldAngle + 2.0*TWO_PI/3.0);
@@ -188,12 +184,15 @@ void OmniWheel::loop() {
 	// set torque linear to error
 	float errorAngle = referenceAngle - encoderAngle;
 
-	// carry out PI controller to compute advance angle
+	// carry out PI controller
 	advanceAngleError = memory.persistentMem.motorControllerConfig.Kp*errorAngle;
 
 	advanceAnglePhase += errorAngle * timePassed_s;
 	advanceAnglePhase = constrain(advanceAnglePhase, -maxTorqueAdvanceAngle,maxTorqueAdvanceAngle); // limit error integral by 30°
 	float i_out = memory.persistentMem.motorControllerConfig.Ki * advanceAnglePhase;
+
+	// read https://core.ac.uk/download/pdf/82166502.pdf
+
 	advanceAngle = advanceAngleError + i_out;
 	advanceAngle = constrain(advanceAngle, -maxTorqueAdvanceAngle, +maxTorqueAdvanceAngle); 			// limit outcome by 30°
 
@@ -208,7 +207,11 @@ void OmniWheel::loop() {
 
 	// send new pwm value to motor
 	// set torque proportional to advanceAngleError
-	sendPWMDuty();
+
+	// torque is increased with advance angle error, which is the difference
+	// between to-be reference angle and actual angle as indicated by the encoder
+
+	sendPWMDuty(min(abs(advanceAngleError/maxTorqueAdvanceAngle),1.0));
 
 	static uint32_t lastoutput = 0;
 
@@ -285,7 +288,7 @@ void OmniWheel::enable(bool doit) {
 		advanceAngle = 0;
 
 		// enable driver, but PWM has no duty cycle yet.
-		sendPWMDuty();
+		sendPWMDuty(0);
 		digitalWrite(enablePin, HIGH);
 		delay(50); // settle
 
@@ -298,16 +301,16 @@ void OmniWheel::enable(bool doit) {
 		// quit the loop if torque is above a certain threshold with encoder at 0
 		// end calibration by setting the current reference angle to the measured rotors position
 		float lastLoopEncoderAngle = 0;
-		targetTorque = 0;
+		float targetTorque = 0;
 		while ((targetTorque < 0.2)) { // quit when above 20% torque
 			// P controller with p=4.0
 			magneticFieldAngle -= encoderAngle*1.0; // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
-			sendPWMDuty();
+			sendPWMDuty(targetTorque);
 			delay(20);
 			readEncoder();
 			float encoderLoopDiff = encoderAngle - lastLoopEncoderAngle;
-			// if encoder indicates no movement, we can increase torque a bit.
+			// if encoder indicates no movement, we can increase torque a bit until the motor moves
 			if (abs(encoderLoopDiff) < radians(1.0))
 				targetTorque += 0.005;
 			lastLoopEncoderAngle = encoderAngle;
@@ -317,8 +320,7 @@ void OmniWheel::enable(bool doit) {
 		encoderAngle = magneticFieldAngle;
 		lastReferenceAngle = magneticFieldAngle;
 		advanceAnglePhase = 0;
-		targetTorque = 0;
-		sendPWMDuty();
+		sendPWMDuty(0);
 	}
 	else
 		digitalWrite(enablePin, LOW);

@@ -65,7 +65,6 @@ private:
 	float currentSpeed = 0;				// [rev/s]
 	float referenceAngle = 0;			// [rad] target angle of the rotor
 	float lastReferenceAngle = 0;		// [rad]
-	float targetTorque = 0;
  	float torque = 0;
 	float encoderAngle = 0;				// [rad]
 	int lastEncoderPosition = 0;		// last call of encoder value
@@ -74,7 +73,7 @@ private:
 	float turnReferenceAngle();
 	void setMagneticFieldAngle(float angle);
 	void readEncoder();
-	void sendPWMDuty();
+	void sendPWMDuty(float torque);
 	uint32_t lastStepTime_us = 0;
 
 	bool isEnabled = false;
