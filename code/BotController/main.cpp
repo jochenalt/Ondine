@@ -1,10 +1,10 @@
+#include <BrushlessMotorDriver.h>
 #include "Arduino.h"
 #include "MenuController.h"
 #include "Engine.h"
 #include "BotController.h"
 
 #include <utilities/PatternBlinker.h>
-#include <OmniWheel.h>
 
 #define LED_PIN 13			// blinking LED on Teensy
 static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// nice!

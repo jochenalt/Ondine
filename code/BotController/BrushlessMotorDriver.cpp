@@ -8,14 +8,14 @@
 #include <Arduino.h>
 #include <Util.h>
 #include <BotMemory.h>
+#include <BrushlessMotorDriver.h>
 
-#include <OmniWheel.h>
 #include <ClassInterrupt.h>
 #include <utilities/TimePassedBy.h>
 
 
-const float maxAdvanceAngle = radians(60); // [rad]
-const float maxTorqueAdvanceAngle = radians(45); // [rad]
+const float maxAdvanceAngle = radians(30); 			// [rad], has been found out empirically
+const float maxSpeed = 60; 							// [rev/s]
 
 // max PWM value is (1<<pwmResolution)-1
 const int pwmResolution = 10;
@@ -49,7 +49,7 @@ void precomputeSVPMWave() {
 	}
 }
 
-int OmniWheel::getPWMValue(float torque, float angle_rad) {
+int BrushlessMotorDriver::getPWMValue(float torque, float angle_rad) {
 	// map input angle to 0..2*PI
 	if (angle_rad < 0)
 		angle_rad += (int)(abs(angle_rad)/(2.0*M_PI) + 1.0)*2.0*M_PI;
@@ -61,16 +61,23 @@ int OmniWheel::getPWMValue(float torque, float angle_rad) {
 	return  torque * svpwmTable[angleIndex];
 }
 
-OmniWheel::OmniWheel() {
+BrushlessMotorDriver::BrushlessMotorDriver() {
 	// initialize precomputed spvm values (only once)
 	precomputeSVPMWave();
 }
 
-void OmniWheel::setup(MenuController* menuCtrl) {
+void estimateControllerGain(float K_s /* amplification */, float T_u /* delay */, float T_g /* control time */, float &K_p, float &K_i, float &K_d)  {
+	// Ziegler and Nicols, according to https://rn-wissen.de/wiki/index.php/Regelungstechnik
+	K_p = (0.9 / K_s) * (T_g / T_u);
+	K_i = K_p / (3.3 * T_u);
+	K_d = K_p*0.5*T_u;
+}
+
+void BrushlessMotorDriver::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
 }
 
-void OmniWheel::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
+void BrushlessMotorDriver::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
 	// there's only one enable pin that has a short cut to EN1, EN2, and EN3 from L6234
 	enablePin = EnablePin;
 
@@ -99,7 +106,7 @@ void OmniWheel::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Inp
 	setMagneticFieldAngle(0);
 }
 
-void OmniWheel::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR) {
+void BrushlessMotorDriver::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR) {
 	encoderAPin = EncoderAPin;
 	encoderBPin = EncoderBPin;
 
@@ -108,12 +115,12 @@ void OmniWheel::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR) {
 }
 
 // turn magnetic field of the motor according to current speed
-void OmniWheel::setMagneticFieldAngle(float angle) {
+void BrushlessMotorDriver::setMagneticFieldAngle(float angle) {
 	// increase angle of magnetic field
 	magneticFieldAngle = angle;
 }
 
-float OmniWheel::turnReferenceAngle() {
+float BrushlessMotorDriver::turnReferenceAngle() {
 	uint32_t now_us = micros();
 	uint32_t timePassed_us = now_us - lastStepTime_us;
 
@@ -135,7 +142,7 @@ float OmniWheel::turnReferenceAngle() {
 	return timePassed_s;
 }
 
-void OmniWheel::readEncoder() {
+void BrushlessMotorDriver::readEncoder() {
 	if (encoder == NULL) {
 		// without encoder assume perfect motor
 		encoderAngle = referenceAngle;
@@ -149,7 +156,7 @@ void OmniWheel::readEncoder() {
 }
 
 // set the pwm values matching the current magnetic field angle
-void OmniWheel::sendPWMDuty(float torque) {
+void BrushlessMotorDriver::sendPWMDuty(float torque) {
 	int pwmValueA = getPWMValue(torque, magneticFieldAngle);
 	int pwmValueB = getPWMValue(torque, magneticFieldAngle + 1.0*TWO_PI/3.0);
 	int pwmValueC = getPWMValue(torque, magneticFieldAngle + 2.0*TWO_PI/3.0);
@@ -158,8 +165,9 @@ void OmniWheel::sendPWMDuty(float torque) {
 	analogWrite(input3Pin, pwmValueC);
 }
 
+
 // call me as often as possible
-void OmniWheel::loop() {
+void BrushlessMotorDriver::loop() {
 	// run only if at least one ms passed
 	uint32_t now = millis();
 	if (now - lastCall < 1)
@@ -177,41 +185,47 @@ void OmniWheel::loop() {
 	// read the current encoder value
 	readEncoder();
 
-	// compute the angle of the magnetic field
-	// - starting point is reference angle
-	// - compute difference as given by the encoder
-	// - feed into PI controller, result is magnetic field
-	// set torque linear to error
+	// set the advance angle linear to speed (according to "Advance Angle Calculation for
+	// Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
+	advanceAngle = currentSpeed/maxSpeed*maxAdvanceAngle;
+
+	// compute position error
 	float errorAngle = referenceAngle - encoderAngle;
 
-	// carry out PI controller
-	advanceAngleError = memory.persistentMem.motorControllerConfig.Kp*errorAngle;
+	// in case of deceleration, use much smaller delay time, which leads to higher PI controller factors
+	// according to "Brushless Control Made Easy.pdf"
+	float controllerDecelerationFactor = 1.0; // factor of acceleration delay time compared to deceleration
+	if (((errorAngle < 0 ) && (actualSpeed > 0)) ||
+		((errorAngle > 0 ) && (actualSpeed < 0)))
+		controllerDecelerationFactor = MaxDecelerationFactor;
 
-	advanceAnglePhase += errorAngle * timePassed_s;
-	advanceAnglePhase = constrain(advanceAnglePhase, -maxTorqueAdvanceAngle,maxTorqueAdvanceAngle); // limit error integral by 30°
-	float i_out = memory.persistentMem.motorControllerConfig.Ki * advanceAnglePhase;
+	// carry out PI controller with integrative gain increasing with speed
+	float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid, errorAngle, timePassed_s, -radians(maxAdvanceAngle),radians(maxAdvanceAngle));
 
-	// read https://core.ac.uk/download/pdf/82166502.pdf
+	// magnetic force is proportional to distance^2, i.e. torque is proportional to sqr(tan(advanceAngle))
+	// control output plays with that torque
+	// assume tan(x) = x
+	float torque = sqr(abs(advanceAngle)/maxAdvanceAngle)*(controlOutput/maxAdvanceAngle);
 
-	advanceAngle = advanceAngleError + i_out;
-	advanceAngle = constrain(advanceAngle, -maxTorqueAdvanceAngle, +maxTorqueAdvanceAngle); 			// limit outcome by 30°
+	// if controller shows a small error, stay at ideal advance angle.
+	// the higher the error, the more the advance angle is reduce in order to get more physical torque (at the same time, the torque ratio is increased)
+	// even turn sign of advance angle in case of negative error (i.e. the motor needs to break)
+	// FIXME: If the control output is suddenly negativ, then the advance angle gets fully negative. At high speed, this
+	// might give some jerks
+	advanceAngle = sgn(controlOutput)*advanceAngle*(1.0-abs(controlOutput)/maxAdvanceAngle);
 
 	// outcome of pid controller is advance angle
 	magneticFieldAngle = encoderAngle + advanceAngle;
 
 	// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
-	// referenceAngle = constrain(referenceAngle, encoderAngle - maxTorqueAdvanceAngle, encoderAngle  + maxTorqueAdvanceAngle);
+	referenceAngle = constrain(referenceAngle, encoderAngle - maxAdvanceAngle, encoderAngle  + maxAdvanceAngle);
 	// recompute speed, since set speed might not be achieved
-	// currentSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
+
+	actualSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
 	lastReferenceAngle = referenceAngle; // required to compute speed
 
 	// send new pwm value to motor
-	// set torque proportional to advanceAngleError
-
-	// torque is increased with advance angle error, which is the difference
-	// between to-be reference angle and actual angle as indicated by the encoder
-
-	sendPWMDuty(min(abs(advanceAngleError/maxTorqueAdvanceAngle),1.0));
+	sendPWMDuty(min(abs(torque),1.0));
 
 	static uint32_t lastoutput = 0;
 
@@ -221,58 +235,56 @@ void OmniWheel::loop() {
 	command->print(timePassed_s*1000.0);
 	command->print("ms v=");
 	command->print(currentSpeed);
+	command->print("/");
+	command->print(actualSpeed);
 	command->print(" r=");
 	command->print(degrees(referenceAngle));
 	command->print("° e=");
 	command->print(degrees(encoderAngle));
 	command->print("° err=");
 	command->print(degrees(errorAngle));
-	command->print(" int=");
-	command->print(advanceAnglePhase);
-	command->print(" iout=");
-	command->print(degrees(i_out));
-	command->print(" aae=");
-	command->print(degrees(advanceAngleError));
-	command->print(" a=");
+	command->print(" control=");
+	command->print(degrees(controlOutput));
+	command->print(" aa=");
 	command->print(degrees(advanceAngle));
-	command->print("° m=");
+	command->print("° tq=");
+	command->print(torque);
+	command->print("m=");
 	command->print(degrees(magneticFieldAngle));
 	command->println();
 	}
 
 }
 
-void OmniWheel::setMotorSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
+void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
 	targetSpeed = speed;
 	targetAcc = acc;
 }
 
-float OmniWheel::getMotorSpeed() {
-	return currentSpeed;
+float BrushlessMotorDriver::getMotorSpeed() {
+	return actualSpeed;
 }
 
-float OmniWheel::getIntegratedMotorAngle() {
+float BrushlessMotorDriver::getIntegratedMotorAngle() {
 	return referenceAngle;
 }
 
 
-void OmniWheel::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
+void BrushlessMotorDriver::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
 	setMotorSpeed(speed/GearBoxRatio,acc);
 }
 
-float OmniWheel::getSpeed() {
-	return currentSpeed*GearBoxRatio;
+float BrushlessMotorDriver::getSpeed() {
+	return actualSpeed*GearBoxRatio;
 }
 
-float OmniWheel::getIntegratedAngle() {
+float BrushlessMotorDriver::getIntegratedAngle() {
 	return referenceAngle*GearBoxRatio;
 }
 
-void OmniWheel::enable(bool doit) {
+void BrushlessMotorDriver::enable(bool doit) {
 	isEnabled = doit;
 	if (isEnabled) {
-		// reset speed before enabling. Dont reset the target speed
-		currentSpeed = 0;
 
 		// startup procedure to find the angle of the motor's rotor
 		// - turn magnetic field with min torque (120° max) until encoder recognizes a significant movement
@@ -282,10 +294,10 @@ void OmniWheel::enable(bool doit) {
 		encoderAngle = 0;
 		magneticFieldAngle = 0;
 		referenceAngle = 0;
-		advanceAnglePhase = 0;
-		advanceAngleError = 0;
 		currentSpeed = 0;
+		actualSpeed = 0;
 		advanceAngle = 0;
+		lastEncoderPosition = 0;
 
 		// enable driver, but PWM has no duty cycle yet.
 		sendPWMDuty(0);
@@ -319,7 +331,6 @@ void OmniWheel::enable(bool doit) {
 		referenceAngle = magneticFieldAngle;
 		encoderAngle = magneticFieldAngle;
 		lastReferenceAngle = magneticFieldAngle;
-		advanceAnglePhase = 0;
 		sendPWMDuty(0);
 	}
 	else
@@ -327,7 +338,7 @@ void OmniWheel::enable(bool doit) {
 }
 
 
-void OmniWheel::printHelp() {
+void BrushlessMotorDriver::printHelp() {
 	command->println();
 
 	command->println("brushless motor menu");
@@ -347,7 +358,7 @@ void OmniWheel::printHelp() {
 	command->println("ESC");
 }
 
-void OmniWheel::menuLoop(char ch) {
+void BrushlessMotorDriver::menuLoop(char ch) {
 
 		bool cmd = true;
 		switch (ch) {
@@ -383,28 +394,73 @@ void OmniWheel::menuLoop(char ch) {
 			setMotorSpeed(menuSpeed,  menuAcc);
 			break;
 		case 'P':
-			memory.persistentMem.motorControllerConfig.Kp  += 0.02;
+			memory.persistentMem.motorControllerConfig.pid.Kp  += 0.02;
 			command->print("Kp=");
-			command->println(memory.persistentMem.motorControllerConfig.Kp);
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
 
 			break;
 		case 'p':
-			memory.persistentMem.motorControllerConfig.Kp -= 0.02;
+			memory.persistentMem.motorControllerConfig.pid.Kp -= 0.02;
 			command->print("Kp=");
-			command->println(memory.persistentMem.motorControllerConfig.Kp);
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
+			break;
+		case 'D':
+			memory.persistentMem.motorControllerConfig.pid.Kd  += 0.02;
+			command->print("Kd=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
 
 			break;
-
+		case 'd':
+			memory.persistentMem.motorControllerConfig.pid.Kd -= 0.02;
+			command->print("Kd=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
+			break;
 		case 'I':
-			memory.persistentMem.motorControllerConfig.Ki  += 0.02;
+			memory.persistentMem.motorControllerConfig.pid.Ki  += 0.02;
 			command->print("Ki=");
-			command->println(memory.persistentMem.motorControllerConfig.Ki);
+			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
 
 			break;
 		case 'i':
-			memory.persistentMem.motorControllerConfig.Ki -= 0.02;
+			memory.persistentMem.motorControllerConfig.pid.Ki -= 0.02;
 			command->print("Ki=");
-			command->println(memory.persistentMem.motorControllerConfig.Ki);
+			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
+			break;
+		case 'Z':
+			memory.persistentMem.motorControllerConfig.pid.K_s  += 0.02;
+			command->print("amplification=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.K_s);
+			command->print("deadtime=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.T_u);
+			command->print("controltime=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.T_g);
+			memory.persistentMem.motorControllerConfig.pid.zieglerAndNicols();
+			command->print("PID=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
+			command->println(")");
+
+			break;
+		case 'z':
+			memory.persistentMem.motorControllerConfig.pid.K_s  -= 0.02;
+			command->print("amplification=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.K_s);
+			command->print("deadtime=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.T_u);
+			command->print("controltime=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.T_g);
+			memory.persistentMem.motorControllerConfig.pid.zieglerAndNicols();
+			command->print("PID=");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
+			command->println(")");
+
 			break;
 		case 'e':
 			menuEnable = menuEnable?false:true;

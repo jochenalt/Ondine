@@ -11,6 +11,7 @@
 #define __BOTMEMORY_H__
 #include "Arduino.h"
 #include "MemoryBase.h"
+#include "PIDController.h"
 
 class BotMemory;
 extern BotMemory memory;
@@ -37,14 +38,19 @@ public:
 class MotorConfig {
 public:
 	void initDefaultValues() {
-		Kp = 5.0;
-		Ki = 2.0;
+		pid.Kp = 5.0;
+		pid.Ki = 2.0;
+		pid.Kd = 0.0;
+
+		pid.K_s = 1.0;
+		pid.T_u = 0.05;
+		pid.T_g = 0.1;
 	}
 
 	void print();
 
-	float Kp;
-	float Ki;
+	// PID values for control at 0 rev/s
+	PIDControllerConfig pid;
 };
 
 class IMUConfig {

@@ -9,19 +9,22 @@
 #define BLDCCONTROLLER_H_
 
 #include <MenuController.h>
+#include <PIDController.h>
 
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
 
 
-const float MaxAcceleration = 500.0; // [rev/s^2]
+const float MaxAcceleration = 100.0; // [rev/s^2]
+const float MaxDecelerationFactor = 5.0; // acceleration delay time is that higher than deceleration delay time;
+
 const float GearBoxRatio = 24.0/50.0;
 
-class OmniWheel : virtual public Menuable {
+class BrushlessMotorDriver : virtual public Menuable {
 public:
 
-	OmniWheel();
-	virtual ~OmniWheel() {};
+	BrushlessMotorDriver();
+	virtual ~BrushlessMotorDriver() {};
 
 	void setup(MenuController* menuCtrl);
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
@@ -43,6 +46,7 @@ public:
 	virtual void printHelp();
 	virtual void menuLoop(char ch);
 private:
+	void estimatePIDController();
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3
 	int enablePin = 0;
@@ -59,13 +63,15 @@ private:
 	float targetSpeed = 0;				// [rev/s]
 
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
-	float advanceAnglePhase = 0;		// [rad] integration of angle errors (used by PI controller)
 	float advanceAngle = 0;
-	float advanceAngleError= 0;			// [rad] current angle error (computed by PI controller, determines torque)
 	float currentSpeed = 0;				// [rev/s]
+	float actualSpeed = 0;				// [rev/s]
+
 	float referenceAngle = 0;			// [rad] target angle of the rotor
 	float lastReferenceAngle = 0;		// [rad]
- 	float torque = 0;
+	PIDController pid;
+
+	float torque = 0;
 	float encoderAngle = 0;				// [rad]
 	int lastEncoderPosition = 0;		// last call of encoder value
 

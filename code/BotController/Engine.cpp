@@ -30,7 +30,7 @@ void Engine::setup(MenuController* menuCtrl) {
 
 	// initialize all brushless motors and their encoders
 	for (int i = 0;i<3;i++) {
-		wheel[i] = new OmniWheel();
+		wheel[i] = new BrushlessMotorDriver();
 		wheel[i]->setup(menuCtrl);
 		wheel[i]->setupMotor(EnablePin, WheelPins[i][0], WheelPins[i][1], WheelPins[i][2]);
 		wheel[i]->setupEncoder(EncoderPins[i][0],EncoderPins[i][1], 1024);

@@ -8,8 +8,8 @@
 #ifndef ENGINE_H_
 #define ENGINE_H_
 
+#include <BrushlessMotorDriver.h>
 #include <MenuController.h>
-#include <OmniWheel.h>
 #include <Kinematics.h>
 
 // Engine combines three wheels and allows to pass speed commands to all of them
@@ -34,7 +34,7 @@ public:
 	virtual void menuLoop(char ch);
 	virtual void printHelp();
 private:
-	OmniWheel* wheel[3] = { NULL, NULL, NULL };
+	BrushlessMotorDriver* wheel[3] = { NULL, NULL, NULL };
 	int activeMenuWheel = 0;
 	uint32_t averageTime_ms = 0;
 	uint32_t lastLoop_ms = 0;
