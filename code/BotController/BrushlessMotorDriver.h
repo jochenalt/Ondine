@@ -46,7 +46,6 @@ public:
 	virtual void printHelp();
 	virtual void menuLoop(char ch);
 private:
-	void estimatePIDController();
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3
 	int enablePin = 0;
@@ -69,7 +68,7 @@ private:
 
 	float referenceAngle = 0;			// [rad] target angle of the rotor
 	float lastReferenceAngle = 0;		// [rad]
-	PIDController pid;
+	DynamicPIDController pid;
 
 	float torque = 0;
 	float encoderAngle = 0;				// [rad]

@@ -38,19 +38,29 @@ public:
 class MotorConfig {
 public:
 	void initDefaultValues() {
-		pid.Kp = 5.0;
-		pid.Ki = 2.0;
-		pid.Kd = 0.0;
+		pid_position.Kp = 5.0;
+		pid_position.Ki = 2.0;
+		pid_position.Kd = 0.0;
 
-		pid.K_s = 1.0;
-		pid.T_u = 0.05;
-		pid.T_g = 0.1;
+		pid_position.K_s = 5.0;
+		pid_position.T_u = 0.01;
+		pid_position.T_g = 0.1;
+
+		pid_speed.Kp = 0.8;
+		pid_speed.Ki = 0.2;
+		pid_speed.Kd = 0.0;
+
+		pid_speed.K_s = 1.0;
+		pid_speed.T_u = 0.05;
+		pid_speed.T_g = 0.1;
+
 	}
 
 	void print();
 
 	// PID values for control at 0 rev/s
-	PIDControllerConfig pid;
+	PIDControllerConfig pid_position;
+	PIDControllerConfig pid_speed;
 };
 
 class IMUConfig {

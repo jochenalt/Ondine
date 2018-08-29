@@ -14,8 +14,10 @@
 #include <utilities/TimePassedBy.h>
 
 
-const float maxAdvanceAngle = radians(30); 			// [rad], has been found out empirically
+const float maxAngleError = radians(30);
+const float maxAdvanceAnglePhase = radians(30); 	// [rad], has been found out empirically
 const float maxSpeed = 60; 							// [rev/s]
+
 
 // max PWM value is (1<<pwmResolution)-1
 const int pwmResolution = 10;
@@ -66,12 +68,6 @@ BrushlessMotorDriver::BrushlessMotorDriver() {
 	precomputeSVPMWave();
 }
 
-void estimateControllerGain(float K_s /* amplification */, float T_u /* delay */, float T_g /* control time */, float &K_p, float &K_i, float &K_d)  {
-	// Ziegler and Nicols, according to https://rn-wissen.de/wiki/index.php/Regelungstechnik
-	K_p = (0.9 / K_s) * (T_g / T_u);
-	K_i = K_p / (3.3 * T_u);
-	K_d = K_p*0.5*T_u;
-}
 
 void BrushlessMotorDriver::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
@@ -185,40 +181,44 @@ void BrushlessMotorDriver::loop() {
 	// read the current encoder value
 	readEncoder();
 
-	// set the advance angle linear to speed (according to "Advance Angle Calculation for
-	// Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
-	advanceAngle = currentSpeed/maxSpeed*maxAdvanceAngle;
+	// torque is max at 90 degrees
+	// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
+	advanceAngle = radians(90)* sgn(actualSpeed);
 
-	// compute position error
+
+	// compute position error as input for PID controller
 	float errorAngle = referenceAngle - encoderAngle;
 
-	// in case of deceleration, use much smaller delay time, which leads to higher PI controller factors
-	// according to "Brushless Control Made Easy.pdf"
-	float controllerDecelerationFactor = 1.0; // factor of acceleration delay time compared to deceleration
-	if (((errorAngle < 0 ) && (actualSpeed > 0)) ||
-		((errorAngle > 0 ) && (actualSpeed < 0)))
-		controllerDecelerationFactor = MaxDecelerationFactor;
+	// do we need to accelerate or decelerate?
+	bool accelerate = (errorAngle > 0) ^ (actualSpeed < 0);
 
-	// carry out PI controller with integrative gain increasing with speed
-	float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid, errorAngle, timePassed_s, -radians(maxAdvanceAngle),radians(maxAdvanceAngle));
+	// carry out posh PID controller
+	float speedRatio = actualSpeed/maxSpeed;
+	float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed, speedRatio,
+									-radians(maxAngleError) /* min */,radians(maxAngleError) /* max */,
+									errorAngle,  timePassed_s);
 
-	// magnetic force is proportional to distance^2, i.e. torque is proportional to sqr(tan(advanceAngle))
-	// control output plays with that torque
-	// assume tan(x) = x
-	float torque = sqr(abs(advanceAngle)/maxAdvanceAngle)*(controlOutput/maxAdvanceAngle);
+	// estimate the current shift of current behind voltage (back EMF). This is typically set to increase linearly with the voltage
+	// which is proportional to the torque for the PWM output
+	// (according to https://www.digikey.gr/en/articles/techzone/2017/jan/why-and-how-to-sinusoidally-control-three-phase-brushless-dc-motors)
+	// (according to "Advance Angle Calculation for Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
+	float advanceAnglePhaseShift = controlOutput/maxAngleError;
 
-	// if controller shows a small error, stay at ideal advance angle.
-	// the higher the error, the more the advance angle is reduce in order to get more physical torque (at the same time, the torque ratio is increased)
-	// even turn sign of advance angle in case of negative error (i.e. the motor needs to break)
-	// FIXME: If the control output is suddenly negativ, then the advance angle gets fully negative. At high speed, this
-	// might give some jerks
-	advanceAngle = sgn(controlOutput)*advanceAngle*(1.0-abs(controlOutput)/maxAdvanceAngle);
+	if (accelerate) {
+		// if motor is too slow, increase torque. Advance angle remains the same (like in DC motor control)
+		torque = abs(controlOutput)/maxAngleError;
+	} else {
+		// if the motor is too fast we need to decelerate turn back advance angle to compensate.
+		advanceAngle = -advanceAngle;
+		advanceAnglePhaseShift = -advanceAnglePhaseShift;
+		torque = abs(controlOutput)/maxAngleError;
+	}
 
-	// outcome of pid controller is advance angle
-	magneticFieldAngle = encoderAngle + advanceAngle;
+	// set magnetic field relative to rotor's position
+	magneticFieldAngle = encoderAngle + advanceAngle + advanceAnglePhaseShift;
 
 	// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
-	referenceAngle = constrain(referenceAngle, encoderAngle - maxAdvanceAngle, encoderAngle  + maxAdvanceAngle);
+	referenceAngle = constrain(referenceAngle, encoderAngle - maxAngleError, encoderAngle  + maxAngleError);
 	// recompute speed, since set speed might not be achieved
 
 	actualSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
@@ -314,7 +314,11 @@ void BrushlessMotorDriver::enable(bool doit) {
 		// end calibration by setting the current reference angle to the measured rotors position
 		float lastLoopEncoderAngle = 0;
 		float targetTorque = 0;
+		logger->print("calibration ");
 		while ((targetTorque < 0.2)) { // quit when above 20% torque
+			logger->print(torque);
+			logger->print(" ");
+
 			// P controller with p=4.0
 			magneticFieldAngle -= encoderAngle*1.0; // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
@@ -327,6 +331,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 				targetTorque += 0.005;
 			lastLoopEncoderAngle = encoderAngle;
 		}
+		logger->println("done.");
 
 		referenceAngle = magneticFieldAngle;
 		encoderAngle = magneticFieldAngle;
@@ -361,6 +366,8 @@ void BrushlessMotorDriver::printHelp() {
 void BrushlessMotorDriver::menuLoop(char ch) {
 
 		bool cmd = true;
+		bool pidChange = false;
+		bool pidEstimationChange = false;
 		switch (ch) {
 		case '0':
 			menuSpeed = 0;
@@ -394,73 +401,68 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 			setMotorSpeed(menuSpeed,  menuAcc);
 			break;
 		case 'P':
-			memory.persistentMem.motorControllerConfig.pid.Kp  += 0.02;
-			command->print("Kp=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.Kp  += 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.Kp  += 0.02;
 
+			pidChange = true;
 			break;
 		case 'p':
-			memory.persistentMem.motorControllerConfig.pid.Kp -= 0.02;
-			command->print("Kp=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.Kp -= 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.Kp -= 0.02;
+			pidChange = true;
 			break;
 		case 'D':
-			memory.persistentMem.motorControllerConfig.pid.Kd  += 0.02;
-			command->print("Kd=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.Kd += 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.Kd += 0.02;
+			pidChange = true;
 
 			break;
 		case 'd':
-			memory.persistentMem.motorControllerConfig.pid.Kd -= 0.02;
-			command->print("Kd=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.Kd -= 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.Kd -= 0.02;
+			pidChange = true;
 			break;
 		case 'I':
-			memory.persistentMem.motorControllerConfig.pid.Ki  += 0.02;
-			command->print("Ki=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
-
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.Ki += 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.Ki += 0.02;
+			pidChange = true;
 			break;
 		case 'i':
-			memory.persistentMem.motorControllerConfig.pid.Ki -= 0.02;
-			command->print("Ki=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.Ki -= 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.Ki -= 0.02;
+			pidChange = true;
 			break;
 		case 'Z':
-			memory.persistentMem.motorControllerConfig.pid.K_s  += 0.02;
-			command->print("amplification=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.K_s);
-			command->print("deadtime=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.T_u);
-			command->print("controltime=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.T_g);
-			memory.persistentMem.motorControllerConfig.pid.zieglerAndNicols();
-			command->print("PID=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
-			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
-			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
-			command->println(")");
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.K_s  += 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.K_s  += 0.02;
+
+			pidEstimationChange = true;
+			pidChange = true;
+			memory.persistentMem.motorControllerConfig.pid_position.zieglerAndNicols();
 
 			break;
 		case 'z':
-			memory.persistentMem.motorControllerConfig.pid.K_s  -= 0.02;
-			command->print("amplification=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.K_s);
-			command->print("deadtime=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.T_u);
-			command->print("controltime=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.T_g);
-			memory.persistentMem.motorControllerConfig.pid.zieglerAndNicols();
-			command->print("PID=");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kp);
-			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Ki);
-			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid.Kd);
-			command->println(")");
-
+			if (currentSpeed == 0)
+				memory.persistentMem.motorControllerConfig.pid_position.K_s  -= 0.02;
+			else
+				memory.persistentMem.motorControllerConfig.pid_speed.K_s  -= 0.02;
+			pidEstimationChange = true;
+			pidChange = true;
+			memory.persistentMem.motorControllerConfig.pid_position.zieglerAndNicols();
 			break;
 		case 'e':
 			menuEnable = menuEnable?false:true;
@@ -472,6 +474,31 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 		default:
 			cmd = false;
 			break;
+		}
+		if (pidEstimationChange) {
+			command->print("amplification=");
+			command->println(memory.persistentMem.motorControllerConfig.pid_position.K_s);
+			command->print("deadtime=");
+			command->println(memory.persistentMem.motorControllerConfig.pid_position.T_u);
+			command->print("controltime=");
+			command->println(memory.persistentMem.motorControllerConfig.pid_position.T_g);
+		}
+
+		if (pidChange) {
+			command->print("PID(pos)=");
+			command->println(memory.persistentMem.motorControllerConfig.pid_position.Kp);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid_position.Ki);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid_position.Kd);
+			command->println(")");
+			command->print("PID(speed)=");
+			command->println(memory.persistentMem.motorControllerConfig.pid_speed.Kp);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid_speed.Ki);
+			command->print(",");
+			command->println(memory.persistentMem.motorControllerConfig.pid_speed.Kd);
+			command->println(")");
 		}
 		if (cmd) {
 			command->print("v=");
