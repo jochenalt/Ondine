@@ -15,6 +15,10 @@ I ended up with that design, that has an identical width of all rolls and two be
 <img align="left" width="300px" src="../images/omniwheel/omniwheel CAD total.png"/>
 <img width="300px" src="../images/omniwheel/omniwheel CAD cut.png"/>
 
+I was a bit scared that a bot of 3kg could be too heavy for the spoke, so I tried a von Mieses stress analysis with a force of 10N going towards the spoke simulating the weight of the bot, and a torque of 1N at 35mm wheel radius simulating a bot acceleration of approx 1N*80mm/35mm/3kg = 0.8 m/s<sup>2</sup> (ignoring all interia effects). The weak point of the spoke is suprisingly not the marked thin part. The simulated weight of the bot of 3kg seems to be much more significant than the torque applied.
+<img width="600px" src="../images/omniwheel/VonMisesSpannung.png"/>
+
+
 As a courtesy to the japanese patent, I arranged the 3D-printed parts in beautiful manner:
 
 <img width="600px" src="../images/omniwheel/arrangement total.jpg"/>
