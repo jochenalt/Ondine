@@ -43,7 +43,7 @@ During setup of the bot, we can precompute the so-called construction matrix <i>
 
 <img  width="250" src="../images/kinematics/image031.png" >
 
-During runtime within a continously running loop, we need to apply formula above with the precomputed construction matrix. Luckily, the tilt correction matrix <i>R</i> does not need to be multiplied completely with the construction matrix, since we have the sparse matrix
+During runtime within a continously loop, we need to apply the formula above with the precomputed construction matrix. Luckily, the tilt correction matrix <i>R</i> does not need to be multiplied completely with the construction matrix, since we have the sparse matrix
 
 <img  width="100" src="../images/kinematics/image033.png" >
 

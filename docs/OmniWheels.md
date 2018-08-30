@@ -16,6 +16,7 @@ I ended up with that design, that has an identical width of all rolls and two be
 <img width="300px" src="../images/omniwheel/omniwheel CAD cut.png"/>
 
 I was a bit scared that a bot of 3kg could be too heavy for the spoke, so I tried a stress analysis with a target acceleration of 1.0 m/s<sup>2</sup> resulting in a wheel torque of 0.04Nm (roughly). The weak point of the spoke is suprisingly not the marked thin part. The simulated weight of the bot seems to be much more significant than the torque applied.
+
 <img width="600px" src="../images/omniwheel/VonMisesSpannung.png"/>
 
 As a courtesy to the japanese patent, I arranged the 3D-printed parts in beautiful manner:
@@ -35,3 +36,5 @@ To adhere corundum to the rolls I used 2-component epoxy glue. It is a messy exp
 To improve the quality of the adhesive layer, you can add instant adhesive with low viscosity (intended for porose surfaces) on the rolls. This is the way industrial sandpaper is manufactured to support a grain at its flanks. The final wheel looks really nice:
 
 <img  width="400px" src="../images/omniwheel/final.jpg"/>
+
+The CAD files can be found [here](https://github.com/jochenalt/ondine/tree/master/CAD/OmniWheel.ipt)
