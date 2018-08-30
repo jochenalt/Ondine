@@ -183,17 +183,17 @@ void BrushlessMotorDriver::loop() {
 
 	// torque is max at 90 degrees
 	// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-	advanceAngle = radians(90)* sgn(actualSpeed);
+	advanceAngle = radians(90)* sgn(actualMotorSpeed);
 
 
 	// compute position error as input for PID controller
 	float errorAngle = referenceAngle - encoderAngle;
 
 	// do we need to accelerate or decelerate?
-	bool accelerate = (errorAngle > 0) ^ (actualSpeed < 0);
+	bool accelerate = (errorAngle > 0) ^ (actualMotorSpeed < 0);
 
 	// carry out posh PID controller
-	float speedRatio = actualSpeed/maxSpeed;
+	float speedRatio = actualMotorSpeed/maxSpeed;
 	float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed, speedRatio,
 									-radians(maxAngleError) /* min */,radians(maxAngleError) /* max */,
 									errorAngle,  timePassed_s);
@@ -221,7 +221,7 @@ void BrushlessMotorDriver::loop() {
 	referenceAngle = constrain(referenceAngle, encoderAngle - maxAngleError, encoderAngle  + maxAngleError);
 	// recompute speed, since set speed might not be achieved
 
-	actualSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
+	actualMotorSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
 	lastReferenceAngle = referenceAngle; // required to compute speed
 
 	// send new pwm value to motor
@@ -236,7 +236,7 @@ void BrushlessMotorDriver::loop() {
 	command->print("ms v=");
 	command->print(currentSpeed);
 	command->print("/");
-	command->print(actualSpeed);
+	command->print(actualMotorSpeed);
 	command->print(" r=");
 	command->print(degrees(referenceAngle));
 	command->print("° e=");
@@ -262,7 +262,7 @@ void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */,
 }
 
 float BrushlessMotorDriver::getMotorSpeed() {
-	return actualSpeed;
+	return actualMotorSpeed;
 }
 
 float BrushlessMotorDriver::getIntegratedMotorAngle() {
@@ -275,7 +275,7 @@ void BrushlessMotorDriver::setSpeed(float speed /* rotations per second */, floa
 }
 
 float BrushlessMotorDriver::getSpeed() {
-	return actualSpeed*GearBoxRatio;
+	return actualMotorSpeed*GearBoxRatio;
 }
 
 float BrushlessMotorDriver::getIntegratedAngle() {
@@ -295,7 +295,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 		magneticFieldAngle = 0;
 		referenceAngle = 0;
 		currentSpeed = 0;
-		actualSpeed = 0;
+		actualMotorSpeed = 0;
 		advanceAngle = 0;
 		lastEncoderPosition = 0;
 
@@ -315,7 +315,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 		float lastLoopEncoderAngle = 0;
 		float targetTorque = 0;
 		logger->print("calibration ");
-		while ((targetTorque < 0.2)) { // quit when above 20% torque
+		while ((targetTorque < 0.3)) { // quit when above 20% torque
 			logger->print(torque);
 			logger->print(" ");
 
@@ -324,11 +324,18 @@ void BrushlessMotorDriver::enable(bool doit) {
 
 			sendPWMDuty(targetTorque);
 			delay(20);
+
+			// if encoder indicates no movement, we can increase torque a bit until the motor moves
+			// if there is movement, decrease the torque and let the motor turn until the rotor is in line with the magnetic field
 			readEncoder();
 			float encoderLoopDiff = encoderAngle - lastLoopEncoderAngle;
-			// if encoder indicates no movement, we can increase torque a bit until the motor moves
 			if (abs(encoderLoopDiff) < radians(1.0))
 				targetTorque += 0.005;
+			else
+				// motor is moving, reduce torque to not let it overshoot
+				if (targetTorque > 0)
+					targetTorque -= 0.005;
+
 			lastLoopEncoderAngle = encoderAngle;
 		}
 		logger->println("done.");
@@ -468,6 +475,11 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 			menuEnable = menuEnable?false:true;
 			enable(menuEnable);
 			break;
+		case 'f':
+			if (pid.isFuzzy())
+				pid.turnFuzzyAdaption(false, 0.1);
+			else
+				pid.turnFuzzyAdaption(true, 0.1);
 		case 'h':
 			printHelp();
 			break;

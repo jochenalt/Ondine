@@ -71,37 +71,43 @@ public:
 		fuzzyOn = doit;
 		fuzzydT = dT;
 	}
-	float update (PIDControllerConfig& params, float error, float dT, float min, float max) {
-		float pOut = params.Kp*error;
-		integrativeError += error * dT;
-		integrativeError = constrain(integrativeError, min, max);
-		float iOut = params.Ki* integrativeError;
-		float dError = error - lastError;
-	    float derivative = dError / dT;
-	    double dOut = params.Kd * derivative;
-		lastError = error;
-		float out = pOut + iOut + dOut;
-		out = constrain(out, min, max);
 
-		sumdT += dT;
-		sumError += error;
-		sumdError += dError;
-		sumLoops++;
-		if (fuzzyOn && (sumdT > fuzzydT)) {
-			updateFuzzy(params, sumError/sumLoops/abs(max), sumdError/sumLoops/abs(max));
-			sumdT = 0;
-			sumLoops = 0;
-			sumError = 0;
-			sumdError = 0;
-		}
-		return out;
+	bool isFuzzy() {
+		return fuzzyOn;
 	}
+
+	float update (PIDControllerConfig& params, float error, float dT, float min, float max);
+
 	float integrativeError = 0;
 	float lastError = 0;
 
 private:
 	enum LinguisticLabel {NegativeBig,  NegativeSmall,  NoInput, PositiveSmall, PositiveBig};
 	enum OutputLabel {Zero, MediumSmall,Small, Medium, Big, MediumBig, VeryBig};
+
+	const char* getLinguisticLabelName(LinguisticLabel i) {
+		switch (i) {
+		case NegativeBig: return "NB";
+		case NegativeSmall: return "NS";
+		case NoInput: return "Z";
+		case PositiveSmall: return "PS";
+		case PositiveBig: return "PB";
+		}
+		return NULL;
+	}
+	const char* getOutputLabelName(OutputLabel i) {
+		switch (i) {
+		case Zero: return "Z";
+		case MediumSmall: return "MS";
+		case Small: return "S";
+		case Medium: return "M";
+		case Big: return "B";
+		case MediumBig: return "MB";
+		case VeryBig: return "VB";
+		}
+		return NULL;
+	}
+
 	typedef  OutputLabel RuleBaseType[5][5];
 	const RuleBaseType ruleBaseKp = {
 			{ VeryBig, VeryBig,      VeryBig,    VeryBig, VeryBig },
@@ -131,113 +137,14 @@ private:
 									 {1.25,1.5, 1.65 },
 									 {1.5, 2.0, 2.0 }};
 
-	float fuzzificate (float input, float left, float middle, float right) {
-		if ((input >= left) && (input <=middle))
-			return (input - left) / (middle - left);
-		if ((input >= middle) && (input <=right))
-			return (input - middle) / (right - middle);
-		return 0;
-	}
-
-	float centroidDefuzzification(float fuzzyNumberError[5], float fuzzyNumberdError[5], const RuleBaseType &ruleBase) {
-		float fuzzySum = 0;
-		float value[5];
-		for (int a = 0;a<5;a++) {
-			for (int b = 0;b<5;b++) {
-				float minFuzzyNumber = min(fuzzyNumberError[a], fuzzyNumberdError[b]);
-				if (minFuzzyNumber > 0) {
-					OutputLabel output = ruleBase[a][b];
-					float v = fuzzificate(minFuzzyNumber, membershipFunction[output][0],membershipFunction[output][1], membershipFunction[output][2]);
-					value[output] += v;
-					fuzzySum += v;
-					logger->print("e/de(");
-					logger->print(a);
-					logger->print("/");
-					logger->print(b);
-					logger->print(")->(");
-					logger->print((int)output);
-					logger->print("/");
-					logger->print(v);
-				}
-			}
-		}
-		float centroid = 0;
-		for (int i = 0;i<5;i++) {
-			centroid += value[i]/fuzzySum*(i+1);
-		}
-		return centroid;
-	};
-
-	void updateFuzzy(PIDControllerConfig config, float error, float dError) {
-		// fuzzification
-		logger->print("fuzz");
-		logger->print("e=");
-		logger->print(error);
-		logger->print("/");
-		logger->print(dError);
-
-		float fuzzyNumberError [5];
-		fuzzyNumberError[NegativeBig] 		= fuzzificate (error, -1, -1, -0.5);
-		fuzzyNumberError[NegativeSmall] 	= fuzzificate (error, -0.75, 0.5, -0.25);
-		fuzzyNumberError[NoInput] 			= fuzzificate (error, -0.25, 0, +0.25);
-		fuzzyNumberError[PositiveSmall] 	= fuzzificate (error, 0.25, 0.5, +0.75);
-		fuzzyNumberError[PositiveBig] 		= fuzzificate (error, 0.5, 1,1);
-
-		float fuzzyNumberdError [5];
-		fuzzyNumberdError[NegativeBig] 		= fuzzificate (error, -1, -1, -0.5);
-		fuzzyNumberdError[NegativeSmall] 	= fuzzificate (error, -0.75, 0.5, -0.25);
-		fuzzyNumberdError[NoInput] 			= fuzzificate (error, -0.25, 0, +0.25);
-		fuzzyNumberdError[PositiveSmall] 	= fuzzificate (error, 0.25, 0.5, +0.75);
-		fuzzyNumberdError[PositiveBig] 		= fuzzificate (error, 0.5, 1,1);
-
-		logger->print(" e=");
-		logger->print(error);
-		logger->print(" (");
-		for (int i = 0;i<5;i++) {
-			if (fuzzyNumberError[i] > 0) {
-				logger->print(i);
-				logger->print(":");
-				logger->print(fuzzyNumberError[i]);
-			}
-		}
-		logger->print(") de=");
-		logger->print(dError);
-		logger->print(" (");
-		for (int i = 0;i<5;i++) {
-			if (fuzzyNumberdError[i] > 0) {
-				logger->print(i);
-				logger->print(":");
-				logger->print(fuzzyNumberError[i]);
-			}
-		}
-		logger->print(")");
-		logger->print(error);
-		logger->print("/");
-		logger->print(dError);
-
-		logger->print("KPMOD:");
-		float kPModifier = centroidDefuzzification(fuzzyNumberError, fuzzyNumberdError, ruleBaseKp);
-		logger->print(" ");
-		logger->println(kPModifier);
-
-		logger->print("KIMOD:");
-		float kIModifier = centroidDefuzzification(fuzzyNumberError, fuzzyNumberdError, ruleBaseKi);
-		logger->print(" ");
-		logger->println(kIModifier);
-		logger->print("KDMOD:");
-		float kDModifier = centroidDefuzzification(fuzzyNumberError, fuzzyNumberdError, ruleBaseKd);
-		logger->print(" ");
-		logger->print(kDModifier);
-		logger->println();
-
-		config.Kp *= kPModifier;
-		config.Ki *= kIModifier;
-		config.Kd *= kDModifier;
-
-	}
+	// returns the interpolated value of a triangle function:
+	// f(x<=left) = 0, f(middle) = 1, f(x>=right)=0
+	float triangleFunction (float input, float left, float middle, float right);
+	float centroidDefuzzification(float fuzzyNumberError[5], float fuzzyNumberdError[5], const RuleBaseType &ruleBase);
+	void updateFuzzy(PIDControllerConfig config, float error, float dError);
 
 	bool fuzzyOn = false;
-	float fuzzydT = 0;
+	float fuzzydT = 0.1;
 	float sumdT = 0;
 	float sumError;
 	float sumdError;

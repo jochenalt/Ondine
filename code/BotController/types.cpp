@@ -37,20 +37,22 @@ BotMovement& BotMovement::operator=(const BotMovement& t) {
 		return *this;
 }
 
-void increaseWithDifferentiableAcceleration(float &speed, float &accel, float newSpeed,float dT) {
+void increaseWithDifferentiableAcceleration(float &currentSpeed, float &currentAccel, float newSpeed,float dT) {
 	// an acceleration corresponds with the tilt angle of the bot.
 	// Since this can not change immediately, the acceleration needs to be ramped up
-	float targetSpeed = constrain(newSpeed, speed - MaxBotAccel*dT, speed +  MaxBotAccel*dT);
+
+	// compute max speed we can reach with max acceleration
+	float targetSpeed = constrain(newSpeed, currentSpeed - MaxBotAccel*dT, currentSpeed +  MaxBotAccel*dT);
 	targetSpeed = constrain(targetSpeed, -MaxBotSpeed, +MaxBotSpeed);
 
-	// target acceleration required to reach that speed
-	float targetAccel = (targetSpeed - speed)/dT;
+	// what acceleration would be required to get to that speed?
+	float targetAccel = (targetSpeed - currentSpeed)/dT;
 
-	// limit the target acceleration to get a linearly growing acceleration
-	accel = constrain(targetAccel, accel - MaxBotAccelAccel*dT, accel + MaxBotAccelAccel*dT);
+	// limit changes in that acceleration to make the movement jerkless
+	currentAccel = constrain(targetAccel, currentAccel - MaxBotAccelAccel*dT, currentAccel + MaxBotAccelAccel*dT);
 
-	// compute the speed out of the new acceleration
-	speed += accel*dT;
+	// compute the speed out of the jerkless acceleration
+	currentSpeed += currentAccel*dT;
 }
 
 void BotMovement::rampUp(const BotMovement& target, float dT) {

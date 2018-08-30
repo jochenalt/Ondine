@@ -16,9 +16,7 @@
 
 
 const float MaxAcceleration = 100.0; // [rev/s^2]
-const float MaxDecelerationFactor = 5.0; // acceleration delay time is that higher than deceleration delay time;
-
-const float GearBoxRatio = 24.0/50.0;
+const float GearBoxRatio = 18.0/54.0*18.0/54.0; // two timing belts with 54/18*54/18 pulleys = 9
 
 class BrushlessMotorDriver : virtual public Menuable {
 public:
@@ -53,9 +51,11 @@ private:
 	int input2Pin = 0;
 	int input3Pin = 0;
 
+	// Encoder attached to the motor's axis
 	int encoderAPin = 0;
 	int encoderBPin = 0;
 
+	// to be configured in setup
 	float encoderCPR = 0;
 
 	float targetAcc = 0;				// [rev/s^2]
@@ -64,7 +64,7 @@ private:
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAngle = 0;
 	float currentSpeed = 0;				// [rev/s]
-	float actualSpeed = 0;				// [rev/s]
+	float actualMotorSpeed = 0;				// [rev/s]
 
 	float referenceAngle = 0;			// [rad] target angle of the rotor
 	float lastReferenceAngle = 0;		// [rad]

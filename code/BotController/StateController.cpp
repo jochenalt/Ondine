@@ -19,25 +19,25 @@ void ControlPlane::update(float dT,
 		float sensorAngle /* angle towards the axis */, float sensorAngularVelocity) {
 
 	// target angle out of acceleration, assume tan(x) = x
-	targetAngle = sensorAngle*(targetAccel/Gravity);
+	targetAngle = targetAccel/Gravity;
 
 	// target angularVelocity out of acceleration
 	float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 
 	// compute absolute position of the ball's centre of gravity
-	absBallPos += currentSpeed*dT - (sensorAngularVelocity*dT/TWO_PI) * CentreOfGravityHeight;
+	absBallPos += currentSpeed*dT - sensorAngularVelocity*dT/TWO_PI * CentreOfGravityHeight;
 
 	// compute absolute position of the position where we expect the bot to be
-	targetBallPos += targetSpeed * dT - (targetAngle*dT/TWO_PI) * CentreOfGravityHeight;
+	targetBallPos += targetSpeed*dT  - targetAngle/TWO_PI * CentreOfGravityHeight;
 
 	// compute absolute position of the body where we expect the bot to be
-	float targetBodyPos = targetBallPos + (targetAngle*dT/TWO_PI) * CentreOfGravityHeight;
+	float targetBodyPos = targetBallPos + targetAngle/TWO_PI * CentreOfGravityHeight;
 
 	// compute target speed of ball (considering the dynamic tilt angle)
-	float targetBallSpeed = (targetBodyPos - absBodyPos)/dT;
+	float targetBallSpeed = (targetBodyPos - lastTargetBodyPos)/dT;
 
 	// compute ABSOLUTE position of the body, assume sin(x) = x for small angle
-	absBodyPos = absBallPos + sensorAngle*CentreOfGravityHeight;
+	float absBodyPos = absBallPos + sensorAngle*CentreOfGravityHeight;
 
 	// compute acceleration the robot is supposed to have
 	float targetAbsAccel = (targetSpeed - lastTargetSpeed)/dT;
@@ -111,6 +111,7 @@ void ControlPlane::update(float dT,
 	lastTargetAngle = targetAngle;
 	lastAbsBodyPos = absBodyPos;
 	lastAbsBallPos = absBallPos;
+	lastTargetBodyPos = targetBodyPos;
 	lastBodySpeed = absBodySpeed;
 	lastBallSpeed = absBallSpeed;
 	lastTargetSpeed = targetSpeed;
