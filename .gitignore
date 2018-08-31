@@ -16,3 +16,5 @@ code/*/Release
 *.job
 *.zcode
 *settings.txt
+CAD/Images/
+CAD/OmniWheel/AIP/

@@ -109,6 +109,7 @@ private:
 	}
 
 	typedef  OutputLabel RuleBaseType[5][5];
+	// rule based sets coming from Self-tuningFuzzyPIDController
 	const RuleBaseType ruleBaseKp = {
 			{ VeryBig, VeryBig,      VeryBig,    VeryBig, VeryBig },
 			{  	  Big,     Big,          Big,  MediumBig, VeryBig },
@@ -153,15 +154,17 @@ private:
 
 /* PID controller that consist of two sets of configuration params.
  * One is used for position control, the other for speed control
- * When pid is running, speed is used to interpolate the PID params
+ * When pid is running, current speed is used to interpolate the PID params sets
+ * By this, a high gain with low speeds and low gain at high speeds can be implemented
  */
-class DynamicPIDController : public PIDController {
+class SpeedGainPIDController : public PIDController {
 public:
-	DynamicPIDController () {};
-	virtual ~DynamicPIDController () {};
+	SpeedGainPIDController () {};
+	virtual ~SpeedGainPIDController () {};
 
 	float update(const PIDControllerConfig &position, const PIDControllerConfig &speed, float min, float max, float speedRatio,
 				float error, float dT) {
+		speedRatio *= speedRatio;
 		float positionRatio = 1.0 - speedRatio;
 		PIDControllerConfig config (position.Kp*positionRatio + speed.Kp* speedRatio,
 									position.Ki*positionRatio + speed.Ki* speedRatio,

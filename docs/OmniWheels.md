@@ -15,7 +15,7 @@ I ended up with that design, that has an identical width of all rolls and two be
 <img align="left" width="300px" src="../images/omniwheel/omniwheel CAD total.png"/>
 <img width="300px" src="../images/omniwheel/omniwheel CAD cut.png"/>
 
-Still, I was scared that a bot of 3kg could be too heavy for the spoke, so I tried a stress analysis with a target acceleration of 1.0 m/s<sup>2</sup> resulting in a wheel torque of 0.04Nm (roughly). The weak point of the spoke is suprisingly not the marked thin part. The simulated weight of the bot seems to be much more significant than the torque applied. Finally, ABS seesms to be strong enough to carry the bot.
+Still, I was scared that a bot of 3kg could be too heavy for the spoke, so I tried a stress analysis with a target acceleration of 1.0 m/s<sup>2</sup> resulting in a wheel torque of 0.04Nm (roughly). The weak point of the spoke is suprisingly not the marked thin part. The simulated weight of the bot seems to be much more significant than the torque applied. Finally, ABS seems to be strong enough to carry the bot.
 
 <img width="600px" src="../images/omniwheel/VonMisesSpannung.png"/>
 
@@ -23,7 +23,7 @@ As a courtesy to the japanese patent, I arranged the 3D-printed parts in beautif
 
 <img width="600px" src="../images/omniwheel/arrangement total.jpg"/>
 
-The first assembly is necessary to check the tolerances. The slightest amount of warping during printing would would make the rolls wobble against the spoke, so perfect rolls need to be selected in this phase.
+The first assembly is necessary to check the tolerances. The slightest amount of warping during printing would make the rolls wobble against the spoke, so perfect rolls need to be selected in this phase.
 
 <img  width="300px" src="../images/omniwheel/first assembly.jpg"/>
 

@@ -38,21 +38,23 @@ public:
 class MotorConfig {
 public:
 	void initDefaultValues() {
-		pid_position.Kp = 5.0;
-		pid_position.Ki = 2.0;
-		pid_position.Kd = 0.0;
+		// PID controller at slow speeds is aggressive to keep position
+		pid_position.Kp = 1.8;
+		pid_position.Ki = 0.5;
+		pid_position.Kd = 0.000;
 
-		pid_position.K_s = 5.0;
-		pid_position.T_u = 0.01;
-		pid_position.T_g = 0.1;
+		// at high speeds, PID controller is less aggressive to avoid overshoot
+		pid_position.K_s = 1.0;
+		pid_position.T_u = 0.5;
+		pid_position.T_g = 0.05;
 
-		pid_speed.Kp = 0.8;
+		pid_speed.Kp = 1.1;
 		pid_speed.Ki = 0.2;
-		pid_speed.Kd = 0.0;
+		pid_speed.Kd = 0.02;
 
 		pid_speed.K_s = 1.0;
-		pid_speed.T_u = 0.05;
-		pid_speed.T_g = 0.1;
+		pid_speed.T_u = 0.02;
+		pid_speed.T_g = 0.05;
 
 	}
 

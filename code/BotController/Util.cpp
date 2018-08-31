@@ -11,8 +11,11 @@
 void fatalError(const char s[]) {
 	logger->print("FATAL");
 	logger->println(s);
+	delay(100);
 }
 void warnMsg(const char s[]) {
 	logger->print("WARN:");
 	logger->println(s);
+	delay(100);
+
 }

@@ -15,8 +15,10 @@
 
 
 const float maxAngleError = radians(30);
-const float maxAdvanceAnglePhase = radians(30); 	// [rad], has been found out empirically
-const float maxSpeed = 60; 							// [rev/s]
+const float maxAdvancePhaseAngle = radians(10);
+const float RevPerSecondPerVolt = 5;							// motor constant of Maxon EC max 40 W
+const float voltage = 12;										// [V]
+const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
 // max PWM value is (1<<pwmResolution)-1
@@ -128,12 +130,15 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	lastStepTime_us = now_us;
 
 	// accelerate to target speed
-	float speedDiff = targetSpeed - currentSpeed;
+	float speedDiff = targetSpeed - currentTargetMotorSpeed;
+
 	speedDiff = constrain(speedDiff, -abs(targetAcc)*timePassed_s, +abs(targetAcc)*timePassed_s);
-	currentSpeed += speedDiff;
+
+	currentTargetMotorSpeed += speedDiff;
+	currentTargetMotorAccel = speedDiff/timePassed_s;
 
 	// compute angle difference compared to last invokation
-	referenceAngle += currentSpeed * timePassed_s * TWO_PI;
+	referenceAngle += currentTargetMotorSpeed * timePassed_s * TWO_PI;
 
 	return timePassed_s;
 }
@@ -172,46 +177,47 @@ void BrushlessMotorDriver::loop() {
 
 	// turn reference angle along the set speed
 	float timePassed_s = turnReferenceAngle();
-	// logger->print("loop t=");
-	// logger->print(timePassed_s);
-	// logger->print(" r=");
-	// logger->print(referenceAngle);
-	// logger->print("  ");
-
+	/*
+	logger->print("loop t=");
+	logger->print(timePassed_s);
+	logger->print(" r=");
+	logger->print(referenceAngle);
+	logger->print(" e=");
+	logger->print(encoderAngle);
+	logger->println();
+	*/
 	// read the current encoder value
 	readEncoder();
-
-	// torque is max at 90 degrees
-	// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-	advanceAngle = radians(90)* sgn(actualMotorSpeed);
-
 
 	// compute position error as input for PID controller
 	float errorAngle = referenceAngle - encoderAngle;
 
 	// do we need to accelerate or decelerate?
-	bool accelerate = (errorAngle > 0) ^ (actualMotorSpeed < 0);
+	bool accelerate = (errorAngle > 0) ^ (actualMotorSpeed <= 0);
 
 	// carry out posh PID controller
-	float speedRatio = actualMotorSpeed/maxSpeed;
-	float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed, speedRatio,
-									-radians(maxAngleError) /* min */,radians(maxAngleError) /* max */,
+	float speedRatio = min(actualMotorSpeed/maxRevolutionSpeed,1.0);
+	float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
+									-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
 									errorAngle,  timePassed_s);
 
 	// estimate the current shift of current behind voltage (back EMF). This is typically set to increase linearly with the voltage
 	// which is proportional to the torque for the PWM output
 	// (according to https://www.digikey.gr/en/articles/techzone/2017/jan/why-and-how-to-sinusoidally-control-three-phase-brushless-dc-motors)
 	// (according to "Advance Angle Calculation for Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
-	float advanceAnglePhaseShift = controlOutput/maxAngleError;
+	float advanceAnglePhaseShift = (actualMotorSpeed/maxRevolutionSpeed)*maxAdvancePhaseAngle;
 
+	// torque is max at 90 degrees
+	// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
+	advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.05);
+
+	float torque = abs(controlOutput)/maxAngleError;
 	if (accelerate) {
 		// if motor is too slow, increase torque. Advance angle remains the same (like in DC motor control)
-		torque = abs(controlOutput)/maxAngleError;
 	} else {
 		// if the motor is too fast we need to decelerate turn back advance angle to compensate.
-		advanceAngle = -advanceAngle;
-		advanceAnglePhaseShift = -advanceAnglePhaseShift;
-		torque = abs(controlOutput)/maxAngleError;
+		// advanceAngle = -advanceAngle;
+		//advanceAnglePhaseShift = -advanceAnglePhaseShift;
 	}
 
 	// set magnetic field relative to rotor's position
@@ -229,12 +235,13 @@ void BrushlessMotorDriver::loop() {
 
 	static uint32_t lastoutput = 0;
 
+	/*
 	if (millis() - lastoutput >  100) {
 		lastoutput = millis();
 	command->print("time=");
 	command->print(timePassed_s*1000.0);
 	command->print("ms v=");
-	command->print(currentSpeed);
+	command->print(currentTargetMotorSpeed);
 	command->print("/");
 	command->print(actualMotorSpeed);
 	command->print(" r=");
@@ -253,6 +260,7 @@ void BrushlessMotorDriver::loop() {
 	command->print(degrees(magneticFieldAngle));
 	command->println();
 	}
+	*/
 
 }
 
@@ -294,7 +302,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 		encoderAngle = 0;
 		magneticFieldAngle = 0;
 		referenceAngle = 0;
-		currentSpeed = 0;
+		currentTargetMotorSpeed = 0;
 		actualMotorSpeed = 0;
 		advanceAngle = 0;
 		lastEncoderPosition = 0;
@@ -315,8 +323,8 @@ void BrushlessMotorDriver::enable(bool doit) {
 		float lastLoopEncoderAngle = 0;
 		float targetTorque = 0;
 		logger->print("calibration ");
-		while ((targetTorque < 0.3)) { // quit when above 20% torque
-			logger->print(torque);
+		while ((targetTorque < 0.2)) { // quit when above 20% torque
+			logger->print(targetTorque);
 			logger->print(" ");
 
 			// P controller with p=4.0
@@ -331,10 +339,6 @@ void BrushlessMotorDriver::enable(bool doit) {
 			float encoderLoopDiff = encoderAngle - lastLoopEncoderAngle;
 			if (abs(encoderLoopDiff) < radians(1.0))
 				targetTorque += 0.005;
-			else
-				// motor is moving, reduce torque to not let it overshoot
-				if (targetTorque > 0)
-					targetTorque -= 0.005;
 
 			lastLoopEncoderAngle = encoderAngle;
 		}
@@ -408,7 +412,7 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 			setMotorSpeed(menuSpeed,  menuAcc);
 			break;
 		case 'P':
-			if (currentSpeed == 0)
+			if (abs(currentTargetMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Kp  += 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Kp  += 0.02;
@@ -416,43 +420,43 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 			pidChange = true;
 			break;
 		case 'p':
-			if (currentSpeed == 0)
+			if (abs(currentTargetMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Kp -= 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Kp -= 0.02;
 			pidChange = true;
 			break;
 		case 'D':
-			if (currentSpeed == 0)
-				memory.persistentMem.motorControllerConfig.pid_position.Kd += 0.02;
+			if (abs(currentTargetMotorSpeed) < 15)
+				memory.persistentMem.motorControllerConfig.pid_position.Kd += 0.005;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Kd += 0.02;
+				memory.persistentMem.motorControllerConfig.pid_speed.Kd += 0.005;
 			pidChange = true;
 
 			break;
 		case 'd':
-			if (currentSpeed == 0)
-				memory.persistentMem.motorControllerConfig.pid_position.Kd -= 0.02;
+			if (abs(currentTargetMotorSpeed) < 15)
+				memory.persistentMem.motorControllerConfig.pid_position.Kd -= 0.005;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Kd -= 0.02;
+				memory.persistentMem.motorControllerConfig.pid_speed.Kd -= 0.005;
 			pidChange = true;
 			break;
 		case 'I':
-			if (currentSpeed == 0)
+			if (abs(currentTargetMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Ki += 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Ki += 0.02;
 			pidChange = true;
 			break;
 		case 'i':
-			if (currentSpeed == 0)
+			if (abs(currentTargetMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Ki -= 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Ki -= 0.02;
 			pidChange = true;
 			break;
 		case 'Z':
-			if (currentSpeed == 0)
+			if (abs(currentTargetMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.K_s  += 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.K_s  += 0.02;
@@ -463,7 +467,7 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 
 			break;
 		case 'z':
-			if (currentSpeed == 0)
+			if (currentTargetMotorSpeed == 0)
 				memory.persistentMem.motorControllerConfig.pid_position.K_s  -= 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.K_s  -= 0.02;

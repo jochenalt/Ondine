@@ -15,7 +15,7 @@
 #include <Encoder/Encoder.h>
 
 
-const float MaxAcceleration = 100.0; // [rev/s^2]
+const float MaxAcceleration = 1000.0; // [rev/s^2]
 const float GearBoxRatio = 18.0/54.0*18.0/54.0; // two timing belts with 54/18*54/18 pulleys = 9
 
 class BrushlessMotorDriver : virtual public Menuable {
@@ -63,14 +63,14 @@ private:
 
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAngle = 0;
-	float currentSpeed = 0;				// [rev/s]
+	float currentTargetMotorSpeed = 0;				// [rev/s]
+	float currentTargetMotorAccel = 0;
 	float actualMotorSpeed = 0;				// [rev/s]
 
 	float referenceAngle = 0;			// [rad] target angle of the rotor
 	float lastReferenceAngle = 0;		// [rad]
-	DynamicPIDController pid;
+	SpeedGainPIDController pid;
 
-	float torque = 0;
 	float encoderAngle = 0;				// [rad]
 	int lastEncoderPosition = 0;		// last call of encoder value
 

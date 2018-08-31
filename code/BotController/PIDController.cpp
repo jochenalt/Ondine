@@ -18,7 +18,27 @@ float PIDController::update (PIDControllerConfig& params, float error, float dT,
 		lastError = error;
 		float out = pOut + iOut + dOut;
 		out = constrain(out, min, max);
+/*
+		logger->print("pid(");
+		logger->print(min);
+		logger->print("/");
+		logger->print(max);
+		logger->print(" e=");
 
+		logger->print(error);
+
+		logger->print(error);
+		logger->print(" ");
+		logger->print(pOut);
+		logger->print(" ");
+		logger->print(iOut);
+		logger->print(" ");
+		logger->print(dOut);
+		logger->print("=");
+		logger->print(out);
+		logger->println(")");
+
+*/
 		// carry out the self-tuning fuzzy adaption
 		// do this not everytime (computing intense) but with a rate of fuzzydT set in turnFuzzyAdaption
 		sumdT += dT;
