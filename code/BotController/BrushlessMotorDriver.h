@@ -65,12 +65,12 @@ private:
 	float advanceAngle = 0;
 	float currentReferenceMotorSpeed = 0;				// [rev/s]
 	float currentReferenceMotorAccel = 0;
-	float actualMotorSpeed = 0;				// [rev/s]
+	float measuredMotorSpeed = 0;				// [rev/s]
 	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
 	float lastReferenceAngle = 0;			// [rad] reference angle of last call
 	float encoderAngle = 0;					// [rad] current measured angle coming from encoder
 	int lastEncoderPosition = 0;			// last call of encoder value
-	uint32_t lastStepTime_us = 0;			// [us] last time we turned the reference angle
+	uint32_t lastTurnTime_us = 0;			// [us] last time we turned the reference angle
 	SpeedGainPIDController pid;
 
 	int getPWMValue( float torque, float angle_rad);
@@ -88,7 +88,7 @@ private:
 	int menuAcc = MaxAcceleration;
 	float menuTorque = 0.0;
 	bool menuEnable = false;
-	uint32_t lastCall = 0;
+	uint32_t lastLoopCall_ms = 0;
 };
 
 #endif /* BLDCCONTROLLER_H_ */
