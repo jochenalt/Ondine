@@ -7,6 +7,11 @@
 
 #include <PIDController.h>
 
+void PIDController::reset() {
+	integrativeError = 0;
+	lastError = 0;
+}
+
 float PIDController::update (PIDControllerConfig& params, float error, float dT, float min, float max) {
 		float pOut = params.Kp*error;
 		integrativeError += error * dT;

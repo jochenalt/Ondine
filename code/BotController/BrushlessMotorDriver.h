@@ -59,27 +59,24 @@ private:
 	float encoderCPR = 0;
 
 	float targetAcc = 0;				// [rev/s^2]
-	float targetSpeed = 0;				// [rev/s]
+	float targetMotorSpeed = 0;				// [rev/s]
 
 	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAngle = 0;
-	float currentTargetMotorSpeed = 0;				// [rev/s]
-	float currentTargetMotorAccel = 0;
+	float currentReferenceMotorSpeed = 0;				// [rev/s]
+	float currentReferenceMotorAccel = 0;
 	float actualMotorSpeed = 0;				// [rev/s]
-
-	float referenceAngle = 0;			// [rad] target angle of the rotor
-	float lastReferenceAngle = 0;		// [rad]
+	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
+	float lastReferenceAngle = 0;			// [rad] reference angle of last call
+	float encoderAngle = 0;					// [rad] current measured angle coming from encoder
+	int lastEncoderPosition = 0;			// last call of encoder value
+	uint32_t lastStepTime_us = 0;			// [us] last time we turned the reference angle
 	SpeedGainPIDController pid;
-
-	float encoderAngle = 0;				// [rad]
-	int lastEncoderPosition = 0;		// last call of encoder value
 
 	int getPWMValue( float torque, float angle_rad);
 	float turnReferenceAngle();
-	void setMagneticFieldAngle(float angle);
 	void readEncoder();
 	void sendPWMDuty(float torque);
-	uint32_t lastStepTime_us = 0;
 
 	bool isEnabled = false;
 

@@ -63,9 +63,6 @@ public:
 		integrativeError = 0;
 	}
 	virtual ~PIDController() {};
-	void reset() {
-		integrativeError = 0;
-	}
 
 	void turnFuzzyAdaption(boolean doit, float dT) {
 		fuzzyOn = doit;
@@ -77,6 +74,8 @@ public:
 	}
 
 	float update (PIDControllerConfig& params, float error, float dT, float min, float max);
+
+	void reset();
 
 	float integrativeError = 0;
 	float lastError = 0;
@@ -170,6 +169,9 @@ public:
 									position.Ki*positionRatio + speed.Ki* speedRatio,
 									position.Kd*positionRatio + speed.Kd* speedRatio);
 		return PIDController::update(config, error, dT, min, max);
+	}
+	void reset() {
+		PIDController::reset();
 	}
 };
 

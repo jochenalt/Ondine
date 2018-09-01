@@ -99,9 +99,6 @@ void BrushlessMotorDriver::setupMotor( int EnablePin, int Input1Pin, int Input2P
 	// enable all enable lines at once (Drotek L6234 board has all enable lines connected)
 	pinMode(enablePin, OUTPUT);
 	digitalWrite(enablePin, LOW); // start with disabled motor
-
-	// initialize magnetic field values
-	setMagneticFieldAngle(0);
 }
 
 void BrushlessMotorDriver::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR) {
@@ -112,14 +109,14 @@ void BrushlessMotorDriver::setupEncoder(int EncoderAPin, int EncoderBPin, int CP
 	encoder = new Encoder(encoderAPin, encoderBPin);
 }
 
-// turn magnetic field of the motor according to current speed
-void BrushlessMotorDriver::setMagneticFieldAngle(float angle) {
-	// increase angle of magnetic field
-	magneticFieldAngle = angle;
-}
 
 float BrushlessMotorDriver::turnReferenceAngle() {
 	uint32_t now_us = micros();
+	if (lastStepTime_us == 0) {
+		// first call of this, we dont have dT
+		// be aware that in this case, we return 0
+		lastStepTime_us = now_us;
+	}
 	uint32_t timePassed_us = now_us - lastStepTime_us;
 
 	// check for overflow on micros() (happens every 70 minutes at teensy's frequency)
@@ -130,15 +127,15 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	lastStepTime_us = now_us;
 
 	// accelerate to target speed
-	float speedDiff = targetSpeed - currentTargetMotorSpeed;
+	float speedDiff = targetMotorSpeed - currentReferenceMotorSpeed;
 
 	speedDiff = constrain(speedDiff, -abs(targetAcc)*timePassed_s, +abs(targetAcc)*timePassed_s);
 
-	currentTargetMotorSpeed += speedDiff;
-	currentTargetMotorAccel = speedDiff/timePassed_s;
+	currentReferenceMotorSpeed += speedDiff;
+	currentReferenceMotorAccel = speedDiff/timePassed_s;
 
 	// compute angle difference compared to last invokation
-	referenceAngle += currentTargetMotorSpeed * timePassed_s * TWO_PI;
+	referenceAngle += currentReferenceMotorSpeed * timePassed_s * TWO_PI;
 
 	return timePassed_s;
 }
@@ -169,6 +166,7 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 
 // call me as often as possible
 void BrushlessMotorDriver::loop() {
+	if (isEnabled) {
 	// run only if at least one ms passed
 	uint32_t now = millis();
 	if (now - lastCall < 1)
@@ -209,16 +207,9 @@ void BrushlessMotorDriver::loop() {
 
 	// torque is max at 90 degrees
 	// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-	advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.05);
+	advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.01);
 
 	float torque = abs(controlOutput)/maxAngleError;
-	if (accelerate) {
-		// if motor is too slow, increase torque. Advance angle remains the same (like in DC motor control)
-	} else {
-		// if the motor is too fast we need to decelerate turn back advance angle to compensate.
-		// advanceAngle = -advanceAngle;
-		//advanceAnglePhaseShift = -advanceAnglePhaseShift;
-	}
 
 	// set magnetic field relative to rotor's position
 	magneticFieldAngle = encoderAngle + advanceAngle + advanceAnglePhaseShift;
@@ -233,9 +224,10 @@ void BrushlessMotorDriver::loop() {
 	// send new pwm value to motor
 	sendPWMDuty(min(abs(torque),1.0));
 
+	/*
+
 	static uint32_t lastoutput = 0;
 
-	/*
 	if (millis() - lastoutput >  100) {
 		lastoutput = millis();
 	command->print("time=");
@@ -261,11 +253,11 @@ void BrushlessMotorDriver::loop() {
 	command->println();
 	}
 	*/
-
+	}
 }
 
 void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
-	targetSpeed = speed;
+	targetMotorSpeed = speed;
 	targetAcc = acc;
 }
 
@@ -299,13 +291,25 @@ void BrushlessMotorDriver::enable(bool doit) {
 		// - turn in other direction until this movement until encoder gives original position
 		// if the encoder does not indicate a movement, increase torque and try again
 
-		encoderAngle = 0;
+		if (encoder == NULL)
+			delete encoder;
+		encoder = new Encoder(encoderAPin, encoderBPin);
+		actualMotorSpeed = 0;				// [rev/s]
+		referenceAngle = 0;					// [rad] target angle of the rotor
+		lastReferenceAngle = 0;				// [rad]
+		encoderAngle = 0;					// [rad]
 		magneticFieldAngle = 0;
-		referenceAngle = 0;
-		currentTargetMotorSpeed = 0;
-		actualMotorSpeed = 0;
 		advanceAngle = 0;
+		referenceAngle = 0;
+		currentReferenceMotorSpeed = 0;		// [rev/s]
+		currentReferenceMotorAccel = 0;
+		actualMotorSpeed = 0;
+		targetMotorSpeed = 0;
+		targetAcc = 0;
+		advanceAngle = 0;
+		lastStepTime_us = 0;
 		lastEncoderPosition = 0;
+		pid.reset();
 
 		// enable driver, but PWM has no duty cycle yet.
 		sendPWMDuty(0);
@@ -322,11 +326,15 @@ void BrushlessMotorDriver::enable(bool doit) {
 		// end calibration by setting the current reference angle to the measured rotors position
 		float lastLoopEncoderAngle = 0;
 		float targetTorque = 0;
+		float lastTorque = 0;
+		float maxTorque = 0.2;
 		logger->print("calibration ");
-		while ((targetTorque < 0.2)) { // quit when above 20% torque
-			logger->print(targetTorque);
-			logger->print(" ");
-
+		while ((targetTorque < maxTorque)) { // quit when above 20% torque
+			if ((int)(targetTorque/maxTorque*10.) > (int)(lastTorque/maxTorque*10.)) {
+				logger->print((int)(targetTorque/maxTorque*10.));
+				logger->print(" ");
+				lastTorque = targetTorque;
+			}
 			// P controller with p=4.0
 			magneticFieldAngle -= encoderAngle*1.0; // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
@@ -349,8 +357,9 @@ void BrushlessMotorDriver::enable(bool doit) {
 		lastReferenceAngle = magneticFieldAngle;
 		sendPWMDuty(0);
 	}
-	else
+	else {
 		digitalWrite(enablePin, LOW);
+	}
 }
 
 
@@ -412,7 +421,7 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 			setMotorSpeed(menuSpeed,  menuAcc);
 			break;
 		case 'P':
-			if (abs(currentTargetMotorSpeed) < 15)
+			if (abs(currentReferenceMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Kp  += 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Kp  += 0.02;
@@ -420,14 +429,14 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 			pidChange = true;
 			break;
 		case 'p':
-			if (abs(currentTargetMotorSpeed) < 15)
+			if (abs(currentReferenceMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Kp -= 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Kp -= 0.02;
 			pidChange = true;
 			break;
 		case 'D':
-			if (abs(currentTargetMotorSpeed) < 15)
+			if (abs(currentReferenceMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Kd += 0.005;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Kd += 0.005;
@@ -435,28 +444,28 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 
 			break;
 		case 'd':
-			if (abs(currentTargetMotorSpeed) < 15)
+			if (abs(currentReferenceMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Kd -= 0.005;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Kd -= 0.005;
 			pidChange = true;
 			break;
 		case 'I':
-			if (abs(currentTargetMotorSpeed) < 15)
+			if (abs(currentReferenceMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Ki += 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Ki += 0.02;
 			pidChange = true;
 			break;
 		case 'i':
-			if (abs(currentTargetMotorSpeed) < 15)
+			if (abs(currentReferenceMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.Ki -= 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.Ki -= 0.02;
 			pidChange = true;
 			break;
 		case 'Z':
-			if (abs(currentTargetMotorSpeed) < 15)
+			if (abs(currentReferenceMotorSpeed) < 15)
 				memory.persistentMem.motorControllerConfig.pid_position.K_s  += 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.K_s  += 0.02;
@@ -467,7 +476,7 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 
 			break;
 		case 'z':
-			if (currentTargetMotorSpeed == 0)
+			if (currentReferenceMotorSpeed == 0)
 				memory.persistentMem.motorControllerConfig.pid_position.K_s  -= 0.02;
 			else
 				memory.persistentMem.motorControllerConfig.pid_speed.K_s  -= 0.02;
@@ -502,18 +511,18 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 
 		if (pidChange) {
 			command->print("PID(pos)=");
-			command->println(memory.persistentMem.motorControllerConfig.pid_position.Kp);
+			command->print(memory.persistentMem.motorControllerConfig.pid_position.Kp);
 			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid_position.Ki);
+			command->print(memory.persistentMem.motorControllerConfig.pid_position.Ki);
 			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid_position.Kd);
+			command->print(memory.persistentMem.motorControllerConfig.pid_position.Kd);
 			command->println(")");
 			command->print("PID(speed)=");
-			command->println(memory.persistentMem.motorControllerConfig.pid_speed.Kp);
+			command->print(memory.persistentMem.motorControllerConfig.pid_speed.Kp);
 			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid_speed.Ki);
+			command->print(memory.persistentMem.motorControllerConfig.pid_speed.Ki);
 			command->print(",");
-			command->println(memory.persistentMem.motorControllerConfig.pid_speed.Kd);
+			command->print(memory.persistentMem.motorControllerConfig.pid_speed.Kd);
 			command->println(")");
 		}
 		if (cmd) {
