@@ -369,9 +369,9 @@ void BrushlessMotorDriver::enable(bool doit) {
 				elapsedTime += dT;
 				if ((int)(targetTorque/maxTorque*10.) > (int)(lastTorque/maxTorque*10.)) {
 					logger->print(10-(int)(targetTorque/maxTorque*10.));
-					logger->print(" ");
+					logger->print(" (");
 					logger->print(degrees(magneticFieldAngle),0);
-					logger->print(" ");
+					logger->print("°) ");
 
 					lastTorque = targetTorque;
 				}
@@ -402,7 +402,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 
 			// if almost no movement happened, rotor could be located in a singularity.
 			// This would be bad, rotor would never find its position during rotation.
-			// We should move at least 5°
+			// We should move at least 4°
 			repeat  = (abs(maxEncoderAngle) < radians(4)) || (elapsedTime >= timeOut);
 			if (repeat) {
 				logger->print(" failed(");
