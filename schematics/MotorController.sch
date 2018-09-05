@@ -18795,7 +18795,6 @@ distributor Buerklin, 17G580</description>
 <part name="IC1" library="v-reg" library_urn="urn:adsk.eagle:library:409" deviceset="78XXL" device="" package3d_urn="urn:adsk.eagle:package:30361/1" value="7805"/>
 <part name="POWER_IN" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="3.5MM" package3d_urn="urn:adsk.eagle:package:38050/1" value="12V"/>
 <part name="D2" library="diode" library_urn="urn:adsk.eagle:library:210" deviceset="1N4148" device="DO35-7" package3d_urn="urn:adsk.eagle:package:43339/1"/>
-<part name="SV1" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA04-1" device="" package3d_urn="urn:adsk.eagle:package:8337/1"/>
 <part name="Q1" library="transistor-pnp" library_urn="urn:adsk.eagle:library:399" deviceset="BC307" device="" package3d_urn="urn:adsk.eagle:package:29211/2"/>
 <part name="R11" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/2V" package3d_urn="urn:adsk.eagle:package:23495/1" value="0"/>
 <part name="U$1" library="pololu motor driver" deviceset="SINGLE_MOTOR_DRIVER" device=""/>
@@ -18832,7 +18831,7 @@ distributor Buerklin, 17G580</description>
 <instance part="ENCODER3" gate="1" x="190.5" y="88.9" rot="R180"/>
 <instance part="ENCODER1" gate="1" x="190.5" y="50.8" rot="R180"/>
 <instance part="ENCODER2" gate="1" x="190.5" y="71.12" rot="R180"/>
-<instance part="IMU-I2C" gate="G$1" x="48.26" y="142.24" rot="R270"/>
+<instance part="IMU-I2C" gate="G$1" x="48.26" y="170.18" rot="R270"/>
 <instance part="CONTROL-I2C" gate="G$1" x="71.12" y="142.24" rot="R270"/>
 <instance part="DC-MOTOR" gate="1" x="254" y="132.08" rot="R180"/>
 <instance part="D1" gate="1" x="-109.22" y="58.42"/>
@@ -18855,7 +18854,6 @@ distributor Buerklin, 17G580</description>
 <instance part="IC1" gate="A" x="-109.22" y="45.72"/>
 <instance part="POWER_IN" gate="G$1" x="-142.24" y="55.88"/>
 <instance part="D2" gate="G$1" x="-45.72" y="-12.7" rot="R90"/>
-<instance part="SV1" gate="1" x="40.64" y="160.02" rot="R270"/>
 <instance part="Q1" gate="G$1" x="-58.42" y="7.62"/>
 <instance part="R11" gate="G$1" x="-121.92" y="-30.48" rot="R90"/>
 <instance part="U$1" gate="G$1" x="251.46" y="68.58"/>
@@ -18959,8 +18957,7 @@ distributor Buerklin, 17G580</description>
 <wire x1="175.26" y1="86.36" x2="182.88" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="175.26" y1="48.26" x2="175.26" y2="-22.86" width="0.1524" layer="91"/>
 <junction x="175.26" y="48.26"/>
-<wire x1="53.34" y1="124.46" x2="58.42" y2="124.46" width="0.1524" layer="91"/>
-<wire x1="58.42" y1="124.46" x2="73.66" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="124.46" x2="73.66" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="53.34" y1="124.46" x2="17.78" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="17.78" y1="124.46" x2="15.24" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="124.46" x2="-12.7" y2="124.46" width="0.1524" layer="91"/>
@@ -18988,12 +18985,8 @@ distributor Buerklin, 17G580</description>
 <wire x1="-109.22" y1="38.1" x2="-109.22" y2="-22.86" width="0.1524" layer="91"/>
 <junction x="-109.22" y="-22.86"/>
 <pinref part="IMU-I2C" gate="G$1" pin="5"/>
-<wire x1="53.34" y1="134.62" x2="53.34" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="162.56" x2="53.34" y2="124.46" width="0.1524" layer="91"/>
 <junction x="53.34" y="124.46"/>
-<pinref part="SV1" gate="1" pin="4"/>
-<wire x1="43.18" y1="152.4" x2="58.42" y2="152.4" width="0.1524" layer="91"/>
-<wire x1="58.42" y1="152.4" x2="58.42" y2="124.46" width="0.1524" layer="91"/>
-<junction x="58.42" y="124.46"/>
 <wire x1="-55.88" y1="-17.78" x2="-55.88" y2="-22.86" width="0.1524" layer="91"/>
 <junction x="-55.88" y="-22.86"/>
 <pinref part="D2" gate="G$1" pin="A"/>
@@ -19374,7 +19367,7 @@ distributor Buerklin, 17G580</description>
 <segment>
 <pinref part="PRJ1" gate="G$1" pin="19/A5/SCL"/>
 <pinref part="IMU-I2C" gate="G$1" pin="2"/>
-<wire x1="45.72" y1="114.3" x2="45.72" y2="134.62" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="114.3" x2="45.72" y2="162.56" width="0.1524" layer="91"/>
 <label x="45.72" y="127" size="1.778" layer="95" rot="R270"/>
 </segment>
 </net>
@@ -19382,7 +19375,7 @@ distributor Buerklin, 17G580</description>
 <segment>
 <pinref part="PRJ1" gate="G$1" pin="18/A4/SDA"/>
 <pinref part="IMU-I2C" gate="G$1" pin="3"/>
-<wire x1="48.26" y1="114.3" x2="48.26" y2="134.62" width="0.1524" layer="91"/>
+<wire x1="48.26" y1="114.3" x2="48.26" y2="162.56" width="0.1524" layer="91"/>
 <label x="48.26" y="124.46" size="1.778" layer="95" rot="R270"/>
 </segment>
 </net>
@@ -19559,35 +19552,14 @@ distributor Buerklin, 17G580</description>
 <wire x1="33.02" y1="114.3" x2="33.02" y2="132.08" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="132.08" x2="50.8" y2="132.08" width="0.1524" layer="91"/>
 <pinref part="IMU-I2C" gate="G$1" pin="4"/>
-<wire x1="50.8" y1="132.08" x2="50.8" y2="134.62" width="0.1524" layer="91"/>
+<wire x1="50.8" y1="132.08" x2="50.8" y2="162.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$48" class="0">
 <segment>
 <pinref part="IMU-I2C" gate="G$1" pin="1"/>
 <pinref part="PRJ1" gate="G$1" pin="20/A6"/>
-<wire x1="43.18" y1="134.62" x2="43.18" y2="114.3" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$49" class="0">
-<segment>
-<pinref part="SV1" gate="1" pin="1"/>
-<pinref part="PRJ1" gate="G$1" pin="23/A9"/>
-<wire x1="35.56" y1="152.4" x2="35.56" y2="114.3" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$50" class="0">
-<segment>
-<pinref part="SV1" gate="1" pin="2"/>
-<pinref part="PRJ1" gate="G$1" pin="22/A8"/>
-<wire x1="38.1" y1="152.4" x2="38.1" y2="114.3" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$51" class="0">
-<segment>
-<pinref part="SV1" gate="1" pin="3"/>
-<pinref part="PRJ1" gate="G$1" pin="21/A7"/>
-<wire x1="40.64" y1="152.4" x2="40.64" y2="114.3" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="162.56" x2="43.18" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$31" class="0">
@@ -19702,6 +19674,66 @@ distributor Buerklin, 17G580</description>
 <pinref part="PRJ1" gate="G$1" pin="RESET"/>
 <pinref part="S2" gate="1" pin="P"/>
 <wire x1="104.14" y1="99.06" x2="114.3" y2="99.06" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$57" class="0">
+<segment>
+<pinref part="HE1" gate="-2" pin="S"/>
+<wire x1="-33.02" y1="76.2" x2="25.4" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="76.2" x2="25.4" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="58.42" x2="33.02" y2="58.42" width="0.1524" layer="91"/>
+<pinref part="PRJ1" gate="G$1" pin="1/TX"/>
+<wire x1="33.02" y1="58.42" x2="33.02" y2="73.66" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$58" class="0">
+<segment>
+<pinref part="HE1" gate="-3" pin="S"/>
+<wire x1="-33.02" y1="78.74" x2="5.08" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="78.74" x2="5.08" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="139.7" x2="58.42" y2="139.7" width="0.1524" layer="91"/>
+<pinref part="PRJ1" gate="G$1" pin="14/A0"/>
+<wire x1="58.42" y1="139.7" x2="58.42" y2="114.3" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$49" class="0">
+<segment>
+<pinref part="PRJ1" gate="G$1" pin="23/A9"/>
+<wire x1="35.56" y1="114.3" x2="35.56" y2="127" width="0.1524" layer="91"/>
+<wire x1="35.56" y1="127" x2="-15.24" y2="127" width="0.1524" layer="91"/>
+<pinref part="HE3" gate="-2" pin="S"/>
+<wire x1="-15.24" y1="127" x2="-15.24" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="-15.24" y1="111.76" x2="-33.02" y2="111.76" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$50" class="0">
+<segment>
+<pinref part="HE3" gate="-3" pin="S"/>
+<wire x1="-33.02" y1="114.3" x2="-17.78" y2="114.3" width="0.1524" layer="91"/>
+<wire x1="-17.78" y1="114.3" x2="-17.78" y2="129.54" width="0.1524" layer="91"/>
+<wire x1="-17.78" y1="129.54" x2="38.1" y2="129.54" width="0.1524" layer="91"/>
+<pinref part="PRJ1" gate="G$1" pin="22/A8"/>
+<wire x1="38.1" y1="129.54" x2="38.1" y2="114.3" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$51" class="0">
+<segment>
+<pinref part="PRJ1" gate="G$1" pin="21/A7"/>
+<wire x1="40.64" y1="114.3" x2="40.64" y2="134.62" width="0.1524" layer="91"/>
+<wire x1="40.64" y1="134.62" x2="-20.32" y2="134.62" width="0.1524" layer="91"/>
+<wire x1="-20.32" y1="134.62" x2="-20.32" y2="93.98" width="0.1524" layer="91"/>
+<pinref part="HE2" gate="-2" pin="S"/>
+<wire x1="-20.32" y1="93.98" x2="-33.02" y2="93.98" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$59" class="0">
+<segment>
+<pinref part="HE2" gate="-3" pin="S"/>
+<wire x1="-33.02" y1="96.52" x2="-22.86" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="96.52" x2="-22.86" y2="137.16" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="137.16" x2="60.96" y2="137.16" width="0.1524" layer="91"/>
+<pinref part="PRJ1" gate="G$1" pin="13/SCK"/>
+<wire x1="60.96" y1="137.16" x2="60.96" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
