@@ -23,11 +23,11 @@ As a courtesy to the japanese patent, I arranged the 3D-printed parts in beautif
 
 <img width="600px" src="../images/omniwheel/arrangement total.jpg"/>
 
-The first assembly is necessary to check the tolerances. The slightest amount of warping during printing would make the rolls wobble against the spoke, so perfect rolls need to be selected in this phase.
+The first assembly is necessary to check the tolerances. The slightest amount of warping during printing would make the rolls wobble; perfect rolls need to be selected in this phase.
 
 <img  width="300px" src="../images/omniwheel/first assembly.jpg"/>
 
-Then I realized, that the friction of ABS rolls on a ball made of rubber or something was quite poor. There's little you can do about the 3d printed material, so I needed some kind of cover. I was thinking of rubber spray, but found out, that sand paper has a perfect friction on rubber. So, I looked for a material similar to sand paper and found corundum, which is sand with sharp edges. Originally it is used for blasting, so it is quite cheap to get. Thing is, that you can it order in quantities of at least 5kg only. The remaining 4,95kg can be put in the garden to attract and fool ants.
+Then I realized, that the friction of ABS rolls on a ball made of rubber or something was quite poor. There's little you can do about the 3d printed material, so I needed some kind of cover. I was thinking of rubber spray, but found out, that sand paper has a perfect friction on rubber. So, I looked for a material similar to sand paper and found corundum, which is sand with sharp edges. Originally it is used for blasting, so it is quite cheap to get. Thing is, that you can  order it in quantities of at least 5kg only. The remaining 4,95kg can be put in the garden to attract and fool ants.
 
 To adhere corundum to the rolls I used 2-component epoxy glue. It is a messy experience to coat small rolls with glue and rolling them in a can of corundum sand.
 
