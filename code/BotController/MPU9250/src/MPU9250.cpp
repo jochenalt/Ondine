@@ -23,10 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 #include "Arduino.h"
 #include "MPU9250.h"
+#include "util.h"
 
 /* MPU9250 object, input the I2C bus and address */
-MPU9250::MPU9250(TwoWire &bus,uint8_t address){
-  _i2c = &bus; // I2C bus
+MPU9250::MPU9250(i2c_t3 * bus,uint8_t address, int rate){
+  _i2c = bus; // I2C bus
+  _i2cRate = rate;
   _address = address; // I2C address
   _useSPI = false; // set to use I2C
 }
@@ -51,9 +53,8 @@ int MPU9250::begin(){
     _spi->begin();
   } else { // using I2C for communication
     // starting the I2C bus
-    _i2c->begin();
-    // setting the I2C clock
-    _i2c->setClock(_i2cRate);
+    //assume that bus has been began before
+	//_i2c->begin(I2C_MASTER, _address, I2C_PINS_18_19, I2C_PULLUP_INT, _i2cRate);
   }
   // select clock source to gyro
   if(writeRegister(PWR_MGMNT_1,CLOCK_SEL_PLL) < 0){

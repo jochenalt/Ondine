@@ -14,6 +14,7 @@
 #include <Engine.h>
 #include <IMU.h>
 #include <Kinematics.h>
+#include <BrushedMotorDriver.h>
 
 class BotController : public Menuable {
 public:
@@ -37,6 +38,7 @@ private:
 	IMU imu;
 	StateController state;
 	BotMovement targetBotMovement;
+	BrushedMotorDriver lifter;
 
 	Mode mode = OFF;
 };

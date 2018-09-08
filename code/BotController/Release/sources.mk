@@ -46,9 +46,8 @@ MPU9250/examples/Interrupt_SPI \
 MPU9250/examples/WOM_I2C \
 MPU9250/src \
 core/core \
+i2c_t3-v9.1 \
 libraries/EEPROM \
 libraries/SPI \
-libraries/Wire \
-libraries/Wire/utility \
 utilities \
 

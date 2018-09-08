@@ -7,7 +7,7 @@
 <setting keepoldvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="50" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
+<grid distance="25" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -273,10 +273,10 @@
 <pad name="!D2" x="-3.81" y="0" drill="0.9" diameter="1.778"/>
 <pad name="D1" x="-3.81" y="-2.54" drill="0.9" diameter="1.778"/>
 <pad name="!SF" x="-3.81" y="-5.08" drill="0.9" diameter="1.778"/>
-<pad name="VIN(5-28V)" x="16.764" y="0.889" drill="0.9" diameter="1.778"/>
-<pad name="GND" x="16.764" y="-2.413" drill="0.9" diameter="1.778"/>
-<pad name="OUT2" x="16.764" y="-5.842" drill="0.9" diameter="1.778"/>
-<pad name="OUT1" x="16.764" y="-9.779" drill="0.9" diameter="1.778"/>
+<pad name="VIN(5-28V)" x="17.399" y="0.254" drill="0.9" diameter="1.778"/>
+<pad name="GND" x="17.399" y="-3.048" drill="0.9" diameter="1.778"/>
+<pad name="OUT2" x="17.399" y="-6.477" drill="0.9" diameter="1.778"/>
+<pad name="OUT1" x="17.399" y="-9.779" drill="0.9" diameter="1.778"/>
 <text x="-7.112" y="9.906" size="0.6096" layer="21">GND</text>
 <text x="-6.985" y="12.446" size="0.6096" layer="21">VIN</text>
 <text x="-7.62" y="-12.954" size="0.6096" layer="21">SLEW</text>

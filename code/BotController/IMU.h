@@ -48,13 +48,14 @@ public:
 	}
 
 	void setup(MenuController* menuCtrl);
+	void setup();
 	void loop();
 
 	// stateful method to indicate that a new value from IMU is available. returns true only once per new value
 	// This is the main timer determining the sample frequency
 	bool isNewValueAvailable(float &dT /* time since last call in [s] */);
 
-	IMUSample& getSample() { return sample; };
+	IMUSample getSample() { return sample; };
 
 	float getAngleXRad();
 	float getAngleYRad();
@@ -71,16 +72,16 @@ public:
 
 private:
 	void updateFilter();
-	MPU9250* mpu9250 = 0;
+	MPU9250* mpu9250 = NULL;
 	KalmanFilter filterX;
 	KalmanFilter filterY;
 	KalmanFilter filterZ;
 
 	IMUSample sample;
 	bool valueIsUpdated = false;
-	bool menuPrintValues = false;
+	bool logIMUValues = false;
 	uint32_t lastInvocationTime_ms = 0;
-	uint32_t averageTime_ms = 0;
+	uint32_t averageTime_us = 0;
 	float dT = 0;
 };
 

@@ -12,16 +12,20 @@
 #include <IMU.h>
 #include <setup.h>
 #include <Util.h>
+#include <I2CPortScanner.h>
 
 
 volatile bool newDataAvailable = false;
-TimePassedBy updateTimer(20);
+TimePassedBy updateTimer(SamplingTime*2000.0 /* [ms] */); // emergency timer, in case interrupt did not work
 
 
 
 // interrupt that is called whenever MPU9250 has a new value (which is set to happens every 10ms)
 void imuInterrupt() {
-	newDataAvailable = true;
+	if (newDataAvailable) {
+	} else {
+		newDataAvailable = true;
+	}
 }
 
 IMUSamplePlane::IMUSamplePlane() {
@@ -70,15 +74,24 @@ IMUSample& IMUSample::operator=(const IMUSample& t) {
 
 void IMU::setup(MenuController *newMenuCtrl) {
 	registerMenuController(newMenuCtrl);
+}
 
-	// i2c frequency
-	Wire.setClock(400000);
+void IMU::setup() {
+	if (mpu9250 != NULL) {
+		delete mpu9250;
+	}
+	IMUWire = &Wire;
+	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
+	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
+	// IMUWire->resetBus();
+	// doI2CPortScan(F("portscan"), IMUWire, logger);
 
-	mpu9250 = new MPU9250(Wire,0x68 /* I2C address */);
+	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_400);
 	int status = mpu9250->begin();
 	if (status < 0) {
-	    Serial.print("IMU setup failed ");
-	    Serial.println(status);
+	    logger->print("status=");
+	    logger->print(status);
+		fatalError("I2C-IMU setup failed ");
 	}
 
 	// setting the accelerometer full scale range to +/-8G
@@ -93,21 +106,34 @@ void IMU::setup(MenuController *newMenuCtrl) {
 	// set update rate of gyro to 100 Hz
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
 
+	mpu9250->setGyroBiasX_rads(0);
+	mpu9250->setGyroBiasY_rads(0);
+	mpu9250->setGyroBiasZ_rads(0);
+
+	mpu9250->setAccelCalX(0,1.0);
+	mpu9250->setAccelCalY(0,1.0);
+	mpu9250->setAccelCalZ(0,1.0);
+	mpu9250->setMagCalX(0.0, 1.0);
+	mpu9250->setMagCalY(0.0, 1.0);
+	mpu9250->setMagCalZ(0.0, 1.0);
+
 	// enable interrupt
+	attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
 	mpu9250->enableDataReadyInterrupt();
 
-	attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
 
 	// initialize Kalman filter
 	filterX.setup(0);
 	filterY.setup(0);
 	filterZ.setup(0);
+
+	delay(100);
 }
+
 
 void IMU::calibrate() {
 	mpu9250->calibrateAccel();
 	mpu9250->calibrateGyro();
-
 	mpu9250->readSensor();
 
 	// reset Kalman filter
@@ -118,29 +144,69 @@ void IMU::calibrate() {
 
 void IMU::loop() {
 	if (newDataAvailable || updateTimer.isDue()) {
-		uint32_t start = millis();
+		if (newDataAvailable) {
+			updateTimer.dT(); // reset timer
+			newDataAvailable = false;
+		} else {
+			warnMsg("interrupt of IMU not working");
+		}
 
 		// read raw values
-		mpu9250->readSensor();
+		int status = mpu9250->readSensor();
+		if (status != 1) {
+			fatalError("IMU status error");
+		}
 
 		// compute dT for kalman filter
-		uint32_t now = millis();
-		dT = ((float)(now - lastInvocationTime_ms))/1000.0;
+		uint32_t now = micros();
+		dT = ((float)(now - lastInvocationTime_ms))/1000000.0;
 		lastInvocationTime_ms = now;
 
+		float tiltX = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
+		float tiltY = mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
+		float tiltZ = mpu9250->getMagZ_uT();
+
+		float angularVelocityX = -mpu9250->getGyroY_rads();
+		float angularVelocityY = mpu9250->getGyroX_rads();
+		float angularVelocityZ = -mpu9250->getGyroZ_rads();
+
 		// invoke kalman filter separately per plane
-		filterX.update(mpu9250->getAccelX_mss(), mpu9250->getGyroX_rads(), dT);
-		filterY.update(mpu9250->getAccelY_mss(), mpu9250->getGyroY_rads(), dT);
-		filterZ.update(mpu9250->getMagZ_uT(), mpu9250->getGyroZ_rads(), dT);
+		filterX.update(tiltX, angularVelocityX, dT);
+		filterY.update(tiltY, angularVelocityY, dT);
+		filterZ.update(tiltZ, angularVelocityZ, dT);
 
 		// indicate that new value is available
 		valueIsUpdated = true;
 
-		uint32_t end = millis();
+		uint32_t end = micros();
 
-		uint32_t duration_ms = end - start;
-		averageTime_ms += duration_ms;
-		averageTime_ms /= 2;
+		uint32_t duration_us = end - now;
+		averageTime_us = averageTime_us/2 + duration_us/2;
+
+		if (logIMUValues) {
+			command->print("dT=");
+			command->print(dT,3);
+			command->print("a=(X:");
+			command->print(tiltX,6);
+			command->print("/");
+			command->print(angularVelocityX,6);
+			command->print("Y:");
+			command->print(tiltY,6);
+			command->print("/");
+			command->print(angularVelocityY,6);
+			command->print("Z:");
+			command->print(tiltZ,6);
+			command->print("/");
+			command->print(angularVelocityZ,6);
+			command->print(" angle=(");
+			command->print(degrees(getAngleXRad()));
+			command->print(",");
+			command->print(degrees(getAngleYRad()));
+			command->print(")");
+			command->print("kalman t=");
+			command->print(averageTime_us);
+			command->println("us");
+		}
 	}
 }
 
@@ -177,6 +243,7 @@ float IMU::getAnglularVelocityZ() {
 
 void IMU::printHelp() {
 	command->println("IMU controller");
+	command->println("s - setup");
 	command->println("r - read values");
 	command->println("c - calibrate ");
 
@@ -187,7 +254,10 @@ void IMU::menuLoop(char ch) {
 	bool cmd = true;
 	switch (ch) {
 	case 'r':
-		menuPrintValues = !menuPrintValues;
+		logIMUValues = !logIMUValues;
+		break;
+	case 's':
+		setup();
 		break;
 	case 'h':
 		printHelp();
@@ -204,15 +274,11 @@ void IMU::menuLoop(char ch) {
 		break;
 	}
 
-	if (menuPrintValues) {
-		command->print("angle=(");
-		command->print(degrees(getAngleXRad()));
-		command->print(",");
-		command->print(degrees(getAngleYRad()));
-		command->println(")");
-	}
+
 	if (cmd) {
-		command->print("read IMU values");
+		command->print("readvalue=");
+		command->print(logIMUValues);
 		command->println(" >");
+
 	}
 }

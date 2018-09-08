@@ -40,8 +40,8 @@ void Engine::setup(MenuController* menuCtrl) {
 void Engine::loop() {
 	uint32_t start = millis();
 	wheel[0]->loop();
-	// wheel[1]->loop();
-	// wheel[2]->loop();
+	wheel[1]->loop();
+	wheel[2]->loop();
 	uint32_t end = millis();
 
 	uint32_t duration_ms = end - start;
@@ -62,9 +62,11 @@ void Engine::getIntegratedWheelAngle(float wheelAngle[3]) {
 
 void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
 	for (int i = 0;i<3;i++) {
-		float angle = wheel[i]->getIntegratedAngle();
-		wheelAngleChange[i] = angle - lastWheelAngle[i];
-		lastWheelAngle[i] = angle;
+		if (wheel[i] != NULL) {
+			float angle = wheel[i]->getIntegratedAngle();
+			wheelAngleChange[i] = angle - lastWheelAngle[i];
+			lastWheelAngle[i] = angle;
+		}
 	}
 }
 

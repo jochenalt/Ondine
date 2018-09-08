@@ -36,7 +36,9 @@ Util.cpp.o: ..\Util.cpp \
  C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/elapsedMillis.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/Arduino.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/IntervalTimer.h \
- D:\Projects\Ondine\code\BotController/Util.h
+ D:\Projects\Ondine\code\BotController/Util.h \
+ D:\Projects\Ondine\code\BotController/i2c_t3-v9.1/i2c_t3-v9.1.h \
+ C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/DMAChannel.h
 
 C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/Arduino.h:
 
@@ -113,3 +115,7 @@ C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/Arduino.h:
 C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/IntervalTimer.h:
 
 D:\Projects\Ondine\code\BotController/Util.h:
+
+D:\Projects\Ondine\code\BotController/i2c_t3-v9.1/i2c_t3-v9.1.h:
+
+C:\Program\ Files\ (x86)\Arduino\hardware\teensy\avr\cores\teensy3/DMAChannel.h:

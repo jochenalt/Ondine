@@ -6,6 +6,7 @@
  */
 
 #include <Arduino.h>
+#include <setup.h>
 #include <Util.h>
 #include <BotMemory.h>
 #include <BrushlessMotorDriver.h>
@@ -21,8 +22,7 @@ const float voltage = 12;										// [V]
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
-// max PWM value is (1<<pwmResolution)-1
-const int pwmResolution = 10;
+
 
 // array to store pre-computed values of space vector wave form (SVPWM)
 const int svpwmArraySize = 244;
