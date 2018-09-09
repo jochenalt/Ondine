@@ -83,14 +83,10 @@ void IMU::setup() {
 	IMUWire = &Wire;
 	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
-	// IMUWire->resetBus();
-	// doI2CPortScan(F("portscan"), IMUWire, logger);
 
 	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_400);
 	int status = mpu9250->begin();
 	if (status < 0) {
-	    logger->print("status=");
-	    logger->print(status);
 		fatalError("I2C-IMU setup failed ");
 	}
 
@@ -113,6 +109,7 @@ void IMU::setup() {
 	mpu9250->setAccelCalX(0,1.0);
 	mpu9250->setAccelCalY(0,1.0);
 	mpu9250->setAccelCalZ(0,1.0);
+
 	mpu9250->setMagCalX(0.0, 1.0);
 	mpu9250->setMagCalY(0.0, 1.0);
 	mpu9250->setMagCalZ(0.0, 1.0);
@@ -121,13 +118,10 @@ void IMU::setup() {
 	attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
 	mpu9250->enableDataReadyInterrupt();
 
-
 	// initialize Kalman filter
 	filterX.setup(0);
 	filterY.setup(0);
 	filterZ.setup(0);
-
-	delay(100);
 }
 
 
