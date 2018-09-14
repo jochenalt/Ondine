@@ -139,7 +139,7 @@ void IMU::calibrate() {
 void IMU::loop() {
 	if (newDataAvailable || updateTimer.isDue()) {
 		if (newDataAvailable) {
-			updateTimer.dT(); // reset timer
+			updateTimer.dT(); // reset timer of updateTimer
 			newDataAvailable = false;
 		} else {
 			warnMsg("interrupt of IMU not working");
