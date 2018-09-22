@@ -7,7 +7,6 @@
 #include <utilities/PatternBlinker.h>
 #include <i2c_t3-v9.1/i2c_t3-v9.1.h>
 
-#define LED_PIN 13			// blinking LED on Teensy
 static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// nice!
 
 PatternBlinker ledBlinker(LED_PIN, 50 /* ms */); // one bit in the patterns above is active for 100ms
@@ -24,10 +23,22 @@ i2c_t3* cortexWire = NULL;
 
 void setup()
 {
+
+	// let the LED blink two times to indicate that setup is starting now
+	digitalWrite(LED_PIN,LOW);
+	delay(30);
+	digitalWrite(LED_PIN,HIGH);
+	delay(30);
+	digitalWrite(LED_PIN,LOW);
+	delay(30);
+	digitalWrite(LED_PIN,HIGH);
+	delay(30);
+	digitalWrite(LED_PIN,LOW);
+
 	ledBlinker.set(DefaultPattern,sizeof(DefaultPattern));
 
 	command->begin(115200);
-	botController.setup();
+	botController.setup(); // this couple of second (mainly due to IMU)
 
 	command->println("BotController - h for help");
 }

@@ -3,8 +3,11 @@
 
 
 #include <math.h>
-#define IMU_INTERRUPT_PIN 20
-#define IMU_I2C_ADDRESS 0x69
+
+#define LED_PIN 13					// blinking LED on Teensy
+#define IMU_INTERRUPT_PIN 20		// pin that listens to interrupts coming from IMU when a new measurement is in da house
+#define IMU_I2C_ADDRESS 0x69		// MPU9050 i2c address
+#define POWER_RELAY_PIN 0 			// HIGH turns on relay that turns on motor power
 
 const int SampleFrequency 					= 100; 					// [Hz]
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time of the general loop

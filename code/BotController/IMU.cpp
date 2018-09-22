@@ -77,9 +77,12 @@ void IMU::setup(MenuController *newMenuCtrl) {
 }
 
 void IMU::setup() {
+	// in case of repeated calls of setup, delete old memory
 	if (mpu9250 != NULL) {
 		delete mpu9250;
 	}
+
+	// initialize high speed I2C to IMU
 	IMUWire = &Wire;
 	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout

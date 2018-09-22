@@ -22,6 +22,7 @@ const int LifterCPR = 48;
 
 void BotController::setup() {
 	registerMenuController(&menuController);
+	power.setup();
 	engine.setup(&menuController);
 	imu.setup(&menuController);
 	imu.setup();
@@ -29,7 +30,6 @@ void BotController::setup() {
 	lifter.setup(&menuController);
 	lifter.setupMotor(LifterEnablePin, LifterIn1Pin, LifterIn2Pin,LifterCurrentSensePin);
 	lifter.setupEncoder(LifterEncoderAPin, LifterEncoderBPin, LifterCPR);
-
 }
 
 void BotController::printHelp() {
@@ -39,6 +39,7 @@ void BotController::printHelp() {
 	command->println("e - engine");
 	command->println("i - imu");
 	command->println("l - lifter");
+	command->println("p - power on/off");
 	command->println("b - balance on");
 
 	command->println("m - save configuration to epprom");
@@ -51,6 +52,14 @@ void BotController::menuLoop(char ch) {
 	case 'b':
 		mode = BALANCE;
 		break;
+	case 'p':
+		if (power.isMotorOn()) {
+			command->println("turning motor power off");
+			power.motorPower(false);
+		} else {
+			command->println("turning motor power on");
+			power.motorPower(true);
+		}
 	case 'e':
 		engine.pushMenu();
 		break;
