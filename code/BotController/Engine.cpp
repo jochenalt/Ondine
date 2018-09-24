@@ -8,20 +8,7 @@
 #include <Util.h>
 #include <MenuController.h>
 #include <Engine.h>
-
-
-// Pins for Drotek L6234 breakout
-//                             PWM1,PWM2,PWM3
-const int WheelPins[3][3] = { { 2,    3,   4},
-                              { 5,    6,   7},
-							  { 8,    9,   10}};
-
-//                                ENCA, ENCB
-const int EncoderPins[3][2] = { { 11,   12 },
-                                { 25,   26 },
-							    { 27,   28 }};
-
-const int EnablePin = 24;
+#include <setup.h>
 
 
 void Engine::setup(MenuController* menuCtrl) {
@@ -32,7 +19,7 @@ void Engine::setup(MenuController* menuCtrl) {
 	for (int i = 0;i<3;i++) {
 		wheel[i] = new BrushlessMotorDriver();
 		wheel[i]->setup(menuCtrl);
-		wheel[i]->setupMotor(EnablePin, WheelPins[i][0], WheelPins[i][1], WheelPins[i][2]);
+		wheel[i]->setupMotor(BRUSHLESS_DRIVER_ENABLE_PIN, BrushlessDriverPWMPins[i][0], BrushlessDriverPWMPins[i][1], BrushlessDriverPWMPins[i][2]);
 		wheel[i]->setupEncoder(EncoderPins[i][0],EncoderPins[i][1], 1024);
 	}
 }

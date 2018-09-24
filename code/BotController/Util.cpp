@@ -9,13 +9,16 @@
 #include <Util.h>
 
 void fatalError(const char s[]) {
-	logger->print("FATAL");
-	logger->println(s);
-	delay(100);
+	if (logger) {
+		logger->print("FATAL");
+		logger->println(s);
+	}
+	delay(100); // wait until serial sent that before crashing
 }
 void warnMsg(const char s[]) {
-	logger->print("WARN:");
-	logger->println(s);
-	delay(100);
-
+	if (logger) {
+		logger->print("WARN:");
+		logger->println(s);
+	}
+	delay(100); // wait until serial sent that before crashing
 }

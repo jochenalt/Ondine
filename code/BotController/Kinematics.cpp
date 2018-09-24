@@ -136,10 +136,10 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 		if (absWheelSpeed0 > MaxWheelSpeed)
 			factor = MaxWheelSpeed / absWheelSpeed0;
 		else
-		if (absWheelSpeed1 > MaxWheelSpeed)
-			factor = MaxWheelSpeed / absWheelSpeed1;
-		else
-			factor = MaxWheelSpeed / absWheelSpeed2;
+			if (absWheelSpeed1 > MaxWheelSpeed)
+				factor = MaxWheelSpeed / absWheelSpeed1;
+			else
+				factor = MaxWheelSpeed / absWheelSpeed2;
 		wheelSpeed0 = wheelSpeed0 * factor;
 		wheelSpeed1 = wheelSpeed1 * factor;
 		wheelSpeed2 = wheelSpeed2 * factor;

@@ -25,7 +25,7 @@ const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
 // array to store pre-computed values of space vector wave form (SVPWM)
-const int svpwmArraySize = 244;
+#define svpwmArraySize 244
 int svpwmTable[svpwmArraySize];
 
 void precomputeSVPMWave() {
@@ -34,7 +34,7 @@ void precomputeSVPMWave() {
 	static boolean initialized = false;
 	if (!initialized) {
 		for (int i = 0;i<svpwmArraySize;i++) {
-			float angle = float(i)/ float(svpwmArraySize) * (M_PI*2.0);
+			float angle = float(i)/ float(svpwmArraySize) * (TWO_PI);
 			float phaseA = sin(angle);
 			float phaseB = sin(angle + M_PI*2.0/3.0);
 			float phaseC = sin(angle + M_PI*4.0/3.0);
@@ -59,8 +59,8 @@ int BrushlessMotorDriver::getPWMValue(float torque, float angle_rad) {
 		angle_rad += (int)(abs(angle_rad)/(2.0*M_PI) + 1.0)*2.0*M_PI;
 
 	int angleIndex = ((int)(angle_rad / ( 2.0*M_PI) * svpwmArraySize)) % svpwmArraySize;
-	if ((angleIndex <0) || (angleIndex > svpwmArraySize))
-		fatalError("cvpwm table look up error");
+	if ((angleIndex < 0) || (angleIndex > svpwmArraySize))
+		fatalError("getPWMValue: idx out of bounds");
 
 	return  torque * svpwmTable[angleIndex];
 }
@@ -86,12 +86,12 @@ void BrushlessMotorDriver::setupMotor( int EnablePin, int Input1Pin, int Input2P
 	// setup L6234 input PWM pins
 	analogWriteResolution(pwmResolution);
 
-	// choose the frequency that it just can't be heard
+	// choose a frequency that it just can't be heard
 	analogWriteFrequency(input1Pin, 50000);
 	analogWriteFrequency(input2Pin, 50000);
 	analogWriteFrequency(input3Pin, 50000);
 
-	// has to be pwm pins
+	// these pins have to have PWM functionality
 	pinMode(input1Pin, OUTPUT);
 	pinMode(input1Pin, OUTPUT);
 	pinMode(input1Pin, OUTPUT);
@@ -121,15 +121,15 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 
 	// check for overflow on micros() (happens every 70 minutes at teensy's frequency)
 	if (now_us < lastTurnTime_us) {
-		logger->println("timereset!!!");
-		timePassed_us = 4294967295 - timePassed_us;
+		logger->println("time overflow!!!");
+		timePassed_us = (4294967295 - timePassed_us) + now_us;
 		logger->print("timepased=");
 		logger->println(timePassed_us);
 	}
 	lastTurnTime_us = now_us;
 	float timePassed_s = (float)timePassed_us/1000000.0;
 	if (timePassed_s > 0.01) {
-		logger->println("timepassed!!!!");
+		logger->println("turnReferenceAngle's dT too big!!!!");
 		logger->print(timePassed_s);
 	}
 
@@ -139,7 +139,8 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	speedDiff = constrain(speedDiff, -abs(targetAcc)*timePassed_s, +abs(targetAcc)*timePassed_s);
 
 	currentReferenceMotorSpeed += speedDiff;
-	currentReferenceMotorAccel = speedDiff/timePassed_s;
+	if (timePassed_s > 0.0001) // max call frequency should be 1000Hz
+		currentReferenceMotorAccel = speedDiff/timePassed_s;
 
 	// compute angle difference compared to last invokation
 	referenceAngle += currentReferenceMotorSpeed * timePassed_s * TWO_PI;
@@ -174,106 +175,94 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 // call me as often as possible
 void BrushlessMotorDriver::loop() {
 	if (isEnabled) {
-	// run only if at least one ms passed
-	uint32_t now = millis();
-	if (now - lastLoopCall_ms < 1)
-		return;
-	lastLoopCall_ms = now;
+		// run only if at least one ms passed
+		uint32_t now = millis();
 
-	// turn reference angle along the set speed
-	float timePassed_s = turnReferenceAngle();
-	if (timePassed_s > 0) {
-		/*
-		logger->print("loop t=");
-		logger->print(timePassed_s,4);
-		logger->print(" r=");
-		logger->print(referenceAngle);
-		logger->print(" e=");
-		logger->print(encoderAngle);
-		logger->println();
+		// max frequency of motor control is 1000Hz
+		if (now - lastLoopCall_ms < 1)
+			return;
+		lastLoopCall_ms = now;
+
+		// turn reference angle along the set speed
+		float timePassed_s = turnReferenceAngle();
+		if (timePassed_s > 0) {
+			/*
+			logger->print("loop t=");
+			logger->print(timePassed_s,4);
+			logger->print(" r=");
+			logger->print(referenceAngle);
+			logger->print(" e=");
+			logger->print(encoderAngle);
+			logger->println();
+			*/
+			// read the current encoder value
+			readEncoder();
+
+			// compute position error as input for PID controller
+			float errorAngle = referenceAngle - encoderAngle;
+
+			// carry out posh PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
+			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
+			float speedRatio = min(measuredMotorSpeed/maxRevolutionSpeed,1.0);
+			float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
+											-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
+											errorAngle,  timePassed_s);
+
+			// estimate the current shift of current behind voltage (back EMF). This is typically set to increase linearly with the voltage
+			// which is proportional to the torque for the PWM output
+			// (according to https://www.digikey.gr/en/articles/techzone/2017/jan/why-and-how-to-sinusoidally-control-three-phase-brushless-dc-motors)
+			// (according to "Advance Angle Calculation for Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
+			float advanceAnglePhaseShift = (measuredMotorSpeed/maxRevolutionSpeed)*maxAdvancePhaseAngle;
+
+			// torque is max at -90/+90 degrees
+			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
+			advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
+
+			float torque = abs(controlOutput)/maxAngleError;
+
+			// set magnetic field relative to rotor's position
+			magneticFieldAngle = encoderAngle + advanceAngle + advanceAnglePhaseShift;
+
+			// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
+			referenceAngle = constrain(referenceAngle, encoderAngle - maxAngleError, encoderAngle  + maxAngleError);
+			// recompute speed, since set speed might not be achieved
+
+			measuredMotorSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
+			lastReferenceAngle = referenceAngle; // required to compute speed
+
+			// send new pwm value to motor
+			sendPWMDuty(min(abs(torque),1.0));
+
+
+			/*
+			static uint32_t lastoutput = 0;
+
+			if (millis() - lastoutput >  100) {
+				lastoutput = millis();
+			command->print("time=");
+			command->print(timePassed_s*1000.0);
+			command->print("ms v=");
+			command->print(currentReferenceMotorSpeed);
+			command->print("/");
+			command->print(actualMotorSpeed);
+			command->print(" r=");
+			command->print(degrees(referenceAngle));
+			command->print("° enc=");
+			command->print(degrees(encoderAngle));
+			command->print("° err=");
+			command->print(degrees(errorAngle));
+			command->print(" control=");
+			command->print(degrees(controlOutput));
+			command->print(" aa=");
+			command->print(degrees(advanceAngle));
+			command->print("° tq=");
+			command->print(torque);
+			command->print("m=");
+			command->print(degrees(magneticFieldAngle));
+			command->println();
+			}
 		*/
-		// read the current encoder value
-		readEncoder();
-
-		// compute position error as input for PID controller
-		float errorAngle = referenceAngle - encoderAngle;
-
-		// carry out posh PID controller
-		float speedRatio = min(measuredMotorSpeed/maxRevolutionSpeed,1.0);
-		float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
-										-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
-										errorAngle,  timePassed_s);
-
-		// estimate the current shift of current behind voltage (back EMF). This is typically set to increase linearly with the voltage
-		// which is proportional to the torque for the PWM output
-		// (according to https://www.digikey.gr/en/articles/techzone/2017/jan/why-and-how-to-sinusoidally-control-three-phase-brushless-dc-motors)
-		// (according to "Advance Angle Calculation for Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
-		float advanceAnglePhaseShift = (measuredMotorSpeed/maxRevolutionSpeed)*maxAdvancePhaseAngle;
-
-		// torque is max at 90 degrees
-		// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-		advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
-
-		float torque = abs(controlOutput)/maxAngleError;
-		float positionControl = pow((1.0-abs(currentReferenceMotorSpeed)/maxRevolutionSpeed),100);
-		static float positionControlFilter = 0;
-		positionControlFilter = 0.01*positionControl + 0.99*positionControlFilter;
-		static int direction = 0;
-		if (sgn(errorAngle) != direction) {
-			direction = sgn(errorAngle);
-			positionControlFilter = 0;
 		}
-		/*
-		logger->print(" pc=");
-		logger->print(positionControl);
-		logger->print("pcf=");
-		logger->print(positionControlFilter);
-	*/
-		//torque = min((1.0+3.0*positionControl*positionControlFilter)*torque,1.0);
-
-		// set magnetic field relative to rotor's position
-		magneticFieldAngle = encoderAngle + advanceAngle + advanceAnglePhaseShift;
-
-		// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
-		referenceAngle = constrain(referenceAngle, encoderAngle - maxAngleError, encoderAngle  + maxAngleError);
-		// recompute speed, since set speed might not be achieved
-
-		measuredMotorSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
-		lastReferenceAngle = referenceAngle; // required to compute speed
-
-		// send new pwm value to motor
-		sendPWMDuty(min(abs(torque),1.0));
-
-
-		/*
-		static uint32_t lastoutput = 0;
-
-		if (millis() - lastoutput >  100) {
-			lastoutput = millis();
-		command->print("time=");
-		command->print(timePassed_s*1000.0);
-		command->print("ms v=");
-		command->print(currentReferenceMotorSpeed);
-		command->print("/");
-		command->print(actualMotorSpeed);
-		command->print(" r=");
-		command->print(degrees(referenceAngle));
-		command->print("° enc=");
-		command->print(degrees(encoderAngle));
-		command->print("° err=");
-		command->print(degrees(errorAngle));
-		command->print(" control=");
-		command->print(degrees(controlOutput));
-		command->print(" aa=");
-		command->print(degrees(advanceAngle));
-		command->print("° tq=");
-		command->print(torque);
-		command->print("m=");
-		command->print(degrees(magneticFieldAngle));
-		command->println();
-		}
-	*/
-	}
 	}
 }
 
@@ -332,7 +321,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 		const int maxTries = 5;
 		bool repeat = false;
 		do {
-			logger->print("calibration ");
+			logger->println("calibration ");
 
 			lastLoopCall_ms = 0;				// time of last loop call
 			measuredMotorSpeed = 0;				// [rev/s]
@@ -368,6 +357,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 				lastTime_us = now_us;
 				elapsedTime += dT;
 				if ((int)(targetTorque/maxTorque*10.) > (int)(lastTorque/maxTorque*10.)) {
+					logger->print("t=");
 					logger->print(10-(int)(targetTorque/maxTorque*10.));
 					logger->print(" (");
 					logger->print(degrees(magneticFieldAngle),0);
@@ -377,7 +367,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 				}
 
 				// let the magnetic field turn with 1 rev/s towards the encoder value different from 0
-				magneticFieldAngle -= sgn(encoderAngle)*min(radians(0.5),abs(encoderAngle)*0.2); // this is a P-controller that turns the magnetic field towards the direction of the encoder
+				magneticFieldAngle -= sgn(encoderAngle)*min(radians(0.5),abs(encoderAngle)*1.0); // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
 				// logger->print(dT*100);
 				// logger->print(" ");
@@ -398,6 +388,13 @@ void BrushlessMotorDriver::enable(bool doit) {
 				}
 
 				lastLoopEncoderAngle = encoderAngle;
+				logger->print("mag=");
+				logger->print(degrees(magneticFieldAngle));
+				logger->print("enc=");
+				logger->print(degrees(encoderAngle));
+				logger->print(" t=");
+				logger->print(targetTorque);
+				logger->println();
 			}
 
 			// if almost no movement happened, rotor could be located in a singularity.
@@ -458,7 +455,6 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 
 		bool cmd = true;
 		bool pidChange = false;
-		bool pidEstimationChange = false;
 		switch (ch) {
 		case '0':
 			menuSpeed = 0;
@@ -535,29 +531,6 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 				memory.persistentMem.motorControllerConfig.pid_speed.Ki -= 0.02;
 			pidChange = true;
 			break;
-		case 'Z':
-			if (abs(currentReferenceMotorSpeed) < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.K_s  += 0.01;
-			else
-				memory.persistentMem.motorControllerConfig.pid_speed.K_s  += 0.01;
-
-			pidEstimationChange = true;
-			pidChange = true;
-			memory.persistentMem.motorControllerConfig.pid_speed.zieglerAndNicols();
-			memory.persistentMem.motorControllerConfig.pid_position.zieglerAndNicols();
-
-			break;
-		case 'z':
-			if (currentReferenceMotorSpeed < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.K_s  -= 0.01;
-			else
-				memory.persistentMem.motorControllerConfig.pid_speed.K_s  -= 0.01;
-			pidEstimationChange = true;
-			pidChange = true;
-			memory.persistentMem.motorControllerConfig.pid_speed.zieglerAndNicols();
-			memory.persistentMem.motorControllerConfig.pid_position.zieglerAndNicols();
-
-			break;
 		case 'e':
 			menuEnable = menuEnable?false:true;
 			enable(menuEnable);
@@ -568,24 +541,6 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 		default:
 			cmd = false;
 			break;
-		}
-		if (pidEstimationChange) {
-			if (abs(currentReferenceMotorSpeed) < 15) {
-				command->print("amplification=");
-				command->println(memory.persistentMem.motorControllerConfig.pid_position.K_s);
-				command->print("deadtime=");
-				command->println(memory.persistentMem.motorControllerConfig.pid_position.T_u);
-				command->print("controltime=");
-				command->println(memory.persistentMem.motorControllerConfig.pid_position.T_g);
-			} else {
-				command->print("amplification=");
-				command->println(memory.persistentMem.motorControllerConfig.pid_speed.K_s);
-				command->print("deadtime=");
-				command->println(memory.persistentMem.motorControllerConfig.pid_speed.T_u);
-				command->print("controltime=");
-				command->println(memory.persistentMem.motorControllerConfig.pid_speed.T_g);
-
-			}
 		}
 
 		if (pidChange) {

@@ -11,6 +11,8 @@
 
 
 void Menuable::registerMenuController(MenuController* newMenuCtrl) {
+	if (!newMenuCtrl)
+		fatalError("registerMenuControll(NULL)");
 	menuCtrl = newMenuCtrl;
 	menuCtrl->registerMenu(this);
 }
@@ -22,6 +24,8 @@ void MenuController::setup() {
 }
 
 void MenuController::registerMenu(const Menuable* menu) {
+	if (menuSize > MaxNumberOfMenues-2)
+		fatalError("menu stack overflow");
 	menus[menuSize++] = (Menuable*)menu;
 }
 
@@ -35,7 +39,7 @@ void Menuable::pushMenu() {
 
 void MenuController::popMenu() {
 	if (activeMenuStackPtr == 0)
-		fatalError("MC stack underflow");
+		fatalError("menu stack underflow");
 	else {
 		activeMenuStackPtr--;
 		menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
@@ -43,7 +47,7 @@ void MenuController::popMenu() {
 }
 
 void MenuController::pushMenu(const Menuable* menu) {
-	if (activeMenuStackPtr == MaxNumberOfMenues)
+	if (activeMenuStackPtr == MaxNumberOfMenues-1)
 		fatalError("MC stack overflow");
 	else {
 		for (int i = 0;i<menuSize;i++) {

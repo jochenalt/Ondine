@@ -24,9 +24,9 @@ void BotMemory::println() {
 void StateControllerConfig::initDefaultValues() {
 	angleWeight				= 39.0;
 	angularSpeedWeight		= 21.00;
-	ballPositionWeight			= 1.5;
-	ballVelocityWeight			= 0.0;
-	ballAccelWeight				= 1.3;
+	ballPositionWeight		= 1.5;
+	ballVelocityWeight		= 0.0;
+	ballAccelWeight			= 1.3;
 	bodyPositionWeight		= 0.0;
 	bodyVelocityWeight		= 9.0;
 	bodyAccelWeight			= 0.0;

@@ -38,7 +38,7 @@ BotMovement& BotMovement::operator=(const BotMovement& t) {
 }
 
 void increaseWithDifferentiableAcceleration(float &currentSpeed, float &currentAccel, float newSpeed,float dT) {
-	if (dT > 0) {
+	if (dT > OneMicrosecond_s) {
 		// an acceleration corresponds with the tilt angle of the bot.
 		// Since this can not change immediately, the acceleration needs to be ramped up
 

@@ -17,9 +17,6 @@ public:
 		Kp = 0;
 		Ki = 0;
 		Kd = 0;
-		K_s = 0;
-		T_u = 0;
-		T_g = 0;
 	};
 
 	virtual ~PIDControllerConfig() {};
@@ -33,21 +30,9 @@ public:
 		this->Kd = Kd;
 	}
 
-	void zieglerAndNicols()  {
-		// Ziegler and Nicols, according to https://rn-wissen.de/wiki/index.php/Regelungstechnik
-		Kp = (0.9 / K_s) * (T_g / T_u);
-		Ki = Kp / (3.3 * T_u);
-		Kd = Kp*0.5*T_u;
-	}
-
 	float Kp;
 	float Ki;
 	float Kd;
-
-	// Ziegler and Nicols (impulseanswer)
-	float K_s; // amplification = dSpeed / dT = acceleration
-	float T_u; // dead time, delay
-	float T_g; // execution time
 };
 
 /* self-tuning PID Controller with fuzzy controller

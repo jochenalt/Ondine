@@ -10,14 +10,19 @@
 #include <Power.h>
 
 void Power::setup() {
-	pinMode(POWER_RELAY_PIN, OUTPUT);
-	digitalWrite(POWER_RELAY_PIN, LOW);
-	motorOn = false;
+	motorPower(false);
 }
 
 void Power::motorPower(bool on) {
 	motorOn = on;
-	digitalWrite(POWER_RELAY_PIN, motorOn?HIGH:LOW);
+	if (motorOn) {
+		pinMode(POWER_RELAY_PIN, OUTPUT);
+		digitalWrite(POWER_RELAY_PIN, LOW);
+	} else {
+		// teensy output is 3.3V, since relay works with 5V we need an open collector to release the power-relay
+		// (check with schematics)
+		pinMode(POWER_RELAY_PIN, INPUT);
+	}
 }
 
 bool Power::isMotorOn() {

@@ -15574,9 +15574,7 @@ Symbol with thermocouple connector pins
 </devices>
 </deviceset>
 <deviceset name="LEVEL-SHIFTER-4CH">
-<description>&lt;b&gt;4-Channel Bi-Directional  Logic Level Converter&lt;/b&gt; based on &lt;b&gt;BSS128&lt;/b&gt; transistors
-&lt;p&gt;&lt;b&gt;&lt;a href="http://www.ebay.com/sch/i2c+logic+converter+module"&gt;Click here to find device on ebay.com&lt;/a&gt;&lt;/b&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt="photo" src="http://www.diymodules.org/img/device-photo.php?name=LEVEL-SHIFTER-4CH"&gt;&lt;/p&gt;</description>
+<description>&lt;b&gt;4-Channel Bi-Directional  Logic Level Converter&lt;/b&gt;</description>
 <gates>
 <gate name="G$1" symbol="LEVEL-SHIFTER-4CH" x="0" y="0"/>
 </gates>
@@ -15602,8 +15600,8 @@ Symbol with thermocouple connector pins
 </device>
 <device name="LEVEL-SHIFTER-4CH-ADAFRUIT" package="LEVEL-SHIFTER-4CH-ADAFRUIT">
 <connects>
-<connect gate="G$1" pin="GND.1" pad="GNDH"/>
-<connect gate="G$1" pin="GND.2" pad="GNDL"/>
+<connect gate="G$1" pin="GND.1" pad="GNDL"/>
+<connect gate="G$1" pin="GND.2" pad="GNDH"/>
 <connect gate="G$1" pin="HV" pad="HV"/>
 <connect gate="G$1" pin="HV1" pad="HV1"/>
 <connect gate="G$1" pin="HV2" pad="HV2"/>

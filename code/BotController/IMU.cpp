@@ -140,69 +140,71 @@ void IMU::calibrate() {
 }
 
 void IMU::loop() {
-	if (newDataAvailable || updateTimer.isDue()) {
-		if (newDataAvailable) {
-			updateTimer.dT(); // reset timer of updateTimer
-			newDataAvailable = false;
-		} else {
-			warnMsg("interrupt of IMU not working");
-		}
+	if (mpu9250) {
+		if (newDataAvailable || updateTimer.isDue()) {
+			if (newDataAvailable) {
+				updateTimer.dT(); // reset timer of updateTimer
+				newDataAvailable = false;
+			} else {
+				warnMsg("interrupt of IMU not working");
+			}
 
-		// read raw values
-		int status = mpu9250->readSensor();
-		if (status != 1) {
-			fatalError("IMU status error");
-		}
+			// read raw values
+			int status = mpu9250->readSensor();
+			if (status != 1) {
+				fatalError("IMU status error");
+			}
 
-		// compute dT for kalman filter
-		uint32_t now = micros();
-		dT = ((float)(now - lastInvocationTime_ms))/1000000.0;
-		lastInvocationTime_ms = now;
+			// compute dT for kalman filter
+			uint32_t now = micros();
+			dT = ((float)(now - lastInvocationTime_ms))/1000000.0;
+			lastInvocationTime_ms = now;
 
-		float tiltX = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
-		float tiltY = mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
-		float tiltZ = mpu9250->getMagZ_uT();
+			float tiltX = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
+			float tiltY = mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
+			float tiltZ = mpu9250->getMagZ_uT();
 
-		float angularVelocityX = -mpu9250->getGyroY_rads();
-		float angularVelocityY = mpu9250->getGyroX_rads();
-		float angularVelocityZ = -mpu9250->getGyroZ_rads();
+			float angularVelocityX = -mpu9250->getGyroY_rads();
+			float angularVelocityY = mpu9250->getGyroX_rads();
+			float angularVelocityZ = -mpu9250->getGyroZ_rads();
 
-		// invoke kalman filter separately per plane
-		filterX.update(tiltX, angularVelocityX, dT);
-		filterY.update(tiltY, angularVelocityY, dT);
-		filterZ.update(tiltZ, angularVelocityZ, dT);
+			// invoke kalman filter separately per plane
+			filterX.update(tiltX, angularVelocityX, dT);
+			filterY.update(tiltY, angularVelocityY, dT);
+			filterZ.update(tiltZ, angularVelocityZ, dT);
 
-		// indicate that new value is available
-		valueIsUpdated = true;
+			// indicate that new value is available
+			valueIsUpdated = true;
 
-		uint32_t end = micros();
+			uint32_t end = micros();
 
-		uint32_t duration_us = end - now;
-		averageTime_us = averageTime_us/2 + duration_us/2;
+			uint32_t duration_us = end - now;
+			averageTime_us = averageTime_us/2 + duration_us/2;
 
-		if (logIMUValues) {
-			command->print("dT=");
-			command->print(dT,3);
-			command->print("a=(X:");
-			command->print(tiltX,6);
-			command->print("/");
-			command->print(angularVelocityX,6);
-			command->print("Y:");
-			command->print(tiltY,6);
-			command->print("/");
-			command->print(angularVelocityY,6);
-			command->print("Z:");
-			command->print(tiltZ,6);
-			command->print("/");
-			command->print(angularVelocityZ,6);
-			command->print(" angle=(");
-			command->print(degrees(getAngleXRad()));
-			command->print(",");
-			command->print(degrees(getAngleYRad()));
-			command->print(")");
-			command->print("kalman t=");
-			command->print(averageTime_us);
-			command->println("us");
+			if (logIMUValues) {
+				command->print("dT=");
+				command->print(dT,3);
+				command->print("a=(X:");
+				command->print(tiltX,6);
+				command->print("/");
+				command->print(angularVelocityX,6);
+				command->print("Y:");
+				command->print(tiltY,6);
+				command->print("/");
+				command->print(angularVelocityY,6);
+				command->print("Z:");
+				command->print(tiltZ,6);
+				command->print("/");
+				command->print(angularVelocityZ,6);
+				command->print(" angle=(");
+				command->print(degrees(getAngleXRad()));
+				command->print(",");
+				command->print(degrees(getAngleYRad()));
+				command->print(")");
+				command->print("kalman t=");
+				command->print(averageTime_us);
+				command->println("us");
+			}
 		}
 	}
 }

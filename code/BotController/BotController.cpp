@@ -60,6 +60,7 @@ void BotController::menuLoop(char ch) {
 			command->println("turning motor power on");
 			power.motorPower(true);
 		}
+		break;
 	case 'e':
 		engine.pushMenu();
 		break;
@@ -107,8 +108,9 @@ void BotController::loop() {
 		engine.getWheelAngleChange(angleChange);
 
 		float currentWheelSpeed[3] = {0,0,0};
-		for (int w = 0;w<3;w++)
-			currentWheelSpeed[w] = angleChange[w] * TWO_PI / dT;	// compute wheel speed out of delta-angle
+		currentWheelSpeed[0] = angleChange[0] * TWO_PI / dT;	// compute wheel speed out of delta-angle
+		currentWheelSpeed[1] = angleChange[1] * TWO_PI / dT;
+		currentWheelSpeed[2] = angleChange[2] * TWO_PI / dT;
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		BotMovement currentMovement;
@@ -119,7 +121,7 @@ void BotController::loop() {
 		state.update(dT, currentMovement, sensorSample, targetBotMovement);
 
 		// apply kinematics to compute wheel speed out of x,y, omega
-		float  newWheelSpeed[3];
+		float  newWheelSpeed[3] = { 0, 0, 0};
 		kinematics.computeWheelSpeed(   state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 										sensorSample.x.angle,sensorSample.y.angle,
 										newWheelSpeed);
