@@ -18,6 +18,14 @@ void BotMemory::setDefaults() {
 
 
 void BotMemory::println() {
+	persistentMem.ctrlConfig.print();
+	logger->println();
+	persistentMem.motorControllerConfig.print();;
+	logger->println();
+	persistentMem.imuControllerConfig.print();
+	logger->println();
+	persistentMem.logConfig.print();
+	logger->println();
 }
 
 
@@ -33,3 +41,16 @@ void StateControllerConfig::initDefaultValues() {
 	omegaWeight				= 0.0;
 }
 
+void LogConfig::null() {
+	performanceLog = false;
+}
+
+void LogConfig::initDefaultValues() {
+	performanceLog = false;
+}
+
+void LogConfig::print() {
+	logger->print("log:");
+	logger->print("perf:");
+	logger->print(performanceLog?"true":"false");
+}

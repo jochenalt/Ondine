@@ -131,9 +131,11 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	}
 	lastTurnTime_us = now_us;
 	float timePassed_s = (float)timePassed_us/1000000.0;
-	if (timePassed_s > 0.01) {
+	if (timePassed_s > (2.0/(float)SampleFrequency)) {
 		logger->println("turnReferenceAngle's dT too big!!!!");
-		logger->print(timePassed_s);
+		logger->print(timePassed_s*1000.0);
+		logger->println("ms");
+
 	}
 
 	// accelerate to target speed
@@ -176,14 +178,14 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 
 
 // call me as often as possible
-void BrushlessMotorDriver::loop() {
-	if (isEnabled) {
+bool BrushlessMotorDriver::loop() {
+	if (enabled) {
 		// run only if at least one ms passed
 		uint32_t now = millis();
 
 		// max frequency of motor control is 1000Hz
 		if (now - lastLoopCall_ms < 1000/MaxBrushlessDriverFrequency)
-			return;
+			return false;
 		lastLoopCall_ms = now;
 
 		// turn reference angle along the set speed
@@ -265,8 +267,10 @@ void BrushlessMotorDriver::loop() {
 			command->println();
 			}
 		*/
+			return true;
 		}
 	}
+	return false;
 }
 
 void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
@@ -296,8 +300,8 @@ float BrushlessMotorDriver::getIntegratedAngle() {
 }
 
 void BrushlessMotorDriver::enable(bool doit) {
-	isEnabled = doit;
-	if (isEnabled) {
+	enabled = doit;
+	if (enabled) {
 
 		// startup procedure to find the angle of the motor's rotor
 		// - turn magnetic field with min torque (120° max) until encoder recognizes a significant movement
@@ -347,7 +351,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 
 			float targetTorque = 0.0;
 			float lastTorque = 0;
-			float maxTorque = 0.8;
+			float maxTorque = 0.4;
 			float lastTime_us = micros();
 			uint32_t now_us = micros();
 			float maxEncoderAngle = 0;
@@ -370,12 +374,12 @@ void BrushlessMotorDriver::enable(bool doit) {
 				}
 
 				// let the magnetic field turn with 1 rev/s towards the encoder value different from 0
-				magneticFieldAngle -= sgn(encoderAngle)*min(radians(0.5),abs(encoderAngle)*1.0); // this is a P-controller that turns the magnetic field towards the direction of the encoder
+				magneticFieldAngle -= sgn(encoderAngle)*min(radians(1.0),abs(encoderAngle)*0.5); // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
 				// logger->print(dT*100);
 				// logger->print(" ");
 				sendPWMDuty(targetTorque);
-				delay(1);
+				delay(5);
 
 				// if encoder indicates no movement, we can increase torque a bit until the motor moves
 				// if there is movement, decrease the torque and let the motor turn until the rotor is
@@ -423,7 +427,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 
 		if (tries >= maxTries) {
 			digitalWrite(enablePin, HIGH);
-			isEnabled = false;
+			enabled = false;
 			logger->println(" failed.");
 		} else
 			logger->println(" done.");

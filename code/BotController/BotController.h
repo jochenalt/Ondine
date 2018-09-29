@@ -16,6 +16,7 @@
 #include <Kinematics.h>
 #include <BrushedMotorDriver.h>
 #include <Power.h>
+#include <TimePassedBy.h>
 
 class BotController : public Menuable {
 public:
@@ -41,6 +42,7 @@ private:
 	BotMovement targetBotMovement;
 	BrushedMotorDriver lifter;
 	Power power;
+	TimePassedBy performanceLogTimer;
 	Mode mode = OFF;
 };
 

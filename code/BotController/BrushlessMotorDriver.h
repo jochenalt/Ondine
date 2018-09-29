@@ -27,7 +27,9 @@ public:
 	void setup(MenuController* menuCtrl);
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
 	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
-	void loop( );
+
+	// engine loop, returns true, if engine did something
+	bool loop( );
 
 	// set speed of motor
 	void setMotorSpeed(float speed /* [rotations per second] */, float acc = MaxAcceleration /* [rotations per second^2] */);
@@ -40,6 +42,7 @@ public:
 	float getIntegratedAngle();
 
 	void enable(bool doit);
+	bool isEnabled() { return enabled; };
 
 	virtual void printHelp();
 	virtual void menuLoop(char ch);
@@ -78,7 +81,7 @@ private:
 	void readEncoder();
 	void sendPWMDuty(float torque);
 
-	bool isEnabled = false;
+	bool enabled = false;
 
 	// Encoder library
 	Encoder* encoder = NULL;

@@ -16,12 +16,41 @@
 class BotMemory;
 extern BotMemory memory;
 
+class LogConfig {
+public:
+	void null();
+	void initDefaultValues();
+	void print();
+	boolean performanceLog;
+};
 
 class StateControllerConfig {
 public:
 	void null();
 	void initDefaultValues();
-	void print();
+	void print() {
+		logger->print("stateConfig(");
+		logger->print("angleWeight:");
+		logger->print(angleWeight);
+		logger->print(" angularSpeedWeight:");
+		logger->print(angularSpeedWeight);
+		logger->print(" ballVelocityWeight:");
+		logger->print(ballVelocityWeight);
+		logger->print(" ballPositionWeight:");
+		logger->print(ballPositionWeight);
+		logger->print(" ballAccelWeight:");
+		logger->print(ballAccelWeight);
+		logger->print(" bodyVelocityWeight:");
+		logger->print(bodyVelocityWeight);
+		logger->print(" bodyPositionWeight:");
+		logger->print(bodyPositionWeight);
+		logger->print(" bodyAccelWeight:");
+		logger->print(bodyAccelWeight);
+		logger->print(" omegaWeight:");
+		logger->print(omegaWeight);
+		logger->print(")");
+
+	}
 
 	float angleWeight;
 	float angularSpeedWeight;
@@ -48,7 +77,22 @@ public:
 		pid_speed.Kd = 0.02;
 	}
 
-	void print();
+	void print() {
+		logger->print("motorConfig(");
+		logger->print("pidPosition(");
+		logger->print(pid_position.Kp);
+		logger->print(",");
+		logger->print(pid_position.Ki);
+		logger->print(",");
+		logger->print(pid_position.Kd);
+		logger->print(") pid_speed(");
+		logger->print(pid_speed.Kp);
+		logger->print(",");
+		logger->print(pid_speed.Ki);
+		logger->print(",");
+		logger->print(pid_speed.Kd);
+		logger->print("))");
+	}
 
 	// PID values for control at 0 rev/s
 	PIDControllerConfig pid_position;
@@ -63,6 +107,15 @@ class IMUConfig {
 			offsetRawZ = -397;
 		}
 
+		void print() {
+			logger->print("imu(offset=(");
+			logger->print(offsetRawX);
+			logger->print(",");
+			logger->print(offsetRawY);
+			logger->print(",");
+			logger->print(offsetRawZ);
+			logger->print("))");
+		}
 	float offsetRawX;
 	float offsetRawY;
 	float offsetRawZ;
@@ -81,6 +134,7 @@ class BotMemory : public MemoryBase {
 			StateControllerConfig ctrlConfig;
 			MotorConfig motorControllerConfig;
 			IMUConfig imuControllerConfig;
+			LogConfig logConfig;
 		} persistentMem;
 };
 

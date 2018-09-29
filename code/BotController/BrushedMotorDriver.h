@@ -58,6 +58,7 @@ private:
 	PIDController pid;
 	float menuSpeed = 0;
 	bool menuEnable = false;
+	bool logValues = false;
 	// Encoder library
 	Encoder* encoder = NULL;
 };

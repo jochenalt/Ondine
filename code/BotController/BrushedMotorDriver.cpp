@@ -69,6 +69,14 @@ float BrushedMotorDriver::getCurrentCurrent() {
 void BrushedMotorDriver::loop() {
 	readEncoder();
 	readCurrentSense();
+	if (logValues) {
+		logger->print("a=");
+		logger->print(degrees(encoderAngle));
+		logger->print("t=");
+		logger->print(currentCurrent*1000);
+		logger->print("mA");
+		logger->println();
+	}
 }
 
 void BrushedMotorDriver::setMotorSpeed(float speed) {
@@ -110,6 +118,7 @@ void BrushedMotorDriver::printHelp() {
 	command->println("+ - inc speed");
 	command->println("- - dec speed");
 	command->println("r - revert direction");
+	command->println("l - log values");
 	command->println("e - enable");
 
 	command->println("ESC");
@@ -137,6 +146,9 @@ void BrushedMotorDriver::menuLoop(char ch) {
 			else
 				menuSpeed -= 1.0;
 			setMotorSpeed(menuSpeed);
+			break;
+		case 'l':
+			logValues = !logValues;
 			break;
 		case 'e':
 			menuEnable = menuEnable?false:true;

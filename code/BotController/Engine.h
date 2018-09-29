@@ -31,14 +31,22 @@ public:
 
 	void setup(MenuController* menuCtrl);
 	void loop();
+
+	void enable(bool doit);
+	bool isEnabled() { return enabled; };
+
+	// return everage time [s] of an engine loop
+	float getAvrLoopTime() { return ((float)averageTime_us)/1000000.0; };
+
 	virtual void menuLoop(char ch);
 	virtual void printHelp();
 private:
 	BrushlessMotorDriver* wheel[3] = { NULL, NULL, NULL };
 	int activeMenuWheel = 0;
-	uint32_t averageTime_ms = 0;
+	uint32_t averageTime_us = 0;
 	uint32_t lastLoop_ms = 0;
 	float lastWheelAngle[3] = {0,0,0};
+	bool enabled = false;
 };
 
 #endif /* ENGINE_H_ */

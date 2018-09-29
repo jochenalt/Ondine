@@ -25,15 +25,16 @@ void Engine::setup(MenuController* menuCtrl) {
 }
 
 void Engine::loop() {
-	uint32_t start = millis();
-	wheel[0]->loop();
-	wheel[1]->loop();
-	wheel[2]->loop();
-	uint32_t end = millis();
+	for (int i = 0;i<3;i++) {
+		uint32_t start = micros();
+		bool didSomething = wheel[i]->loop();
+		uint32_t end = micros();
+		if (didSomething) {
+			averageTime_us += (end - start)*3; // total time of 3 wheels
+			averageTime_us /= 2;
+		}
+	}
 
-	uint32_t duration_ms = end - start;
-	averageTime_ms += duration_ms;
-	averageTime_ms /= 2;
 }
 
 void Engine::setWheelSpeed(float revPerSec[3]) {
@@ -58,10 +59,39 @@ void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
 }
 
 
+void Engine::enable(bool doIt) {
+	if (doIt) {
+		bool ok = true;
+		for (int i = 0;i<3;i++) {
+			wheel[i]->enable(true);
+			if (!wheel[i]->isEnabled()) {
+				ok = false;
+				logger->print("enable wheel ");
+				logger->print(i);
+				logger->print(" failed!");
+			}
+		}
+		if (ok)
+			enabled = true;
+		else {
+			wheel[0]->enable(false);
+			wheel[1]->enable(false);
+			wheel[2]->enable(false);
+			enabled = false;
+		}
+	} else {
+		wheel[0]->enable(false);
+		wheel[1]->enable(false);
+		wheel[2]->enable(false);
+		enabled = false;
+	}
+}
+
 void Engine::printHelp() {
 	command->println();
 	command->println("Engine Menu");
 	command->println();
+	command->println("e - enable");
 	command->println("0 - set wheel 0");
 	command->println("1 - set wheel 1");
 	command->println("2 - set wheel 2");
@@ -84,6 +114,9 @@ void Engine::menuLoop(char ch) {
 		activeMenuWheel = 2;
 		wheel[2]->pushMenu();
 		break;
+	case'e':
+		enable(!enabled);
+		break;
 	case 'h':
 		printHelp();
 		break;
@@ -92,9 +125,13 @@ void Engine::menuLoop(char ch) {
 		break;
 	}
 	if (cmd) {
+		if (enabled)
+			command->print("enabled.");
+		else
+			command->print("disabled.");
 		command->print("loop t=");
-		command->print(averageTime_ms);
-		command->print("ms");
+		command->print(averageTime_us);
+		command->print("us");
 
 		command->print(" active wheel");
 		command->print(activeMenuWheel);

@@ -10,6 +10,7 @@
 
 #include <BotController.h>
 #include <BotMemory.h>
+#include <TimePassedBy.h>
 
 const int LifterEnablePin = 31;
 const int LifterIn1Pin = 29;
@@ -30,6 +31,8 @@ void BotController::setup() {
 	lifter.setup(&menuController);
 	lifter.setupMotor(LifterEnablePin, LifterIn1Pin, LifterIn2Pin,LifterCurrentSensePin);
 	lifter.setupEncoder(LifterEncoderAPin, LifterEncoderBPin, LifterCPR);
+
+	performanceLogTimer.setRate(5000);
 }
 
 void BotController::printHelp() {
@@ -41,6 +44,7 @@ void BotController::printHelp() {
 	command->println("l - lifter");
 	command->println("p - power on/off");
 	command->println("b - balance on");
+	command->println("1 - performance log on");
 
 	command->println("m - save configuration to epprom");
 
@@ -73,8 +77,12 @@ void BotController::menuLoop(char ch) {
 	case 'i':
 		imu.pushMenu();
 		break;
+	case '1':
+		memory.persistentMem.logConfig.performanceLog = !memory.persistentMem.logConfig.performanceLog;
+		break;
 	case 'h':
 		printHelp();
+		memory.println();
 		break;
 	default:
 		cmd = false;
@@ -137,6 +145,16 @@ void BotController::loop() {
 		logger->print("tb=");
 		logger->print(balanceTime);
 		logger->println();
+	}
+
+	if (memory.persistentMem.logConfig.performanceLog) {
+		if (performanceLogTimer.isDue()) {
+			logger->print("perf(");
+			logger->print("engine=");
+			logger->print(engine.getAvrLoopTime()*1000.0);
+			logger->print("ms");
+			logger->println(")");
+		}
 	}
 
 }
