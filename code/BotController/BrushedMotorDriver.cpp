@@ -30,7 +30,7 @@ void BrushedMotorDriver::setupMotor(int enablePin,int in1Pin, int in2Pin, int cu
 	analogWriteResolution(pwmResolution);
 
 	digitalWrite(enablePin, LOW); // start with disabled motor
-	analogWriteFrequency(in2Pin, 20000);
+	analogWriteFrequency(in1Pin, 20000);
 }
 
 void BrushedMotorDriver::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR) {
@@ -72,20 +72,24 @@ void BrushedMotorDriver::loop() {
 }
 
 void BrushedMotorDriver::setMotorSpeed(float speed) {
-	float ratio = abs(speed/10.0);
+	float ratio = abs(speed/10);
 	bool direction = (speed > 0);
 	// analogWrite(in2Pin, speed/MaxSpeed*((1<<pwmResolution)-1) );
 	int maxPWM = ((1<<pwmResolution)-1);
 	int pwmValue = abs(ratio*maxPWM);
-	if (direction)
+	if (!direction)
 		pwmValue = maxPWM - pwmValue;
 
-	logger->print("speed");
+	logger->print("ratio");
+	logger->println(ratio);
+	logger->print("pwm");
 	logger->println(pwmValue);
+	logger->print("direction");
+	logger->println(direction);
 
-	digitalWrite(in1Pin, (direction)?HIGH:LOW);
+	digitalWrite(in2Pin, (direction)?LOW:HIGH);
 
-	analogWrite(in2Pin, pwmValue);
+	analogWrite(in1Pin, pwmValue);
 
 }
 

@@ -25,12 +25,15 @@ const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
 // array to store pre-computed values of space vector wave form (SVPWM)
+// array size is choosen by having a maximum difference of 1% in two subsequent table items,
+// i.e. we have a true running with a precision of 1%. The rest is compensated by the optical
+// encoder with a precision of 0.1%
 #define svpwmArraySize 244
 int svpwmTable[svpwmArraySize];
 
 void precomputeSVPMWave() {
 	const int maxPWMValue = (1<<pwmResolution)-1;
-	const float spaceVectorFactor = 1.15; // empiric to reach full pwm scale
+	const float spaceVectorScaleUpFactor = 1.15; // empiric value to reach full pwm scale
 	static boolean initialized = false;
 	if (!initialized) {
 		for (int i = 0;i<svpwmArraySize;i++) {
@@ -39,10 +42,10 @@ void precomputeSVPMWave() {
 			float phaseB = sin(angle + M_PI*2.0/3.0);
 			float phaseC = sin(angle + M_PI*4.0/3.0);
 
-			// neat software trick to avoid the switch of 6 phases everyone else is doing
+			// trick to avoid the switch of 6 phases everyone else is doing, neat, huh?
 			float voff = (min(phaseA, min(phaseB, phaseC)) + max(phaseA, max(phaseB, phaseC)))/2.0;
 
-			float pwmSpaceVectorValue =  ((phaseA - voff)/2.0*spaceVectorFactor + 0.5)*maxPWMValue;
+			float pwmSpaceVectorValue =  ((phaseA - voff)/2.0*spaceVectorScaleUpFactor + 0.5)*maxPWMValue;
 			float pwmSinValue =  (phaseA/2.0 + 0.5)*maxPWMValue;
 
 			svpwmTable[i] =  pwmSpaceVectorValue;
@@ -56,9 +59,9 @@ void precomputeSVPMWave() {
 int BrushlessMotorDriver::getPWMValue(float torque, float angle_rad) {
 	// map input angle to 0..2*PI
 	if (angle_rad < 0)
-		angle_rad += (int)(abs(angle_rad)/(2.0*M_PI) + 1.0)*2.0*M_PI;
+		angle_rad += (int)(abs(angle_rad)/TWO_PI + 1.0)*TWO_PI;
 
-	int angleIndex = ((int)(angle_rad / ( 2.0*M_PI) * svpwmArraySize)) % svpwmArraySize;
+	int angleIndex = ((int)(angle_rad / TWO_PI * svpwmArraySize)) % svpwmArraySize;
 	if ((angleIndex < 0) || (angleIndex > svpwmArraySize))
 		fatalError("getPWMValue: idx out of bounds");
 
@@ -179,7 +182,7 @@ void BrushlessMotorDriver::loop() {
 		uint32_t now = millis();
 
 		// max frequency of motor control is 1000Hz
-		if (now - lastLoopCall_ms < 1)
+		if (now - lastLoopCall_ms < 1000/MaxBrushlessDriverFrequency)
 			return;
 		lastLoopCall_ms = now;
 

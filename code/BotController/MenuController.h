@@ -41,7 +41,7 @@ public:
 	void pushMenu(const Menuable* menu);
 	void popMenu();
 private:
-	static const int MaxNumberOfMenues = 8;
+	static const int MaxNumberOfMenues = 10;
 	Menuable* menus[MaxNumberOfMenues];
 	int menuSize = 0;
 	int activeMenuStackPtr = 0;

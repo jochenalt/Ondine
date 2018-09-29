@@ -46,6 +46,6 @@ const float MaxTiltAngle = atan(MaxBotAccel/Gravity_mm); 			// [rad] max tilt an
 // max PWM value is (1<<pwmResolution)-1
 // PWM ist used for the brushless motors
 const int pwmResolution = 10;
-
+const int MaxBrushlessDriverFrequency = 1000;
 const float OneMicrosecond_s = 0.000001;
 #endif /* SETUP_H_ */

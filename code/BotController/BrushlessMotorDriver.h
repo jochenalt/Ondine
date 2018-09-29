@@ -56,16 +56,16 @@ private:
 	int encoderBPin = 0;
 
 	// to be configured in setup
-	float encoderCPR = 0;
+	float encoderCPR = 0;					// [] cycles per revolution. cpr times 4 gives counts per revolution
 
-	float targetAcc = 0;				// [rev/s^2]
+	float targetAcc = 0;					// [rev/s^2]
 	float targetMotorSpeed = 0;				// [rev/s]
 
-	float magneticFieldAngle = 0;		// [rad] angle of the induced magnetic field 0=1 = 2PI
+	float magneticFieldAngle = 0;			// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAngle = 0;
-	float currentReferenceMotorSpeed = 0;				// [rev/s]
+	float currentReferenceMotorSpeed = 0;	// [rev/s]
 	float currentReferenceMotorAccel = 0;
-	float measuredMotorSpeed = 0;				// [rev/s]
+	float measuredMotorSpeed = 0;			// [rev/s]
 	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
 	float lastReferenceAngle = 0;			// [rad] reference angle of last call
 	float encoderAngle = 0;					// [rad] current measured angle coming from encoder

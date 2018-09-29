@@ -12,8 +12,8 @@
 #include <BotMemory.h>
 
 const int LifterEnablePin = 31;
-const int LifterIn1Pin = 30;
-const int LifterIn2Pin = 29;
+const int LifterIn1Pin = 29;
+const int LifterIn2Pin = 30;
 const int LifterEncoderAPin = 35;
 const int LifterEncoderBPin = 36;
 const int LifterCurrentSensePin = A22;
