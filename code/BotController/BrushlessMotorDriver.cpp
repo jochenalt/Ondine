@@ -74,11 +74,12 @@ BrushlessMotorDriver::BrushlessMotorDriver() {
 }
 
 
-void BrushlessMotorDriver::setup(MenuController* menuCtrl) {
+void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl) {
+	this->motorNo = motorNo;
 	registerMenuController(menuCtrl);
 }
 
-void BrushlessMotorDriver::setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
+void BrushlessMotorDriver::setupMotor(int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
 	// there's only one enable pin that has a short cut to EN1, EN2, and EN3 from L6234
 	enablePin = EnablePin;
 
@@ -135,7 +136,6 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 		logger->println("turnReferenceAngle's dT too big!!!!");
 		logger->print(timePassed_s*1000.0);
 		logger->println("ms");
-
 	}
 
 	// accelerate to target speed
@@ -302,6 +302,11 @@ float BrushlessMotorDriver::getIntegratedAngle() {
 void BrushlessMotorDriver::enable(bool doit) {
 	enabled = doit;
 	if (enabled) {
+		if (memory.persistentMem.logConfig.calibrationLog) {
+			logger->print("calibrating motor ");
+			logger->print(motorNo);
+			logger->println();
+		}
 
 		// startup procedure to find the angle of the motor's rotor
 		// - turn magnetic field with min torque (120° max) until encoder recognizes a significant movement
@@ -328,7 +333,8 @@ void BrushlessMotorDriver::enable(bool doit) {
 		const int maxTries = 5;
 		bool repeat = false;
 		do {
-			logger->println("calibration ");
+			if ((tries > 0) && (memory.persistentMem.logConfig.calibrationLog))
+				logger->println("restart ");
 
 			lastLoopCall_ms = 0;				// time of last loop call
 			measuredMotorSpeed = 0;				// [rev/s]
@@ -364,12 +370,10 @@ void BrushlessMotorDriver::enable(bool doit) {
 				lastTime_us = now_us;
 				elapsedTime += dT;
 				if ((int)(targetTorque/maxTorque*10.) > (int)(lastTorque/maxTorque*10.)) {
-					logger->print("t=");
 					logger->print(10-(int)(targetTorque/maxTorque*10.));
-					logger->print(" (");
+					logger->print("(");
 					logger->print(degrees(magneticFieldAngle),0);
 					logger->print("°) ");
-
 					lastTorque = targetTorque;
 				}
 
@@ -379,7 +383,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 				// logger->print(dT*100);
 				// logger->print(" ");
 				sendPWMDuty(targetTorque);
-				delay(5);
+				delay(2);
 
 				// if encoder indicates no movement, we can increase torque a bit until the motor moves
 				// if there is movement, decrease the torque and let the motor turn until the rotor is
@@ -395,13 +399,15 @@ void BrushlessMotorDriver::enable(bool doit) {
 				}
 
 				lastLoopEncoderAngle = encoderAngle;
-				logger->print("mag=");
-				logger->print(degrees(magneticFieldAngle));
-				logger->print("enc=");
-				logger->print(degrees(encoderAngle));
-				logger->print(" t=");
-				logger->print(targetTorque);
-				logger->println();
+				if (memory.persistentMem.logConfig.calibrationLog) {
+					logger->print("mag=");
+					logger->print(degrees(magneticFieldAngle));
+					logger->print("enc=");
+					logger->print(degrees(encoderAngle));
+					logger->print(" t=");
+					logger->print(targetTorque);
+					logger->println();
+				}
 			}
 
 			// if almost no movement happened, rotor could be located in a singularity.
@@ -409,14 +415,15 @@ void BrushlessMotorDriver::enable(bool doit) {
 			// We should move at least 4°
 			repeat  = (abs(maxEncoderAngle) < radians(4)) || (elapsedTime >= timeOut);
 			if (repeat) {
-				logger->print(" failed(");
-				logger->print(degrees(maxEncoderAngle),1);
-				logger->print("°,");
-				logger->print(targetTorque,1);
-				logger->print("PWM,");
-				logger->print(elapsedTime,1);
-				logger->print("s) ");
-
+				if (memory.persistentMem.logConfig.calibrationLog) {
+					logger->print(" failed(");
+					logger->print(degrees(maxEncoderAngle),1);
+					logger->print("°,");
+					logger->print(targetTorque,1);
+					logger->print("PWM,");
+					logger->print(elapsedTime,1);
+					logger->print("s) ");
+				}
 			}
 		}
 		while ((tries++ < maxTries) && (repeat == true));

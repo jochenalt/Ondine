@@ -22,6 +22,7 @@ public:
 	void initDefaultValues();
 	void print();
 	boolean performanceLog;
+	boolean calibrationLog;
 };
 
 class StateControllerConfig {

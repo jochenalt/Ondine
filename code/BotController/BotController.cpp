@@ -44,7 +44,9 @@ void BotController::printHelp() {
 	command->println("l - lifter");
 	command->println("p - power on/off");
 	command->println("b - balance on");
+	command->println();
 	command->println("1 - performance log on");
+	command->println("2 - calibration log on");
 
 	command->println("m - save configuration to epprom");
 
@@ -80,6 +82,9 @@ void BotController::menuLoop(char ch) {
 	case '1':
 		memory.persistentMem.logConfig.performanceLog = !memory.persistentMem.logConfig.performanceLog;
 		break;
+	case '2':
+		memory.persistentMem.logConfig.calibrationLog = !memory.persistentMem.logConfig.calibrationLog;
+		break;
 	case 'h':
 		printHelp();
 		memory.println();
@@ -94,14 +99,24 @@ void BotController::menuLoop(char ch) {
 }
 
 void BotController::loop() {
+	// performance measurement
 	uint32_t now = micros();
 
-	engine.loop();
-	uint32_t engineTime = micros()-now;
+	// give other libraries some time
+	yield();
 
+	// drive motors
+	engine.loop();
+
+	// react on serial line
 	menuController.loop();
+
+	// check if new IMU orientation is there
 	imu.loop();
+
+	// drive the lifter
 	lifter.loop();
+
 	uint32_t imuTime = micros()-now;
 
 	// run main balance loop. Timing is 1determined by IMU sending an
@@ -139,8 +154,6 @@ void BotController::loop() {
 		uint32_t balanceTime = micros()-now;
 
 		logger->print("te=");
-		logger->print(engineTime);
-		logger->print("ti=");
 		logger->print(imuTime);
 		logger->print("tb=");
 		logger->print(balanceTime);

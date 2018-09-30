@@ -43,14 +43,19 @@ void StateControllerConfig::initDefaultValues() {
 
 void LogConfig::null() {
 	performanceLog = false;
+	calibrationLog = false;
 }
 
 void LogConfig::initDefaultValues() {
 	performanceLog = false;
+	calibrationLog = false;
 }
 
 void LogConfig::print() {
 	logger->print("log:");
 	logger->print("perf:");
 	logger->print(performanceLog?"true":"false");
+	logger->print("calib:");
+	logger->print(calibrationLog?"true":"false");
+
 }

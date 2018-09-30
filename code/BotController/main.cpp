@@ -37,7 +37,7 @@ void setup()
 
 	ledBlinker.set(DefaultPattern,sizeof(DefaultPattern));
 
-	command->begin(115200);
+	command->begin(230400);
 	botController.setup(); // this couple of second (mainly due to IMU)
 
 	command->println("BotController - h for help");

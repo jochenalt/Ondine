@@ -24,7 +24,7 @@ public:
 	BrushlessMotorDriver();
 	virtual ~BrushlessMotorDriver() {};
 
-	void setup(MenuController* menuCtrl);
+	void setup(int motorId, MenuController* menuCtrl);
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
 	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
 
@@ -49,6 +49,7 @@ public:
 private:
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3
+	int motorNo = 0;
 	int enablePin = 0;
 	int input1Pin = 0;
 	int input2Pin = 0;
