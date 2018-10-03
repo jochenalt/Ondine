@@ -17,3 +17,5 @@ code/*/Release
 *.zcode
 *settings.txt
 CAD/Images/
+*.d
+sloeber-workspace/

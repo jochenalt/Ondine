@@ -29,27 +29,30 @@ class PatternBlinker {
 	public:
 
 	PatternBlinker() {
-		setup(0,0);
+		setup(0,0, false);
 	}
 
-	PatternBlinker(uint8_t pPin, uint8_t ms) {
-		setup(pPin,ms);
+	PatternBlinker(uint8_t pPin, uint8_t ms=100, bool reverse = false) {
+		setup(pPin,ms, reverse);
 	}
 
-	 void setup(uint8_t pPin, uint8_t ms) {
+	 void setup(uint8_t pPin, uint8_t ms, bool reverse) {
 		mPin = pPin;
 		mDuration = ms;
 		mPattern = NULL;
 		pinMode(pPin, OUTPUT);
-		digitalWrite(pPin, LOW);
+		digitalWrite(pPin, reverse?HIGH:LOW);
+		this->reverse= reverse;
 	}
 
 	// switch blinker off
 	void off() {
 		mPattern = NULL;
 		if (mPin != -1)
-		digitalWrite(mPin,HIGH);
+			digitalWrite(mPin,reverse?LOW:HIGH);
 	}
+
+
 
 	// set the blink pattern on the passed pin
 	void set(uint8_t* pPattern, uint8_t pPatternLength) {
@@ -71,10 +74,10 @@ class PatternBlinker {
 				pos = mSeq / 8;
 				bitpos = 7- (mSeq & 0x07);
 				if ((mPattern[pos] & _BV(bitpos)) > 0) {
-					digitalWrite(mPin,HIGH);
+					digitalWrite(mPin,reverse?LOW:HIGH);
 				}
 				else {
-					digitalWrite(mPin,LOW);
+					digitalWrite(mPin,reverse?HIGH:LOW);
 				}
 
 				mSeq++;
@@ -83,7 +86,7 @@ class PatternBlinker {
 					if (oneTime)
 						mPattern = NULL;
 			} else {
-				digitalWrite(mPin,HIGH);
+				digitalWrite(mPin,reverse?LOW:HIGH);
 			}
 		}
 	}
@@ -96,6 +99,7 @@ class PatternBlinker {
 	TimePassedBy timer;		// timer for checking passed time
 	boolean oneTime;
 	uint8_t mDuration;
+	bool reverse;
 };
 
 

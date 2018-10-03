@@ -6,18 +6,26 @@
  */
 
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <variant/arduino_pins.h>
+#include <PatternBlinker.h>
+#include <WebServer.h>
+#include <LogStream.h>
 
-
-#define LED D0            // Led in NodeMCU at pin GPIO16 (D0).
+static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// nice!
+PatternBlinker ledBlinker(LED_BUILTIN, 50 /* ms */, true); // one bit in the patterns above is active for 100ms
+WebServer webserver;
+LogStream* logger = new LogStream();
 
 void setup() {
-	pinMode(LED, OUTPUT);    // LED pin as output.
+	digitalWrite(LED_BUILTIN,LOW);
+	webserver.setup();
+	ledBlinker.set(DefaultPattern,sizeof(DefaultPattern));
+	logger->println("setup");
 }
 
 void loop() {
-	digitalWrite(LED, HIGH);// turn the LED off.(Note that LOW is the voltage level but actually
-                        //the LED is on; this is because it is acive low on the ESP8266.
-	delay(1000);            // wait for 1 second.
-	digitalWrite(LED, LOW); // turn the LED on.
-	delay(1000); // wait for 1 second.
+	uint32_t now = millis();
+	ledBlinker.loop(now);
+	webserver.loop();
 }

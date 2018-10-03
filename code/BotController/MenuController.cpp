@@ -33,6 +33,9 @@ void Menuable::popMenu() {
 	menuCtrl->popMenu();
 }
 
+void Menuable::printHelp() {
+}
+
 void Menuable::pushMenu() {
 	menuCtrl->pushMenu(this);
 }
