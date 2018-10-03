@@ -1,0 +1,11 @@
+﻿Studie Statikanalyse:1 gestartet: 03.10.2018, 12:51:10
+Anzahl Konfigurationen: 1
+Standardnetz: 38887 Elemente, 70561 Knoten
+Modell wird in 16 unabhängige Komponenten aufgeteilt
+Weiche Feder hinzugefügt
+Berechnungszeit 1s
+Konvergenzrate: 50%
+Gesamtzahl der H Verfeinerungen  erreicht
+Studie        Worst Jacobian ratio :  3.35  on element 3380 abgeschlossen: 03.10.2018, 12:51:20
+Gesamtzeit 0:00:10
+
