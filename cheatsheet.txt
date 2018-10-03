@@ -27,3 +27,7 @@ Y = (-40*sin(t))+(6*sin(t+atan(sin(-9*t)/((40/3/10)-cos(-9*t)))))+(3*sin(10*t))
  (10*cos(t))-(1.5*cos(t+atan(sin(-9*t)/((10/0.75/10)-cos(-9*t)))))-(0.75*cos(10*t))
 (-10*sin(t))+(1.5*sin(t+atan(sin(-9*t)/((10/0.75/10)-cos(-9*t)))))+(0.75*sin(10*t))
 
+---
+webserver  https://randomnerdtutorials.com/esp8266-web-server/
+
+
