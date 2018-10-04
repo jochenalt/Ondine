@@ -22300,7 +22300,7 @@ Source: www.kingbright.com</description>
 <busses>
 </busses>
 <nets>
-<net name="CTRL-5.0V" class="0">
+<net name="+5V" class="0">
 <segment>
 <pinref part="P+1" gate="VCC" pin="VCC"/>
 <pinref part="PRJ1" gate="G$1" pin="VIN"/>
@@ -22357,6 +22357,7 @@ Source: www.kingbright.com</description>
 <junction x="121.92" y="149.86"/>
 <pinref part="CONTROL" gate="1" pin="3"/>
 <wire x1="134.62" y1="167.64" x2="154.94" y2="167.64" width="0.1524" layer="91"/>
+<label x="-68.58" y="149.86" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -23236,6 +23237,7 @@ Source: www.kingbright.com</description>
 <approved hash="101,1,40.64,-10.16,MOTOR1-4,S,,,,"/>
 <approved hash="101,1,101.6,-10.16,MOTOR2-4,S,,,,"/>
 <approved hash="101,1,170.18,-10.16,MOTOR3-4,S,,,,"/>
+<approved hash="102,1,-71.12,149.86,VCC,+5V,,,,"/>
 <approved hash="204,1,114.3,213.36,U$3,3V,,,,"/>
 <approved hash="204,1,73.66,223.52,U$3,3V,,,,"/>
 <approved hash="204,1,73.66,200.66,U$3,3V,,,,"/>
