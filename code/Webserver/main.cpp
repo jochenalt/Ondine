@@ -17,7 +17,7 @@
 
 // everyone likes a blinking LED
 static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// nice!
-PatternBlinker ledBlinker(LED_BUILTIN, 50 /* ms */, true); // one bit in the patterns above is active for 100ms
+PatternBlinker ledBlinker(LED_BUILTIN, 50 /* ms */, true); // one bit in the patterns above is active for 50ms
 
 // ESP8266 webserver
 WebServer webserver;
@@ -43,7 +43,7 @@ void setup() {
 	botControllerLogs->swap();
 	botControllerLogs->begin(230400);
 
-	ctrlComm->begin(SDA, SCL);        // join i2c bus (address optional for master)
+	ctrlComm->begin(SDA, SCL);        // join i2c bus as master
 
 	// doI2CPortScan(F("looking for BotControll"), ctrlComm, logger);
 

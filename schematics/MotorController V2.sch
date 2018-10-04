@@ -12250,7 +12250,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <vertex x="-3.05" y="-2.475"/>
 </polygon>
 </package>
-<package name="P128-35" urn="urn:adsk.eagle:footprint:25377/1" library_version="5">
+<package name="P128-35" urn="urn:adsk.eagle:footprint:22831/1" library_version="3">
 <description>&lt;b&gt;ELECTROLYTIC CAPACITOR&lt;/b&gt;&lt;p&gt;</description>
 <wire x1="1.778" y1="2.54" x2="1.778" y2="1.397" width="0.1524" layer="21"/>
 <wire x1="1.778" y1="1.397" x2="1.778" y2="0.635" width="0.1524" layer="21"/>
@@ -12293,7 +12293,7 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <text x="-1.651" y="-5.08" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
 <rectangle x1="0.254" y1="-1.27" x2="0.762" y2="1.27" layer="21"/>
 </package>
-<package name="SMC_A" urn="urn:adsk.eagle:footprint:25479/1" library_version="5">
+<package name="SMC_A" urn="urn:adsk.eagle:footprint:22933/1" library_version="3">
 <description>&lt;b&gt;Chip Capacitor &lt;/b&gt; Polar tantalum capacitors with solid electrolyte&lt;p&gt;
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198&lt;br&gt;
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -12309,7 +12309,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <rectangle x1="1.4" y1="-0.6" x2="1.6" y2="0.6" layer="51" rot="R180"/>
 <rectangle x1="-1.45" y1="-0.75" x2="-0.8" y2="0.75" layer="51"/>
 </package>
-<package name="SMC_Z" urn="urn:adsk.eagle:footprint:25480/1" library_version="5">
+<package name="SMC_Z" urn="urn:adsk.eagle:footprint:22934/1" library_version="3">
 <description>&lt;b&gt;Chip Capacitor&lt;/b&gt; Polar tantalum capacitors with solid electrolyte&lt;p&gt;
 Siemens Matsushita Components B 45 194&lt;br&gt;
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -12325,7 +12325,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <rectangle x1="0.9" y1="-0.45" x2="1" y2="0.45" layer="51" rot="R180"/>
 <rectangle x1="-0.9" y1="-0.6" x2="-0.5" y2="0.6" layer="51"/>
 </package>
-<package name="SMC_P" urn="urn:adsk.eagle:footprint:25481/1" library_version="5">
+<package name="SMC_P" urn="urn:adsk.eagle:footprint:22935/1" library_version="3">
 <description>&lt;b&gt;Chip Capacitor&lt;/b&gt; Polar tantalum capacitors with solid electrolyte&lt;p&gt;
 Siemens Matsushita Components B 45 194&lt;br&gt;
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -12341,7 +12341,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <rectangle x1="1.7" y1="-0.45" x2="1.8" y2="0.45" layer="51" rot="R180"/>
 <rectangle x1="-1.65" y1="-0.75" x2="-1.075" y2="0.725" layer="51"/>
 </package>
-<package name="SMC_B" urn="urn:adsk.eagle:footprint:25482/1" library_version="5">
+<package name="SMC_B" urn="urn:adsk.eagle:footprint:22936/1" library_version="3">
 <description>&lt;b&gt;Chip Capacitor &lt;/b&gt; Polar tantalum capacitors with solid electrolyte&lt;p&gt;
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198&lt;br&gt;
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -12357,7 +12357,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <rectangle x1="1.55" y1="-1.1" x2="1.75" y2="1.1" layer="51" rot="R180"/>
 <rectangle x1="-1.6" y1="-1.35" x2="-0.95" y2="1.35" layer="51"/>
 </package>
-<package name="SMC_C" urn="urn:adsk.eagle:footprint:25483/1" library_version="5">
+<package name="SMC_C" urn="urn:adsk.eagle:footprint:22937/1" library_version="3">
 <description>&lt;b&gt;Chip Capacitor &lt;/b&gt; Polar tantalum capacitors with solid electrolyte&lt;p&gt;
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198&lt;br&gt;
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -12373,7 +12373,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <rectangle x1="2.8" y1="-1.1" x2="3" y2="1.1" layer="51" rot="R180"/>
 <rectangle x1="-2.85" y1="-1.55" x2="-1.9" y2="1.55" layer="51"/>
 </package>
-<package name="SMC_D" urn="urn:adsk.eagle:footprint:25484/1" library_version="5">
+<package name="SMC_D" urn="urn:adsk.eagle:footprint:22938/1" library_version="3">
 <description>&lt;b&gt;Chip Capacitor &lt;/b&gt; Polar tantalum capacitors with solid electrolyte&lt;p&gt;
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198&lt;br&gt;
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -12389,7 +12389,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <rectangle x1="3.45" y1="-1.2" x2="3.65" y2="1.2" layer="51" rot="R180"/>
 <rectangle x1="-3.5" y1="-2.1" x2="-2.4" y2="2.1" layer="51"/>
 </package>
-<package name="SMC_E" urn="urn:adsk.eagle:footprint:25485/1" library_version="5">
+<package name="SMC_E" urn="urn:adsk.eagle:footprint:22939/1" library_version="3">
 <description>&lt;b&gt;Chip Capacitor &lt;/b&gt; Polar tantalum capacitors with solid electrolyte&lt;p&gt;
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198&lt;br&gt;
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13578,13 +13578,13 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <packageinstance name="UD-8X10_NICHICON"/>
 </packageinstances>
 </package3d>
-<package3d name="P128-35" urn="urn:adsk.eagle:package:25807/1" type="box" library_version="5">
+<package3d name="P128-35" urn="urn:adsk.eagle:package:23326/1" type="box" library_version="3">
 <description>ELECTROLYTIC CAPACITOR</description>
 <packageinstances>
 <packageinstance name="P128-35"/>
 </packageinstances>
 </package3d>
-<package3d name="SMC_A" urn="urn:adsk.eagle:package:25926/1" type="box" library_version="5">
+<package3d name="SMC_A" urn="urn:adsk.eagle:package:23431/1" type="box" library_version="3">
 <description>Chip Capacitor  Polar tantalum capacitors with solid electrolyte
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13592,7 +13592,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <packageinstance name="SMC_A"/>
 </packageinstances>
 </package3d>
-<package3d name="SMC_Z" urn="urn:adsk.eagle:package:25927/1" type="box" library_version="5">
+<package3d name="SMC_Z" urn="urn:adsk.eagle:package:23433/1" type="box" library_version="3">
 <description>Chip Capacitor Polar tantalum capacitors with solid electrolyte
 Siemens Matsushita Components B 45 194
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13600,7 +13600,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <packageinstance name="SMC_Z"/>
 </packageinstances>
 </package3d>
-<package3d name="SMC_P" urn="urn:adsk.eagle:package:25919/1" type="box" library_version="5">
+<package3d name="SMC_P" urn="urn:adsk.eagle:package:23432/1" type="box" library_version="3">
 <description>Chip Capacitor Polar tantalum capacitors with solid electrolyte
 Siemens Matsushita Components B 45 194
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13608,7 +13608,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <packageinstance name="SMC_P"/>
 </packageinstances>
 </package3d>
-<package3d name="SMC_B" urn="urn:adsk.eagle:package:25920/1" type="box" library_version="5">
+<package3d name="SMC_B" urn="urn:adsk.eagle:package:23436/1" type="box" library_version="3">
 <description>Chip Capacitor  Polar tantalum capacitors with solid electrolyte
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13616,7 +13616,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <packageinstance name="SMC_B"/>
 </packageinstances>
 </package3d>
-<package3d name="SMC_C" urn="urn:adsk.eagle:package:25921/1" type="box" library_version="5">
+<package3d name="SMC_C" urn="urn:adsk.eagle:package:23435/1" type="box" library_version="3">
 <description>Chip Capacitor  Polar tantalum capacitors with solid electrolyte
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13624,7 +13624,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <packageinstance name="SMC_C"/>
 </packageinstances>
 </package3d>
-<package3d name="SMC_D" urn="urn:adsk.eagle:package:25923/1" type="box" library_version="5">
+<package3d name="SMC_D" urn="urn:adsk.eagle:package:23434/1" type="box" library_version="3">
 <description>Chip Capacitor  Polar tantalum capacitors with solid electrolyte
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13632,7 +13632,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <packageinstance name="SMC_D"/>
 </packageinstances>
 </package3d>
-<package3d name="SMC_E" urn="urn:adsk.eagle:package:25922/1" type="box" library_version="5">
+<package3d name="SMC_E" urn="urn:adsk.eagle:package:23446/1" type="box" library_version="3">
 <description>Chip Capacitor  Polar tantalum capacitors with solid electrolyte
 Siemens Matsushita Components B 45 194, B 45 197, B 45 198
 Source: www.farnell.com/datasheets/247.pdf</description>
@@ -13656,7 +13656,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="CPOL-EU" urn="urn:adsk.eagle:component:23787/23" prefix="C" uservalue="yes" library_version="5">
+<deviceset name="CPOL-EU" urn="urn:adsk.eagle:component:23787/21" prefix="C" uservalue="yes" library_version="3">
 <description>&lt;B&gt;POLARIZED CAPACITOR&lt;/B&gt;, European symbol</description>
 <gates>
 <gate name="G$1" symbol="CPOL" x="0" y="0"/>
@@ -14074,7 +14074,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25807/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23326/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -15502,7 +15502,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25926/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23431/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -15516,7 +15516,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25927/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23433/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -15530,7 +15530,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25919/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23432/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -15544,7 +15544,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25920/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23436/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -15558,7 +15558,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25921/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23435/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -15572,7 +15572,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25923/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23434/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -15586,7 +15586,7 @@ Source: www.farnell.com/datasheets/247.pdf</description>
 <connect gate="G$1" pin="-" pad="-"/>
 </connects>
 <package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:25922/1"/>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:23446/1"/>
 </package3dinstances>
 <technologies>
 <technology name="">
@@ -22015,7 +22015,7 @@ Source: www.kingbright.com</description>
 <part name="IMU-I2C" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA05-1" device="" package3d_urn="urn:adsk.eagle:package:8332/1" value="1"/>
 <part name="DC-MOTOR" library="con-lstb" library_urn="urn:adsk.eagle:library:162" deviceset="MA06-1" device="" package3d_urn="urn:adsk.eagle:package:8340/1" value="1"/>
 <part name="D1" library="diode" library_urn="urn:adsk.eagle:library:210" deviceset="1N5908" device="" package3d_urn="urn:adsk.eagle:package:43355/1"/>
-<part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-EU" device="E5-10.5" package3d_urn="urn:adsk.eagle:package:23372/1" value="1000uF"/>
+<part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-EU" device="E2.5-6" package3d_urn="urn:adsk.eagle:package:23349/1" value="1000uF"/>
 <part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="CPOL-EU" device="E5-5" package3d_urn="urn:adsk.eagle:package:23367/1" value="100uF"/>
 <part name="C3" library="capacitor-wima" library_urn="urn:adsk.eagle:library:116" deviceset="C" device="2.5/2" package3d_urn="urn:adsk.eagle:package:5415/1" value="100nF"/>
 <part name="MOTOR1" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="5566-4" device=""/>
@@ -22046,7 +22046,7 @@ Source: www.kingbright.com</description>
 <part name="D12" library="diode" library_urn="urn:adsk.eagle:library:210" deviceset="ZENER-DIODE" device="DO41Z10" package3d_urn="urn:adsk.eagle:package:43341/1" value="5.6V"/>
 <part name="D13" library="diode" library_urn="urn:adsk.eagle:library:210" deviceset="ZENER-DIODE" device="DO41Z10" package3d_urn="urn:adsk.eagle:package:43341/1" value="5.6V"/>
 <part name="U$3" library="nodemcu" deviceset="NODEMCU" device=""/>
-<part name="LED1" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="3MM" package3d_urn="urn:adsk.eagle:package:15797/1"/>
+<part name="LED1" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="3MM" package3d_urn="urn:adsk.eagle:package:15797/1" value="red"/>
 <part name="R15" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="4,7K"/>
 </parts>
 <sheets>
@@ -22060,7 +22060,7 @@ Source: www.kingbright.com</description>
 <attribute name="VALUE" x="30.48" y="-5.08" size="1.778" layer="95"/>
 </instance>
 <instance part="P+1" gate="VCC" x="-71.12" y="152.4">
-<attribute name="VALUE" x="-73.66" y="149.86" size="1.778" layer="96" rot="R90"/>
+<attribute name="VALUE" x="-73.66" y="154.94" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="GND1" gate="1" x="-10.16" y="-27.94">
 <attribute name="VALUE" x="-12.7" y="-30.48" size="1.778" layer="96"/>
@@ -22081,9 +22081,9 @@ Source: www.kingbright.com</description>
 <attribute name="NAME" x="91.44" y="20.32" size="1.778" layer="95"/>
 <attribute name="VALUE" x="91.44" y="-5.08" size="1.778" layer="95"/>
 </instance>
-<instance part="DRK3" gate="G$1" x="157.48" y="15.24">
-<attribute name="NAME" x="154.94" y="20.32" size="1.778" layer="95"/>
-<attribute name="VALUE" x="154.94" y="-5.08" size="1.778" layer="95"/>
+<instance part="DRK3" gate="G$1" x="162.56" y="15.24">
+<attribute name="NAME" x="162.56" y="20.32" size="1.778" layer="95"/>
+<attribute name="VALUE" x="160.02" y="-5.08" size="1.778" layer="95"/>
 </instance>
 <instance part="R4" gate="G$1" x="76.2" y="15.24">
 <attribute name="NAME" x="72.39" y="16.7386" size="1.778" layer="95"/>
@@ -22175,18 +22175,18 @@ Source: www.kingbright.com</description>
 <instance part="MOTOR2" gate="-4" x="101.6" y="-12.7" rot="R270">
 <attribute name="NAME" x="100.838" y="-15.24" size="1.524" layer="95" rot="R270"/>
 </instance>
-<instance part="MOTOR3" gate="-1" x="172.72" y="-12.7" rot="R270">
+<instance part="MOTOR3" gate="-1" x="177.8" y="-12.7" rot="R270">
+<attribute name="NAME" x="177.038" y="-15.24" size="1.524" layer="95" rot="R270"/>
+<attribute name="VALUE" x="179.197" y="-11.938" size="1.778" layer="96" rot="R270"/>
+</instance>
+<instance part="MOTOR3" gate="-2" x="175.26" y="-12.7" rot="R270">
+<attribute name="NAME" x="174.498" y="-15.24" size="1.524" layer="95" rot="R270"/>
+</instance>
+<instance part="MOTOR3" gate="-3" x="172.72" y="-12.7" rot="R270">
 <attribute name="NAME" x="171.958" y="-15.24" size="1.524" layer="95" rot="R270"/>
-<attribute name="VALUE" x="174.117" y="-11.938" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="MOTOR3" gate="-2" x="170.18" y="-12.7" rot="R270">
+<instance part="MOTOR3" gate="-4" x="170.18" y="-12.7" rot="R270">
 <attribute name="NAME" x="169.418" y="-15.24" size="1.524" layer="95" rot="R270"/>
-</instance>
-<instance part="MOTOR3" gate="-3" x="167.64" y="-12.7" rot="R270">
-<attribute name="NAME" x="166.878" y="-15.24" size="1.524" layer="95" rot="R270"/>
-</instance>
-<instance part="MOTOR3" gate="-4" x="165.1" y="-12.7" rot="R270">
-<attribute name="NAME" x="164.338" y="-15.24" size="1.524" layer="95" rot="R270"/>
 </instance>
 <instance part="IC1" gate="1" x="-109.22" y="45.72">
 <attribute name="NAME" x="-106.68" y="38.1" size="1.778" layer="95"/>
@@ -22329,7 +22329,6 @@ Source: www.kingbright.com</description>
 <wire x1="213.36" y1="132.08" x2="213.36" y2="149.86" width="0.1524" layer="91"/>
 <wire x1="177.8" y1="149.86" x2="213.36" y2="149.86" width="0.1524" layer="91"/>
 <pinref part="DC-MOTOR" gate="1" pin="4"/>
-<label x="236.22" y="132.08" size="1.778" layer="95"/>
 <wire x1="246.38" y1="132.08" x2="213.36" y2="132.08" width="0.1524" layer="91"/>
 <junction x="213.36" y="132.08"/>
 <pinref part="IC1" gate="1" pin="OUT"/>
@@ -22351,7 +22350,6 @@ Source: www.kingbright.com</description>
 <wire x1="-106.68" y1="50.8" x2="-91.44" y2="50.8" width="0.1524" layer="91"/>
 <wire x1="-91.44" y1="50.8" x2="-91.44" y2="45.72" width="0.1524" layer="91"/>
 <junction x="154.94" y="149.86"/>
-<label x="134.62" y="167.64" size="1.778" layer="95"/>
 <pinref part="U$3" gate="G$1" pin="VIN"/>
 <wire x1="154.94" y1="167.64" x2="154.94" y2="149.86" width="0.1524" layer="91"/>
 <wire x1="114.3" y1="223.52" x2="121.92" y2="223.52" width="0.1524" layer="91"/>
@@ -22430,8 +22428,8 @@ Source: www.kingbright.com</description>
 <wire x1="228.6" y1="134.62" x2="228.6" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="228.6" y1="124.46" x2="137.16" y2="124.46" width="0.1524" layer="91"/>
 <pinref part="S1" gate="1" pin="1"/>
-<wire x1="137.16" y1="124.46" x2="119.38" y2="124.46" width="0.1524" layer="91"/>
-<wire x1="119.38" y1="124.46" x2="60.96" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="137.16" y1="124.46" x2="116.84" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="116.84" y1="124.46" x2="60.96" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="124.46" x2="53.34" y2="124.46" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="129.54" x2="15.24" y2="124.46" width="0.1524" layer="91"/>
 <junction x="15.24" y="124.46"/>
@@ -22489,9 +22487,7 @@ Source: www.kingbright.com</description>
 <wire x1="60.96" y1="203.2" x2="60.96" y2="124.46" width="0.1524" layer="91"/>
 <junction x="60.96" y="124.46"/>
 <pinref part="U$3" gate="G$1" pin="GND@2"/>
-<wire x1="114.3" y1="220.98" x2="119.38" y2="220.98" width="0.1524" layer="91"/>
-<wire x1="119.38" y1="220.98" x2="119.38" y2="124.46" width="0.1524" layer="91"/>
-<junction x="119.38" y="124.46"/>
+<wire x1="114.3" y1="220.98" x2="116.84" y2="220.98" width="0.1524" layer="91"/>
 <pinref part="U$3" gate="G$1" pin="GND@3"/>
 <wire x1="73.66" y1="220.98" x2="60.96" y2="220.98" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="220.98" x2="60.96" y2="203.2" width="0.1524" layer="91"/>
@@ -22504,6 +22500,16 @@ Source: www.kingbright.com</description>
 <pinref part="R15" gate="G$1" pin="1"/>
 <wire x1="-27.94" y1="-12.7" x2="-27.94" y2="-22.86" width="0.1524" layer="91"/>
 <junction x="-27.94" y="-22.86"/>
+<pinref part="U$3" gate="G$1" pin="GND"/>
+<wire x1="114.3" y1="190.5" x2="116.84" y2="190.5" width="0.1524" layer="91"/>
+<wire x1="116.84" y1="190.5" x2="116.84" y2="210.82" width="0.1524" layer="91"/>
+<pinref part="U$3" gate="G$1" pin="GND@1"/>
+<wire x1="116.84" y1="210.82" x2="114.3" y2="210.82" width="0.1524" layer="91"/>
+<wire x1="116.84" y1="210.82" x2="116.84" y2="220.98" width="0.1524" layer="91"/>
+<junction x="116.84" y="210.82"/>
+<wire x1="116.84" y1="190.5" x2="116.84" y2="124.46" width="0.1524" layer="91"/>
+<junction x="116.84" y="190.5"/>
+<junction x="116.84" y="124.46"/>
 </segment>
 </net>
 <net name="N$4" class="0">
@@ -22580,7 +22586,6 @@ Source: www.kingbright.com</description>
 <wire x1="116.84" y1="25.4" x2="185.42" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="185.42" y1="25.4" x2="185.42" y2="15.24" width="0.1524" layer="91"/>
 <pinref part="DRK3" gate="G$1" pin="LIPO+"/>
-<wire x1="185.42" y1="15.24" x2="180.34" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="-35.56" y1="33.02" x2="-35.56" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="218.44" y1="86.36" x2="195.58" y2="86.36" width="0.1524" layer="91"/>
 <wire x1="195.58" y1="86.36" x2="195.58" y2="25.4" width="0.1524" layer="91"/>
@@ -22619,21 +22624,21 @@ Source: www.kingbright.com</description>
 <net name="N$16" class="1">
 <segment>
 <pinref part="DRK3" gate="G$1" pin="M1"/>
-<wire x1="167.64" y1="-7.62" x2="167.64" y2="-10.16" width="0.1524" layer="91"/>
+<wire x1="172.72" y1="-7.62" x2="172.72" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR3" gate="-3" pin="S"/>
 </segment>
 </net>
 <net name="N$17" class="1">
 <segment>
 <pinref part="DRK3" gate="G$1" pin="M2"/>
-<wire x1="170.18" y1="-7.62" x2="170.18" y2="-10.16" width="0.1524" layer="91"/>
+<wire x1="175.26" y1="-7.62" x2="175.26" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR3" gate="-2" pin="S"/>
 </segment>
 </net>
 <net name="N$18" class="1">
 <segment>
 <pinref part="DRK3" gate="G$1" pin="M3"/>
-<wire x1="172.72" y1="-7.62" x2="172.72" y2="-10.16" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="-7.62" x2="177.8" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="MOTOR3" gate="-1" pin="S"/>
 </segment>
 </net>
@@ -22700,19 +22705,21 @@ Source: www.kingbright.com</description>
 <segment>
 <pinref part="DRK3" gate="G$1" pin="IN2"/>
 <pinref part="R8" gate="G$1" pin="2"/>
-<wire x1="149.86" y1="12.7" x2="144.78" y2="12.7" width="0.1524" layer="91"/>
+<wire x1="154.94" y1="12.7" x2="144.78" y2="12.7" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$25" class="0">
 <segment>
 <pinref part="R7" gate="G$1" pin="2"/>
 <pinref part="DRK3" gate="G$1" pin="IN1"/>
+<wire x1="154.94" y1="15.24" x2="149.86" y2="15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$26" class="0">
 <segment>
 <pinref part="R9" gate="G$1" pin="2"/>
 <pinref part="DRK3" gate="G$1" pin="IN3"/>
+<wire x1="154.94" y1="10.16" x2="149.86" y2="10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$27" class="0">
@@ -22859,21 +22866,21 @@ Source: www.kingbright.com</description>
 <pinref part="PRJ1" gate="G$1" pin="38/A19"/>
 <wire x1="73.66" y1="154.94" x2="73.66" y2="114.3" width="0.1524" layer="91"/>
 <label x="73.66" y="114.3" size="1.778" layer="95" rot="R90"/>
-<wire x1="73.66" y1="154.94" x2="68.58" y2="154.94" width="0.1524" layer="91"/>
-<wire x1="68.58" y1="154.94" x2="68.58" y2="193.04" width="0.1524" layer="91"/>
-<pinref part="U$3" gate="G$1" pin="D2"/>
-<wire x1="68.58" y1="193.04" x2="73.66" y2="193.04" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="154.94" x2="71.12" y2="154.94" width="0.1524" layer="91"/>
+<pinref part="U$3" gate="G$1" pin="D1"/>
+<wire x1="73.66" y1="190.5" x2="71.12" y2="190.5" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="190.5" x2="71.12" y2="154.94" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="SDA1" class="0">
 <segment>
 <pinref part="PRJ1" gate="G$1" pin="37/A18"/>
-<wire x1="76.2" y1="157.48" x2="76.2" y2="114.3" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="162.56" x2="76.2" y2="114.3" width="0.1524" layer="91"/>
 <label x="76.2" y="114.3" size="1.778" layer="95" rot="R90"/>
-<pinref part="U$3" gate="G$1" pin="D1"/>
-<wire x1="73.66" y1="190.5" x2="71.12" y2="190.5" width="0.1524" layer="91"/>
-<wire x1="71.12" y1="190.5" x2="71.12" y2="157.48" width="0.1524" layer="91"/>
-<wire x1="71.12" y1="157.48" x2="76.2" y2="157.48" width="0.1524" layer="91"/>
+<pinref part="U$3" gate="G$1" pin="D2"/>
+<wire x1="68.58" y1="193.04" x2="73.66" y2="193.04" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="193.04" x2="68.58" y2="162.56" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="162.56" x2="76.2" y2="162.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$42" class="0">
@@ -22996,7 +23003,7 @@ Source: www.kingbright.com</description>
 <wire x1="48.26" y1="-7.62" x2="48.26" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="CTRL-3.3V" class="0">
+<net name="3.3V" class="0">
 <segment>
 <pinref part="PRJ1" gate="G$1" pin="3V3_LO"/>
 <wire x1="33.02" y1="114.3" x2="33.02" y2="132.08" width="0.1524" layer="91"/>
@@ -23035,7 +23042,6 @@ Source: www.kingbright.com</description>
 <net name="LIPO-GND" class="1">
 <segment>
 <pinref part="DRK3" gate="G$1" pin="GND"/>
-<wire x1="180.34" y1="12.7" x2="185.42" y2="12.7" width="0.1524" layer="91"/>
 <wire x1="185.42" y1="12.7" x2="185.42" y2="-38.1" width="0.1524" layer="91"/>
 <wire x1="116.84" y1="-38.1" x2="185.42" y2="-38.1" width="0.1524" layer="91"/>
 <pinref part="DRK2" gate="G$1" pin="GND"/>
@@ -23178,7 +23184,7 @@ Source: www.kingbright.com</description>
 <segment>
 <pinref part="R14" gate="G$1" pin="2"/>
 <pinref part="DRK3" gate="G$1" pin="EN"/>
-<wire x1="149.86" y1="5.08" x2="144.78" y2="5.08" width="0.1524" layer="91"/>
+<wire x1="154.94" y1="5.08" x2="144.78" y2="5.08" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$48" class="0">
@@ -23194,17 +23200,45 @@ Source: www.kingbright.com</description>
 <wire x1="-27.94" y1="-2.54" x2="-27.94" y2="7.62" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="N$49" class="0">
+<segment>
+<pinref part="U$3" gate="G$1" pin="D0"/>
+<wire x1="73.66" y1="187.96" x2="73.66" y2="182.88" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="182.88" x2="142.24" y2="182.88" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="182.88" x2="142.24" y2="180.34" width="0.1524" layer="91"/>
+<pinref part="CONTROL" gate="1" pin="8"/>
+<wire x1="142.24" y1="180.34" x2="134.62" y2="180.34" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$50" class="0">
+<segment>
+<pinref part="U$3" gate="G$1" pin="RST"/>
+<wire x1="114.3" y1="218.44" x2="144.78" y2="218.44" width="0.1524" layer="91"/>
+<wire x1="144.78" y1="218.44" x2="144.78" y2="177.8" width="0.1524" layer="91"/>
+<pinref part="CONTROL" gate="1" pin="7"/>
+<wire x1="144.78" y1="177.8" x2="134.62" y2="177.8" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$51" class="0">
+<segment>
+<pinref part="CONTROL" gate="1" pin="6"/>
+<wire x1="134.62" y1="175.26" x2="147.32" y2="175.26" width="0.1524" layer="91"/>
+<wire x1="147.32" y1="175.26" x2="147.32" y2="137.16" width="0.1524" layer="91"/>
+<wire x1="147.32" y1="137.16" x2="58.42" y2="137.16" width="0.1524" layer="91"/>
+<pinref part="PRJ1" gate="G$1" pin="14/A0"/>
+<wire x1="58.42" y1="137.16" x2="58.42" y2="114.3" width="0.1524" layer="91"/>
+</segment>
+</net>
 </nets>
 </sheet>
 </sheets>
 <errors>
 <approved hash="101,1,40.64,-10.16,MOTOR1-4,S,,,,"/>
 <approved hash="101,1,101.6,-10.16,MOTOR2-4,S,,,,"/>
-<approved hash="104,1,101.6,167.64,U$2,GND.1,CTRL-GND,,,"/>
-<approved hash="104,1,101.6,170.18,U$2,LV,CTRL-VDD,,,"/>
-<approved hash="104,1,71.12,167.64,U$2,GND.2,GND,,,"/>
-<approved hash="110,1,73.66,121.92,N$60,SCL1,,,,"/>
-<approved hash="110,1,73.66,121.92,N$60,SCL1,,,,"/>
+<approved hash="101,1,170.18,-10.16,MOTOR3-4,S,,,,"/>
+<approved hash="204,1,114.3,213.36,U$3,3V,,,,"/>
+<approved hash="204,1,73.66,223.52,U$3,3V,,,,"/>
+<approved hash="204,1,73.66,200.66,U$3,3V,,,,"/>
 </errors>
 </schematic>
 </drawing>
