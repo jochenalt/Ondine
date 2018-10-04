@@ -8,6 +8,7 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
+#include <Arduino.h>
 class WebServer {
 public:
 	WebServer() {};
@@ -16,6 +17,9 @@ public:
 
 	void setup();
 	void loop();
+private:
+	// Variable to store the HTTP request
+	String request;
 };
 
 #endif /* WEBSERVER_H_ */

@@ -1,6 +1,8 @@
 /*
  * LogBuffer.h
  *
+ * circular buffer used to store log entries and display them on the web page
+ *
  *  Created on: 03.10.2018
  *      Author: JochenAlt
  */
@@ -10,31 +12,30 @@
 
 #include <Arduino.h>
 
-class LogStream : public Stream{
+class LogStream : public Stream
+{
 public:
 	LogStream() {};
 	virtual ~LogStream() {};
 
-	virtual size_t write(uint8_t c)  {
+    int available(void) override { 	return size;};
+    virtual int read() override { return get(0);pop(); };
+    virtual int peek() override { return get(0); };
+    virtual int peek(int idx) { return get(idx); };
+	virtual size_t write(uint8_t c)  override {
 		push(c);
 		return 1;
 	}
 
-    int available(void) override {
-    	return size;
-    };
-
-    virtual int read() override { return get(0);pop(); };
-    virtual int peek() override { return get(0); };
-    virtual int peek(int idx) { return get(idx); };
-
 private:
-	static const int BufferSize = 1024;
+
+
+    static const int BufferSize = 1024;
 	uint8_t buffer[BufferSize];
 
 	int  inIdx = 0;
 	int  outIdx = 0;
-	size_t size = 0;
+	int size = 0;
 
 	void push(uint8_t c) {
 		// make room for one character

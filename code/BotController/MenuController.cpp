@@ -71,8 +71,8 @@ void MenuController::pushMenu(const Menuable* menu) {
 
 void MenuController::loop() {
 	if 	(command->available()) {
-		uint32_t start = micros();
 		char ch = command->read();
+		uint32_t start = micros();
 		uint32_t middle = micros();
 
 		if (ch == 27)

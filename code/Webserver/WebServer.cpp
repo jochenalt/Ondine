@@ -13,15 +13,14 @@ extern LogStream* logger;
 // Load Wi-Fi library
 #include <ESP8266WiFi.h>
 
+#include <Util.h>
+
 // Replace with your network credentials
 const char* ssid     = "lorem ipsum dolor sit amet";
 const char* password = "7386801780590940";
 
 // Set web server port number to 80
 WiFiServer server(80);
-
-// Variable to store the HTTP request
-String header;
 
 // Auxiliar variables to store the current output state
 String output5State = "off";
@@ -32,7 +31,7 @@ const int output5 = 5;
 const int output4 = 4;
 
 void WebServer::setup() {
-  Serial.begin(115200);
+  Serial.begin(230400);
   // Initialize the output variables as outputs
   pinMode(output5, OUTPUT);
   pinMode(output4, OUTPUT);
@@ -60,13 +59,12 @@ void WebServer::loop(){
   WiFiClient client = server.available();   // Listen for incoming clients
 
   if (client) {                             // If a new client connects,
-    logger->println("New Client.");          // print a message out in the serial port
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
       if (client.available()) {             // if there's bytes to read from the client,
         char c = client.read();             // read a byte, then
         Serial.write(c);                    // print it out the serial monitor
-        header += c;
+        request += c;
         if (c == '\n') {                    // if the byte is a newline character
           // if the current line is blank, you got two newline characters in a row.
           // that's the end of the client HTTP request, so send a response:
@@ -78,23 +76,53 @@ void WebServer::loop(){
             client.println("Connection: close");
             client.println();
 
+            // identify http action
+            String httpAction = request;
+            int urlEnd = request.indexOf(" HTTP/1.1");
+            int urlStart = request.indexOf("GET ");
+            int httpActionLength = 4; // default is "GET "
+            // bool httpPost = false;
+           	if (urlStart < 0) {
+           		urlStart = request.indexOf("POST ");
+           		if (urlStart >=0) {
+           			httpActionLength = 5;
+           			// httpPost = true;
+            	}
+           	}
+
+            if ((urlEnd > 0) && (urlStart >= 0))
+            	httpAction = httpAction.substring(urlStart,urlEnd);
+            /*
+            logger->print("http:");
+            logger->print("httpAction=[");
+            logger->print(httpAction);
+            logger->print(" params=[");
+            logger->print(httpAction.substring(httpActionLength+1, httpAction.length()));
+            logger->print("]");
+			*/
             // turns the GPIOs on and off
-            if (header.indexOf("GET /5/on") >= 0) {
+            if (httpAction.indexOf("GET /5/on") >= 0) {
               Serial.println("GPIO 5 on");
               output5State = "on";
               digitalWrite(output5, HIGH);
-            } else if (header.indexOf("GET /5/off") >= 0) {
+            } else if (httpAction.indexOf("GET /5/off") >= 0) {
               Serial.println("GPIO 5 off");
               output5State = "off";
               digitalWrite(output5, LOW);
-            } else if (header.indexOf("GET /4/on") >= 0) {
+            } else if (httpAction.indexOf("GET /4/on") >= 0) {
               Serial.println("GPIO 4 on");
               output4State = "on";
               digitalWrite(output4, HIGH);
-            } else if (header.indexOf("GET /4/off") >= 0) {
+            } else if (httpAction.indexOf("GET /4/off") >= 0) {
               Serial.println("GPIO 4 off");
               output4State = "off";
               digitalWrite(output4, LOW);
+            } else if (httpAction.indexOf("GET /cmd") >= 0) {
+            	String cmd = httpAction.substring(httpActionLength+1+3+1+8, httpAction.length());
+            	logger->print(" cmd=[");
+            	logger->print(cmd);
+            	logger->println("]");
+            	sendCommandAsync(CmdSerialCommand, cmd);
             }
 
             // Display the HTML web page
@@ -130,6 +158,13 @@ void WebServer::loop(){
             } else {
               client.println("<p><a href=\"/4/off\"><button class=\"button button2\">OFF</button></a></p>");
             }
+            client.println(" <form action=\"/cmd\" method=\"GET\">");
+            client.println(" <label>BotController command:</label>");
+            client.println(" <input type=\"text\" name=\"command\" placeholder=\"key in command\" />");
+            client.println(" <input type=\"submit\" value=\"Send\">");
+            client.println(" </form>");
+
+            client.println("<p><b>Log</b></p>");
             client.println("<textarea rows=\"24\" cols=\"196\" id=\"logtextarea\">");
             int size = logger->available();
             for (int i = 0;i< size;i++) {
@@ -143,6 +178,7 @@ void WebServer::loop(){
             client.println();
             // Break out of the while loop
             break;
+
           } else { // if you got a newline, then clear currentLine
             currentLine = "";
           }
@@ -152,11 +188,10 @@ void WebServer::loop(){
       }
     }
     // Clear the header variable
-    header = "";
+    request = "";
+
     // Close the connection
     client.stop();
-    logger->println("Client disconnected.");
-    logger->println("");
   }
 }
 
