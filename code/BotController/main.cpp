@@ -6,6 +6,7 @@
 
 #include <utilities/PatternBlinker.h>
 #include <i2c_t3-v9.1/i2c_t3-v9.1.h>
+#include <common.h>
 
 static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// nice!
 
@@ -20,7 +21,6 @@ i2c_t3* Wires[3] = { &Wire, &Wire1, &Wire2};
 i2c_t3* IMUWire = NULL;
 
 i2c_t3* webServerComm = &Wire1;
-const int webserverCommAddress = 0x17;
 int requestBytes = 0;
 
 void webServerCommRequestEvent() {
@@ -82,7 +82,7 @@ void setup()
 	command->begin(230400);
 	botController.setup(); // this couple of second (mainly due to IMU)
 
-	webServerComm->begin(I2C_SLAVE, webserverCommAddress, 0, I2C_PINS_37_38, I2C_PULLUP_EXT, I2C_RATE_400);          // join i2c bus with address #8
+	webServerComm->begin(I2C_SLAVE, BotControllerI2CAddress, 0, I2C_PINS_37_38, I2C_PULLUP_EXT, I2C_RATE_400);          // join i2c bus with address #8
 	webServerComm->setDefaultTimeout(4000); // 4ms default timeout
 
 	webServerComm->onRequest(webServerCommRequestEvent);

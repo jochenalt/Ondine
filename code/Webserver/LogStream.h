@@ -73,4 +73,7 @@ private:
 
 };
 
+
+extern LogStream* logger;
+
 #endif /* LOGSTREAM_H_ */

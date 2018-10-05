@@ -14,6 +14,7 @@
 #include <Util.h>
 #include <I2CPortScanner.h>
 #include <pins.h>
+#include <I2CMaster.h>
 
 // everyone likes a blinking LED
 static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// nice!
@@ -28,6 +29,10 @@ LogStream* logger = new LogStream();
 // receive log messages from bot controller
 HardwareSerial* botControllerLogs = NULL;
 
+// communication to bot controller
+I2CMaster* i2cMaster = new I2CMaster(&Wire);
+
+
 void setup() {
 	logger->println("setup webserver");
 
@@ -36,14 +41,13 @@ void setup() {
 	ledBlinker.set(DefaultPattern,sizeof(DefaultPattern));
 
 	logger->println("setup i2c to bot controller");
-	ctrlComm = &Wire;
 
 	logger->println("setup serial interface to bot controller");
 	botControllerLogs = &Serial;
 	botControllerLogs->swap();
 	botControllerLogs->begin(230400);
 
-	ctrlComm->begin(SDA, SCL);        // join i2c bus as master
+	i2cMaster->setup();
 
 	// doI2CPortScan(F("looking for BotControll"), ctrlComm, logger);
 
@@ -52,11 +56,14 @@ void setup() {
 }
 
 void subloop() {
+	// copy log from bot ctrl to log buffer
 	while (botControllerLogs->available()) {
 		char c = botControllerLogs->read();
 		logger->print(c);
 	}
-	communicate();
+
+	// carry out any pending communication
+	i2cMaster->loop();
 }
 
 void loop() {

@@ -14,6 +14,8 @@ extern LogStream* logger;
 #include <ESP8266WiFi.h>
 
 #include <Util.h>
+#include <common.h>
+#include <I2CMaster.h>
 
 // Replace with your network credentials
 const char* ssid     = "lorem ipsum dolor sit amet";
@@ -122,7 +124,7 @@ void WebServer::loop(){
             	logger->print(" cmd=[");
             	logger->print(cmd);
             	logger->println("]");
-            	sendCommandAsync(CmdSerialCommand, cmd);
+            	i2cMaster->sendCommandAsync(BotCtrlCmd_SerialCommand, cmd);
             }
 
             // Display the HTML web page

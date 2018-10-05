@@ -27,6 +27,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BotController/utilities}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/libraries}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/libraries/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/common}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.953881605" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
