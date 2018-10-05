@@ -1,3 +1,6 @@
+/*
+ * pins of ESP8266 that are not defined in pins_arduino
+ */
 #ifndef _PINS_H
 #define _PINS_H
 
@@ -17,6 +20,7 @@ static const uint8_t GPIO03 = D9;
 static const uint8_t GPIO01 = D10;
 
 // Uart used for receiving log entries of bot controller
+// ESP866 has only 1.5 UARTs, second uart can transmit but not rceive
 static const uint8_t RXD0 = GPIO03;
 static const uint8_t TXD0 = GPIO01;
 

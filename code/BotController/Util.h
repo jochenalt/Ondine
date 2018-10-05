@@ -26,6 +26,5 @@ template <typename T> int sqr(T val) {
 extern HardwareSerial* logger;
 extern HardwareSerial* command;
 extern i2c_t3* IMUWire;
-extern i2c_t3* cortexWire;
 
 #endif /* UTIL_H_ */

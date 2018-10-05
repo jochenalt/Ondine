@@ -6,8 +6,5 @@
 #include <LogStream.h>
 
 
-// communication line to bot controller
-extern HardwareSerial* botControllerLogs;
-
 
 #endif

@@ -14,7 +14,6 @@ public:
 	WebServer() {};
 	virtual ~WebServer() {};
 
-
 	void setup();
 	void loop();
 private:

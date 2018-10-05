@@ -19,7 +19,8 @@ void Power::motorPower(bool on) {
 		pinMode(POWER_RELAY_PIN, OUTPUT);
 		digitalWrite(POWER_RELAY_PIN, LOW);
 	} else {
-		// teensy output is 3.3V, since relay works with 5V we need an open collector to release the power-relay
+		// teensy output is 3.3V, since relay works with 5V
+		// we need an open collector to release the power-relay
 		// (check with schematics)
 		pinMode(POWER_RELAY_PIN, INPUT);
 	}
