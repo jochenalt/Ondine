@@ -11,7 +11,7 @@
 #include <types.h>
 #include <MenuController.h>
 #include <StateController.h>
-#include <Engine.h>
+#include <BallDrive.h>
 #include <IMU.h>
 #include <Kinematics.h>
 #include <BrushedMotorDriver.h>
@@ -32,10 +32,12 @@ public:
 	// turn on/off the balancing mode
 	void balanceMode(Mode mode) {
 		this->mode = mode;
+
+		// set current position as starting psition
+		ballDrive.reset();
 	}
 private:
-	Engine engine;
-	Kinematix kinematics;
+	BallDrive ballDrive;
 	MenuController menuController;
 	IMU imu;
 	StateController state;

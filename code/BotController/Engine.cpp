@@ -48,6 +48,11 @@ void Engine::getIntegratedWheelAngle(float wheelAngle[3]) {
 		wheelAngle[i] = wheel[i]->getIntegratedAngle();
 }
 
+void Engine::resetWheelAngleChange() {
+	float wheelAngleChange[3];
+	getWheelAngleChange(wheelAngleChange);
+}
+
 void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
 	for (int i = 0;i<3;i++) {
 		if (wheel[i] != NULL) {

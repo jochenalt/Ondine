@@ -193,30 +193,6 @@ void Kinematix::setup() {
 	setupConstructionMatrix();
 }
 
-void Kinematix::menuLoop(char ch) {
-	bool cmd = true;
-	switch (ch) {
-	case 't':
-		testInverseKinematics();
-		testPerformanceKinematics();
-		testKinematics();
-		break;
-	case 'h':
-		printHelp();
-		break;
-	case 27:
-		popMenu();
-		return;
-		break;
-	default:
-		cmd = false;
-		break;
-	}
-	if (cmd) {
-		command->println(">");
-	}
-}
-
 
 void Kinematix::testKinematics() {
 	
@@ -424,9 +400,3 @@ void Kinematix::testTRM() {
 	}	
 }
 
-void Kinematix::printHelp() {
-	command->println(F("Kinematics"));
-	command->println(F("t - test kinematics"));
-	command->println(F("h   - help"));
-	command->println(F("0   - exit"));
-}

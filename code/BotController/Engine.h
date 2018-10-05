@@ -26,7 +26,10 @@ public:
 	// get angle of all wheels. Accumulates when turning
 	void getIntegratedWheelAngle(float wheelAngle[3]);
 
-	// get the change of angles since last invocation
+	// resets inner history of wheel change
+	void resetWheelAngleChange();
+
+	// get the change of angles since last invocation of getWheelChange or resetWheelAngleChange
 	void getWheelAngleChange(float wheelAngleChange[3]);
 
 	void setup(MenuController* menuCtrl);

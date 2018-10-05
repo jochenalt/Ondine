@@ -24,7 +24,7 @@ const int LifterCPR = 48;
 void BotController::setup() {
 	registerMenuController(&menuController);
 	power.setup();
-	engine.setup(&menuController);
+	ballDrive.setup(&menuController);
 	imu.setup(&menuController);
 	imu.setup();
 	state.setup(&menuController);
@@ -39,7 +39,7 @@ void BotController::printHelp() {
 	command->println();
 	command->println("Bot Menu");
 	command->println();
-	command->println("e - engine");
+	command->println("e - ball engine");
 	command->println("i - imu");
 	command->println("l - lifter");
 	command->println("p - power on/off");
@@ -56,7 +56,7 @@ void BotController::menuLoop(char ch) {
 	bool cmd = true;
 	switch (ch) {
 	case 'b':
-		mode = BALANCE;
+		balanceMode((mode==BALANCE)?OFF:BALANCE);
 		break;
 	case 'p':
 		if (power.isMotorOn()) {
@@ -68,7 +68,7 @@ void BotController::menuLoop(char ch) {
 		}
 		break;
 	case 'e':
-		engine.pushMenu();
+		ballDrive.pushMenu();
 		break;
 	case 's':
 		memory.save();
@@ -106,7 +106,7 @@ void BotController::loop() {
 	yield();
 
 	// drive motors
-	engine.loop();
+	ballDrive.loop();
 
 	// react on serial line
 	menuController.loop();
@@ -125,32 +125,19 @@ void BotController::loop() {
 	if ((mode == BALANCE) && imu.isNewValueAvailable(dT)) {
 		IMUSample sensorSample = imu.getSample();
 
-
-		// fetch motor encoder values to compute real wheel position
-		float angleChange[3] = {0,0,0};
-		engine.getWheelAngleChange(angleChange);
-
-		float currentWheelSpeed[3] = {0,0,0};
-		currentWheelSpeed[0] = angleChange[0] * TWO_PI / dT;	// compute wheel speed out of delta-angle
-		currentWheelSpeed[1] = angleChange[1] * TWO_PI / dT;
-		currentWheelSpeed[2] = angleChange[2] * TWO_PI / dT;
-
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		BotMovement currentMovement;
-		kinematics.computeActualSpeed(  currentWheelSpeed,
-										sensorSample.x.angle,sensorSample.y.angle,
-										currentMovement.speedX, currentMovement.speedY, currentMovement.omega);
+		ballDrive.getSpeed(sensorSample.x.angle, sensorSample.y.angle,
+				           currentMovement.speedX, currentMovement.speedY, currentMovement.omega);
+
 		// compute new movement out of current angle, angular velocity, velocity, position
 		state.update(dT, currentMovement, sensorSample, targetBotMovement);
 
 		// apply kinematics to compute wheel speed out of x,y, omega
-		float  newWheelSpeed[3] = { 0, 0, 0};
-		kinematics.computeWheelSpeed(   state.getSpeedX(), state.getSpeedY(), state.getOmega(),
-										sensorSample.x.angle,sensorSample.y.angle,
-										newWheelSpeed);
+		// and set speed of each wheel
+		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
+				            sensorSample.x.angle,sensorSample.y.angle);
 
-		// send new speed to motors
-		engine.setWheelSpeed(newWheelSpeed);
 		uint32_t balanceTime = micros()-now;
 
 		logger->print("te=");
@@ -164,7 +151,7 @@ void BotController::loop() {
 		if (performanceLogTimer.isDue()) {
 			logger->print("perf(");
 			logger->print("engine=");
-			logger->print(engine.getAvrLoopTime()*1000.0);
+			logger->print(ballDrive.engine.getAvrLoopTime()*1000.0);
 			logger->print("ms");
 			logger->println(")");
 		}

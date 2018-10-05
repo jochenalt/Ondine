@@ -21,7 +21,7 @@
 typedef float matrix33_t[3][3];
 typedef float vector3[3];
 
-class Kinematix : virtual public Menuable {
+class Kinematix {
 	public:
 		Kinematix () {}
 
@@ -50,8 +50,6 @@ class Kinematix : virtual public Menuable {
 		// Function to test this in the debugger.
 		void testTRM();
 
-		virtual void printHelp();
-		virtual void menuLoop(char ch);
 	private:
 		// compute the tilt rotation matrix, used in kinematics and inverse kinematics
 		void computeTiltRotationMatrix(float pTiltX, float  pTiltY);

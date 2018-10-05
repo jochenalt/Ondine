@@ -33,6 +33,7 @@ void I2CSlave::loop() {
 
 		switch (receiveAdr) {
 			case BotCtrlCmd_SerialCommand:
+
 				break;
 			default:
 				logger->print("invalid i2c register");
