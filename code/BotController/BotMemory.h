@@ -69,7 +69,7 @@ class MotorConfig {
 public:
 	void initDefaultValues() {
 		// PID controller at slow speeds is aggressive to keep position
-		pid_position.Kp = 1.8;
+		pid_position.Kp = 2.7;
 		pid_position.Ki = 0.5;
 		pid_position.Kd = 0.000;
 
