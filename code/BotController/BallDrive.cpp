@@ -28,7 +28,7 @@ void BallDrive::printHelp() {
 	command->println("o/l - modify tilt x");
 	command->println("i/k - modify tilt y");
 
-	command->println("d - single wheel control");
+	command->println("b - single wheel control");
 
 	command->println("0 - nullify speed");
 
@@ -83,52 +83,63 @@ void BallDrive::menuLoop(char ch) {
 		menuOmega = 0;
 		menuAngleX = 0;
 		menuAngleY = 0;
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'q':
 		menuSpeedX += 0.1;
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'a':
 		menuSpeedX -= 0.1;
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'w':
 		menuSpeedY += 0.1;
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 's':
 		menuSpeedY -= 0.1;
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'y':
 		menuOmega += 0.1;
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'x':
 		menuOmega += 0.1;
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'o':
 		menuAngleX += radians(1);
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'l':
 		menuAngleX -= radians(1);
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'i':
 		menuAngleY += radians(1);
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'k':
 		menuAngleY -= radians(1);
+		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
-	case'e':
+	case 'e':
 		enable(!isEnabled());
 		break;
-	case'd':
+	case 'b':
 		engine.pushMenu();
 		break;
 	case 'h':
@@ -148,8 +159,8 @@ void BallDrive::menuLoop(char ch) {
 			logger->print("enabled.");
 		else
 			logger->print("disabled.");
-		logger->print("loop t=");
-		logger->print(engine.getAvrLoopTime());
+		logger->print(" t=");
+		logger->print(engine.getAvrLoopTime()*1000000.0);
 		logger->print("us");
 		logger->print(" speed=(");
 		logger->print(menuSpeedX);
@@ -162,6 +173,8 @@ void BallDrive::menuLoop(char ch) {
 		logger->print(")");
 
 		command->println(" >");
+
+
 	}
 }
 

@@ -52,10 +52,10 @@ void LogConfig::initDefaultValues() {
 }
 
 void LogConfig::print() {
-	logger->print("log:");
-	logger->print("perf:");
-	logger->print(performanceLog?"true":"false");
-	logger->print("calib:");
-	logger->print(calibrationLog?"true":"false");
+	logger->println("log:");
+	logger->print("   perf:");
+	logger->println(performanceLog?"true":"false");
+	logger->print("   calib:");
+	logger->println(calibrationLog?"true":"false");
 
 }

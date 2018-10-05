@@ -41,9 +41,7 @@ void Menuable::pushMenu() {
 }
 
 void MenuController::popMenu() {
-	if (activeMenuStackPtr == 0)
-		fatalError("menu stack underflow");
-	else {
+	if (activeMenuStackPtr > 0 ) {
 		activeMenuStackPtr--;
 		menus[activeMenuStack[activeMenuStackPtr]]->printHelp();
 	}
@@ -80,11 +78,12 @@ void MenuController::loop() {
 		else
 			menus[activeMenuStack[activeMenuStackPtr]]->menuLoop(ch);
 		uint32_t end = micros();
+		/*
 		logger->print("menu=");
 		logger->print(middle-start);
 		logger->print(" ");
 		logger->print(end-middle);
-
 		logger->println();
+		*/
 	}
 }
