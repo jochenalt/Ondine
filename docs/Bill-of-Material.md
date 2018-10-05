@@ -5,7 +5,7 @@
 |:------------------|--:|:---------------------------------------------------|:-------------|:----------------|
 |3D Print           | 1 | ABS 3D printer                                     | <img width="100" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/bom/Zortrax-M200-professional-desktop-3D-printer.jpg"/> | [Zortrax M200](https://store.zortrax.com/M200) |
 |                   |   | Petroleum, Acetone                                 | <img width="100" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Acetone-structural.png/255px-Acetone-structural.png"/> | Local Dealer    | 																																			        |
-|Electronics        | 1 | ODroid C2, 1.5 GHz Quadcore board                  | <img width="100" src="http://www.hardkernel.com/main/_Files/prdt/2016/201602/ODROID-C2.png"/>                       |  [ODroid C2](http://www.hardkernel.com/main/products/prdt_info.php?g_code=G145457216438) |
+|Electronics        | 1 | NodeMCU V2, ESP8266 board                          | <img width="100" src="http://www.hardkernel.com/main/_Files/prdt/2016/201602/ODROID-C2.png"/>                       |  [NodeMCU V2](https://www.seeedstudio.com/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html) |
 |                   | 1 | Teensy 3.5, Arm M4 board                           | <img width="100" src="https://www.pjrc.com/store/teensy35.jpg"/>                                                    | [Teensy 3.5](https://www.pjrc.com/store/teensy35.html ) |
 |3x Omniwheel       |  |                                                     |             |                  |
 |                   |  | 2-component epoxy glue with 15 minutes set time (enough for one omniwheel) | <img width="100" src="https://images-na.ssl-images-amazon.com/images/I/41NpN3-Fl-L.jpg"/> | [Epoxy30](https://www.amazon.de/Minuten-Epoxy-Kleber-Transparent-100/dp/B00MKAW3DA/ref=sr_1_1?ie=UTF8&qid=1534629955&sr=8-1&keywords=epoxy+30) |
@@ -36,6 +36,5 @@
 ## Tools
 |Category              |  Description                                                        | Source     |
 |:---------------------|:--------------------------------------------------------------------|:-----------|
-|IDE for Teensy        | Eclipse derivate to develop and deploy in C++ on Teensy             |  [Eclipse Sloeber](http://eclipse.baeyens.it)                                      |
-|ROS Kinetic           | ROS Version I used. Although the newer *lunar* is out for a while, some tools required (e.g. hector slam) are not yet available on Lunar. So, I went with the elder version |  [ROS Kinetic](http://wiki.ros.org/kinetic) |
+|IDE for Teensy and ESP8266 | Eclipse derivate to develop and deploy in C++ on Teensy        |  [Eclipse Sloeber](http://eclipse.baeyens.it)                                      |
 
