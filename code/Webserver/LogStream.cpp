@@ -6,3 +6,7 @@
  */
 
 #include <LogStream.h>
+
+
+// cicrular buffer for leg entries shown on the web page
+LogStream* logger = new LogStream();

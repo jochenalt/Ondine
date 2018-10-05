@@ -30,5 +30,13 @@ void I2CSlave::loop() {
 		logger->println("]");
 
 		reveiveEvent = "";
+
+		switch (receiveAdr) {
+			case BotCtrlCmd_SerialCommand:
+				break;
+			default:
+				logger->print("invalid i2c register");
+				logger->println(receiveAdr);
+		}
 	}
 }

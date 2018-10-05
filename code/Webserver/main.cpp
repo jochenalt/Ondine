@@ -23,15 +23,11 @@ PatternBlinker ledBlinker(LED_BUILTIN, 50 /* ms */, true); // one bit in the pat
 // ESP8266 webserver
 WebServer webserver;
 
-// cicrular buffer for leg entries shown on the web page
-LogStream* logger = new LogStream();
-
 // receive log messages from bot controller
 HardwareSerial* botControllerLogs = NULL;
 
 // communication to bot controller
 I2CMaster* i2cMaster = new I2CMaster(&Wire);
-
 
 void setup() {
 	logger->println("setup webserver");

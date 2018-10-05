@@ -15,7 +15,7 @@ String pendingCommand;
 int pendingAdr;
 
 void I2CMaster::setup() {
-	ctrlComm->begin(SDA, SCL);        // join i2c bus as master
+	i2cBus->begin(SDA, SCL);        // join i2c bus as master
 }
 
 void I2CMaster::sendCommandAsync(int adr,String cmd) {
@@ -24,15 +24,16 @@ void I2CMaster::sendCommandAsync(int adr,String cmd) {
 }
 
 void I2CMaster::sendCommand(uint8_t adr, String cmd) {
-	ctrlComm->beginTransmission(BotControllerI2CAddress); // transmit to bot controller
-	ctrlComm->write((uint8_t)adr);
+	i2cBus->beginTransmission(BotControllerI2CAddress); // transmit to bot controller
+	i2cBus->write((uint8_t)adr);
 	for (unsigned int i = 0;i<cmd.length();i++)
-		ctrlComm->write(cmd[i]);
-	uint8_t status = ctrlComm->endTransmission();    // stop transmitting
+		i2cBus->write(cmd[i]);
+	uint8_t status = i2cBus->endTransmission();    // stop transmitting
 
-	// dont know why, but without this empty transmission the previous transmission is bufferd somewhere
-	ctrlComm->beginTransmission(BotControllerI2CAddress);
-	status = ctrlComm->endTransmission();
+	// dont know why, but without this empty transmission the previous
+	// transmission is bufferd somewhere and not recived by the bot controller
+	i2cBus->beginTransmission(BotControllerI2CAddress);
+	status = i2cBus->endTransmission();
 
 	logger->print("send(");
 	logger->print(adr);
@@ -40,14 +41,13 @@ void I2CMaster::sendCommand(uint8_t adr, String cmd) {
 	logger->print(cmd);
 	logger->print("]=");
 	logger->println(status);
-
 }
 
 String I2CMaster::requestResponse(int numberOfBytes) {
-	ctrlComm->requestFrom(BotControllerI2CAddress, numberOfBytes);
+	i2cBus->requestFrom(BotControllerI2CAddress, numberOfBytes);
 	String result = "";
-	while (ctrlComm->available()) { // slave may send less than requested
-		char c = ctrlComm->read(); // receive a byte as character
+	while (i2cBus->available()) { // slave may send less than requested
+		char c = i2cBus->read(); // receive a byte as character
 		result += c;
 	}
 	return result;

@@ -5,7 +5,7 @@
 |:------------------|--:|:---------------------------------------------------|:-------------|:----------------|
 |3D Print           | 1 | ABS 3D printer                                     | <img width="100" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/bom/Zortrax-M200-professional-desktop-3D-printer.jpg"/> | [Zortrax M200](https://store.zortrax.com/M200) |
 |                   |   | Petroleum, Acetone                                 | <img width="100" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Acetone-structural.png/255px-Acetone-structural.png"/> | Local Dealer    | 																																			        |
-|Electronics        | 1 | NodeMCU V2, ESP8266 board                          | <img width="100" src="http://www.hardkernel.com/main/_Files/prdt/2016/201602/ODROID-C2.png"/>                       |  [NodeMCU V2](https://www.seeedstudio.com/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html) |
+|Electronics        | 1 | NodeMCU V2, ESP8266 board                          | <img width="100" src="https://statics3.seeedstudio.com/seeed/img/2017-03/QluwTVU7FQIvaC8dZy6x2JaM.jpg"/>                       |  [NodeMCU V2](https://www.seeedstudio.com/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html) |
 |                   | 1 | Teensy 3.5, Arm M4 board                           | <img width="100" src="https://www.pjrc.com/store/teensy35.jpg"/>                                                    | [Teensy 3.5](https://www.pjrc.com/store/teensy35.html ) |
 |3x Omniwheel       |  |                                                     |             |                  |
 |                   |  | 2-component epoxy glue with 15 minutes set time (enough for one omniwheel) | <img width="100" src="https://images-na.ssl-images-amazon.com/images/I/41NpN3-Fl-L.jpg"/> | [Epoxy30](https://www.amazon.de/Minuten-Epoxy-Kleber-Transparent-100/dp/B00MKAW3DA/ref=sr_1_1?ie=UTF8&qid=1534629955&sr=8-1&keywords=epoxy+30) |
@@ -36,5 +36,5 @@
 ## Tools
 |Category              |  Description                                                        | Source     |
 |:---------------------|:--------------------------------------------------------------------|:-----------|
-|IDE for Teensy and ESP8266 | Eclipse derivate to develop and deploy in C++ on Teensy        |  [Eclipse Sloeber](http://eclipse.baeyens.it)                                      |
+|IDE for Teensy and ESP8266 | Eclipse derivate to develop and deploy in C++ on Teensy and n NodeMCU V2 |  [Eclipse Sloeber](http://eclipse.baeyens.it)                                      |
 
