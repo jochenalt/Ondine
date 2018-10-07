@@ -27,6 +27,7 @@ void BallDrive::printHelp() {
 	command->println("y/x - modify omega speed");
 	command->println("o/l - modify tilt x");
 	command->println("i/k - modify tilt y");
+	command->println("t   - test kinmatics");
 
 	command->println("b - single wheel control");
 
@@ -44,11 +45,27 @@ void BallDrive::setSpeed(float speedX,float speedY, float omega,
 											angleX,angleY,
 											newWheelSpeed);
 
+	logger->print("kinematics:(");
+	logger->print(speedX);
+	logger->print(",");
+	logger->print(speedY);
+	logger->print(",");
+	logger->print(omega);
+	logger->print(")->(");
+	logger->print(newWheelSpeed[0]);
+	logger->print(",");
+	logger->print(newWheelSpeed[1]);
+	logger->print(",");
+	logger->print(newWheelSpeed[2]);
+	logger->println(")");
 	// send new speed to motors
 	engine.setWheelSpeed(newWheelSpeed);
 }
 
+// compute the current speed since the last invocation.
+// returns 0 when called first (assuming the we start without motion)
 void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY, float &omega) {
+	// this function required
 	if (lastCall_ms > 0 ) {
 		uint32_t now = millis();
 		float dT = ((float)(now - lastCall_ms))/1000.0;
@@ -58,7 +75,7 @@ void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY
 		float angleChange[3] = {0,0,0};
 		engine.getWheelAngleChange(angleChange);
 
-		float currentWheelSpeed[3] = {0,0,0};
+		float currentWheelSpeed[3];
 		currentWheelSpeed[0] = angleChange[0] * TWO_PI / dT;	// compute wheel speed out of delta-angle
 		currentWheelSpeed[1] = angleChange[1] * TWO_PI / dT;
 		currentWheelSpeed[2] = angleChange[2] * TWO_PI / dT;
@@ -67,10 +84,16 @@ void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY
 		kinematics.computeActualSpeed(  currentWheelSpeed,
 										angleX, angleY,
 										speedX, speedY, omega);
+	} else {
+		speedX = 0;
+		speedY = 0;
+		omega = 0;
 	}
 }
 
 void BallDrive::loop() {
+	// drive the motors
+	// due to use of brushless motors, this requires permanent invokation of loop
 	engine.loop();
 }
 
@@ -102,17 +125,17 @@ void BallDrive::menuLoop(char ch) {
 		cmd = true;
 		break;
 	case 's':
-		menuSpeedY -= 0.1;
+		menuSpeedY -= (0.1);
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'y':
-		menuOmega += 0.1;
+		menuOmega += radians(0.1);
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'x':
-		menuOmega += 0.1;
+		menuOmega -= radians(0.1);
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
@@ -146,9 +169,9 @@ void BallDrive::menuLoop(char ch) {
 		printHelp();
 		break;
 	case 't':
+		kinematics.testKinematics();
 		kinematics.testInverseKinematics();
 		kinematics.testPerformanceKinematics();
-		kinematics.testKinematics();
 		break;
 	default:
 		cmd = false;

@@ -1,6 +1,9 @@
 /*
  * BallEngine.h
  *
+ * Takes three single wheels, adds kinematics and provides methods to
+ * set the speed per direction for the entire ball drive
+ *
  *  Created on: 05.10.2018
  *      Author: JochenAlt
  */

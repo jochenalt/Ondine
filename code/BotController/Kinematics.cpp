@@ -10,46 +10,58 @@
 #include "Kinematics.h"
 #include "Util.h"
 
-Kinematix kin;
-
 const float WheelRadius = 35.;
 const float BallRadius = 90.;
 const float WheelAngleRad= radians(45.);
 const float MaxWheelSpeed = 2000.;
 
 // convenience macro: set a 3-vector
-#define VECTOR_SET(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
+#define ASSIGN(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
 
-// return the construction matrix (CM) and compute its inverse matrix used for inverse kinematics
+void logMatrix(float m[3][3]) {
+	logger->println(F("knematics matrix"));
+	logger->println(F("tilt matrix"));
+	logger->print(m[0][0],4);logger->print(" ");
+	logger->print(m[0][1],4);logger->print(" ");
+	logger->print(m[0][2],4);logger->println();
+	logger->print(m[1][0],4);logger->print(" ");
+	logger->print(m[1][1],4);logger->print(" ");
+	logger->print(m[1][2],4);logger->println();
+	logger->print(m[2][0],4);logger->print(" ");
+	logger->print(m[2][1],4);logger->print(" ");
+	logger->print(m[2][2],4);logger->println(" ");
+}
+
+// compute construction matrix cm and compute its inverse matrix
 void Kinematix::setupConstructionMatrix() {
 		float a = -1.0/WheelRadius;
 		float cos_phi = cos(WheelAngleRad);
 		float sin_phi = sin(WheelAngleRad);
 		
 		// define the construction matrix
-		VECTOR_SET(cm[0],                      0, a*cos_phi,          -a*sin_phi);
-		VECTOR_SET(cm[1], -a*sqrt(3.)/2.*cos_phi, -a*cos_phi/2.,      -a*sin_phi);
-		VECTOR_SET(cm[2],  a*sqrt(3.)/2.*cos_phi, -a*cos_phi/2.,      -a*sin_phi);
+		ASSIGN(cm[0],                      0,  a*cos_phi,         -a*sin_phi);
+		ASSIGN(cm[1], -a*sqrt(3.)/2.*cos_phi, -a*cos_phi/2.,      -a*sin_phi);
+		ASSIGN(cm[2],  a*sqrt(3.)/2.*cos_phi, -a*cos_phi/2.,      -a*sin_phi);
 
 		// compute inverse of construction matrix
 		float det_denominator = 
-					     ((cm[0][0])*cm[1][1] * cm[2][2]) +
- 			             ((cm[0][1])*cm[1][2] * cm[2][0]) +
-			             ((cm[0][2])*cm[1][0] * cm[2][1]) -
-			             ((cm[2][0])*cm[1][1] * cm[0][2]) -
-			             ((cm[2][1])*cm[1][2] * cm[0][0]) -
-			             ((cm[2][2])*cm[1][0] * cm[0][1]);
+					     ((cm[0][0]) * cm[1][1] * cm[2][2]) +
+ 			             ((cm[0][1]) * cm[1][2] * cm[2][0]) +
+			             ((cm[0][2]) * cm[1][0] * cm[2][1]) -
+			             ((cm[2][0]) * cm[1][1] * cm[0][2]) -
+			             ((cm[2][1]) * cm[1][2] * cm[0][0]) -
+			             ((cm[2][2]) * cm[1][0] * cm[0][1]);
 
 		float detRezi = 1.0 / det_denominator;
-		VECTOR_SET(icm[0],
+		ASSIGN(icm[0],
 			detRezi*(((cm[1][1]) * cm[2][2] - (cm[1][2]) * cm[2][1])),
 			detRezi*(((cm[0][2]) * cm[2][1] - (cm[0][1]) * cm[2][2])),
 			detRezi*(((cm[0][1]) * cm[1][2] - (cm[0][2]) * cm[1][1])));
-		VECTOR_SET(icm[1],
+		ASSIGN(icm[1],
 			detRezi*(((cm[1][2]) * cm[2][0] - (cm[1][0]) * cm[2][2])),
 			detRezi*(((cm[0][0]) * cm[2][2] - (cm[0][2]) * cm[2][0])),
 			detRezi*(((cm[0][2]) * cm[1][0] - (cm[0][0]) * cm[1][2])));
-		VECTOR_SET(icm[2],
+		ASSIGN(icm[2],
 			detRezi*(((cm[1][0]) * cm[2][1] - (cm[1][1]) * cm[2][0])),
 			detRezi*(((cm[0][1]) * cm[2][0] - (cm[0][0]) * cm[2][1])),
 			detRezi*(((cm[0][0]) * cm[1][1] - (cm[0][1]) * cm[1][0])));
@@ -82,9 +94,9 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 	// compute Tilt Rotation Matrix (TRM). All values are between -1..1, so use FP16
 	// fixed point arithmetics. accuracy of TRM is better than 1%
 	// computation is coming from kinematix.xls
-	VECTOR_SET(trm[0],       cosY,     0,      sinY);
-	VECTOR_SET(trm[1],  sinX*sinY,  cosX,-sinX*cosY);
-	VECTOR_SET(trm[2], -cosX*sinY,  sinX, cosX*cosY);
+	ASSIGN(trm[0],       cosY,     0,      sinY);
+	ASSIGN(trm[1],  sinX*sinY,  cosX,-sinX*cosY);
+	ASSIGN(trm[2], -cosX*sinY,  sinX, cosX*cosY);
 }
 
 // compute speed of all motors depending from the speed in the IMU's coordinate system in (Vx, Vy, OmegaZ) 
@@ -95,63 +107,52 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 	
 	// this matrix depends on the tilt angle and corrects the kinematics 
 	// due to the slightly moved touch point of the ball
-	kin.computeTiltRotationMatrix(pTiltX,pTiltY);
+	computeTiltRotationMatrix(pTiltX,pTiltY);
+
+	// logger->println(F("tilt matrix"));
+	// logMatrix(trm);
 
 	// rotate construction matrix by tilt (by multiplying with tilt rotation matrix)
 	// compute only those fields that are required afterwards (so we need only 10 out of 81 multiplications of a regular matrix multiplication)
-	float m01_11=  cm[0][1]*trm[1][1];
-	float m01_21 = cm[0][1]*trm[2][1];
-	float m10_00 = cm[1][0]*trm[0][0];
-	float m10_10 = cm[1][0]*trm[1][0];
-	float m10_20 = cm[1][0]*trm[2][0];
-	float m11_11 = cm[1][1]*trm[1][1];
-	float m11_21 = cm[1][1]*trm[2][1];
-	float m02_02 = cm[0][2]*trm[0][2];
-	float m02_22 = cm[0][2]*trm[2][2];
-	float m02_12 = cm[0][2]*trm[1][2];
+	float m01_11=  cm[0][1] * trm[1][1];
+	float m01_21 = cm[0][1] * trm[2][1];
+	float m10_00 = cm[1][0] * trm[0][0];
+	float m10_10 = cm[1][0] * trm[1][0];
+	float m10_20 = cm[1][0] * trm[2][0];
+	float m11_11 = cm[1][1] * trm[1][1];
+	float m11_21 = cm[1][1] * trm[2][1];
+	float m02_02 = cm[0][2] * trm[0][2];
+	float m02_22 = cm[0][2] * trm[2][2];
+	float m02_12 = cm[0][2] * trm[1][2];
 
-	float  lBotZSpeed = -pOmegaZ * BallRadius;
+	// logger->println(F("kinematics matrix"));
+	// logMatrix(km);
+
+	float  lVz = -pOmegaZ * BallRadius;
 
 	// final computation of kinematics:
 	// compute wheel's speed in °/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
-	float wheelSpeed0 = ((m01_11 + m02_12)*pVx	         - m02_02*pVy             + ( m01_21 + m02_22         )*lBotZSpeed)  ;
-	float wheelSpeed1 = ((m10_10 + m11_11 + m02_12)*pVx  - (m10_00 + m02_02)*pVy  + ( m10_20 + m11_21 + m02_22)*lBotZSpeed ) ;
-	float wheelSpeed2 = ((-m10_10+ m11_11 + m02_12)*pVx  + (m10_00 - m02_02)*pVy  + (-m10_20 + m11_21 + m02_22)*lBotZSpeed) ;
+	pWheel_speed[0] = ((m01_11 + m02_12) * pVx	         - (m02_02) * pVy           + ( m01_21 + m02_22         ) * lVz)  ;
+	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  - (m10_00 + m02_02) * pVy  + ( m10_20 + m11_21 + m02_22) * lVz) ;
+	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + (m10_00 - m02_02) * pVy  + (-m10_20 + m11_21 + m02_22) * lVz) ;
 
-	// alarm: if one wheel is supposed to run faster than it can
-	// reduce the speed of all wheels in proportion, so that the 
-	// fastest wheel has max speed
-	float absWheelSpeed0 = abs(wheelSpeed0);
-	float absWheelSpeed1 = abs(wheelSpeed1);
-	float absWheelSpeed2 = abs(wheelSpeed2);
+	// logger->print(" ws0=");
+	// logger->print(wheelSpeed0);
+	// logger->print(" ws1=");
+	// logger->print(wheelSpeed1);
+	// logger->print(" ws2=");
+	// logger->print(wheelSpeed2);
 
-	// while one wheel's to-be speed exceeds max speed
-	// compute reduction factor for fastest wheel and reduce 
-	// speed of all wheels accordingly
-	while ((absWheelSpeed0 > MaxWheelSpeed) ||
-		   (absWheelSpeed1 > MaxWheelSpeed) ||
-		   (absWheelSpeed2 > MaxWheelSpeed)) {
-
-		float factor;
-		if (absWheelSpeed0 > MaxWheelSpeed)
-			factor = MaxWheelSpeed / absWheelSpeed0;
-		else
-			if (absWheelSpeed1 > MaxWheelSpeed)
-				factor = MaxWheelSpeed / absWheelSpeed1;
-			else
-				factor = MaxWheelSpeed / absWheelSpeed2;
-		wheelSpeed0 = wheelSpeed0 * factor;
-		wheelSpeed1 = wheelSpeed1 * factor;
-		wheelSpeed2 = wheelSpeed2 * factor;
-		
-		absWheelSpeed0 = abs(wheelSpeed0);
-		absWheelSpeed1 = abs(wheelSpeed1);
-		absWheelSpeed2 = abs(wheelSpeed2);
+	// if one wheel's speed exceeds max speed
+	// reduce all speeds by same factor to comply with the max speed restriction
+	// but without changing the direction of movement
+	for (int i = 0;i<3;i++) {
+		if (abs(pWheel_speed[i]) > MaxWheelSpeed) {
+			float factor = MaxWheelSpeed / abs(pWheel_speed[i]);
+			for (int j = 0;j<3;j++)
+				pWheel_speed[j] *= factor;
+		}
 	}
-
-	pWheel_speed[0] = wheelSpeed0;
-	pWheel_speed[1] = wheelSpeed1;
-	pWheel_speed[2] = wheelSpeed2;
 }
 
 // compute actual speed in the coord-system of the IMU out of the encoder's data depending on the given tilt
@@ -160,21 +161,22 @@ void Kinematix::computeActualSpeed( float pWheel[3],
 									float& pVx, float& pVy, float& pOmega) {
 	// this matrix depends on the tilt angle and corrects the kinematics 
 	// due to the moved touch point of the ball
-	kin.computeTiltRotationMatrix(pTiltX,pTiltY);
+	computeTiltRotationMatrix(pTiltX,pTiltY);
 
 	// compute the sparse result of the construction matrix * tilt compensation matrix
 	// (multiply only those fields that are required afterwards, so we have only 10 instead of 81 multiplications)
-	int16_t m00_01 = trm[0][0] * icm[0][1];
-	int16_t m02_20 = trm[0][2] * icm[2][0];
-	int16_t m10_01 = trm[1][0] * icm[0][1];
-	int16_t m11_10 = trm[1][1] * icm[1][0];
-	int16_t m11_11 = trm[1][1] * icm[1][1];
-	int16_t m12_20 = trm[1][2] * icm[2][0];
-	int16_t m20_01 = trm[2][0] * icm[0][1];
-	int16_t m21_10 = trm[2][1] * icm[1][0];
-	int16_t m21_11 = trm[2][1] * icm[1][1];
-	int16_t m22_20 = trm[2][2] * icm[2][0];
+	float m00_01 = trm[0][0] * icm[0][1];
+	float m02_20 = trm[0][2] * icm[2][0];
+	float m10_01 = trm[1][0] * icm[0][1];
+	float m11_10 = trm[1][1] * icm[1][0];
+	float m11_11 = trm[1][1] * icm[1][1];
+	float m12_20 = trm[1][2] * icm[2][0];
+	float m20_01 = trm[2][0] * icm[0][1];
+	float m21_10 = trm[2][1] * icm[1][0];
+	float m21_11 = trm[2][1] * icm[1][1];
+	float m22_20 = trm[2][2] * icm[2][0];
 							
+
 	// compute inverse kinematics
 	pVx    =        ( m11_10 + m12_20)           * pWheel[0]
 			      + ( m10_01 + m11_11 + m12_20)  * pWheel[1]
@@ -197,50 +199,32 @@ void Kinematix::setup() {
 void Kinematix::testKinematics() {
 	
 	setupConstructionMatrix();
-	float cm00 = cm[0][0];
-	float cm01 = cm[0][1];
-	float cm02 = cm[0][2];
-	float cm10 = cm[1][0];
-	float cm11 = cm[1][1];
-	float cm12 = cm[1][2];
-	float cm20 = cm[2][0];
-	float cm21 = cm[2][1];
-	float cm22 = cm[2][2];
-	
-	command->println(F("construction matrix"));
-	command->print(cm00);
-	command->print(cm01);
-	command->print(cm02);command->println();
-	command->print(cm10);
-	command->print(cm11);
-	command->print(cm12);command->println();
-	command->print(cm20);
-	command->print(cm21);
-	command->print(cm22);command->println(" ");
 
+	logger->println(F("construction matrix"));
+	logMatrix(cm);
 		
 	float lVx,lVy,lOmega;
 	lVx = 0;
 	lVy = 0;
 	lOmega=35.0;
-	command->print(F("Vx="));
+	logger->print(F("Vx="));
 	
-	command->print(lVx);
-	command->print(F(" Vy="));
-	command->print(lVy);
-	command->print(F(" Omega="));
-	command->print(lOmega);
-	command->println();
+	logger->print(lVx);
+	logger->print(F(" Vy="));
+	logger->print(lVy);
+	logger->print(F(" Omega="));
+	logger->print(lOmega);
+	logger->println();
 
 	float lTiltX,lTiltY;
 	lTiltX = 0;
 	lTiltY = 0;
 
-	command->print(F("TiltX="));
-	command->print(lTiltX);
-	command->print(F(" TiltY="));
-	command->print(lTiltY);
-	command->println();
+	logger->print(F("TiltX="));
+	logger->print(lTiltX);
+	logger->print(F(" TiltY="));
+	logger->print(lTiltY);
+	logger->println();
 	
 	float pWheel_speed[3] = {0,0,0};
 	 computeWheelSpeed( lVx, lVy, lOmega,
@@ -250,13 +234,13 @@ void Kinematix::testKinematics() {
 	float lWheel2 = pWheel_speed[1];
 	float lWheel3 = pWheel_speed[2];
 	
-	command->print(F("W1="));
-	command->print(lWheel1);
-	command->print(F(" W2="));
-	command->print(lWheel2);
-	command->print(F(" W3="));
-	command->print(lWheel3);
-	command->println();
+	logger->print(F("W1="));
+	logger->print(lWheel1);
+	logger->print(F(" W2="));
+	logger->print(lWheel2);
+	logger->print(F(" W3="));
+	logger->print(lWheel3);
+	logger->println();
 }	
 
 void Kinematix::testInverseKinematics() {
@@ -272,29 +256,29 @@ void Kinematix::testInverseKinematics() {
 	float icm21 = icm[2][1];
 	float icm22 = icm[2][2];
 
-	command->println(F("inverse construction matrix"));
-	command->print(icm00);
-	command->print(icm01);
-	command->print(icm02);command->println(" ");
-	command->print(icm10);
-	command->print(icm11);
-	command->print(icm12);command->println(" ");
-	command->print(icm20);
-	command->print(icm21);
-	command->print(icm22);command->println(" ");
+	logger->println(F("inverse construction matrix"));
+	logger->print(icm00);logger->print(" ");
+	logger->print(icm01);logger->print(" ");
+	logger->print(icm02);logger->println(" ");
+	logger->print(icm10);logger->print(" ");
+	logger->print(icm11);logger->print(" ");
+	logger->print(icm12);logger->println(" ");
+	logger->print(icm20);logger->print(" ");
+	logger->print(icm21);logger->print(" ");
+	logger->print(icm22);logger->println(" ");
 
 	// speed of wheels in °/s
 	float lWheel1 = -758.9;
 	float lWheel2 = 36.4;
 	float lWheel3 = -133.7;
 	
-	command->print(F("W1="));
-	command->print(lWheel1);
-	command->print(F(" W2="));
-	command->print(lWheel2);
-	command->print(F(" W3="));
-	command->print(lWheel3);
-	command->println();
+	logger->print(F("W1="));
+	logger->print(lWheel1);
+	logger->print(F(" W2="));
+	logger->print(lWheel2);
+	logger->print(F(" W3="));
+	logger->print(lWheel3);
+	logger->println();
 						
 	float  lTiltX,lTiltY;
 	lTiltX = 20.0;
@@ -376,7 +360,7 @@ void Kinematix::testTRM() {
 			x = sin(float(i)) * j;
 			y = cos(float(i)) * j;
 
-			kin.computeTiltRotationMatrix(x,y);
+			computeTiltRotationMatrix(x,y);
 
 			float sin_tilt_x = sin(radians(x));
 			float cos_tilt_x = cos(radians(x));
