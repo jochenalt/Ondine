@@ -2,7 +2,7 @@
  * BallEngine.h
  *
  * Takes three single wheels, adds kinematics and provides methods to
- * set the speed per direction for the entire ball drive
+ * set and retrieve speed in terms of (x,y,omega)
  *
  *  Created on: 05.10.2018
  *      Author: JochenAlt
@@ -44,8 +44,9 @@ public:
 	Kinematix kinematics;
 
 private:
-	uint32_t lastCall_ms = 0;
+	uint32_t lastCall_ms = 0;	// used by getSpeed to compute time since last call
 
+	// members used by the asci menu only
 	float menuSpeedX = 0;
 	float menuSpeedY = 0;
 	float menuOmega = 0;
