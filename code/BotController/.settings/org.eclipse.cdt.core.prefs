@@ -457,7 +457,7 @@ environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PLATFORM_F
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PLATFORM_FILE/value=C\:/Program Files (x86)/Arduino/hardware/teensy/avr/platform.txt
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/delimiter=;
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/operation=replace
-environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/value=BotController
+environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/value=Controller
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.SELECTED.PLATFORM/delimiter=;
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.SELECTED.PLATFORM/operation=replace
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.SELECTED.PLATFORM/value=C\:/Program Files (x86)/Arduino/hardware/teensy/avr

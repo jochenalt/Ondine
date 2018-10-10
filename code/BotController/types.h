@@ -1,7 +1,23 @@
 
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef __TYPES_H_
+#define __TYPES_H_
 
+// used as rotation matrix
+typedef float matrix33_t[3][3];
+
+typedef float vector3[3];
+
+// returns Rz * Ry * Rx
+void computeRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t);
+
+// inverse = m^(-1)
+void computeInverseMatrix(matrix33_t m, matrix33_t inverse);
+
+// result = v * m
+void vectorTimesMatrix(vector3 v,matrix33_t m, vector3 result);
+
+// convenience macro: set a 3-vector
+#define ASSIGN(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
 
 class BotMovement {
 public:

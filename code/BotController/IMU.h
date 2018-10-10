@@ -11,6 +11,7 @@
 #include <MenuController.h>
 #include <MPU9250/src/MPU9250.h>
 #include <Filter/KalmanFilter.h>
+#include <Kinematics.h>
 
 
 class IMUSamplePlane {
@@ -39,6 +40,8 @@ public:
 
 class IMU : public Menuable {
 public:
+	enum Dimension { X=0,Y=1,Z=2 };
+
 	virtual ~IMU() {};
 	IMU() {};
 
@@ -55,15 +58,8 @@ public:
 	// This is the main timer determining the sample frequency
 	bool isNewValueAvailable(float &dT /* time since last call in [s] */);
 
-	IMUSample getSample() { return sample; };
+	IMUSample getSample() { return currentSample; };
 
-	float getAngleXRad();
-	float getAngleYRad();
-	float getAngleZRad();
-
-	float getAngularVelocityX();
-	float getAngularVelocityY();
-	float getAnglularVelocityZ();
 
 	// call when stable and upright before starting up
 	void calibrate();
@@ -71,18 +67,21 @@ public:
 	virtual void menuLoop(char ch);
 
 private:
+
+	float getAngleRad(Dimension dim);
+	float getAngularVelocity(Dimension dim);
 	void updateFilter();
 	MPU9250* mpu9250 = NULL;
-	KalmanFilter filterX;
-	KalmanFilter filterY;
-	KalmanFilter filterZ;
+	KalmanFilter kalman[3]; // one kalman filter per dimension
 
-	IMUSample sample;
+	IMUSample currentSample;
 	bool valueIsUpdated = false;
 	bool logIMUValues = false;
 	uint32_t lastInvocationTime_ms = 0;
 	uint32_t averageTime_us = 0;
 	float dT = 0;
+
+	matrix33_t nullMatrix; // rotation matrix that turns the IMU's orientation into the absolut null position
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */

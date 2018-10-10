@@ -15,8 +15,6 @@ const float BallRadius = 90.;
 const float WheelAngleRad= radians(45.);
 const float MaxWheelSpeed = 2000.;
 
-// convenience macro: set a 3-vector
-#define ASSIGN(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
 
 void logMatrix(float m[3][3]) {
 	logger->println(F("knematics matrix"));
@@ -91,8 +89,7 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 	float sinY = sin(pTiltX);
 	float cosY = cos(pTiltX);
 
-	// compute Tilt Rotation Matrix (TRM). All values are between -1..1, so use FP16
-	// fixed point arithmetics. accuracy of TRM is better than 1%
+	// compute Tilt Rotation Matrix (TRM).
 	// computation is coming from kinematix.xls
 	ASSIGN(trm[0],       cosY,     0,      sinY);
 	ASSIGN(trm[1],  sinX*sinY,  cosX,-sinX*cosY);
@@ -383,4 +380,3 @@ void Kinematix::testTRM() {
 		error = 0;
 	}	
 }
-

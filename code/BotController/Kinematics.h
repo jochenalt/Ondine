@@ -16,10 +16,8 @@
 #define KINEMATIX_H_
 
 #include "MenuController.h"
+#include "types.h"
 
-// used as rotation matrix
-typedef float matrix33_t[3][3];
-typedef float vector3[3];
 
 class Kinematix {
 	public:

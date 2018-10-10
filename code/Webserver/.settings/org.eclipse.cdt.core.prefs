@@ -588,7 +588,7 @@ environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PLATFORM_F
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PLATFORM_FILE/value=${eclipse_home}/arduinoPlugin/packages/esp8266/hardware/esp8266/2.3.0/platform.txt
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/delimiter=;
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/operation=replace
-environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/value=WebServer
+environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.PROJECT_NAME/value=Webserver
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.SELECTED.PLATFORM/delimiter=;
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.SELECTED.PLATFORM/operation=replace
 environment/project/io.sloeber.core.toolChain.release.63619773/JANTJE.SELECTED.PLATFORM/value=${eclipse_home}/arduinoPlugin/packages/esp8266/hardware/esp8266/2.4.2

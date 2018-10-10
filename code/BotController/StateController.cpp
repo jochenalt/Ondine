@@ -14,7 +14,7 @@
 
 
 void ControlPlane::update(float dT,
-		float currentSpeed /* speed of body */, float targetSpeed , float targetAccel,
+		float currentSpeed /* speed of body */, float targetSpeed, float targetAccel,
 		float currentOmega, float targetOmega,
 		float sensorAngle /* angle towards the axis */, float sensorAngularVelocity) {
 

@@ -37,7 +37,11 @@ class ControlPlane {
 			accel  = 0;
 			filteredSpeed = 0;
 
-			speedFilter.init(FIR::LOWPASS, 0.01 /* allowed ripple in amplitude  */, 0.001 /* supression required*/, SampleFrequency, 20 /* cut off frequency */);
+			speedFilter.init(FIR::LOWPASS,
+					         0.01 /* allowed ripple in amplitude  */,
+							 0.001 /* supression required*/,
+							 SampleFrequency,
+							 20 /* cut off frequency */);
 		}
 
 		float targetAngle;			// expected angle out of acceleration

@@ -69,3 +69,51 @@ void BotMovement::rampUp(const BotMovement& target, float dT) {
 	omega = constrain(omega, -MaxBotOmega, +MaxBotOmega);
 }
 
+
+// return Rz * Ry * Rz
+void computeRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t m) {
+	float  sinX = sin(eulerX);
+	float  cosX = cos(eulerX);
+	float  sinY = sin(eulerY);
+	float  cosY = cos(eulerY);
+	float  sinZ = sin(eulerZ);
+	float  cosZ = cos(eulerZ);
+
+	ASSIGN(m[0], cosZ*cosY, 	-sinZ*cosX+cosZ*sinY*sinX,  	sinZ*sinX+cosZ*sinY*cosX);
+	ASSIGN(m[1], sinZ*cosY, 	 cosZ*cosX + sinZ*sinY*sinX, 	cosZ*sinX+sinZ*sinY*cosX);
+	ASSIGN(m[2], -sinY,	 		cosY*sinX,						cosY*cosX);
+}
+
+void computeInverseMatrix(matrix33_t m, matrix33_t inverse) {
+
+	float det_denominator =
+				     ((m[0][0]) * m[1][1] * m[2][2]) +
+			         ((m[0][1]) * m[1][2] * m[2][0]) +
+		             ((m[0][2]) * m[1][0] * m[2][1]) -
+		             ((m[2][0]) * m[1][1] * m[0][2]) -
+		             ((m[2][1]) * m[1][2] * m[0][0]) -
+		             ((m[2][2]) * m[1][0] * m[0][1]);
+
+	float detRezi = 1.0 / det_denominator;
+	ASSIGN(inverse[0],
+		detRezi*(((m[1][1]) * m[2][2] - (m[1][2]) * m[2][1])),
+		detRezi*(((m[0][2]) * m[2][1] - (m[0][1]) * m[2][2])),
+		detRezi*(((m[0][1]) * m[1][2] - (m[0][2]) * m[1][1])));
+	ASSIGN(inverse[1],
+		detRezi*(((m[1][2]) * m[2][0] - (m[1][0]) * m[2][2])),
+		detRezi*(((m[0][0]) * m[2][2] - (m[0][2]) * m[2][0])),
+		detRezi*(((m[0][2]) * m[1][0] - (m[0][0]) * m[1][2])));
+	ASSIGN(inverse[2],
+		detRezi*(((m[1][0]) * m[2][1] - (m[1][1]) * m[2][0])),
+		detRezi*(((m[0][1]) * m[2][0] - (m[0][0]) * m[2][1])),
+		detRezi*(((m[0][0]) * m[1][1] - (m[0][1]) * m[1][0])));
+
+}
+
+// result = v * m
+void vectorTimesMatrix(vector3 v, matrix33_t m, vector3 result) {
+	result[0] = v[0]*m[0][0] + v[1]*m[0][1]  + v[2]*m[0][2];
+	result[1] = v[0]*m[1][0] + v[1]*m[1][1]  + v[2]*m[1][2];
+	result[2] = v[0]*m[2][0] + v[1]*m[2][1]  + v[2]*m[2][2];
+}
+
