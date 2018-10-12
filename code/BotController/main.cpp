@@ -4,7 +4,7 @@
 #include "Engine.h"
 #include "BotController.h"
 
-#include <utilities/PatternBlinker.h>
+#include <PatternBlinker.h>
 #include <I2CSlave.h>
 
 #include <common.h>

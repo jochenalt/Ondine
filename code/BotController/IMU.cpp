@@ -7,24 +7,26 @@
 
 #include <Arduino.h>
 #include <MPU9250/src/MPU9250.h>
-#include <utilities/TimePassedBy.h>
+#include <TimePassedBy.h>
 #include <Filter/KalmanFilter.h>
 #include <IMU.h>
 #include <setup.h>
 #include <Util.h>
 #include <types.h>
+#include <BotMemory.h>
 
+// flag indicating that IMU has a new measurement, this is set in interrupt
+// and evaluated in loop(), so this needs to be declared volatile
 volatile bool newDataAvailable = false;
-TimePassedBy updateTimer(SamplingTime*2000.0 /* [ms] */); // emergency timer, in case interrupt did not work
+
+// if the interrupt has been missed, use this emergency timer
+// to ask the IMU anyhow.
+TimePassedBy updateTimer(2.0*SamplingTime*1000.0 /* [ms] */); // twice the usual sampling frquency
 
 
-
-// interrupt that is called whenever MPU9250 has a new value (which is set to happens every 10ms)
+// interrupt that is called whenever MPU9250 has a new value (which is setup'ed to happen every 10ms)
 void imuInterrupt() {
-	if (newDataAvailable) {
-	} else {
-		newDataAvailable = true;
-	}
+	newDataAvailable = true;
 }
 
 IMUSamplePlane::IMUSamplePlane() {
@@ -147,7 +149,7 @@ void IMU::calibrate() {
 	// later on to turn the orientation coming from the IMU
 	// such that it is (0,0,0) if in this orientation
 	matrix33_t current;
-	computeRotationMatrix(kalman[Dimension::X].getAngle(),  kalman[Dimension::Y].getAngle(), kalman[Dimension::Z].getAngle(), current);
+	computeZYXRotationMatrix(kalman[Dimension::X].getAngle(),  kalman[Dimension::Y].getAngle(), kalman[Dimension::Z].getAngle(), current);
 	computeInverseMatrix(current, nullMatrix);
 }
 

@@ -37,6 +37,9 @@ BotMovement& BotMovement::operator=(const BotMovement& t) {
 		return *this;
 }
 
+// increase currentSpeed towards newSpeed, adapt currentAcceleration.
+// Consider maximum acceleration MaxBotAccel, and
+// use a trapezoid speed profile with round corners (jerkless acceleration)
 void increaseWithDifferentiableAcceleration(float &currentSpeed, float &currentAccel, float newSpeed,float dT) {
 	if (dT > OneMicrosecond_s) {
 		// an acceleration corresponds with the tilt angle of the bot.
@@ -71,7 +74,7 @@ void BotMovement::rampUp(const BotMovement& target, float dT) {
 
 
 // return Rz * Ry * Rz
-void computeRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t m) {
+void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t m) {
 	float  sinX = sin(eulerX);
 	float  cosX = cos(eulerX);
 	float  sinY = sin(eulerY);

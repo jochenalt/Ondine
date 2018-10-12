@@ -73,7 +73,9 @@ void Kinematix::setupConstructionMatrix() {
 void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 	
 	// do it only if tilt angles have changed
-	// This is important, since forward and inverse kinematics per loop have the same angles, so this trick doubles performance
+	// This is actually important, since forward
+	// and inverse kinematics is done once per loop with identical angles,
+	// so this really doubles performance
 	if  (titleCompensationMatrixComputed &&
 		(lastTiltX == pTiltX) &&
 		(lastTiltY == pTiltY))

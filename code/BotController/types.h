@@ -8,7 +8,7 @@ typedef float matrix33_t[3][3];
 typedef float vector3[3];
 
 // returns Rz * Ry * Rx
-void computeRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t);
+void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t);
 
 // inverse = m^(-1)
 void computeInverseMatrix(matrix33_t m, matrix33_t inverse);

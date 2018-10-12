@@ -15,41 +15,14 @@
 
 class ControlPlane {
 	public:
-		void init () {
-			absBallPos = 0;		// absolute position of the base (origin = position when the bot has been switched on)
-			lastTargetAngle = 0;
-			lastAbsBodyPos = 0; // absolute body position of last loop
-			lastAbsBallPos = 0;
-			lastBodySpeed = 0;
-			lastBallSpeed = 0;
-			lastTargetBodyPos = 0;
-			lastTargetSpeed = 0;
-			targetBallPos = 0; // to-be position of the base
-			bodyVelocity = 0,	// absolute velocity the bot's body has
-			speed = 0;
-			targetAngle = 0;
-			errorAngle = 0;
-			errorAngularVelocity= 0;
-			errorBallPosition = 0;
-			errorBodyPosition = 0;
-			errorBallVelocity = 0;
-			errorBodyVelocity = 0;
-			accel  = 0;
-			filteredSpeed = 0;
-
-			speedFilter.init(FIR::LOWPASS,
-					         0.01 /* allowed ripple in amplitude  */,
-							 0.001 /* supression required*/,
-							 SampleFrequency,
-							 20 /* cut off frequency */);
-		}
-
+		void init ();
 		float targetAngle;			// expected angle out of acceleration
 		float bodyVelocity;			// absolute velocity of body
 		float targetBallPos;		// absolute to-be position of the bot
 		float absBallPos;			// absolute as-is position of the bot
 		float lastTargetAngle;
 		float lastTargetBodyPos;
+		float lastTargetBallPos;
 		float lastAbsBallPos;
 		float lastAbsBodyPos;		// absolute as-is position of last loop
 		float lastBodySpeed;

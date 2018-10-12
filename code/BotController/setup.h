@@ -10,7 +10,7 @@
 #define POWER_RELAY_PIN 0 			// HIGH turns on relay that turns on motor power
 
 
-// Pins for Drotek L6234 breakout
+// Pins for Drotek L6234 breakout, need to be PWM pins
 //                                            PWM1,PWM2,PWM3
 const int BrushlessDriverPWMPins[3][3] = {  { 2,    3,   4},
 											{ 5,    6,   7},
@@ -19,6 +19,7 @@ const int BrushlessDriverPWMPins[3][3] = {  { 2,    3,   4},
 // all L6234 are connected to one enable pin
 #define BRUSHLESS_DRIVER_ENABLE_PIN  24
 
+// optical encoder input, needs to be interrupt pins
 //                                ENCA, ENCB
 const int EncoderPins[3][2] = { { 12,   11 },
                                 { 26,   25 },
@@ -28,10 +29,10 @@ const int EncoderPins[3][2] = { { 12,   11 },
 
 // possible values of sample frequency depend on IMU MP9150 are 1000/n with n=0..32,
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz
-const int SampleFrequency 					= 100; 					// [Hz]
+const int SampleFrequency 					= 100; 					// [Hz] loop time as imposed by IMU frequency
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time of the general loop
 
-const float CentreOfGravityHeight = 500; 							// [mm] center of gravity height from grounm
+const float CentreOfGravityHeight = 500; 							// [mm] center of gravity height from ground
 const float MaxBotSpeed = 1800; 									// [mm/s] max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot

@@ -12,7 +12,7 @@
 #include <BrushlessMotorDriver.h>
 
 #include <ClassInterrupt.h>
-#include <utilities/TimePassedBy.h>
+#include <TimePassedBy.h>
 
 
 const float maxAngleError = radians(30);

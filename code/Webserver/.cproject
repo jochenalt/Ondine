@@ -24,7 +24,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/libraries/ESP8266WiFi/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/variant}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/BotController/utilities}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/libraries}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/libraries/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/WebServer/common}&quot;"/>
@@ -32,6 +31,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Webserver/core/variant}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Webserver/libraries/ESP8266WiFi/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Webserver/libraries/Wire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Common}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.953881605" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>

@@ -30,14 +30,25 @@ void BotMemory::println() {
 
 
 void StateControllerConfig::initDefaultValues() {
+
+	// initialize the weights used for the state controller per
+	// computed state dimension
+	// state controller consists of
+	// (angle, angular speed,
+	//  ball position, ball speed, ball acceleration,
+	//  body position, body speed, body acceleration,
+	// omega)
 	angleWeight				= 39.0;
 	angularSpeedWeight		= 21.00;
+
 	ballPositionWeight		= 1.5;
 	ballVelocityWeight		= 0.0;
 	ballAccelWeight			= 1.3;
+
 	bodyPositionWeight		= 0.0;
 	bodyVelocityWeight		= 9.0;
 	bodyAccelWeight			= 0.0;
+
 	omegaWeight				= 0.0;
 }
 
