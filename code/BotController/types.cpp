@@ -74,7 +74,7 @@ void BotMovement::rampUp(const BotMovement& target, float dT) {
 
 
 // return Rz * Ry * Rz
-void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t m) {
+void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t& m) {
 	float  sinX = sin(eulerX);
 	float  cosX = cos(eulerX);
 	float  sinY = sin(eulerY);
@@ -83,11 +83,11 @@ void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33
 	float  cosZ = cos(eulerZ);
 
 	ASSIGN(m[0], cosZ*cosY, 	-sinZ*cosX+cosZ*sinY*sinX,  	sinZ*sinX+cosZ*sinY*cosX);
-	ASSIGN(m[1], sinZ*cosY, 	 cosZ*cosX + sinZ*sinY*sinX, 	cosZ*sinX+sinZ*sinY*cosX);
+	ASSIGN(m[1], sinZ*cosY, 	cosZ*cosX + sinZ*sinY*sinX, 	cosZ*sinX+sinZ*sinY*cosX);
 	ASSIGN(m[2], -sinY,	 		cosY*sinX,						cosY*cosX);
 }
 
-void computeInverseMatrix(matrix33_t m, matrix33_t inverse) {
+void computeInverseMatrix(matrix33_t m, matrix33_t &inverse) {
 
 	float det_denominator =
 				     ((m[0][0]) * m[1][1] * m[2][2]) +
@@ -113,10 +113,42 @@ void computeInverseMatrix(matrix33_t m, matrix33_t inverse) {
 
 }
 
+const float floatPrecision = 0.00000001;
+void computeEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ) {
+	float beta = atan2(-m[2][0], sqrt(m[0][0]*m[0][0] + m[1][0]*m[1][0]));
+	float gamma = 0;
+	float alpha = 0;
+	if (abs(beta-HALF_PI) < floatPrecision) {
+		alpha = 0;
+		gamma = atan2(m[0][1], m[1][1]);
+	} else {
+			if (abs(beta + HALF_PI) < floatPrecision) {
+				alpha = 0;
+				gamma = -atan2f(m[0][1], m[1][1]);
+			} else {
+				alpha = atan2f(m[1][0],m[0][0]);
+				gamma = atan2f(m[2][1], m[2][2]);
+			}
+	}
+	eulerX = alpha;
+	eulerY = beta;
+	eulerZ = gamma;
+}
+
 // result = v * m
-void vectorTimesMatrix(vector3 v, matrix33_t m, vector3 result) {
+void vectorTimesMatrix(vector3 v, matrix33_t m, vector3 &result) {
 	result[0] = v[0]*m[0][0] + v[1]*m[0][1]  + v[2]*m[0][2];
 	result[1] = v[0]*m[1][0] + v[1]*m[1][1]  + v[2]*m[1][2];
 	result[2] = v[0]*m[2][0] + v[1]*m[2][1]  + v[2]*m[2][2];
 }
 
+void multiplyMatrix(matrix33_t v, matrix33_t m, matrix33_t &result) {
+	 for(int i = 0; i < 3; ++i)
+        for(int j = 0; j < 3; ++j)
+        	result[i][j]=0;
+
+    for(int i = 0; i < 3; ++i)
+        for(int j = 0; j < 3; ++j)
+            for(int k = 0; k < 3; ++k)
+                result[i][j] += v[i][k] * m[k][j];
+}

@@ -32,15 +32,12 @@ public:
 	IMUSample(const IMUSample& t);
 	IMUSample& operator=(const IMUSample& t);
 
-	IMUSamplePlane x;
-	IMUSamplePlane y;
-	IMUSamplePlane z;
+	IMUSamplePlane plane[3];
 };
 
 
 class IMU : public Menuable {
 public:
-	enum Dimension { X=0,Y=1,Z=2 };
 
 	virtual ~IMU() {};
 	IMU() {};
@@ -52,6 +49,7 @@ public:
 
 	void setup(MenuController* menuCtrl);
 	void setup();
+
 	void loop();
 
 	// stateful method to indicate that a new value from IMU is available. returns true only once per new value
@@ -67,6 +65,7 @@ public:
 	virtual void menuLoop(char ch);
 
 private:
+	int init();
 
 	float getAngleRad(Dimension dim);
 	float getAngularVelocity(Dimension dim);
@@ -81,7 +80,12 @@ private:
 	uint32_t averageTime_us = 0;
 	float dT = 0;
 
-	matrix33_t nullMatrix; // rotation matrix that turns the IMU's orientation into the absolut null position
+	float nullAngleX = 0;
+	float nullAngleY = 0;
+	float nullAngleZ = 0;
+
+	matrix33_t nullRotation;
+	const bool preciseNullCalibration = false;
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */

@@ -11,17 +11,13 @@
 #include <BotMemory.h>
 #include <BrushlessMotorDriver.h>
 
-#include <ClassInterrupt.h>
 #include <TimePassedBy.h>
-
 
 const float maxAngleError = radians(30);
 const float maxAdvancePhaseAngle = radians(10);
 const float RevPerSecondPerVolt = 5;							// motor constant of Maxon EC max 40 W
-const float voltage = 12;										// [V]
+const float voltage = 12;										// [V] coming from the battery to server the motors
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
-
-
 
 
 // array to store pre-computed values of space vector wave form (SVPWM)

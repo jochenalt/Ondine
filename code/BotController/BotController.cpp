@@ -127,7 +127,7 @@ void BotController::loop() {
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		BotMovement currentMovement;
-		ballDrive.getSpeed(sensorSample.x.angle, sensorSample.y.angle,
+		ballDrive.getSpeed(sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::Y].angle,
 				           currentMovement.speedX, currentMovement.speedY, currentMovement.omega);
 
 		// compute new movement out of current angle, angular velocity, velocity, position
@@ -136,7 +136,7 @@ void BotController::loop() {
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
-				            sensorSample.x.angle,sensorSample.y.angle);
+				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
 		uint32_t balanceTime = micros()-now;
 

@@ -53,22 +53,23 @@ IMUSamplePlane& IMUSamplePlane::operator=(const IMUSamplePlane& t) {
 IMUSample::IMUSample() {};
 
 IMUSample::IMUSample(const IMUSamplePlane& x, const IMUSamplePlane& y, const IMUSamplePlane& z) {
-	this->x = x;
-	this->y = y;
-	this->z = z;
+	plane[Dimension::X] = x;
+	plane[Dimension::Y] = y;
+	plane[Dimension::Z] = z;
 }
 
 IMUSample::IMUSample(const IMUSample& t) {
-	this->x = t.x;
-	this->y = t.y;
-	this->z = t.z;
+	this->plane[0] = t.plane[0];
+	this->plane[1] = t.plane[1];
+	this->plane[2] = t.plane[2];
 
 }
 
 IMUSample& IMUSample::operator=(const IMUSample& t) {
-	this->x = t.x;
-	this->y = t.y;
-	this->z = t.z;
+	this->plane[0] = t.plane[0];
+	this->plane[1] = t.plane[1];
+	this->plane[2] = t.plane[2];
+
 	return *this;
 }
 
@@ -77,28 +78,12 @@ void IMU::setup(MenuController *newMenuCtrl) {
 	registerMenuController(newMenuCtrl);
 }
 
-void IMU::setup() {
-	// in case of repeated calls of setup, delete old memory
-	if (mpu9250 != NULL) {
-		delete mpu9250;
-	}
-
-	// initialize high speed I2C to IMU
-	IMUWire = &Wire;
-	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
-	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
-
-	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_400);
-	int status = mpu9250->begin();
-	if (status < 0) {
-		fatalError("I2C-IMU setup failed ");
-	}
-
+int IMU::init() {
 	// setting the accelerometer full scale range to +/-8G
 	mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_8G);
 
 	// setting the gyroscope full scale range to +/-500 deg/s
-	status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_500DPS);
+	int status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_500DPS);
 
 	// setting low pass bandwith
 	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ);
@@ -126,31 +111,81 @@ void IMU::setup() {
 	kalman[Dimension::X].setup(0);
 	kalman[Dimension::Y].setup(0);
 	kalman[Dimension::Z].setup(0);
+
+	// reset the rotation matrix rotating IMU to null value
+	nullAngleX = 0;
+	nullAngleY = 0;
+	nullAngleZ = 0;
+	return status;
+}
+
+void IMU::setup() {
+	// in case of repeated calls of setup, delete old memory
+	if (mpu9250 != NULL) {
+		delete mpu9250;
+	}
+
+	// initialize high speed I2C to IMU
+	IMUWire = &Wire;
+	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
+	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
+
+	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_400);
+	int status = mpu9250->begin();
+	if (status < 0) {
+		fatalError("I2C-IMU setup failed ");
+	}
+
+	status = init();
 }
 
 
 void IMU::calibrate() {
-	mpu9250->calibrateAccel();
-	mpu9250->calibrateGyro();
-	mpu9250->readSensor();
-
-	// reset Kalman filter
-	kalman[Dimension::X].setAngle(0);
-	kalman[Dimension::Y].setAngle(0);
-	kalman[Dimension::Z].setAngle(0);
-
-	// measure for 1s, run kalman filter and take final orientation as null value
-	uint32_t now = millis();
-	while (millis() - now > 1000) {
-		loop();
+	logger->println("calibrate imu");
+	int status = mpu9250->calibrateAccel();
+	if (status != 1) {
+		logger->print("accl calibration status error");
+		logger->println(status);
+		fatalError("fatal error");
 	}
 
-	// create rotation matrix out of current angles. The inverse is used
-	// later on to turn the orientation coming from the IMU
-	// such that it is (0,0,0) if in this orientation
+	status = mpu9250->calibrateGyro();
+	if (status != 1) {
+		logger->print("accl calibration status error");
+		logger->println(status);
+		fatalError("fatal error");
+	}
+
+	status = init();
+
+	if (status != 1) {
+		logger->print("status error");
+		logger->println(status);
+		fatalError("fatal error");
+	}
+	// measure for 1s, run kalman filter and take final orientation as null value
+	logger->println("calibrate imu");
+	uint32_t now = millis();
+	while (millis() - now < 1000) {
+		loop();
+	}
+	logger->println("compute nullify rotation matrix");
+
+	nullAngleX = kalman[Dimension::X].getAngle();
+	nullAngleY = kalman[Dimension::Y].getAngle();
+	nullAngleZ = kalman[Dimension::Z].getAngle();
+
 	matrix33_t current;
-	computeZYXRotationMatrix(kalman[Dimension::X].getAngle(),  kalman[Dimension::Y].getAngle(), kalman[Dimension::Z].getAngle(), current);
-	computeInverseMatrix(current, nullMatrix);
+	computeZYXRotationMatrix(nullAngleX,  nullAngleY,  nullAngleZ, current);
+	computeInverseMatrix(current, nullRotation);
+
+	logger->print("nul angle=");
+	logger->print(degrees(nullAngleX));
+	logger->print("/");
+	logger->print(degrees(nullAngleY));
+	logger->print("/");
+	logger->print(degrees(nullAngleZ));
+	logger->println(")");
 }
 
 void IMU::loop() {
@@ -177,7 +212,7 @@ void IMU::loop() {
 			float tilt[3];
 			tilt[Dimension::X] = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
 			tilt[Dimension::Y] = mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
-			tilt[Dimension::Z] = mpu9250->getMagZ_uT();
+			tilt[Dimension::Z] = mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) + HALF_PI;
 
 			float angularVelocity[3];
 			angularVelocity[Dimension::X] = -mpu9250->getGyroY_rads();
@@ -188,21 +223,20 @@ void IMU::loop() {
 			for (int i = 0;i<3;i++)
 				kalman[i].update(tilt[i], angularVelocity[i], dT);
 
-			float filteredTilt[3] = { kalman[Dimension::X].getAngle(), kalman[Dimension::Y].getAngle(),kalman[Dimension::Z].getAngle() };
-			float filteredVelocity[3] = { kalman[Dimension::X].getRate(), kalman[Dimension::Y].getRate(),kalman[Dimension::Z].getRate() };
+			if (preciseNullCalibration) {
+				matrix33_t currentRotation;
+				computeZYXRotationMatrix(kalman[Dimension::X].getAngle(), kalman[Dimension::Y].getAngle(), kalman[Dimension::Z].getAngle(), currentRotation);
+				matrix33_t result;
+				computeZYXRotationMatrix(kalman[Dimension::X].getRate(), kalman[Dimension::Y].getRate(), kalman[Dimension::Z].getRate(), currentRotation);
+				multiplyMatrix(currentRotation, nullRotation, result);
+			}
 
-			float filterNulledTilt[3];
-			vectorTimesMatrix(filteredTilt, nullMatrix, filterNulledTilt);
-			float filteredNulledVelocity[3];
-			vectorTimesMatrix(filteredVelocity, nullMatrix, filteredNulledVelocity);
-
-
-			currentSample.x.angle = filterNulledTilt[Dimension::X];
-			currentSample.y.angle = filterNulledTilt[Dimension::Y];
-			currentSample.z.angle = filterNulledTilt[Dimension::Z];
-			currentSample.x.angularVelocity = filteredNulledVelocity[Dimension::X];
-			currentSample.y.angularVelocity = filteredNulledVelocity[Dimension::Y];
-			currentSample.z.angularVelocity = filteredNulledVelocity[Dimension::Z];
+			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() - nullAngleX;
+			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle() - nullAngleY;
+			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle() - nullAngleX;
+			currentSample.plane[Dimension::X].angularVelocity = kalman[Dimension::X].getRate();
+			currentSample.plane[Dimension::Y].angularVelocity = kalman[Dimension::Y].getRate();
+			currentSample.plane[Dimension::Z].angularVelocity = kalman[Dimension::Z].getRate();
 
 			// indicate that new value is available
 			valueIsUpdated = true;
@@ -216,22 +250,24 @@ void IMU::loop() {
 				command->print("dT=");
 				command->print(dT,3);
 				command->print("a=(X:");
-				command->print(tilt[Dimension::X],6);
+				command->print(tilt[Dimension::X],3);
 				command->print("/");
-				command->print(angularVelocity[Dimension::X],6);
+				command->print(angularVelocity[Dimension::X],3);
 				command->print("Y:");
-				command->print(tilt[Dimension::Y],6);
+				command->print(tilt[Dimension::Y],3);
 				command->print("/");
-				command->print(angularVelocity[Dimension::Y],6);
+				command->print(angularVelocity[Dimension::Y],3);
 				command->print("Z:");
-				command->print(tilt[Dimension::Z],6);
+				command->print(tilt[Dimension::Z],3);
 				command->print("/");
-				command->print(angularVelocity[Dimension::Z],6);
+				command->print(angularVelocity[Dimension::Z],3);
+
 				command->print(" angle=(");
 				command->print(degrees(getAngleRad(Dimension::X)));
 				command->print(",");
 				command->print(degrees(getAngleRad(Dimension::Y)));
 				command->print(")");
+
 				command->print("kalman t=");
 				command->print(averageTime_us);
 				command->println("us");
@@ -248,11 +284,11 @@ bool IMU::isNewValueAvailable(float &dT) {
 }
 
 float IMU::getAngleRad(Dimension dim) {
-	return kalman[dim].getAngle();
+	return currentSample.plane[dim].angle;
 }
 
 float IMU::getAngularVelocity(Dimension dim) {
-	return kalman[dim].getRate();
+	return currentSample.plane[dim].angularVelocity;
 }
 
 

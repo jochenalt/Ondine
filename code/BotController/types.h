@@ -7,14 +7,22 @@ typedef float matrix33_t[3][3];
 
 typedef float vector3[3];
 
+// meaning of a vector's item
+enum Dimension { X=0,Y=1,Z=2 };
+
 // returns Rz * Ry * Rx
-void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t);
+void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t &m);
 
 // inverse = m^(-1)
-void computeInverseMatrix(matrix33_t m, matrix33_t inverse);
+void computeInverseMatrix(matrix33_t m, matrix33_t &inverse);
 
 // result = v * m
-void vectorTimesMatrix(vector3 v,matrix33_t m, vector3 result);
+void vectorTimesMatrix(vector3 v,matrix33_t m, vector3 &result);
+
+// result = v*m
+void multiplyMatrix(matrix33_t v, matrix33_t m, matrix33_t &result);
+
+void computeEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ);
 
 // convenience macro: set a 3-vector
 #define ASSIGN(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
