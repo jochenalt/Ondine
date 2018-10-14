@@ -71,4 +71,7 @@ This is done three times. Then, the three drive chains are screwd to the bottom 
 and it is really moving!
 
 <img  height="500px" src="../images/beltdrive/threeDriveChains.gif" >
+<img  height="500px" src="../images/beltdrive/DrivingWithBall.gif" >
+
+
 
