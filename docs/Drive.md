@@ -61,7 +61,14 @@ Finally it looks like this (without encoder)
 <img  height="300px" src="../images/beltdrive/IMG_20180922_100613.jpg" >
 
 The motor is pushed into the enclosure to clamp the output axis and screwed 
+
 <img  height="300px" src="../images/beltdrive/IMG_20181013_115437.jpg" >
 
-This is done three times:
+This is done three times. Then, the three drive chains are screwd to the bottom part of the bot 
+
 <img  height="500px" src="../images/beltdrive/IMG_20180922_120050.jpg" >
+
+and it is really moving!
+
+<img  height="500px" src="../images/beltdrive/threeDriveChains.gif" >
+
