@@ -23,7 +23,7 @@ Especially the bearing of the outer axis inside the pinion at the motor saved a 
 
 <img  height="300px" src="../images/beltdrive/Beltdrive3.png" >
 
-In the beginning, the timing belts touched the verge of the pinions, until I gave the pinion's teeth a round profile that centred the timing belt in the middle of the teeth.  In order to not have suport remains of a 3D-printed pinion, I cut it half, and glued it after printing, which can be seen on the original parts:
+In the beginning, the timing belts touched the verge of the pinions, until I gave the pinion's teeth a round profile that centred the timing belt in the middle of the teeth.  In order to not have suport remains of a 3D-printed pinion, I cut it half, and glued it after printing, which can be seen  on the original parts (the fine line in the middle of the pinion)
 
 <img  height="200px" src="../images/beltdrive/IMG_20181013_110952.jpg" >
 <img  height="200px" src="../images/beltdrive/IMG_20181013_111134.jpg" >
@@ -39,12 +39,12 @@ The output wheel incorporates a mounting hub to link it to the axis
 <img  height="200px" src="../images/beltdrive/IMG_20180922_095326.jpg" >
 <img  height="200px" src="../images/beltdrive/IMG_20180922_095413.jpg" >
 
-Assembly starts with the enclosure and the output wheel
+Assembly starts with the enclosure and the output wheel. The three screws are used later on to screw the motor holder. In order to not let them fall into the enclsure during assembly, I glued them into the enclosure.
 
 <img  height="300px" src="../images/beltdrive/IMG_20180922_092706.jpg" >
 <img  height="300px" src="../images/beltdrive/IMG_20181013_113918.jpg" >
 
-Then the big wheel and the output timing belt is added 
+Then the big wheel and the output timing belt is added (the stains on the top of the enclosure is my blood)
 
 <img  height="300px" src="../images/beltdrive/IMG_20181013_114005.jpg" >
 
