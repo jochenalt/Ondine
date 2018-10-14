@@ -41,27 +41,27 @@ The output wheel incorporates a mounting hub to link it to the axis
 
 Assembly starts with the enclosure and the output wheel
 
-<img  height="200px" src="../images/beltdrive/IMG_20180922_092706.jpg" >
-
-<img  height="200px" src="../images/beltdrive/IMG_20181013_113918.jpg" >
+<img  height="300px" src="../images/beltdrive/IMG_20180922_092706.jpg" >
+<img  height="300px" src="../images/beltdrive/IMG_20181013_113918.jpg" >
 
 Then the big wheel and the output timing belt is added 
 
-<img  height="200px" src="../images/beltdrive/IMG_20181013_114005.jpg" >
+<img  height="300px" src="../images/beltdrive/IMG_20181013_114005.jpg" >
 
 The pinion and the motor is assembled like this
 
-<img  height="200px" src="../images/beltdrive/IMG_20180922_100241.jpg" >
+<img  height="300px" src="../images/beltdrive/IMG_20180922_100241.jpg" >
 
 And in a tricky operation the motor is moved into the enclosure, keeping the second timing belt at the right position
-<img  height="200px" src="../images/beltdrive/IMG_20180922_100334.jpg" >
+
+<img  height="300px" src="../images/beltdrive/IMG_20180922_100334.jpg" >
 
 Finally it looks like this (without encoder)
 
-<img  height="200px" src="../images/beltdrive/IMG_20180922_100613.jpg" >
+<img  height="300px" src="../images/beltdrive/IMG_20180922_100613.jpg" >
 
 The motor is pushed into the enclosure to clamp the output axis and screwed 
-<img  height="200px" src="../images/beltdrive/IMG_20181013_115437.jpg" >
+<img  height="300px" src="../images/beltdrive/IMG_20181013_115437.jpg" >
 
 This is done three times:
-<img  height="200px" src="../images/beltdrive/IMG_20180922_120050.jpg" >
+<img  height="500px" src="../images/beltdrive/IMG_20180922_120050.jpg" >
