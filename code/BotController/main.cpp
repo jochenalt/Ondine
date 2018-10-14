@@ -6,6 +6,7 @@
 
 #include <PatternBlinker.h>
 #include <I2CSlave.h>
+#include <BotMemory.h>
 
 #include <common.h>
 
@@ -44,6 +45,9 @@ void setup()
 	botController.setup(); 	// this takes 4.5s seconds (mainly due to IMU initialization)
 	i2cSlave->setup(); 		// join the i2c bus with the webserver
 
+	// initialize configuration values coming from EEPROM
+	memory.setup();
+
 	command->print("ms BotController - h for help ");
 	command->print(millis()-now);
 	command->print("ms setup time");
@@ -56,4 +60,5 @@ void loop()
 	ledBlinker.loop(now);    	// LED on Teensy board and LED on power switch
 	botController.loop();		// do the balancing business
 	i2cSlave->loop();			// execute commands from webserver that came in via I2C
+	memory.loop(now);
 }

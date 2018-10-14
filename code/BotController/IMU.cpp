@@ -113,9 +113,10 @@ int IMU::init() {
 	kalman[Dimension::Z].setup(0);
 
 	// reset the rotation matrix rotating IMU to null value
-	nullAngleX = 0;
-	nullAngleY = 0;
-	nullAngleZ = 0;
+	memory.persistentMem.imuControllerConfig.nullOffsetX = 0;
+	memory.persistentMem.imuControllerConfig.nullOffsetY = 0;
+	memory.persistentMem.imuControllerConfig.nullOffsetZ = 0;
+
 	return status;
 }
 
@@ -171,21 +172,16 @@ void IMU::calibrate() {
 	}
 	logger->println("compute nullify rotation matrix");
 
-	nullAngleX = kalman[Dimension::X].getAngle();
-	nullAngleY = kalman[Dimension::Y].getAngle();
-	nullAngleZ = kalman[Dimension::Z].getAngle();
+	memory.persistentMem.imuControllerConfig.nullOffsetX = kalman[Dimension::X].getAngle();
+	memory.persistentMem.imuControllerConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
+	memory.persistentMem.imuControllerConfig.nullOffsetZ = kalman[Dimension::Z].getAngle();
 
 	matrix33_t current;
-	computeZYXRotationMatrix(nullAngleX,  nullAngleY,  nullAngleZ, current);
+	computeZYXRotationMatrix(memory.persistentMem.imuControllerConfig.nullOffsetX ,
+							 memory.persistentMem.imuControllerConfig.nullOffsetY,
+							 memory.persistentMem.imuControllerConfig.nullOffsetZ, current);
 	computeInverseMatrix(current, nullRotation);
 
-	logger->print("nul angle=");
-	logger->print(degrees(nullAngleX));
-	logger->print("/");
-	logger->print(degrees(nullAngleY));
-	logger->print("/");
-	logger->print(degrees(nullAngleZ));
-	logger->println(")");
 }
 
 void IMU::loop() {
@@ -231,9 +227,9 @@ void IMU::loop() {
 				multiplyMatrix(currentRotation, nullRotation, result);
 			}
 
-			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() - nullAngleX;
-			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle() - nullAngleY;
-			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle() - nullAngleX;
+			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetX;
+			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetY;
+			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetZ;
 			currentSample.plane[Dimension::X].angularVelocity = kalman[Dimension::X].getRate();
 			currentSample.plane[Dimension::Y].angularVelocity = kalman[Dimension::Y].getRate();
 			currentSample.plane[Dimension::Z].angularVelocity = kalman[Dimension::Z].getRate();

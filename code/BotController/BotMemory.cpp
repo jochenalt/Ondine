@@ -18,6 +18,7 @@ void BotMemory::setDefaults() {
 
 
 void BotMemory::println() {
+	logger->println("EEPROM memory:")
 	persistentMem.ctrlConfig.print();
 	logger->println();
 	persistentMem.motorControllerConfig.print();;
@@ -63,10 +64,55 @@ void LogConfig::initDefaultValues() {
 }
 
 void LogConfig::print() {
-	logger->println("log:");
-	logger->print("   perf:");
+	logger->println("logging:");
+	logger->print("   perf   :");
 	logger->println(performanceLog?"true":"false");
-	logger->print("   calib:");
+	logger->print("   calib  :");
 	logger->println(calibrationLog?"true":"false");
 
+}
+
+void MotorConfig::initDefaultValues() {
+	// PID controller at slow speeds is aggressive to keep position
+	pid_position.Kp = 2.1;
+	pid_position.Ki = 1.2;
+	pid_position.Kd = 0.000;
+	pid_speed.Kp = .8;
+	pid_speed.Ki = 0.5;
+	pid_speed.Kd = 0.02;
+}
+
+void MotorConfig::print() {
+	logger->println("motor controller configuration:");
+	logger->print("   PID (speed=0)  : ");
+	logger->print("P=");
+	logger->print(pid_position.Kp);
+	logger->print(" I=");
+	logger->print(pid_position.Ki);
+	logger->print(" D=");
+	logger->println(pid_position.Kd);
+	logger->print("   PID (speed=max): ");
+	logger->print("P=");
+	logger->print(pid_speed.Kp);
+	logger->print(" I=");
+	logger->print(pid_speed.Ki);
+	logger->print(" D=");
+	logger->println(pid_speed.Kd);
+}
+
+void IMUConfig::initDefaultValues() {
+	nullOffsetX = 0;
+	nullOffsetY = -0;
+	nullOffsetZ = -0;
+}
+
+void IMUConfig::print() {
+	logger->println("imu configuration");
+	logger->print("   null=(");
+	logger->print(nullOffsetY);
+	logger->print(",");
+	logger->print(nullOffsetY);
+	logger->print(",");
+	logger->print(nullOffsetZ);
+	logger->print("))");
 }

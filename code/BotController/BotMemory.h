@@ -30,27 +30,25 @@ public:
 	void null();
 	void initDefaultValues();
 	void print() {
-		logger->print("stateConfig(");
-		logger->print("angleWeight:");
+		logger->println("state controller configuration:");
+		logger->print("   angleWeight:");
 		logger->print(angleWeight);
 		logger->print(" angularSpeedWeight:");
-		logger->print(angularSpeedWeight);
-		logger->print(" ballVelocityWeight:");
+		logger->println(angularSpeedWeight);
+		logger->print("   ballVelocityWeight:");
 		logger->print(ballVelocityWeight);
 		logger->print(" ballPositionWeight:");
 		logger->print(ballPositionWeight);
 		logger->print(" ballAccelWeight:");
-		logger->print(ballAccelWeight);
-		logger->print(" bodyVelocityWeight:");
+		logger->println(ballAccelWeight);
+		logger->print("   bodyVelocityWeight:");
 		logger->print(bodyVelocityWeight);
 		logger->print(" bodyPositionWeight:");
 		logger->print(bodyPositionWeight);
 		logger->print(" bodyAccelWeight:");
-		logger->print(bodyAccelWeight);
-		logger->print(" omegaWeight:");
-		logger->print(omegaWeight);
-		logger->print(")");
-
+		logger->println(bodyAccelWeight);
+		logger->print("   omegaWeight:");
+		logger->println(omegaWeight);
 	}
 
 	float angleWeight;
@@ -67,33 +65,8 @@ public:
 
 class MotorConfig {
 public:
-	void initDefaultValues() {
-		// PID controller at slow speeds is aggressive to keep position
-		pid_position.Kp = 2.1;
-		pid_position.Ki = 0.5;
-		pid_position.Kd = 0.000;
-
-		pid_speed.Kp = .8;
-		pid_speed.Ki = 0.5;
-		pid_speed.Kd = 0.02;
-	}
-
-	void print() {
-		logger->print("motorConfig(");
-		logger->print("pidPosition(");
-		logger->print(pid_position.Kp);
-		logger->print(",");
-		logger->print(pid_position.Ki);
-		logger->print(",");
-		logger->print(pid_position.Kd);
-		logger->print(") pid_speed(");
-		logger->print(pid_speed.Kp);
-		logger->print(",");
-		logger->print(pid_speed.Ki);
-		logger->print(",");
-		logger->print(pid_speed.Kd);
-		logger->print("))");
-	}
+	void initDefaultValues();
+	void print();
 
 	// PID values for control at 0 rev/s
 	PIDControllerConfig pid_position;
@@ -102,24 +75,13 @@ public:
 
 class IMUConfig {
 	public:
-		void initDefaultValues() {
-			offsetRawX = 541;
-			offsetRawY = -571;
-			offsetRawZ = -397;
-		}
+		void initDefaultValues();
 
-		void print() {
-			logger->print("imu(offset=(");
-			logger->print(offsetRawX);
-			logger->print(",");
-			logger->print(offsetRawY);
-			logger->print(",");
-			logger->print(offsetRawZ);
-			logger->print("))");
-		}
-	float offsetRawX;
-	float offsetRawY;
-	float offsetRawZ;
+		void print();
+
+	float nullOffsetX;
+	float nullOffsetY;
+	float nullOffsetZ;
 };
 
 

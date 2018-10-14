@@ -80,10 +80,6 @@ private:
 	uint32_t averageTime_us = 0;
 	float dT = 0;
 
-	float nullAngleX = 0;
-	float nullAngleY = 0;
-	float nullAngleZ = 0;
-
 	matrix33_t nullRotation;
 	const bool preciseNullCalibration = false;
 };
