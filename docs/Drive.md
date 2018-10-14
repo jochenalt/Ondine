@@ -22,4 +22,9 @@ Last and successful try was the most boring gear type with timing belts. But the
 Especially the bearing of the outer axis inside the pinion at the motor saved a lot of space:
 <img  height="250px" src="../images/beltdrive/Beltdrive3.png" >
 
+In the beginning, the timing belts touched the verge of the pinions, until I gave the pinion's teeth a round profile that centred the timing belt in the middle of the teeth.  In order to not have suport remains of a 3D-printed pinion, I cut it half, and glued it after printing, which can be seen on the original parts:
+
+<img  height="250px" src="../images/beltdrive/IMG_20181013_110952.jpg" >
+<img  height="250px" src="../images/beltdrive/IMG_20181013_111134.jpg" >
+<img  height="250px" src="../images/beltdrive/IMG_20181013_111159.jpg" >
 
