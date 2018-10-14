@@ -1,20 +1,24 @@
 # Drive Chain
 
-Driving Omniwheels is not as easy as expected in the beginning. First, the drive chain needs to be relatively silent for emotional reasons.
-Then, there should be no play or backlash, since during balacing motors continously drive forward and backward with small movements only. 
-Out of the weight and acceleration of the bot, the motor's output power should be something around 30W with a gearbox around 1:5 to 1:10. I was lucky with the motors, I made a snip on ebay and got these brushless [40W Maxon motors](https://www.maxonmotor.com/maxon/view/product/272768) for 5€ each
+Driving Omniwheels requires a precise control, particularly when the bot is not moving. Balancing is a process with all motors moving around the same position with many changes in directon. A regular drive with a geared brushed motor has a certain amount of backlash. Small corrections of the bot's position won't have an impact until the motor overcomes the backlash. Therefore, the controller will always overshoot allowing a smaller gain only. 
+
+# Torque, Power, and Gearbox Ratio 
+I estimated the bot's weight approx. 3kg (=29N). A maximum tilt angle around 15° gives a force of 7N to be delivered by the drive. Ignoring the fact that a wheel is not always perpendicular to the direction, and having wheels with a radius of 35mm results in a torque to be supplied by a wheel of 7N*35mm = 0.025Nm. Motors typically provide 3000 RPM, the Bot's to-be speed should be 1m/s, so a wheel has a maximum speed of 2.4 rev/s. This gives a gearbox ratio of 1:20 max. Later on, it turned out, that my gearbox has a ratio of 1:9. So, the motors torque should be 0.002Nm at 1500 RPM.
+When I started looking for motors, I was lucky and made a snip on ebay, so all the computations above were useless. Anyhow, I got these wonderfull brushless [40W Maxon motors](https://www.maxonmotor.com/maxon/view/product/272768) for 5€ each
 
 <img width="250px" src="https://www.maxonmotor.com/medias/sys_master/root/8797319790622/EC-max-30-BL-40W-2WE-mKabel-Detail.jpg" >
 
-It is clear, that the quality of these motors were setting the scene, the gearbox features had to be at least close to that. But a gearbox from maxon starts at 150€. So, I tried a [harmonic drive with timing belts](https://hackaday.io/project/19405-strain-wave-gear-with-timing-belts) based on Simon Merrets ideas, and I had a go with a cycloid drive due to its mechanical beauty. Both suffered from the same deficiency: The parts were 3D-printed with a precision of 0.2mm at best, and this is not sufficient to get a proper efficiency. Boths gears were groaning loudly and had a significant inner friction such that the motor must give noticable power to start moving.
+# Failed Gearboxes
+The quality of these motors were setting the scene, the gearbox had to be close to this. A gearbox from maxon was no option due to its price of 150€, and I had the ambition to build something without backlash. So, I tried a [harmonic drive with timing belts](https://hackaday.io/project/19405-strain-wave-gear-with-timing-belts) based on Simon Merrets ideas, and I had a go with a cycloid drive due to its mechanical beauty. Both suffered from the same deficiency: The parts were 3D-printed with a precision of 0.2mm at best, which is not sufficient to get a proper efficiency. Boths gears were groaning loudly and had a significant inner friction. The motor had to give a noticable amount of power to overcome this friction and start moving with a small jerk.
 
-Next try was a planetary box which turned out to work acceptable. Play was low, required space was ok as well:
+Next try was a planetary box which turned out to be acceptable. Play was low, required space was ok as well:
 
 <img  width="350px" src="../images/beltdrive/planetary_gear.gif" >
 
-Unfortunately, when I reduced distance between the gears, the gearbox started to produce an annoying plastic sound, even after adding a heringbone gearing, so I dismissed this as well.
+Unfortunately, after reducing the distance between the gears, the gearbox started to produce an annoying plastic sound even after adding a heringbone gearing, so I dismissed this as well.
 
-Last and successful try was the most boring gear type with timing belts. But the advantages were convincing: Low play by nature, silent, and cheap. Only issue is the space required. But this could be mitigated by a design which outer dimensions is dominated by the wheels only not wasting too much space with hubs or flanges etc:
+# Final Gearbox 
+Last and successful try was the most boring gear type with timing belts. Still the advantages were convincing: Low play by nature, silent, and cheap. Only issue is the space required. But this could be mitigated by a design which outer dimensions is dominated by the wheels only not wasting too much space with hubs or flanges etc:
 
 <img  height="300px" src="../images/beltdrive/Beltdrive1.png" >
 <img  height="300px" src="../images/beltdrive/Beltdrive2.png" >
