@@ -22,6 +22,7 @@
 |                   |3  | steel axis gear 4mm, 45mm                              |   <img width="100" src="https://asset.conrad.com/media10/isa/160267/c1/-/de/237213_BB_00_FB/silberstahl-welle-reely-o-x-l-2-mm-x-500-mm.jpg?x=520&y=520"/> | local dealer |          |                  |
 |                   |3x2| ball bearing motor pinion 4x7x2.5                                 |  <img width="100" src="https://www.kugellager-express.de/media/image/product/6134/md/miniatur-kugellager-zoll-inch-r188-w3-175-offen-6-35x12-7x3-175-mm.jpg"/> | [Deep grove ball bearing 2x5x2](https://www.kugellager-express.de/miniatur-kugellager-mr74-zz-4x7x2-5-mm) |
 |                   |3x3| ball bearing gear box 4x8x3                                 |  <img width="100" src="https://www.kugellager-express.de/media/image/product/6134/md/miniatur-kugellager-zoll-inch-r188-w3-175-offen-6-35x12-7x3-175-mm.jpg"/> | [Deep grove ball bearing 2x5x2](https://www.kugellager-express.de/miniatur-kugellager-mr84-2rs-4x8x3-mm) |
+|                   |3x2| Timing Belt for drive chain T2.5, 64 teeth, 160mm |  <img width="100" src="https://www.keilriemenexpress.de/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/Z/a/Zahnflachriemen_T25_36.jpg"/> | [Timing Belt T2.5 160mm](https://www.keilriemenexpress.de/zahnflachriemen-zahnriemen-shop/synchroflex-zahnriemen-t/zahnriemen-t-2-5/zahnflachriemen-t-2-5-6-mm-breite/t2-5-160-mm-breite-6-mm.html) |
 
 ## Sources
 
