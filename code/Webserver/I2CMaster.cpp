@@ -15,7 +15,7 @@ String pendingCommand;
 int pendingAdr;
 
 void I2CMaster::setup() {
-	i2cBus->begin(SDA, SCL);        // join i2c bus as master
+	i2cBus->begin(PIN_WIRE_SDA, PIN_WIRE_SCL);        // join i2c bus as master
 }
 
 void I2CMaster::sendCommandAsync(int adr,String cmd) {

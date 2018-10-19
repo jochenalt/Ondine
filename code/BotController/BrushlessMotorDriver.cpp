@@ -65,10 +65,10 @@ int BrushlessMotorDriver::getPWMValue(float torque, float angle_rad) {
 }
 
 BrushlessMotorDriver::BrushlessMotorDriver() {
-	// initialize precomputed spvm values (only once)
+	// initialize precomputed spvm values
+	// first invocation does the initialization
 	precomputeSVPMWave();
 }
-
 
 void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl) {
 	this->motorNo = motorNo;
@@ -86,7 +86,7 @@ void BrushlessMotorDriver::setupMotor(int EnablePin, int Input1Pin, int Input2Pi
 	// setup L6234 input PWM pins
 	analogWriteResolution(pwmResolution);
 
-	// choose a frequency that it just can't be heard
+	// choose a frequency that just can't be heard
 	analogWriteFrequency(input1Pin, 50000);
 	analogWriteFrequency(input2Pin, 50000);
 	analogWriteFrequency(input3Pin, 50000);
@@ -98,7 +98,7 @@ void BrushlessMotorDriver::setupMotor(int EnablePin, int Input1Pin, int Input2Pi
 
 	// enable all enable lines at once (Drotek L6234 board has all enable lines connected)
 	pinMode(enablePin, OUTPUT);
-	digitalWrite(enablePin, LOW); // start with disabled motor
+	digitalWrite(enablePin, LOW); // start with disabled motor, ::enable turns it on
 }
 
 void BrushlessMotorDriver::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR) {
@@ -119,7 +119,7 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	}
 	uint32_t timePassed_us = now_us - lastTurnTime_us;
 
-	// check for overflow on micros() (happens every 70 minutes at teensy's frequency)
+	// check for overflow on micros() (happens every 70 minutes at teensy's frequency of 120MHz)
 	if (now_us < lastTurnTime_us) {
 		logger->println("time overflow!!!");
 		timePassed_us = (4294967295 - timePassed_us) + now_us;
@@ -129,6 +129,8 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	lastTurnTime_us = now_us;
 	float timePassed_s = (float)timePassed_us/1000000.0;
 	if (timePassed_s > (2.0/(float)SampleFrequency)) {
+		// this happens if this methods isnt called often enough. Mostly
+		// when serial communications takes place
 		logger->println("turnReferenceAngle's dT too big!!!!");
 		logger->print(timePassed_s*1000.0);
 		logger->println("ms");

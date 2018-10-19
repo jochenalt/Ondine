@@ -37,11 +37,23 @@ void ControlPlane::init () {
 			filteredSpeed = 0;
 
 			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of preveious state controller
-			speedFilter.init(FIR::LOWPASS,
+			outputSpeedFilter.init(FIR::LOWPASS,
 					         0.01f  			/* allowed ripple in amplitude is 1% */,
 							 0.001f 			/* supression required is 0.1%*/,
 							 SampleFrequency, 	/* 100 Hz */
 							 15.0f  			/* low pass cut off frequency */);
+
+			inputBallAccel.init(FIR::LOWPASS,
+					         0.1f  			/* allowed ripple in amplitude is 10% */,
+							 0.001f 			/* supression required is 0.1%*/,
+							 SampleFrequency, 	/* 100 Hz */
+							 50.0f  			/* low pass cut off frequency */);
+
+			inputBodyAccel.init(FIR::LOWPASS,
+							  0.1f  			/* allowed ripple in amplitude is 10% */,
+							  0.001f 			/* supression required is 0.1%*/,
+							  SampleFrequency, /* 100 Hz */
+							  50.0f  			/* low pass cut off frequency */);
 }
 
 void ControlPlane::update(float dT,
@@ -84,9 +96,11 @@ void ControlPlane::update(float dT,
 		float absBallSpeed = (absBallPos - lastAbsBallPos)/dT;
 
 		// compute the ABSOLUTE acceleration the robot's body really has
+		// bodyAccel = inputBodyAccel.update((absBodySpeed-lastBodySpeed) / dT);
 		bodyAccel = (absBodySpeed-lastBodySpeed) / dT;
 
 		// compute the ABSOLUTE acceleration the robot's base really has
+		// ballAccel = inputBallAccel.update((currentSpeed-lastBallSpeed) / dT);
 		ballAccel = (currentSpeed-lastBallSpeed) / dT;
 
 		// compute the error of the angle
@@ -121,12 +135,12 @@ void ControlPlane::update(float dT,
 		float error_angular_speed	= memory.persistentMem.ctrlConfig.angularSpeedWeight * errorAngularVelocity;
 
 		float error_base_position 	= memory.persistentMem.ctrlConfig.ballPositionWeight * errorBallPosition;
-		float error_base_velocity 	= memory.persistentMem.ctrlConfig.ballVelocityWeight * errorBallVelocity;
+		float error_base_velocity 	= memory.persistentMem.ctrlConfig.ballVelocityWeight * errorBallVelocity; // [0]
 		float error_base_accel		= memory.persistentMem.ctrlConfig.ballAccelWeight 	 * errorBallAccel;
 
-		float error_body_position	= memory.persistentMem.ctrlConfig.bodyPositionWeight * errorBodyPosition;
+		float error_body_position	= memory.persistentMem.ctrlConfig.bodyPositionWeight * errorBodyPosition; // [0]
 		float error_body_velocity	= memory.persistentMem.ctrlConfig.bodyVelocityWeight * errorBodyVelocity;
-		float error_body_accel		= memory.persistentMem.ctrlConfig.bodyAccelWeight    * errorBodyAccel;
+		float error_body_accel		= memory.persistentMem.ctrlConfig.bodyAccelWeight    * errorBodyAccel;    // [0]
 
 		float error_centripedal     = memory.persistentMem.ctrlConfig.omegaWeight        * errorCentripedal;
 
@@ -153,7 +167,7 @@ void ControlPlane::update(float dT,
 		lastTargetSpeed = targetSpeed;
 
 		// in order to increase gain of state controller, filter with FIR 20Hz 4th order
-		filteredSpeed = speedFilter.update(speed);
+		filteredSpeed = outputSpeedFilter.update(speed);
 	};
 }
 

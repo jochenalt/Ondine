@@ -18,6 +18,7 @@ void I2CSlave::setup() {
 		// webServerComm->onReceive(webServerCommReceiveEvent);
 		webServerComm->onReceive([](unsigned int howMany){ i2cSlave->webServerCommReceiveEvent(howMany);});
 
+		logger->println("i2cslave setup done");
 		requestBytes = 0;
 }
 

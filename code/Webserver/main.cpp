@@ -15,6 +15,7 @@
 #include <I2CPortScanner.h>
 #include <pins.h>
 #include <I2CMaster.h>
+#include <Common.h>
 
 // everyone likes a blinking LED
 static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// nice!
@@ -45,7 +46,14 @@ void setup() {
 
 	i2cMaster->setup();
 
-	// doI2CPortScan(F("looking for BotControll"), ctrlComm, logger);
+	// int noDevices = doI2CPortScan(F("looking for BotControll"), &Wire, logger);
+	Wire.beginTransmission(BotControllerI2CAddress);
+	int error = Wire.endTransmission();
+	if (error == 0) {
+		logger->print("connection to Teensy via I2c (0x");
+		logger->print(BotControllerI2CAddress, HEX);
+		logger->println(" failed!");
+	}
 
 	logger->println("setup done");
 

@@ -44,7 +44,9 @@ class ControlPlane {
 		float accel;			// final acceleration out of the control loop
 		float filteredSpeed;
 
-		FIR::Filter speedFilter;
+		FIR::Filter outputSpeedFilter;
+		FIR::Filter inputBallAccel;
+		FIR::Filter inputBodyAccel;
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
 		void update(float dT,

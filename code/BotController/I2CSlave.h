@@ -43,7 +43,6 @@ public:
 			receiveAdr = 0;
 			reveiveEvent = "";
 		}
-		/*
 		{
 			logger->print("i2cRec(");
 			logger->print(numBytes);
@@ -53,7 +52,6 @@ public:
 			logger->print(reveiveEvent);
 			logger->println("]");
 		}
-		*/
 	}
 
 	void setup();
