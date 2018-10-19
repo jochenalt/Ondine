@@ -14,7 +14,6 @@
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
 
-
 const float MaxAcceleration = 1000.0; // [rev/s^2]
 const float GearBoxRatio = 18.0/54.0*18.0/54.0; // two timing belts with 54/18*54/18 pulleys = 9
 

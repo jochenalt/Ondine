@@ -18,7 +18,7 @@ void BotMemory::setDefaults() {
 
 
 void BotMemory::println() {
-	logger->println("EEPROM memory:")
+	logger->println("EEPROM memory:");
 	persistentMem.ctrlConfig.print();
 	logger->println();
 	persistentMem.motorControllerConfig.print();;
