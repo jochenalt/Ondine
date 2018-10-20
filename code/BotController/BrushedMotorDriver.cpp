@@ -83,15 +83,16 @@ void BrushedMotorDriver::loop() {
 			lastLoopCall_ms = now;
 
 			// compute reference angle in [rad]
-			referenceAngle += dT*referenceSpeed*TWO_PI;
+			referenceAngle += dT * referenceSpeed * TWO_PI;
 
-			// what is the reality?
+			// what is the real angle delivered by optical encoder
 			readEncoder();
 
 			// compare motor angle with measured encoder angle
 			float angleError = encoderAngle - referenceAngle; // [rad]
 
-			// PID controller deliveres power ratio to be sent to motor
+			// PID controller delivers power ratio to be sent to motor
+			// since the encoder is quite coarse with 48 CPR, controller must be relatively low.
 			float outputAngle = pid.update(memory.persistentMem.motorControllerConfig.pid_lifter, angleError, dT, -radians(30), radians(30));
 			currentMotorPower = constrain(outputAngle/radians(30), -1.0, +1.0);
 			setMotorPower(currentMotorPower);
@@ -104,9 +105,6 @@ void BrushedMotorDriver::loop() {
 				logger->print(degrees(referenceAngle));
 				logger->print(" enc=");
 				logger->print(degrees(encoderAngle));
-				logger->print(" encPos=");
-				logger->print(lastEncoderPosition);
-
 
 				logger->print(" err=");
 				logger->print(degrees(angleError));

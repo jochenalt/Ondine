@@ -26037,13 +26037,13 @@ Source: http://www.molex.com</description>
 <attribute name="VALUE" x="135.509" y="-17.018" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="U$3" gate="G$1" x="93.98" y="205.74" rot="R180"/>
-<instance part="LED1" gate="G$1" x="-27.94" y="-7.62" rot="R180">
-<attribute name="NAME" x="-34.036" y="-5.588" size="1.778" layer="95" rot="R270"/>
-<attribute name="VALUE" x="-31.115" y="-5.588" size="1.778" layer="96" rot="R270"/>
+<instance part="LED1" gate="G$1" x="-27.94" y="-15.24" rot="R180">
+<attribute name="NAME" x="-34.036" y="-13.208" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="-31.115" y="-13.208" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="R15" gate="G$1" x="-27.94" y="7.62" rot="R90">
-<attribute name="NAME" x="-29.4386" y="3.81" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="-24.638" y="3.81" size="1.778" layer="96" rot="R90"/>
+<instance part="R15" gate="G$1" x="-27.94" y="2.54" rot="R90">
+<attribute name="NAME" x="-29.4386" y="-1.27" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="-24.638" y="-1.27" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="MOTOR1" gate="-1" x="48.26" y="-12.7" rot="R270">
 <attribute name="NAME" x="47.498" y="-15.24" size="1.524" layer="95" rot="R270"/>
@@ -26308,7 +26308,7 @@ Source: http://www.molex.com</description>
 <label x="177.8" y="68.58" size="1.778" layer="95"/>
 <label x="177.8" y="86.36" size="1.778" layer="95"/>
 <pinref part="LED1" gate="G$1" pin="A"/>
-<wire x1="-27.94" y1="-10.16" x2="-27.94" y2="-22.86" width="0.1524" layer="91"/>
+<wire x1="-27.94" y1="-17.78" x2="-27.94" y2="-22.86" width="0.1524" layer="91"/>
 <junction x="-27.94" y="-22.86"/>
 </segment>
 </net>
@@ -27035,14 +27035,14 @@ Source: http://www.molex.com</description>
 <segment>
 <pinref part="D14" gate="G$1" pin="A"/>
 <pinref part="R15" gate="G$1" pin="2"/>
-<wire x1="-27.94" y1="15.24" x2="-27.94" y2="12.7" width="0.1524" layer="91"/>
+<wire x1="-27.94" y1="15.24" x2="-27.94" y2="7.62" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$34" class="0">
 <segment>
 <pinref part="R15" gate="G$1" pin="1"/>
 <pinref part="LED1" gate="G$1" pin="C"/>
-<wire x1="-27.94" y1="2.54" x2="-27.94" y2="-2.54" width="0.1524" layer="91"/>
+<wire x1="-27.94" y1="-2.54" x2="-27.94" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
