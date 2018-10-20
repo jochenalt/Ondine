@@ -77,9 +77,15 @@ void MotorConfig::initDefaultValues() {
 	pid_position.Kp = 2.1;
 	pid_position.Ki = 1.2;
 	pid_position.Kd = 0.000;
+
 	pid_speed.Kp = .8;
 	pid_speed.Ki = 0.5;
 	pid_speed.Kd = 0.02;
+
+	pid_lifter.Kp = 0.01;
+	pid_lifter.Ki = 0.005;
+	pid_lifter.Kd = 0.0;
+
 }
 
 void MotorConfig::print() {
@@ -98,6 +104,16 @@ void MotorConfig::print() {
 	logger->print(pid_speed.Ki);
 	logger->print(" D=");
 	logger->println(pid_speed.Kd);
+	logger->println();
+	logger->println("lifter controller configuration:");
+	logger->print("   PID (speed=max): ");
+	logger->print("P=");
+	logger->print(pid_lifter.Kp);
+	logger->print(" I=");
+	logger->print(pid_lifter.Ki);
+	logger->print(" D=");
+	logger->println(pid_lifter.Kd);
+
 }
 
 void IMUConfig::initDefaultValues() {

@@ -11,6 +11,7 @@
 
 #include <MenuController.h>
 #include <PIDController.h>
+#include <Filter/FIRFilter.h>
 
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
@@ -31,15 +32,20 @@ public:
 	void setupMotor( int EnablePin, int In1Pin, int In2Pin,int currentSensePin);
 	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
 	void enable(bool doIt);
-	void setMotorSpeed(float speed);
+
+	// set motor speed in [rec/s]
 	float getMotorSpeed();
+	void setMotorSpeed(float speed);
+
 	float getMotorAngle();
 	float getCurrentCurrent();
-	void loop( );
+	void loop();
 
 	virtual void printHelp();
 	virtual void menuLoop(char ch);
 private:
+	void setMotorPower(float speed);
+
 	void readEncoder();
 	void readCurrentSense();
 	// Encoder attached to the motor's axis
@@ -54,13 +60,18 @@ private:
 	float encoderAngle = 0;					// [rad] current measured angle coming from encoder
 	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
 	int lastEncoderPosition = 0;			// last call of encoder value
-
+	uint32_t lastLoopCall_ms = 0;			// [ms] last time loop has been called
+	float referenceSpeed = 0;				// [rev/s] set speed
+	bool enabled = false;
+	float currentMotorPower = 0;
 	PIDController pid;
+	// optical Encoder
+	Encoder* encoder = NULL;
+
 	float menuSpeed = 0;
 	bool menuEnable = false;
 	bool logValues = false;
-	// Encoder library
-	Encoder* encoder = NULL;
+
 };
 
 #endif /* BRUSHEDMOTORDRIVER_H_ */

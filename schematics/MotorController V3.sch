@@ -25835,6 +25835,7 @@ Source: http://www.molex.com</description>
 <part name="MOTOR1" library="con-molex" deviceset="5566-4" device=""/>
 <part name="MOTOR2" library="con-molex" deviceset="5566-4" device=""/>
 <part name="MOTOR3" library="con-molex" deviceset="5566-4" device=""/>
+<part name="D14" library="diode" library_urn="urn:adsk.eagle:library:210" deviceset="ZENER-DIODE" device="DO41Z10" package3d_urn="urn:adsk.eagle:package:43341/1" value="5.6V"/>
 </parts>
 <sheets>
 <sheet>
@@ -26036,13 +26037,13 @@ Source: http://www.molex.com</description>
 <attribute name="VALUE" x="135.509" y="-17.018" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="U$3" gate="G$1" x="93.98" y="205.74" rot="R180"/>
-<instance part="LED1" gate="G$1" x="-27.94" y="10.16" rot="R180">
-<attribute name="NAME" x="-31.496" y="14.732" size="1.778" layer="95" rot="R270"/>
-<attribute name="VALUE" x="-33.655" y="14.732" size="1.778" layer="96" rot="R270"/>
+<instance part="LED1" gate="G$1" x="-27.94" y="-7.62" rot="R180">
+<attribute name="NAME" x="-34.036" y="-5.588" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="-31.115" y="-5.588" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="R15" gate="G$1" x="-27.94" y="-7.62" rot="R90">
-<attribute name="NAME" x="-29.4386" y="-11.43" size="1.778" layer="95" rot="R90"/>
-<attribute name="VALUE" x="-24.638" y="-11.43" size="1.778" layer="96" rot="R90"/>
+<instance part="R15" gate="G$1" x="-27.94" y="7.62" rot="R90">
+<attribute name="NAME" x="-29.4386" y="3.81" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="-24.638" y="3.81" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="MOTOR1" gate="-1" x="48.26" y="-12.7" rot="R270">
 <attribute name="NAME" x="47.498" y="-15.24" size="1.524" layer="95" rot="R270"/>
@@ -26082,6 +26083,10 @@ Source: http://www.molex.com</description>
 </instance>
 <instance part="MOTOR3" gate="-4" x="170.18" y="-12.7" rot="R270">
 <attribute name="NAME" x="169.418" y="-15.24" size="1.524" layer="95" rot="R270"/>
+</instance>
+<instance part="D14" gate="G$1" x="-27.94" y="17.78" rot="R90">
+<attribute name="NAME" x="-29.845" y="16.002" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="-24.511" y="16.002" size="1.778" layer="96" rot="R90"/>
 </instance>
 </instances>
 <busses>
@@ -26289,9 +26294,6 @@ Source: http://www.molex.com</description>
 <wire x1="137.16" y1="162.56" x2="137.16" y2="124.46" width="0.1524" layer="91"/>
 <junction x="137.16" y="124.46"/>
 <label x="134.62" y="162.56" size="1.778" layer="95"/>
-<pinref part="R15" gate="G$1" pin="1"/>
-<wire x1="-27.94" y1="-12.7" x2="-27.94" y2="-22.86" width="0.1524" layer="91"/>
-<junction x="-27.94" y="-22.86"/>
 <pinref part="U$3" gate="G$1" pin="GND"/>
 <wire x1="114.3" y1="190.5" x2="116.84" y2="190.5" width="0.1524" layer="91"/>
 <wire x1="116.84" y1="190.5" x2="116.84" y2="210.82" width="0.1524" layer="91"/>
@@ -26305,6 +26307,9 @@ Source: http://www.molex.com</description>
 <label x="177.8" y="45.72" size="1.778" layer="95"/>
 <label x="177.8" y="68.58" size="1.778" layer="95"/>
 <label x="177.8" y="86.36" size="1.778" layer="95"/>
+<pinref part="LED1" gate="G$1" pin="A"/>
+<wire x1="-27.94" y1="-10.16" x2="-27.94" y2="-22.86" width="0.1524" layer="91"/>
+<junction x="-27.94" y="-22.86"/>
 </segment>
 </net>
 <net name="N$4" class="0">
@@ -26370,8 +26375,8 @@ Source: http://www.molex.com</description>
 </net>
 <net name="LIPO-VDD" class="1">
 <segment>
-<wire x1="-35.56" y1="25.4" x2="-27.94" y2="25.4" width="0.1524" layer="91"/>
 <pinref part="DRK1" gate="G$1" pin="LIPO+"/>
+<wire x1="-35.56" y1="25.4" x2="-27.94" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="-27.94" y1="25.4" x2="55.88" y2="25.4" width="0.1524" layer="91"/>
 <wire x1="55.88" y1="25.4" x2="55.88" y2="15.24" width="0.1524" layer="91"/>
 <wire x1="55.88" y1="25.4" x2="116.84" y2="25.4" width="0.1524" layer="91"/>
@@ -26390,8 +26395,8 @@ Source: http://www.molex.com</description>
 <label x="-27.94" y="25.4" size="1.778" layer="95"/>
 <pinref part="U$1" gate="G$1" pin="VIN(5-28V)"/>
 <pinref part="REL1" gate="G$1" pin="P"/>
-<pinref part="LED1" gate="G$1" pin="C"/>
-<wire x1="-27.94" y1="15.24" x2="-27.94" y2="25.4" width="0.1524" layer="91"/>
+<pinref part="D14" gate="G$1" pin="C"/>
+<wire x1="-27.94" y1="20.32" x2="-27.94" y2="25.4" width="0.1524" layer="91"/>
 <junction x="-27.94" y="25.4"/>
 </segment>
 </net>
@@ -26994,13 +26999,6 @@ Source: http://www.molex.com</description>
 <pinref part="DRK2" gate="G$1" pin="EN"/>
 </segment>
 </net>
-<net name="N$41" class="0">
-<segment>
-<pinref part="R15" gate="G$1" pin="2"/>
-<pinref part="LED1" gate="G$1" pin="A"/>
-<wire x1="-27.94" y1="-2.54" x2="-27.94" y2="7.62" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="RST" class="0">
 <segment>
 <wire x1="144.78" y1="218.44" x2="144.78" y2="177.8" width="0.1524" layer="91"/>
@@ -27031,6 +27029,20 @@ Source: http://www.molex.com</description>
 <pinref part="CONTROL" gate="1" pin="8"/>
 <wire x1="139.7" y1="180.34" x2="134.62" y2="180.34" width="0.1524" layer="91"/>
 <label x="134.62" y="180.34" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="N$33" class="0">
+<segment>
+<pinref part="D14" gate="G$1" pin="A"/>
+<pinref part="R15" gate="G$1" pin="2"/>
+<wire x1="-27.94" y1="15.24" x2="-27.94" y2="12.7" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$34" class="0">
+<segment>
+<pinref part="R15" gate="G$1" pin="1"/>
+<pinref part="LED1" gate="G$1" pin="C"/>
+<wire x1="-27.94" y1="2.54" x2="-27.94" y2="-2.54" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

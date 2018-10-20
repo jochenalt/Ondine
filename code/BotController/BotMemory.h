@@ -71,6 +71,7 @@ public:
 	// PID values for control at 0 rev/s
 	PIDControllerConfig pid_position;
 	PIDControllerConfig pid_speed;
+	PIDControllerConfig pid_lifter;
 };
 
 class IMUConfig {
