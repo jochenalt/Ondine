@@ -49,10 +49,10 @@ void setup() {
 	// int noDevices = doI2CPortScan(F("looking for BotControll"), &Wire, logger);
 	Wire.beginTransmission(BotControllerI2CAddress);
 	int error = Wire.endTransmission();
-	if (error == 0) {
+	if (error != 0) {
 		logger->print("connection to Teensy via I2c (0x");
 		logger->print(BotControllerI2CAddress, HEX);
-		logger->println(" failed!");
+		logger->println(") failed!");
 	}
 
 	logger->println("setup done");
