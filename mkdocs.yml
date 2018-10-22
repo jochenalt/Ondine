@@ -8,5 +8,6 @@ pages:
     - 'Home - Ondine?!': 'index.md'
     - 'OmniWheels': 'OmniWheels.md'
     - 'Drive': 'Drive.md'
+    - 'Electronics': 'Electronics.md'
     - 'Kinematics': 'Kinematics.md'
     - 'Bill of Material - What is Ondine made of?': 'Bill-of-Material.md'
