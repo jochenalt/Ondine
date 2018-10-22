@@ -34,14 +34,16 @@ The device should communicate with the outside world. A fully fledged SOC board 
 # Microcontroller
 
 The microcontroller should run the state control to make the bot balance and move, it has to control the motor drivers which uses up some capacity, and it has to receive commands coming from the webserver module. An Avr uC would be too much of a tuning pain, a fully fledged Linux board would be overengineered, so I went with my favrourite controller, a [Teensy 3.5](https://www.pjrc.com/store/teensy35.html) that has a 32bit-Arm M4 controller with enough memory, 120MHz, 5V compatibility, and a 32-bit FPU which comes in handy for kinematics and state control.
+
 <img width="300" src="https://www.pjrc.com/store/teensy35.jpg"/>
 
 # Schematics 
 
-<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/schematics.png"/>
+[<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/schematics.png"/>](https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/schematics.png)
 
 
 The motors pull 2A max, so I choose the [L6234](https://www.st.com/content/ccc/resource/technical/document/application_note/78/44/47/d5/a8/63/4a/8e/CD00004062.pdf/files/CD00004062.pdf/jcr:content/translations/en.CD00004062.pdf) in order to not have 18 MOSFETs to be soldered. Luckily, there's a nice breakout from [Drotek](https://drotek.com/shop/en/home/212-brushless-gimbal-controller-l6234.html) that is very convinient to use.
+
 <img height="200" src="https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg"/>
 
 
