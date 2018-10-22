@@ -17,17 +17,15 @@ const float MaxWheelSpeed = 2000.;
 
 
 void logMatrix(float m[3][3]) {
-	logger->println(F("knematics matrix"));
-	logger->println(F("tilt matrix"));
-	logger->print(m[0][0],4);logger->print(" ");
+	logger->print("| ");logger->print(m[0][0],4);logger->print(" ");
 	logger->print(m[0][1],4);logger->print(" ");
-	logger->print(m[0][2],4);logger->println();
-	logger->print(m[1][0],4);logger->print(" ");
+	logger->print(m[0][2],4);logger->println("|");
+	logger->print("| ");logger->print(m[1][0],4);logger->print(" ");
 	logger->print(m[1][1],4);logger->print(" ");
-	logger->print(m[1][2],4);logger->println();
-	logger->print(m[2][0],4);logger->print(" ");
+	logger->print(m[1][2],4);logger->println("|");
+	logger->print("| ");logger->print(m[2][0],4);logger->print(" ");
 	logger->print(m[2][1],4);logger->print(" ");
-	logger->print(m[2][2],4);logger->println(" ");
+	logger->print(m[2][2],4);logger->println("|");
 }
 
 // compute construction matrix cm and compute its inverse matrix
