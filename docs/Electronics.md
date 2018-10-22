@@ -14,20 +14,20 @@ A brushless motor is driven by a magnetic field that turns 90° in advance of th
 
 The diagram shows how this works in general.
 
-<img width="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/bldc motor animation.gif"/>
+<img width="250" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/bldc motor animation.gif"/>
 
 For basic BLDC driving it is common to use a 6 step sequence
 
-<img width="100" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC 6 step sequence.png"/>
+<img width="300" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC 6 step sequence.png"/>
 
 In real life, this would result in a very jerky rotation, since the magnetic field will turn abruptly in steps of 60° .
 To drive a motor smoothly at low speeds, we need to chop that by having a PWM signal on the lines:
 
-<img width="100" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/SPWM.png"/>
+<img width="300" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/SPWM.png"/>
 
 In general there are two choices to generate the signal: You can generate traditional sine waves (SPWM) and Space-Vector PWMs (SVPWM).
 
-<img width="100" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/SPWM vs SVPWM.png"/>
+<img width="300" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/SPWM vs SVPWM.png"/>
 
 I always want to have the most fancy thing, so I went with SVPWM.
 
