@@ -9,6 +9,7 @@ Electronics takes care of the following topics
 
 # Control of a Brushless Motor
 
+
 A brushless motor is driven by a magnetic field that turns 90° in advance of the motor's rotor. For that purpose I have optical encoders detecting the rotors position and three half bridges driving the lines with a sine wave that produces the magnetic field. 
 
 The diagram shows how this works in general.
