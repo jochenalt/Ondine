@@ -43,7 +43,7 @@ The output wheel incorporates a mounting hub to connect the wheel and the axis
 <img  height="200px" src="../images/beltdrive/IMG_20180922_095326.jpg" >
 <img  height="200px" src="../images/beltdrive/IMG_20180922_095413.jpg" >
 
-Assembly starts with the enclosure and the output wheel. The three threaded rods looking out of the enclosure are screws that I glued into the enclosure to prevent them falling into the enclosure.
+Assembly starts with the enclosure and the output wheel. The three threaded rods that look out of the enclosure are hex head screws that I glued into the enclosure to prevent them falling into the enclosure.
 
 <img  height="300px" src="../images/beltdrive/IMG_20180922_092706.jpg" >
 <img  height="300px" src="../images/beltdrive/IMG_20181013_113918.jpg" >

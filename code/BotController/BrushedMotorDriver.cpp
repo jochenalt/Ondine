@@ -48,7 +48,7 @@ void BrushedMotorDriver::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR)
 	encoder = new Encoder(EncoderAPin, EncoderBPin);
 }
 
-void BrushedMotorDriver::readEncoder() {
+float BrushedMotorDriver::readEncoder() {
 	if (encoder == NULL) {
 		// without encoder assume perfect motor
 		encoderAngle = referenceAngle;
@@ -59,6 +59,7 @@ void BrushedMotorDriver::readEncoder() {
 		encoderAngle += ((float)(lastEncoderPosition - encoderPosition))/(float)CPR*TWO_PI;
 		lastEncoderPosition = encoderPosition;
 	}
+	return encoderAngle;
 }
 
 float BrushedMotorDriver::getMotorAngle() {
@@ -85,7 +86,7 @@ void BrushedMotorDriver::loop() {
 			// compute reference angle in [rad]
 			referenceAngle += dT * referenceSpeed * TWO_PI;
 
-			// what is the real angle delivered by optical encoder
+			// fetch the real angle delivered by optical encoder
 			readEncoder();
 
 			// compare motor angle with measured encoder angle

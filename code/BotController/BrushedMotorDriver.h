@@ -46,7 +46,7 @@ public:
 private:
 	void setMotorPower(float speed);
 
-	void readEncoder();
+	float readEncoder();
 	void readCurrentSense();
 	// Encoder attached to the motor's axis
 	int encoderAPin = 0;
