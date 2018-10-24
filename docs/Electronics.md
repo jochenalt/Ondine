@@ -23,16 +23,19 @@ To improve the ripple of the movement, space vector PWM (SVPM) can be used inste
 
 Computation is done by 
 
-<img height="50" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image001.png"/>
-<img height="20" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image003.png"/>
+<img height="55" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image001.png"/>
+
+<img height="30" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image003.png"/>
 
 The motor driver L6234 has three PWM inputs, which need to be fed with svpm(t), svpwm (t + 120°), and svpwm(t + 240°). 
 
 The initial position of the rotor has to be considered, in order to drive the magnetic field 90° ahead of the rotor's positon. For this purpose, I use an optical encoder with a startup procedure identifying the initial angle of the rotor (later on, it came to my mind that an absolute magnetic encoder would be more practical. It would have released me from executing this procedure. But it was too late).
 
-<img height="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC motor initialization.png"/>
+<img height="300" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC motor initialization.png"/>
 
-After the initialization procedure we know the current angle of the rotor which we can use later on to have the magnetic field always 90° ahead of the rotor. When we switch on the motor, we start with a very little amount of torque. The torque is slowly increased until the encoder recognized a movement. This happens after approx 0.3° (I have 1024 CPR encoders). The direction of the movement indicates the direction of the rotor's position relatively to the magnetic field. Now the magnetic field is turned torwards the rotor until the rotor has reached its original position. We slightly increase the torque and repeat that loop until the torque is at its max. At the end of this, the magnetic field should be fully aligned with the rotor. It takes approx. 1s and can be recognized with a small short osccillation at the wheel.
+After the initialization procedure we know the current angle of the rotor which we can use later on to have the magnetic field always 90° ahead of the rotor. When we switch on the motor, we start with a very little amount of torque. The torque is slowly increased until the encoder recognized a movement. This happens after approx 0.3° (I have 1024 CPR encoders). The direction of the movement indicates the direction of the rotor's position relatively to the magnetic field. Now the magnetic field is turned torwards the rotor until the rotor has reached its original position. We slightly increase the torque and repeat that loop until the torque is at its maximum. At the end of this, the magnetic field is perfectly aligned with the rotor since there's no movement with maximum torque. 
+
+It takes approx. 1s and can be recognized as a small and short osccillation at the wheel when starting up.
 
 All this is implemented in [BrushlessMotorDriver.cpp](https://github.com/jochenalt/Ondine/blob/master/code/BotController/BrushlessMotorDriver.cpp).
 
