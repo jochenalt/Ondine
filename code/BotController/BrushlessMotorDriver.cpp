@@ -20,6 +20,10 @@ const float voltage = 12;										// [V] coming from the battery to server the 
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
+float sigmoid(float gain, float x) {
+	return 2.0/(1.0 + exp(gain * x)) - 1.0;
+}
+
 // array to store pre-computed values of space vector wave form (SVPWM)
 // array size is choosen by having a maximum difference of 1% in two subsequent table items,
 // i.e. we have a true running with a precision of 1%. The rest is compensated by the optical
@@ -219,7 +223,7 @@ bool BrushlessMotorDriver::loop() {
 
 			// torque is max at -90/+90 degrees
 			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-			advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
+			advanceAngle = radians(90) * sigmoid(10.0, controlOutput);
 
 			float torque = abs(controlOutput)/maxAngleError;
 
