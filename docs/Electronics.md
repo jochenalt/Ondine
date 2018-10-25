@@ -78,7 +78,7 @@ The motors pull 2A max, so I choose the [L6234](https://www.st.com/content/ccc/r
 
 In the end, all parts fit into a standard 100x80 board
 
-<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png"/>
+[<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png"/>](https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png))
 (click to enlare)
 
 
