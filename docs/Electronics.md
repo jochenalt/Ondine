@@ -31,10 +31,10 @@ The motor driver L6234 has three PWM inputs, which need to be fed with svpm(t), 
 
 The initial position of the rotor has to be considered, in order to drive the magnetic field 90° ahead of the rotor's positon. For this purpose, I use an optical encoder with a startup procedure identifying the initial angle of the rotor (later on, it came to my mind that an absolute magnetic encoder could do this without the startup procedure. But it was too late).
 
-<img height="300" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC motor initialization.png"/>
+<img height="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC motor initialization.png"/>
+<img height="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/startup.gif"/>
 
 After the initialization procedure we know the current angle of the rotor. It is used later on to turn the magnetic field 90° ahead of the rotor. When we switch on the motor, we start with a very little amount of torque. The torque is slowly increased until the encoder recognized a movement. This happens after approx 0.3° (I have 1024 CPR encoders). The direction of the movement indicates the direction of the rotor's position relatively to the magnetic field. Now the magnetic field is turned torwards the rotor until the rotor has reached its starting position. We slightly increase the torque and start again waiting for a small movement which is then compensatd by turning the magnetic field. We repeat that until the magnetic field is perfectly aligned with the rotor while applying maximum torque. 
-<img height="300" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/startup.gif"/>
 
 By this procdure, the magnetic files turns towards the current position of the rotor with increasing verve. It takes approx. 1s and is recognizable by a small and short osccillation when starting up.
 
