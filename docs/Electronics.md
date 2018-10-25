@@ -29,7 +29,7 @@ Computation is done by
 
 The motor driver L6234 has three PWM inputs, which need to be fed with svpm(t), svpwm (t + 120°), and svpwm(t + 240°). 
 
-## Initial calibration
+## Initial Calibration
 
 The initial position of the rotor has to be considered in order to drive the magnetic field 90° ahead of the rotor's positon. For this purpose, I use an optical encoder with a startup procedure identifying the initial angle of the rotor (later on, it came to my mind that an absolute magnetic encoder could do this without the startup procedure. But it was too late).
 
@@ -42,11 +42,11 @@ By this procdure, the magnetic files turns towards the current position of the r
 
 Due to the advance angle of 90 degrees, there is an issue when doing position control: If the motor is supposed to stick to one angle and there's varying torque necessary, the advance angle jumps from +90° to -90° everytime the control algrithm changes its direction. To avoid that jump, the PID controller's output is used to identify the advance angle with a sigmoid function:
 
-<img height="60" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image010.png"/>
+<img height="30" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image010.png"/>
 
 <img height="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC controller sigmoid.png"/>
 
-## PID controller
+## PID Controller
 Speaking of the PID controller: Each motor has its own PID controller. I played around with some fancy fuzzy controller, but ended up with a plain gain-scheduled PID controller, i.e. a PID controller that has two sets of PID values: One for balancing, one for maximum speed. The input speed is used to identify the gains by interpolation between these two configuration sets.
 
 All this is implemented in [BrushlessMotorDriver.cpp](https://github.com/jochenalt/Ondine/blob/master/code/BotController/BrushlessMotorDriver.cpp).
