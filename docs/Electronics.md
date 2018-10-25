@@ -66,9 +66,14 @@ The microcontroller should run the state control to make the bot balance and mov
 
 # Schematics 
 
+There's not a big in the schematics, pretty standard, I would say. There's a power supply with a switching 7805 (D3) since a heatsink would have used up too much space. A relay REL1 turns on the power to the motors indiated by LED1, since I wanted to avoid issues during startup when the motors are not yet controlled by the uC but the drivers get power already. The Teensy uC is in the middle, its PWM pins go to the L6234 drivers, which output lines go to the motor sockets. To protect the uC, the PWM lines are connected with a resistor and z-diode limiting the voltage that is induced by the motors and might come back to the uC. I did that not as a precaution but as a learning point after I bricked a uC. The L6234 has the issue that there is an inner connection from the motor line to the incoming pwm line, if it is not controlled correctly.
+
+The optical encoders are connected to interrupt-able pins of the uC. The ESP8266 breakout's D2/D1 is connected to the uC's  I2C-0 port, the logging output coming from the uC via UART5 is fetched by the ESP8266 via its half (only RX) serial port. The IMU MPU9250 is connected to the uC's I2C-1 port. Since the teensy is full of ports, there's no need to cope with the hazzle of multiple slaves on the same I2C bus. 
+
+The S1 dip switch can be set to identify the board. The pololu motor driver U$1 is a used to control the brushed and encoded motor that lifts the enclosure from the ground.  
+
 [<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/schematics.png"/>](https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/schematics.png)
 (click to enlarge)
-
 
 
 The motors pull 2A max, so I choose the [L6234](https://www.st.com/content/ccc/resource/technical/document/application_note/78/44/47/d5/a8/63/4a/8e/CD00004062.pdf/files/CD00004062.pdf/jcr:content/translations/en.CD00004062.pdf) in order to not have 18 MOSFETs to be soldered. Luckily, there's a nice breakout from [Drotek](https://drotek.com/shop/en/home/212-brushless-gimbal-controller-l6234.html) that is very convinient to use.

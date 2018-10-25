@@ -395,8 +395,16 @@ void BrushlessMotorDriver::enable(bool doit) {
 					maxEncoderAngle = encoderAngle;
 				float encoderAngleDiff = encoderAngle - lastLoopEncoderAngle;
 				float encoderResolution = TWO_PI/((float)encoderCPR)*2.0;
+
+				// increase torque if no movement
 				if (abs(encoderAngleDiff) < encoderResolution && abs(encoderAngle) < encoderResolution) {
-					targetTorque += dT*5.0;
+					targetTorque += dT*5.0; // increase with constant torque rate
+					targetTorque = min(targetTorque, maxTorque);
+				}
+
+				// decrease torque if movement
+				if ((abs(encoderAngleDiff) < encoderResolution)) {
+					targetTorque *= 0.9; // decrease by factor of sliding fricton to friction
 					targetTorque = min(targetTorque, maxTorque);
 				}
 
