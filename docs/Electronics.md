@@ -42,7 +42,7 @@ By this procdure, the magnetic files turns towards the current position of the r
 
 Due to the advance angle of 90 degrees, there is an issue when doing position control: If the motor is supposed to stick to one angle and there's varying torque necessary, the advance angle jumps from +90° to -90° everytime the control algrithm changes its direction. To avoid that jump, the PID controller's output is used to identify the advance angle with a sigmoid function:
 
-<img height="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image010.png"/>
+<img height="60" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/image010.png"/>
 
 <img height="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC controller sigmoid.png"/>
 
