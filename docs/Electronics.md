@@ -74,10 +74,12 @@ The microcontroller should run the state control to make the bot balance and mov
 The motors pull 2A max, so I choose the [L6234](https://www.st.com/content/ccc/resource/technical/document/application_note/78/44/47/d5/a8/63/4a/8e/CD00004062.pdf/files/CD00004062.pdf/jcr:content/translations/en.CD00004062.pdf) in order to not have 18 MOSFETs to be soldered. Luckily, there's a nice breakout from [Drotek](https://drotek.com/shop/en/home/212-brushless-gimbal-controller-l6234.html) that is very convinient to use.
 
 [<img height="200" src="https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg"/>](https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg)
-(click to enlare)
 
+
+In the end, all parts fit into a standard 100x80 board
 
 <img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png"/>
+(click to enlare)
 
 
 Schematics and board in Eagle format is [here](https://github.com/jochenalt/Ondine/blob/master/schematics).
