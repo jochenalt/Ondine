@@ -49,7 +49,7 @@ public:
 	}
 	virtual ~PIDController() {};
 
-	float update (PIDControllerConfig& params, float error, float dT, float min, float max);
+	float update (const PIDControllerConfig& params, float error, float dT, float min, float max);
 
 	void reset();
 

@@ -92,6 +92,7 @@ private:
 	float menuTorque = 0.0;
 	bool menuEnable = false;
 	uint32_t lastLoopCall_ms = 0;
+	PIDController pid_setup;
 };
 
 #endif /* BLDCCONTROLLER_H_ */

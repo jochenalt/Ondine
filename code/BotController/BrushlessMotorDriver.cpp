@@ -1,5 +1,5 @@
 /*
- * BrushlessMotorDriver.cpp
+ * BLDCController.cpp
  *
  *  Created on: 29.07.2018
  *      Author: JochenAlt
@@ -20,15 +20,11 @@ const float voltage = 12;										// [V] coming from the battery to server the 
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
-float sigmoid(float gain, float x) {
-	return 2.0/(1.0 + exp(gain * x)) - 1.0;
-}
-
 // array to store pre-computed values of space vector wave form (SVPWM)
 // array size is choosen by having a maximum difference of 1% in two subsequent table items,
-// i.e. we have a true running with a precision of 1%. The rest is compensated by the optical
+// i.e. we have a precision of 1%. The rest is compensated by the optical
 // encoder with a precision of 0.1%
-#define svpwmArraySize 244
+#define svpwmArraySize 244 // manually set such that two adjacent items have a difference of 2 of 255 at most (approx. 1%)
 int svpwmTable[svpwmArraySize];
 
 void precomputeSVPMWave() {
@@ -44,13 +40,10 @@ void precomputeSVPMWave() {
 
 			// trick to avoid the switch of 6 phases everyone else is doing, neat, huh?
 			float voff = (min(phaseA, min(phaseB, phaseC)) + max(phaseA, max(phaseB, phaseC)))/2.0;
+			svpwmTable[i] =   (phaseA - voff)/2.0*spaceVectorScaleUpFactor*maxPWMValue;;
 
-			float pwmSpaceVectorValue =  (phaseA - voff)/2.0*spaceVectorScaleUpFactor*maxPWMValue;
-			float pwmSinValue =  (phaseA/2.0 + 0.5)*maxPWMValue;
-
-			svpwmTable[i] =  pwmSpaceVectorValue;
-			svpwmTable[i] =  pwmSinValue;
-
+			// if you want to use plain sin waves:
+			// svpwmTable[i] =  (phaseA/2.0 + 0.5)*maxPWMValue;;
 		}
 		initialized = true;
 	}
@@ -223,7 +216,7 @@ bool BrushlessMotorDriver::loop() {
 
 			// torque is max at -90/+90 degrees
 			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-			advanceAngle = radians(90) * sigmoid(10.0, controlOutput);
+			advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
 
 			float torque = abs(controlOutput)/maxAngleError;
 
@@ -359,13 +352,13 @@ void BrushlessMotorDriver::enable(bool doit) {
 
 			float targetTorque = 0.0;
 			float lastTorque = 0;
-			float maxTorque = 0.4;
+			float maxTorque = 0.5;
 			float lastTime_us = micros();
 			uint32_t now_us = micros();
 			float maxEncoderAngle = 0;
 			float elapsedTime = 0;
 			const float timeOut = 5.0;
-
+			pid_setup.reset();
 			while ((targetTorque < maxTorque) && (elapsedTime < timeOut)) { // quit when above 80% torque or timeout of 5. happened
 				now_us = micros();
 				float dT = (now_us - lastTime_us)/1000000.0;
@@ -380,12 +373,14 @@ void BrushlessMotorDriver::enable(bool doit) {
 				}
 
 				// let the magnetic field turn with 1 rev/s towards the encoder value different from 0
-				magneticFieldAngle -= sgn(encoderAngle)*min(radians(1.0),abs(encoderAngle)*0.5); // this is a P-controller that turns the magnetic field towards the direction of the encoder
+
+				float magneticFieldAngularSpeed = pid_setup.update(PIDControllerConfig(0.2,0.0,0.0), encoderAngle, dT, -radians(30), radians(30));
+				magneticFieldAngle -= sgn(encoderAngle)*min(radians(2.0),abs(magneticFieldAngularSpeed)); // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
 				// logger->print(dT*100);
 				// logger->print(" ");
 				sendPWMDuty(targetTorque);
-				delay(2);
+				delay(1);
 
 				// if encoder indicates no movement, we can increase torque a bit until the motor moves
 				// if there is movement, decrease the torque and let the motor turn until the rotor is
@@ -400,14 +395,22 @@ void BrushlessMotorDriver::enable(bool doit) {
 					targetTorque = min(targetTorque, maxTorque);
 				}
 
+				// as soon a movement is detected, reduce the torque since friction has been overcome
+				if (abs(encoderAngleDiff) > encoderResolution) {
+					targetTorque *= 0.9;
+					targetTorque = min(targetTorque, maxTorque);
+				}
+
 				lastLoopEncoderAngle = encoderAngle;
 				if (memory.persistentMem.logConfig.calibrationLog) {
 					logger->print("mag=");
 					logger->print(degrees(magneticFieldAngle));
 					logger->print("enc=");
 					logger->print(degrees(encoderAngle));
-					logger->print(" t=");
+					logger->print(" to=");
 					logger->print(targetTorque);
+					logger->print(" ti=");
+					logger->print(elapsedTime);
 					logger->println();
 				}
 			}

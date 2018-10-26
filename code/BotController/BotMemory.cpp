@@ -85,6 +85,7 @@ void MotorConfig::initDefaultValues() {
 	pid_lifter.Kp = 0.01;
 	pid_lifter.Ki = 0.005;
 	pid_lifter.Kd = 0.0;
+
 }
 
 void MotorConfig::print() {
@@ -112,7 +113,7 @@ void MotorConfig::print() {
 	logger->print(pid_lifter.Ki);
 	logger->print(" D=");
 	logger->println(pid_lifter.Kd);
-	logger->println();
+
 }
 
 void IMUConfig::initDefaultValues() {

@@ -13,7 +13,7 @@ void PIDController::reset() {
 	lastError = 0;
 }
 
-float PIDController::update (PIDControllerConfig& params, float error, float dT, float min, float max) {
+float PIDController::update (const PIDControllerConfig& params, float error, float dT, float min, float max) {
 		float pOut = params.Kp*error;
 		integrativeError += error * dT;
 		// integrativeError = constrain(integrativeError, min, max);
