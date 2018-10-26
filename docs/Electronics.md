@@ -48,7 +48,7 @@ The advance angle of 90 degrees implies an issue when doing position control: If
 
 ## PID Controller
 
-Speaking of the PID controller of a brushless motor : I played around with a couple of controller, even implemented one of these fancy fuzzy controllers. Did not work out well. I ended up with a plain gain-scheduled PID controller, i.e. a PID controller that has two sets of PID values: One for balancing, one for maximum speed. The input speed is used to identify the gains by interpolation between these two configuration sets.
+Speaking of the PID controller of a brushless motor : I played around with a couple of controllertypes, I even implemented one of these fancy fuzzy controllers. Did not work out well, actually I got the impression that fuzzy controllers are kind of an academic hype only. I ended up with a plain gain-scheduled PID controller, i.e. a PID controller that has two sets of PID values: One for balancing, one for maximum speed. The input speed is used to identify the gains by interpolation between these two configuration sets.
 
 All this is implemented in [BrushlessMotorDriver.cpp](https://github.com/jochenalt/Ondine/blob/master/code/BotController/BrushlessMotorDriver.cpp).
 
@@ -66,12 +66,12 @@ The microcontroller should run the state control to make the bot balance and mov
 
 # Schematics 
 
-The motors pull 2A max, so I choose the [L6234](https://www.st.com/content/ccc/resource/technical/document/application_note/78/44/47/d5/a8/63/4a/8e/CD00004062.pdf/files/CD00004062.pdf/jcr:content/translations/en.CD00004062.pdf) in order to not have 18 MOSFETs to be soldered. Luckily, there's a nice breakout from [Drotek](https://drotek.com/shop/en/home/212-brushless-gimbal-controller-l6234.html) that is very convinient to use.
+The motors pull 2A max, so I choose the [L6234](https://www.st.com/content/ccc/resource/technical/document/application_note/78/44/47/d5/a8/63/4a/8e/CD00004062.pdf/files/CD00004062.pdf/jcr:content/translations/en.CD00004062.pdf) to avoid soldering 18 MOSFETs. Luckily, there's a nice breakout from [Drotek](https://drotek.com/shop/en/home/212-brushless-gimbal-controller-l6234.html) that is convinient to use.
 
 [<img height="200" src="https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg"/>](https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg)
 
 On the IMU side I went with the cheap and reliable MPU9250 on a drotek breakout
-[<img height="200" src="https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg"/>](https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg)
+[<img height="200" src="https://drotek.com/shop/2650-large_default/mpu9250-gyro-accelerometer-magnetometer.jpg"/>](https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg)
 
 There's not a big deal in the schematics, pretty standard I would say. There's a power supply with a switching 7805 (D3) (a normal power regulator would have required a heatsink for which I dont have enough space on the PCB). A relay REL1 turns on the power to the motors indiated by LED1, since I wanted to avoid issues during startup when the motors are not yet controlled by the uC but the drivers get power already. The Teensy uC is in the middle, its PWM pins go to the L6234 drivers, which output lines go to the motor sockets. To protect the uC, the PWM lines are connected with a resistor and z-diode limiting the voltage that is induced by the motors and might come back to the uC (I did that not as a precaution but as a learning point after I bricked a uC. The L6234 has the issue that there is an inner connection from the motor output to the incoming pwm pin, if it is not controlled correctly).
 
@@ -81,8 +81,6 @@ The S1 dip switch can be set to identify the board. The pololu motor driver U$1 
 
 [<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/schematics.png"/>](https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/schematics.png)
 (click to enlarge)
-
-
 
 In the end, all parts fit into a standard 100x80 board
 

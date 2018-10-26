@@ -379,7 +379,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 					lastTorque = targetTorque;
 				}
 
-				// let the magnetic field turn with at least 1 rev/s towards the encoder value different from 0
+				// let the magnetic field turn with 1 rev/s towards the encoder value different from 0
 				magneticFieldAngle -= sgn(encoderAngle)*min(radians(1.0),abs(encoderAngle)*0.5); // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
 				// logger->print(dT*100);
@@ -395,16 +395,8 @@ void BrushlessMotorDriver::enable(bool doit) {
 					maxEncoderAngle = encoderAngle;
 				float encoderAngleDiff = encoderAngle - lastLoopEncoderAngle;
 				float encoderResolution = TWO_PI/((float)encoderCPR)*2.0;
-
-				// increase torque if no movement
 				if (abs(encoderAngleDiff) < encoderResolution && abs(encoderAngle) < encoderResolution) {
-					targetTorque += dT*5.0; // increase with constant torque rate
-					targetTorque = min(targetTorque, maxTorque);
-				}
-
-				// decrease torque if movement
-				if ((abs(encoderAngleDiff) < encoderResolution)) {
-					targetTorque *= 0.9; // decrease by factor of sliding fricton to friction
+					targetTorque += dT*5.0;
 					targetTorque = min(targetTorque, maxTorque);
 				}
 

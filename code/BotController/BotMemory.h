@@ -72,8 +72,6 @@ public:
 	PIDControllerConfig pid_position;
 	PIDControllerConfig pid_speed;
 	PIDControllerConfig pid_lifter;
-	PIDControllerConfig pid_setup;
-
 };
 
 class IMUConfig {
