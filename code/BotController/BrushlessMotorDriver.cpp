@@ -382,9 +382,9 @@ void BrushlessMotorDriver::enable(bool doit) {
 				if ((int)(targetTorque/maxTorque*10.) > (int)(lastTorque/maxTorque*10.)) {
 					logger->print(10-(int)(targetTorque/maxTorque*10.));
 					logger->print("(m");
-					logger->print(degrees(magneticFieldAngle),0);
+					logger->print(degrees(magneticFieldAngle),1);
 					logger->print("° e");
-					logger->print(degrees(encoderAngle),0);
+					logger->print(degrees(encoderAngle),1);
 					logger->print("°) ");
 
 					lastTorque = targetTorque;
@@ -409,7 +409,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 				float encoderAngleDiff = encoderAngle - lastLoopEncoderAngle;
 				float encoderResolution = TWO_PI/((float)encoderCPR)*2.0;
 				if (abs(encoderAngleDiff) < encoderResolution && abs(encoderAngle) < encoderResolution) {
-					targetTorque += dT*3.0;
+					targetTorque += dT*5.0;
 					targetTorque = min(targetTorque, maxTorque);
 					torqueReduced = false;
 				}

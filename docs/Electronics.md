@@ -88,7 +88,7 @@ The S1 dip switch can be set to identify the board. The pololu motor driver U$1 
 
 In the end, all parts fit into a standard 100x80 board
 
-[<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png"/>](https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png))
+[<img width="1000" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png"/>](https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/board.png)
 (click to enlare)
 
 
