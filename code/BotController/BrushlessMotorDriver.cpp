@@ -372,7 +372,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 			uint32_t now_us = micros();
 			float maxEncoderAngle = 0;
 			float elapsedTime = 0;
-			const float timeOut = 5.0;
+			const float timeOut = 3.0;
 			pid_setup.reset();
 			while ((targetTorque < maxTorque) && (elapsedTime < timeOut)) { // quit when above 80% torque or timeout of 5. happened
 				now_us = micros();
