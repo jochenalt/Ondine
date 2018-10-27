@@ -16,11 +16,16 @@ void Engine::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
 
 	// initialize all brushless motors and their encoders
+	static int MotorIdx [3] =  { 1,0,2 };
+
+	// array that assigns the motors pins to the right order
+	static bool ReverseDirection[3] = { true, true, true };
 	for (int i = 0;i<3;i++) {
+		int idx = MotorIdx[i];
 		wheel[i] = new BrushlessMotorDriver();
-		wheel[i]->setup(i, menuCtrl);
-		wheel[i]->setupMotor(BRUSHLESS_DRIVER_ENABLE_PIN, BrushlessDriverPWMPins[i][0], BrushlessDriverPWMPins[i][1], BrushlessDriverPWMPins[i][2]);
-		wheel[i]->setupEncoder(EncoderPins[i][0],EncoderPins[i][1], 1024);
+		wheel[i]->setup(i, menuCtrl, ReverseDirection[idx]);
+		wheel[i]->setupMotor(BRUSHLESS_DRIVER_ENABLE_PIN, BrushlessDriverPWMPins[idx][0], BrushlessDriverPWMPins[idx][1], BrushlessDriverPWMPins[idx][2]);
+		wheel[i]->setupEncoder(EncoderPins[idx][0],EncoderPins[idx][1], 1024);
 	}
 }
 

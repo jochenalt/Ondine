@@ -23,7 +23,7 @@ public:
 	BrushlessMotorDriver();
 	virtual ~BrushlessMotorDriver() {};
 
-	void setup(int motorId, MenuController* menuCtrl);
+	void setup(int motorId, MenuController* menuCtrl, bool reverse);
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
 	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
 
@@ -82,6 +82,7 @@ private:
 	void sendPWMDuty(float torque);
 
 	bool enabled = false;
+	bool reverse = false;
 
 	// Encoder library
 	Encoder* encoder = NULL;

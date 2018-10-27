@@ -50,7 +50,6 @@ The advance angle of 90 degrees implies an issue when doing position control: If
 <img height="200" src="https://raw.githubusercontent.com/jochenalt/Ondine/master/docs/images/electronics/BLDC controller sigmoid.png"/>
 
 
-
 ## PID Controller
 
 Speaking of the PID controller of a brushless motor : I played around with a couple of controllertypes, I even implemented one of these fancy fuzzy controllers. Did not work out well, actually I got the impression that fuzzy controllers are kind of an academic hype only. I ended up with a plain gain-scheduled PID controller, i.e. a PID controller that has two sets of PID values: One for balancing, one for maximum speed. The input speed is used to identify the gains by interpolation between these two configuration sets.

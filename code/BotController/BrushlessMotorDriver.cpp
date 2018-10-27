@@ -80,8 +80,9 @@ BrushlessMotorDriver::BrushlessMotorDriver() {
 	precomputeSVPMWave();
 }
 
-void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl) {
+void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl, bool reverse) {
 	this->motorNo = motorNo;
+	this->reverse = reverse;
 	registerMenuController(menuCtrl);
 }
 
@@ -283,29 +284,28 @@ bool BrushlessMotorDriver::loop() {
 }
 
 void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
-	targetMotorSpeed = speed;
+	targetMotorSpeed = (reverse?-1.0:1.0)*speed;
 	targetAcc = acc;
 }
 
 float BrushlessMotorDriver::getMotorSpeed() {
-	return measuredMotorSpeed;
+	return (reverse?-1.0:1.0)*measuredMotorSpeed;
 }
-
-float BrushlessMotorDriver::getIntegratedMotorAngle() {
-	return referenceAngle;
-}
-
 
 void BrushlessMotorDriver::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
-	setMotorSpeed(speed/GearBoxRatio,acc);
+	setMotorSpeed((reverse?-1.0:1.0)*speed/GearBoxRatio,acc);
 }
 
 float BrushlessMotorDriver::getSpeed() {
-	return measuredMotorSpeed*GearBoxRatio;
+	return (reverse?-1.0:1.0)*measuredMotorSpeed*GearBoxRatio;
 }
 
 float BrushlessMotorDriver::getIntegratedAngle() {
-	return referenceAngle*GearBoxRatio;
+	return (reverse?-1.0:1.0)*referenceAngle*GearBoxRatio;
+}
+
+float BrushlessMotorDriver::getIntegratedMotorAngle() {
+	return (reverse?-1.0:1.0)*referenceAngle;
 }
 
 void BrushlessMotorDriver::enable(bool doit) {
