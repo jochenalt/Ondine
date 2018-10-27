@@ -192,7 +192,7 @@ void BallDrive::menuLoop(char ch) {
 		logger->print(") angle=(");
 		logger->print(degrees(menuAngleX));
 		logger->print(",");
-		logger->print(degrees(menuAngleX));
+		logger->print(degrees(menuAngleY));
 		logger->print(")");
 
 		command->println(" >");
