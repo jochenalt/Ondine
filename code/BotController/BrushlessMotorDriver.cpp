@@ -20,14 +20,6 @@ const float voltage = 12;										// [V] coming from the battery to server the 
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
-// array to store pre-computed values of space vector wave form (SVPWM)
-// array size is choosen by having a maximum difference of 1% in two subsequent table items,
-// i.e. we have a precision of 1%. The rest is compensated by the optical
-// encoder with a precision of 0.1%
-#define svpwmArraySize 244 // manually set such that two adjacent items have a difference of 2 of 255 at most (approx. 1%)
-int svpwmTable[svpwmArraySize];
-
-
 // function that looks like
 //      1|  -------
 //       |/
@@ -37,10 +29,17 @@ int svpwmTable[svpwmArraySize];
 // ---   |-1
 // (but smooth of course)
 float sigmoid(float gain, float x) {
-	return 1.0-2.0/(1.0 + exp(gain * x));
+    return 1.0-2.0/(1.0 + exp(gain * x));
 }
 
-// precompute cpu intense svpwm values for later lookup
+
+// array to store pre-computed values of space vector wave form (SVPWM)
+// array size is choosen by having a maximum difference of 1% in two subsequent table items,
+// i.e. we have a precision of 1%. The rest is compensated by the optical
+// encoder with a precision of 0.1%
+#define svpwmArraySize 244 // manually set such that two adjacent items have a difference of 2 of 255 at most (approx. 1%)
+int svpwmTable[svpwmArraySize];
+
 void precomputeSVPMWave() {
 	const int maxPWMValue = (1<<pwmResolution)-1;
 	const float spaceVectorScaleUpFactor = 1.15; // empiric value to reach full pwm scale
@@ -217,9 +216,9 @@ bool BrushlessMotorDriver::loop() {
 
 			// carry out posh PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
-			float speedRatio = min(measuredMotorSpeed/maxRevolutionSpeed,1.0);
+			float speedRatio = sqrt(min(abs(measuredMotorSpeed)/maxRevolutionSpeed,1.0));
 			float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
-											-maxAngleError /* min */,maxAngleError /* max */, sqrt(speedRatio),
+											-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
 											errorAngle,  timePassed_s);
 
 			// estimate the current shift of current behind voltage (back EMF). This is typically set to increase linearly with the voltage
@@ -231,7 +230,7 @@ bool BrushlessMotorDriver::loop() {
 			// torque is max at -90/+90 degrees
 			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
 			// advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
-			advanceAngle = radians(90) * sigmoid(20.0, controlOutput/maxAngleError);
+            advanceAngle = radians(90) * sigmoid(40.0, controlOutput/maxAngleError);
 
 			float torque = abs(controlOutput)/maxAngleError;
 
@@ -374,6 +373,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 			float elapsedTime = 0;
 			const float timeOut = 3.0;
 			pid_setup.reset();
+			bool torqueReduced = false; // after first movement is detected, torque is reduced once
 			while ((targetTorque < maxTorque) && (elapsedTime < timeOut)) { // quit when above 80% torque or timeout of 5. happened
 				now_us = micros();
 				float dT = (now_us - lastTime_us)/1000000.0;
@@ -411,13 +411,15 @@ void BrushlessMotorDriver::enable(bool doit) {
 				if (abs(encoderAngleDiff) < encoderResolution && abs(encoderAngle) < encoderResolution) {
 					targetTorque += dT*3.0;
 					targetTorque = min(targetTorque, maxTorque);
+					torqueReduced = false;
 				}
 
 				// as soon a movement is detected, reduce the torque since friction has been overcome
 				// and we want to avoid to push the encoder even more into a deviation
-				if (abs(encoderAngleDiff) > encoderResolution) {
+				if (!torqueReduced && abs(encoderAngleDiff) > encoderResolution) {
 					targetTorque *= 0.8; // ratio between gliding friction and stiction
 					targetTorque = min(targetTorque, maxTorque);
+					torqueReduced = true;
 				}
 
 				lastLoopEncoderAngle = encoderAngle;
@@ -440,16 +442,13 @@ void BrushlessMotorDriver::enable(bool doit) {
 			repeat  = (targetTorque < maxTorque) || (elapsedTime >= timeOut);
 			if (repeat) {
 				logger->print("repeat");
-
-				if (memory.persistentMem.logConfig.calibrationLog) {
-					logger->print(" failed(");
-					logger->print(degrees(maxEncoderAngle),1);
-					logger->print("°,");
-					logger->print(targetTorque,1);
-					logger->print("PWM,");
-					logger->print(elapsedTime,1);
-					logger->print("s) ");
-				}
+				logger->print(" failed(");
+				logger->print(degrees(maxEncoderAngle),1);
+				logger->print("°,");
+				logger->print(targetTorque,1);
+				logger->print("PWM,");
+				logger->print(elapsedTime,1);
+				logger->print("s) ");
 			}
 		}
 		while ((tries++ < maxTries) && (repeat == true));
@@ -602,11 +601,12 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 		if (cmd) {
 			command->print("v=");
 			command->print(menuSpeed);
-			command->print(" actual v=");
-			command->print(getMotorSpeed());
-			command->print("(gear: ");
-			command->print(getSpeed());
-			command->print("rev/s)");
+			command->print(" motorspeed=");
+            command->print(getMotorSpeed());
+            command->print("rev/s gearspeed= ");
+            command->print(getSpeed());
+            command->print("rev/s)");
+
 			command->print(" a=");
 			command->print(menuAcc);
 			command->print(" T=");
