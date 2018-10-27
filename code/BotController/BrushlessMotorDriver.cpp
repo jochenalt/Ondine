@@ -416,7 +416,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 
 				// as soon a movement is detected, reduce the torque since friction has been overcome
 				// and we want to avoid to push the encoder even more into a deviation
-				if (!torqueReduced && abs(encoderAngleDiff) > encoderResolution) {
+				if (!torqueReduced && (abs(encoderAngleDiff) > encoderResolution)) {
 					targetTorque *= 0.8; // ratio between gliding friction and stiction
 					targetTorque = min(targetTorque, maxTorque);
 					torqueReduced = true;
