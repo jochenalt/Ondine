@@ -73,8 +73,8 @@ void LogConfig::print() {
 }
 
 void MotorConfig::initDefaultValues() {
-	// PID controller at slow speeds is aggressive to keep position
-	pid_position.Kp = 2.1;
+	// at slow speeds PID controller is aggressivly keeping the position
+	pid_position.Kp = 3.0;
 	pid_position.Ki = 1.2;
 	pid_position.Kd = 0.000;
 

@@ -15,7 +15,7 @@
 void fatalError(const char s[]);
 void warnMsg(const char s[]);
 
-template <typename T> int sgn(T val) {
+template <typename T> T sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 

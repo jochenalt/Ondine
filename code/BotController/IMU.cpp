@@ -205,15 +205,20 @@ void IMU::loop() {
 			dT = ((float)(now - lastInvocationTime_ms))/1000000.0;
 			lastInvocationTime_ms = now;
 
+			// turn the coordinate system of the IMU into that one of the bot:
+			// front wheel points to the x-axis, y-axis is
+			// for use of the kalman filter, we need to break the convention and
+			// denote the coordsystem for angualr velocity in the direction of the according axis
+			// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
 			float tilt[3];
-			tilt[Dimension::X] = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
-			tilt[Dimension::Y] = mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
-			tilt[Dimension::Z] = mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) + HALF_PI;
+			tilt[Dimension::X] =  mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
+			tilt[Dimension::Y] = -mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
+			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) - HALF_PI;
 
 			float angularVelocity[3];
-			angularVelocity[Dimension::X] = -mpu9250->getGyroY_rads();
-			angularVelocity[Dimension::Y] = mpu9250->getGyroX_rads();
-			angularVelocity[Dimension::Z] = -mpu9250->getGyroZ_rads();
+			angularVelocity[Dimension::X] = mpu9250->getGyroX_rads();
+			angularVelocity[Dimension::Y] = mpu9250->getGyroY_rads();
+			angularVelocity[Dimension::Z] = mpu9250->getGyroZ_rads();
 
 			// invoke kalman filter separately per plane
 			for (int i = 0;i<3;i++)

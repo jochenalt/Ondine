@@ -39,9 +39,9 @@ This gives you the speed in x and y direction out of the speed of all omniwheels
 
 ## Coordinate system
 
-For kinematics, IMU and balance control, this coordinate system is used:
+For kinematics, IMU and balance control, this coordinate system as seens from the top is used:
 
-<img  width="300" src="../images/kinematics/coordsystem.png" >
+<img  width="150" src="../images/kinematics/coordsystem.png" >
 
 ## Implementation
 

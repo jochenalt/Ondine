@@ -27,6 +27,20 @@ const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 #define svpwmArraySize 244 // manually set such that two adjacent items have a difference of 2 of 255 at most (approx. 1%)
 int svpwmTable[svpwmArraySize];
 
+
+// function that looks like
+//      1|  -------
+//       |/
+// ------/--------
+//      /|
+//     / |
+// ---   |-1
+// (but smooth of course)
+float sigmoid(float gain, float x) {
+	return 1.0-2.0/(1.0 + exp(gain * x));
+}
+
+// precompute cpu intense svpwm values for later lookup
 void precomputeSVPMWave() {
 	const int maxPWMValue = (1<<pwmResolution)-1;
 	const float spaceVectorScaleUpFactor = 1.15; // empiric value to reach full pwm scale
@@ -205,7 +219,7 @@ bool BrushlessMotorDriver::loop() {
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
 			float speedRatio = min(measuredMotorSpeed/maxRevolutionSpeed,1.0);
 			float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
-											-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
+											-maxAngleError /* min */,maxAngleError /* max */, sqrt(speedRatio),
 											errorAngle,  timePassed_s);
 
 			// estimate the current shift of current behind voltage (back EMF). This is typically set to increase linearly with the voltage
@@ -216,7 +230,8 @@ bool BrushlessMotorDriver::loop() {
 
 			// torque is max at -90/+90 degrees
 			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-			advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
+			// advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
+			advanceAngle = radians(90) * sigmoid(20.0, controlOutput/maxAngleError);
 
 			float torque = abs(controlOutput)/maxAngleError;
 
@@ -589,6 +604,9 @@ void BrushlessMotorDriver::menuLoop(char ch) {
 			command->print(menuSpeed);
 			command->print(" actual v=");
 			command->print(getMotorSpeed());
+			command->print("(gear: ");
+			command->print(getSpeed());
+			command->print("rev/s)");
 			command->print(" a=");
 			command->print(menuAcc);
 			command->print(" T=");
