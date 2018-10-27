@@ -37,6 +37,12 @@ For forward kinematics we need the formula reversed, which is
 
 This gives you the speed in x and y direction out of the speed of all omniwheels
 
+## Coordinate system
+
+For kinematics, IMU and balance control, this coordinate system is used:
+
+<img  width="300" src="../images/kinematics/coordsystem.png" >
+
 ## Implementation
 
 During setup of the bot, we can precompute the so-called construction matrix <i>CM</i>.
@@ -51,3 +57,5 @@ that reduces the amount of necessary multiplications drastically. Instead of the
 
 
 All this is implemented in [Kinematics.cpp](https://github.com/jochenalt/ondine/tree/master/code/BotController/Kinematics.cpp)
+
+

@@ -325,7 +325,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 		// quit the loop if torque is above a certain threshold with encoder at 0
 		// end calibration by setting the current reference angle to the measured rotors position
 		int tries = 0;
-		const int maxTries = 5;
+		const int maxTries = 3;
 		bool repeat = false;
 		do {
 			if ((tries > 0) && (memory.persistentMem.logConfig.calibrationLog))
@@ -366,15 +366,18 @@ void BrushlessMotorDriver::enable(bool doit) {
 				elapsedTime += dT;
 				if ((int)(targetTorque/maxTorque*10.) > (int)(lastTorque/maxTorque*10.)) {
 					logger->print(10-(int)(targetTorque/maxTorque*10.));
-					logger->print("(");
+					logger->print("(m");
 					logger->print(degrees(magneticFieldAngle),0);
+					logger->print("° e");
+					logger->print(degrees(encoderAngle),0);
 					logger->print("°) ");
+
 					lastTorque = targetTorque;
 				}
 
 				// let the magnetic field turn with 1 rev/s towards the encoder value different from 0
 
-				float magneticFieldAngularSpeed = pid_setup.update(PIDControllerConfig(0.2,0.0,0.0), encoderAngle, dT, -radians(30), radians(30));
+				float magneticFieldAngularSpeed = pid_setup.update(PIDControllerConfig(0.1,0.0,0.0), encoderAngle, dT, -radians(30), radians(30));
 				magneticFieldAngle -= sgn(encoderAngle)*min(radians(2.0),abs(magneticFieldAngularSpeed)); // this is a P-controller that turns the magnetic field towards the direction of the encoder
 
 				// logger->print(dT*100);
@@ -391,13 +394,14 @@ void BrushlessMotorDriver::enable(bool doit) {
 				float encoderAngleDiff = encoderAngle - lastLoopEncoderAngle;
 				float encoderResolution = TWO_PI/((float)encoderCPR)*2.0;
 				if (abs(encoderAngleDiff) < encoderResolution && abs(encoderAngle) < encoderResolution) {
-					targetTorque += dT*5.0;
+					targetTorque += dT*3.0;
 					targetTorque = min(targetTorque, maxTorque);
 				}
 
 				// as soon a movement is detected, reduce the torque since friction has been overcome
+				// and we want to avoid to push the encoder even more into a deviation
 				if (abs(encoderAngleDiff) > encoderResolution) {
-					targetTorque *= 0.9;
+					targetTorque *= 0.8; // ratio between gliding friction and stiction
 					targetTorque = min(targetTorque, maxTorque);
 				}
 
@@ -417,9 +421,11 @@ void BrushlessMotorDriver::enable(bool doit) {
 
 			// if almost no movement happened, rotor could be located in a singularity.
 			// This would be bad, rotor would never find its position during rotation.
-			// We should move at least 4°
-			repeat  = (abs(maxEncoderAngle) < radians(4)) || (elapsedTime >= timeOut);
+			// We should move at least 2°
+			repeat  = (targetTorque < maxTorque) || (elapsedTime >= timeOut);
 			if (repeat) {
+				logger->print("repeat");
+
 				if (memory.persistentMem.logConfig.calibrationLog) {
 					logger->print(" failed(");
 					logger->print(degrees(maxEncoderAngle),1);

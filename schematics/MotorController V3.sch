@@ -25774,7 +25774,7 @@ Source: http://www.molex.com</description>
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="default" width="0.3048" drill="0.635">
+<class number="0" name="default" width="0.254" drill="0.635">
 <clearance class="0" value="0.635"/>
 </class>
 <class number="1" name="Powerline" width="1" drill="0.635">
