@@ -23,6 +23,9 @@ Last and successful try was the most boring gear type: timing belts. Still, the 
 <img  height="300px" src="../images/beltdrive/Beltdrive1.png" >
 <img  height="300px" src="../images/beltdrive/Beltdrive2.png" >
 
+In total the belt drive is embedded into the enclosure like this
+<img  height="300px" src="../images/beltdrive/total.png" >
+
 Especially the bearing of the output axis inside the pinion at the motor made this thing compact:
 
 <img  height="300px" src="../images/beltdrive/Beltdrive3.png" >
@@ -48,7 +51,7 @@ Assembly starts with the enclosure and the output wheel. The three threaded rods
 <img  height="300px" src="../images/beltdrive/IMG_20180922_092706.jpg" >
 <img  height="300px" src="../images/beltdrive/IMG_20181013_113918.jpg" >
 
-Then the big wheel and the output timing belt is added (the stains on the top of the enclosure is my blood)
+Then the big wheel and the output timing belt is added (the stains on top of the enclosure is my blood)
 
 <img  height="300px" src="../images/beltdrive/IMG_20181013_114005.jpg" >
 

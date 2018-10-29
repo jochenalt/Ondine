@@ -42,7 +42,7 @@ public:
 private:
     float Q_angle; 		// Process noise variance for the accelerometer
     float Q_bias; 		// Process noise variance for the gyro bias
-    float R_measure; 	// Measurement noise variance - this is actually the variance of the measurement noise
+    float R_measure; 	// Measurement noise variance - this is the variance of the measurement noise
 
     float angle; 		// The angle calculated by the Kalman filter - part of the 2x1 state vector
     float bias; 		// The gyro bias calculated by the Kalman filter - part of the 2x1 state vector

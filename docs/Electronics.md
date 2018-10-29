@@ -74,7 +74,7 @@ The motors pull 2A max, so I choose the [L6234](https://www.st.com/content/ccc/r
 
 On the IMU side I went with the cheap and reliable MPU9250 on a drotek breakout
 
-[<img height="200" src="https://drotek.com/shop/2650-large_default/mpu9250-gyro-accelerometer-magnetometer.jpg"/>](https://drotek.com/shop/505-large_default/brushless-gimbal-controller-l6234.jpg)
+[<img height="200" src="https://drotek.com/shop/2650-large_default/mpu9250-gyro-accelerometer-magnetometer.jpg"/>](https://drotek.com/shop/en/imu/421-mpu9250-gyro-accelerometer-magnetometer.html)
 
 There's not a big deal in the schematics, pretty standard I would say. There's a power supply with a switching 7805 (D3) (a normal power regulator would have required a heatsink for which I dont have enough space on the PCB). A relay REL1 turns on the power to the motors indiated by LED1, since I wanted to avoid issues during startup when the motors are not yet controlled by the uC but the drivers get power already. The Teensy uC is in the middle, its PWM pins go to the L6234 drivers, which output lines go to the motor sockets. To protect the uC, the PWM lines are connected with a resistor and z-diode limiting the voltage that is induced by the motors and might come back to the uC (I did that not as a precaution but as a learning point after I bricked a uC. The L6234 has the issue that there is an inner connection from the motor output to the incoming pwm pin, if it is not controlled correctly).
 

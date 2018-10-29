@@ -118,17 +118,17 @@ void MotorConfig::print() {
 
 void IMUConfig::initDefaultValues() {
 	nullOffsetX = 0;
-	nullOffsetY = -0;
-	nullOffsetZ = -0;
+	nullOffsetY = 0;
+	nullOffsetZ = 0;
 }
 
 void IMUConfig::print() {
 	logger->println("imu configuration");
 	logger->print("   null=(");
-	logger->print(nullOffsetY);
+	logger->print(degrees(nullOffsetX));
 	logger->print(",");
-	logger->print(nullOffsetY);
+	logger->print(degrees(nullOffsetY));
 	logger->print(",");
-	logger->print(nullOffsetZ);
+	logger->print(degrees(nullOffsetZ));
 	logger->print("))");
 }

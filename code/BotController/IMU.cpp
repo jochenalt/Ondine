@@ -112,11 +112,6 @@ int IMU::init() {
 	kalman[Dimension::Y].setup(0);
 	kalman[Dimension::Z].setup(0);
 
-	// reset the rotation matrix rotating IMU to null value
-	memory.persistentMem.imuControllerConfig.nullOffsetX = 0;
-	memory.persistentMem.imuControllerConfig.nullOffsetY = 0;
-	memory.persistentMem.imuControllerConfig.nullOffsetZ = 0;
-
 	return status;
 }
 
@@ -165,8 +160,11 @@ void IMU::calibrate() {
 		fatalError("fatal error");
 	}
 	// measure for 1s, run kalman filter and take final orientation as null value
-	logger->println("calibrate imu");
 	uint32_t now = millis();
+	memory.persistentMem.imuControllerConfig.nullOffsetX = 0;
+	memory.persistentMem.imuControllerConfig.nullOffsetY = 0;
+	memory.persistentMem.imuControllerConfig.nullOffsetZ = 0;
+
 	while (millis() - now < 1000) {
 		loop();
 	}
@@ -176,6 +174,7 @@ void IMU::calibrate() {
 	memory.persistentMem.imuControllerConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
 	memory.persistentMem.imuControllerConfig.nullOffsetZ = kalman[Dimension::Z].getAngle();
 
+	memory.persistentMem.imuControllerConfig.print();
 	matrix33_t current;
 	computeZYXRotationMatrix(memory.persistentMem.imuControllerConfig.nullOffsetX ,
 							 memory.persistentMem.imuControllerConfig.nullOffsetY,
@@ -251,17 +250,17 @@ void IMU::loop() {
 				command->print("dT=");
 				command->print(dT,3);
 				command->print("a=(X:");
-				command->print(tilt[Dimension::X],3);
+				command->print(degrees(tilt[Dimension::X]),2);
 				command->print("/");
-				command->print(angularVelocity[Dimension::X],3);
+				command->print(degrees(angularVelocity[Dimension::X]),2);
 				command->print("Y:");
-				command->print(tilt[Dimension::Y],3);
+				command->print(degrees(tilt[Dimension::Y]),2);
 				command->print("/");
-				command->print(angularVelocity[Dimension::Y],3);
+				command->print(degrees(angularVelocity[Dimension::Y]),2);
 				command->print("Z:");
-				command->print(tilt[Dimension::Z],3);
+				command->print(degrees(tilt[Dimension::Z]),2);
 				command->print("/");
-				command->print(angularVelocity[Dimension::Z],3);
+				command->print(degrees(angularVelocity[Dimension::Z]),2);
 
 				command->print(" angle=(");
 				command->print(degrees(getAngleRad(Dimension::X)));
