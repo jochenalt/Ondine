@@ -25,7 +25,7 @@ Last and successful try was the most boring gear type: timing belts. Still, the 
 
 In total the belt drive is embedded into the enclosure like this
 
-<img  height="600px" src="../images/beltdrive/total.png" >
+<img  height="700px" src="../images/beltdrive/total.png" >
 
 Especially the bearing of the output axis inside the pinion at the motor made this thing compact:
 
