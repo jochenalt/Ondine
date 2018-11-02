@@ -39,19 +39,19 @@ void ControlPlane::init () {
 			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of preveious state controller
 			outputSpeedFilter.init(FIR::LOWPASS,
 					         0.01f  			/* allowed ripple in amplitude is 1% */,
-							 0.001f 			/* supression required is 0.1%*/,
+							 1.0e-6 			/* supression required is 60db */,
 							 SampleFrequency, 	/* 100 Hz */
 							 15.0f  			/* low pass cut off frequency */);
 
 			inputBallAccel.init(FIR::LOWPASS,
 					         0.1f  			/* allowed ripple in amplitude is 10% */,
-							 0.001f 			/* supression required is 0.1%*/,
+							 1.0e-6 			/* supression required is 60db */,
 							 SampleFrequency, 	/* 100 Hz */
 							 50.0f  			/* low pass cut off frequency */);
 
 			inputBodyAccel.init(FIR::LOWPASS,
 							  0.1f  			/* allowed ripple in amplitude is 10% */,
-							  0.001f 			/* supression required is 0.1%*/,
+							  1.0e-6 			/* supression required is 60db %*/,
 							  SampleFrequency, /* 100 Hz */
 							  50.0f  			/* low pass cut off frequency */);
 }
@@ -65,11 +65,26 @@ void ControlPlane::update(float dT,
 		// target angle out of acceleration, assume tan(x) = x
 		targetAngle = targetAccel/Gravity;
 
+		// logger->print("currentSpeed=");
+		// logger->print(currentSpeed);
+
+		// logger->print("sensorAngle=");
+		// logger->print(sensorAngle);
+		// logger->print("sensorAngularVelocity=");
+		// logger->print(sensorAngularVelocity);
+
+		// logger->print("targetAngle=");
+		// logger->print(targetAngle);
+
 		// target angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
+		// logger->print("targetAngularVelocity=");
+		// logger->print(targetAngularVelocity);
 
 		// compute absolute position of the ball's centre of gravity
 		absBallPos += currentSpeed*dT - sensorAngularVelocity*dT/TWO_PI * CentreOfGravityHeight;
+		logger->print(" absBallPos=");
+		logger->print(absBallPos);
 
 		// compute absolute position of the position where we expect the bot to be
 		targetBallPos += targetSpeed*dT  - targetAngle/TWO_PI * CentreOfGravityHeight;
@@ -85,23 +100,33 @@ void ControlPlane::update(float dT,
 
 		// compute ABSOLUTE position of the body, assume sin(x) = x for small angle
 		float absBodyPos = absBallPos + sensorAngle*CentreOfGravityHeight;
+		logger->print(" absBodyPos=");
+		logger->print(absBodyPos);
 
 		// compute acceleration the robot is supposed to have
 		float targetAbsAccel = (targetSpeed - lastTargetSpeed)/dT;
 
 		// compute the ABSOLUTE velocity the robot's body really has
 		float absBodySpeed = (absBodyPos - lastAbsBodyPos)/dT;
+		logger->print(" absBodySpeed=");
+		logger->print(absBodySpeed);
 
 		// compute the ABSOLUTE velocity the ball has
 		float absBallSpeed = (absBallPos - lastAbsBallPos)/dT;
+		logger->print(" absBallSpeed=");
+		logger->print(absBallSpeed);
 
 		// compute the ABSOLUTE acceleration the robot's body really has
 		// bodyAccel = inputBodyAccel.update((absBodySpeed-lastBodySpeed) / dT);
 		bodyAccel = (absBodySpeed-lastBodySpeed) / dT;
+		logger->print(" bodyAccel=");
+		logger->print(bodyAccel);
 
 		// compute the ABSOLUTE acceleration the robot's base really has
 		// ballAccel = inputBallAccel.update((currentSpeed-lastBallSpeed) / dT);
 		ballAccel = (currentSpeed-lastBallSpeed) / dT;
+		logger->print(" ballAccel=");
+		logger->print(ballAccel);
 
 		// compute the error of the angle
 		errorAngle = targetAngle-sensorAngle;
@@ -150,12 +175,31 @@ void ControlPlane::update(float dT,
 							-error_body_velocity - error_body_position - error_body_accel
 							-error_centripedal;
 
+		logger->print("error=(");
+		logger->print(error_tilt);
+		logger->print(",");
+		logger->print(error_angular_speed);
+		logger->print(",");
+		logger->print(error_base_position);
+		logger->print(",");
+		logger->print(error_base_accel);
+		logger->print(",");
+		logger->print(error_body_velocity);
+		logger->print(",");
+		logger->print(error);
+		logger->print(")");
+
 		accel = constrain(error,-MaxBotAccel, MaxBotAccel);
 
 		// accelerate only if not yet on max speed
 		if ((sgn(speed) != sgn(accel)) ||
 			(abs(speed) < MaxBotSpeed))
 			speed += accel * dT;
+
+		logger->print(" accel=");
+		logger->print(accel);
+		logger->print(" speed=");
+		logger->print(speed);
 
 		lastTargetAngle = targetAngle;
 		lastAbsBodyPos = absBodyPos;
@@ -168,11 +212,18 @@ void ControlPlane::update(float dT,
 
 		// in order to increase gain of state controller, filter with FIR 20Hz 4th order
 		filteredSpeed = outputSpeedFilter.update(speed);
+		logger->print(" fspeed=");
+		logger->print(filteredSpeed);
+
 	};
 }
 
 void StateController::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
+	planeX.init();
+	planeY.init();
+	rampedTargetMovement.init();
+
 }
 
 
@@ -181,17 +232,15 @@ void StateController::update(float dT, const BotMovement& currentMovement,
 							 const BotMovement& targetBotMovement) {
 	// ramp up target speed and omega with a trapezoid profile of constant acceleration
 	rampedTargetMovement.rampUp(targetBotMovement, dT);
-
 	planeX.update(dT, currentMovement.speedX, rampedTargetMovement.speedX, rampedTargetMovement.accelX, currentMovement.omega, rampedTargetMovement.omega, sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::X].angularVelocity);
 	planeY.update(dT, currentMovement.speedY, rampedTargetMovement.speedY, rampedTargetMovement.accelY, currentMovement.omega, rampedTargetMovement.omega, sensorSample.plane[Dimension::Y].angle, sensorSample.plane[Dimension::Y].angularVelocity);
-
 }
 
 float StateController::getSpeedX() {
 	return planeX.filteredSpeed;
 }
 float StateController::getSpeedY() {
-	return planeX.filteredSpeed;
+	return planeY.filteredSpeed;
 }
 
 float StateController::getOmega() {

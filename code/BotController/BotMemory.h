@@ -23,6 +23,7 @@ public:
 	void print();
 	boolean performanceLog;
 	boolean calibrationLog;
+	boolean debugBalanceLog;
 };
 
 class StateControllerConfig {

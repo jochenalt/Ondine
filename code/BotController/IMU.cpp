@@ -280,6 +280,7 @@ void IMU::loop() {
 bool IMU::isNewValueAvailable(float &dT) {
 	bool tmp = valueIsUpdated;
 	valueIsUpdated = false;
+	dT = this->dT;
 	return tmp;
 }
 

@@ -4,20 +4,15 @@
 #include <setup.h>
 
 BotMovement::BotMovement() {
-		speedX = 0;
-		speedY = 0;
-		accelX = 0;
-		accelY = 0;
-		omega = 0;
+	init();
 }
 
 BotMovement::BotMovement(float speedX, float speedY, float omega) {
-		this->speedX = speedX;
-		this->speedY = speedY;
-		this->accelX = accelX;
-		this->accelY = accelY;
-
-		this->omega = omega;
+	this->speedX = speedX;
+	this->speedY = speedY;
+	this->accelX = accelX;
+	this->accelY = accelY;
+	this->omega = omega;
 }
 
 BotMovement::BotMovement(const BotMovement& t) {
@@ -35,6 +30,14 @@ BotMovement& BotMovement::operator=(const BotMovement& t) {
 		accelY = t.accelY;
 		omega = t.omega;
 		return *this;
+}
+
+void BotMovement::init() {
+	speedX = 0;
+	speedY = 0;
+	accelX = 0;
+	accelY = 0;
+	omega = 0;
 }
 
 // increase currentSpeed towards newSpeed, adapt currentAcceleration.

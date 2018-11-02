@@ -56,7 +56,7 @@ public:
 	// This is the main timer determining the sample frequency
 	bool isNewValueAvailable(float &dT /* time since last call in [s] */);
 
-	IMUSample getSample() { return currentSample; };
+	IMUSample& getSample() { return currentSample; };
 
 
 	// call when stable and upright before starting up

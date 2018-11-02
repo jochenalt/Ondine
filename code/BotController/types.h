@@ -33,6 +33,7 @@ public:
 	BotMovement(float speedX, float speedY, float omega);
 	BotMovement(const BotMovement& t);
 	BotMovement& operator=(const BotMovement& t);
+	void init();
 
 	// increase movement towards target in a jerkless manner,
 	// i.e. the acceleration used increases with a constant rate

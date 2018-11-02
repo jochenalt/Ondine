@@ -56,11 +56,13 @@ void StateControllerConfig::initDefaultValues() {
 void LogConfig::null() {
 	performanceLog = false;
 	calibrationLog = false;
+	debugBalanceLog = false;
 }
 
 void LogConfig::initDefaultValues() {
 	performanceLog = false;
 	calibrationLog = false;
+	debugBalanceLog = false;
 }
 
 void LogConfig::print() {
@@ -69,6 +71,8 @@ void LogConfig::print() {
 	logger->println(performanceLog?"true":"false");
 	logger->print("   calib  :");
 	logger->println(calibrationLog?"true":"false");
+	logger->print("   debug  :");
+	logger->println(debugBalanceLog?"true":"false");
 
 }
 

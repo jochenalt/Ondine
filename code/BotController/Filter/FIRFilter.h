@@ -163,6 +163,8 @@ class Filter{
 
 		int get_error_flag(){return m_error_flag;};
 		void get_taps( float *taps );
+		int get_no_of_taps( );
+
 };
 }
 

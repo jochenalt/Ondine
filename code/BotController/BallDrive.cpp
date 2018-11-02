@@ -65,9 +65,10 @@ void BallDrive::setSpeed(float speedX,float speedY, float omega,
 // compute the current speed since the last invocation.
 // returns 0 when called first (assuming the we start without motion)
 void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY, float &omega) {
+
 	// this function required
-	if (lastCall_ms > 0 ) {
-		uint32_t now = millis();
+	uint32_t now = millis();
+	if ((now > lastCall_ms) && (lastCall_ms > 0))  {
 		float dT = ((float)(now - lastCall_ms))/1000.0;
 		lastCall_ms = now;
 
@@ -85,9 +86,9 @@ void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY
 										angleX, angleY,
 										speedX, speedY, omega);
 	} else {
-		speedX = 0;
-		speedY = 0;
-		omega = 0;
+			speedX = 0;
+			speedY = 0;
+			omega = 0;
 	}
 }
 

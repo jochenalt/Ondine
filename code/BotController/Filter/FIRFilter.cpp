@@ -48,7 +48,7 @@ using namespace FIR;
 void Filter::init(filterType filt_t, float allowedRipple, float supression, float SamplingFrequency, float FilterFrequency) {
 	// computation according to
 	float numberOfTaps = 2.0/3.0 * log10(1.0/(10.0*allowedRipple*supression)*SamplingFrequency/FilterFrequency);
-	init(filt_t, SamplingFrequency, numberOfTaps, FilterFrequency);
+	init(filt_t, numberOfTaps, SamplingFrequency, FilterFrequency);
 }
 
 void Filter::init(filterType filt_t, int num_taps, float SamplingFrequency, float FilterFrequency)
@@ -172,6 +172,10 @@ Filter::get_taps( float *taps )
 	for(i = 0; i < m_num_taps; i++) taps[i] = m_taps[i];
 
   return;		
+}
+
+int Filter::get_no_of_taps() {
+	return m_num_taps;
 }
 
 
