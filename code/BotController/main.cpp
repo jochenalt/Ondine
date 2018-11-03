@@ -26,7 +26,8 @@ I2CSlave* i2cSlave = new I2CSlave(&Wire1);
 
 void setup()
 {
-
+	// command input comes via UART or I2C from ESP86266
+	command->begin(230400);
 	uint32_t now = millis();
 	// let the LED blink two times to indicate that setup is starting now
 	digitalWrite(LED_PIN,LOW);
@@ -40,9 +41,8 @@ void setup()
 	digitalWrite(LED_PIN,LOW);
 	ledBlinker.set(DefaultPattern,sizeof(DefaultPattern));
 
-	// command input comes via UART or I2C from ESP86266
-	command->begin(230400);
 	botController.setup(); 	// this takes 4.5s seconds (mainly due to IMU initialization)
+
 	i2cSlave->setup(); 		// join the i2c bus with the webserver
 
 	// initialize configuration values coming from EEPROM
