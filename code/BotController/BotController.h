@@ -49,6 +49,7 @@ private:
 	BrushedMotorDriver lifter;
 	TimePassedBy performanceLogTimer;
 	Mode mode = OFF;
+	TimePassedBy logTimer;
 };
 
 #endif /* BOTCONTROLLER_H_ */

@@ -50,6 +50,7 @@ void BotController::printHelp() {
 	command->println("1 - performance log on");
 	command->println("2 - calibration log on");
 	command->println("3 - debug log on");
+	command->println("4 - state log on");
 
 	command->println("m - save configuration to epprom");
 }
@@ -130,9 +131,6 @@ void BotController::menuLoop(char ch, bool continously) {
 }
 
 void BotController::loop() {
-	// performance measurement
-	uint32_t now = micros();
-
 	// give other libraries some time
 	yield();
 
@@ -150,78 +148,74 @@ void BotController::loop() {
 	// drive the lifter
 	lifter.loop();
 
-	uint32_t imuTime = micros()-now;
-
 	// run main balance loop. Timing is determined by IMU that sends an
 	// interrupt everytime a new value is there.
 	float dT = 0; // set by isNewValueAvailable
 	if ((mode == BALANCE) && imu.isNewValueAvailable(dT)) {
 		IMUSample sensorSample = imu.getSample();
-		ballDrive.loop();
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		BotMovement currentMovement;
 		ballDrive.getSpeed(sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::Y].angle,
 				           currentMovement.speedX, currentMovement.speedY, currentMovement.omega);
+
+		// call this as often as possible to get a smooth motor movement
+		// the call above contains kinematics from wheel speed to cartesian speed, this takes just below 1ms
 		ballDrive.loop();
 
 		// compute new movement out of current angle, angular velocity, velocity, position
 		state.update(dT, currentMovement, sensorSample, targetBotMovement);
 
+		// call this as often as possible to get a smooth motor movement
+		// (call above contains lots of computations)
 		ballDrive.loop();
+
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
-
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
+		// call this as often as possible to get a smooth motor movement
+		// (call above takes just below 1ms, it contains kinematics from cartesian speed to wheel speed)
 		ballDrive.loop();
-		uint32_t balanceTime = micros()-now;
 
-		if (memory.persistentMem.logConfig.debugBalanceLog) {
-			logger->print("a=(");
-			logger->print(degrees(sensorSample.plane[Dimension::X].angle));
-			logger->print(",");
-			logger->print(degrees(sensorSample.plane[Dimension::Y].angle));
-			logger->print(") ");
-			logger->print("a'=(");
-			logger->print(degrees(sensorSample.plane[Dimension::X].angularVelocity));
-			logger->print(",");
-			logger->print(degrees(sensorSample.plane[Dimension::Y].angularVelocity));
-			logger->print(") ");
+		if (logTimer.isDue_ms(1000,millis())) {
+			if (memory.persistentMem.logConfig.debugBalanceLog) {
+				logger->print("a=(");
+				logger->print(degrees(sensorSample.plane[Dimension::X].angle));
+				logger->print(",");
+				logger->print(degrees(sensorSample.plane[Dimension::Y].angle));
+				logger->print(") ");
+				logger->print("a'=(");
+				logger->print(degrees(sensorSample.plane[Dimension::X].angularVelocity));
+				logger->print(",");
+				logger->print(degrees(sensorSample.plane[Dimension::Y].angularVelocity));
+				logger->print(") ");
 
-			logger->print("v=(");
-			logger->print(currentMovement.speedX);
-			logger->print(",");
-			logger->print(currentMovement.speedY);
-			logger->print(") ");
-			logger->print(" state=(");
-			logger->print(state.getSpeedX());
-			logger->print(",");
-			logger->print(state.getSpeedY());
-			logger->print(")");
+				logger->print("v=(");
+				logger->print(currentMovement.speedX);
+				logger->print(",");
+				logger->print(currentMovement.speedY);
+				logger->print(") ");
+				logger->print(" state=(");
+				logger->print(state.getSpeedX());
+				logger->print(",");
+				logger->print(state.getSpeedY());
+				logger->print(")");
+			}
+			if (memory.persistentMem.logConfig.performanceLog) {
+				logger->print(" t=(dT=");
+				logger->print(dT*1000.0);
+				logger->print("ms,imu=");
+				logger->print(imu.getAvrLoopTime()*1000.0);
+				logger->print("ms,state=");
+				logger->print(state.getAvrLoopTime()*1000.0);
+				logger->print("ms,eng=");
+				logger->print(ballDrive.getAvrLoopTime()*1000.0);
+				logger->print("ms");
+				logger->println(")");
+			}
 		}
-		if (memory.persistentMem.logConfig.performanceLog) {
-			logger->print(" t=(dT=");
-			logger->print(dT*1000.0);
-			logger->print("ms,imu=");
-			logger->print(imuTime);
-			logger->print("us,bal=");
-			logger->print(balanceTime);
-			logger->print("us,eng=");
-			logger->print(ballDrive.engine.getAvrLoopTime()*1000.0);
-			logger->print("ms");
-			logger->println(")");
-		}
-	} else {
-		/*
-		float angleX, angleY;
-		ballDrive.getSetAngle(angleX,  angleY);
-		float speedX, speedY, omega;
-		ballDrive.getSpeed(angleX, angleY, speedX, speedY, omega);
-		ballDrive.setSpeed(angleX, angleY, omega, angleX, angleY);
-		delay(2);
-		*/
 	}
 }
 
