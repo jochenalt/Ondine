@@ -165,6 +165,15 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 void BrushlessMotorDriver::reset() {
 	setMotorSpeed(0);
 	readEncoder();
+
+	referenceAngle = encoderAngle;
+	lastReferenceAngle = encoderAngle;
+
+	magneticFieldAngle = 0;				// [rad] angle of the induced magnetic field 0=1 = 2PI
+	advanceAngle = 0;
+	currentReferenceMotorSpeed = 0;		// [rev/s]
+	currentReferenceMotorAccel = 0;		// [rev/s]
+	measuredMotorSpeed = 0;				// [rev/s]
 }
 
 void BrushlessMotorDriver::resetEncoder() {
@@ -229,6 +238,7 @@ bool BrushlessMotorDriver::loop() {
 			logger->println();
 			*/
 			// read the current encoder value
+			float prevEncoderAngle = encoderAngle;
 			readEncoder();
 
 			// compute position error as input for PID controller
@@ -236,7 +246,7 @@ bool BrushlessMotorDriver::loop() {
 
 			// carry out posh PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
-			float speedRatio = min(abs(measuredMotorSpeed)/maxRevolutionSpeed,1.0);
+			float speedRatio = min(abs(currentReferenceMotorSpeed)/maxRevolutionSpeed,1.0);
 			float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
 											-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
 											errorAngle,  timePassed_s);
@@ -245,7 +255,7 @@ bool BrushlessMotorDriver::loop() {
 			// which is proportional to the torque for the PWM output
 			// (according to https://www.digikey.gr/en/articles/techzone/2017/jan/why-and-how-to-sinusoidally-control-three-phase-brushless-dc-motors)
 			// (according to "Advance Angle Calculation for Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
-			float advanceAnglePhaseShift = (measuredMotorSpeed/maxRevolutionSpeed)*maxAdvancePhaseAngle;
+			float advanceAnglePhaseShift = (currentReferenceMotorSpeed/maxRevolutionSpeed)*maxAdvancePhaseAngle;
 
 			// torque is max at -90/+90 degrees
 			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
@@ -261,7 +271,7 @@ bool BrushlessMotorDriver::loop() {
 			referenceAngle = constrain(referenceAngle, encoderAngle - maxAngleError, encoderAngle  + maxAngleError);
 			// recompute speed, since set speed might not be achieved
 
-			measuredMotorSpeed = (referenceAngle-lastReferenceAngle)/TWO_PI/timePassed_s;
+			measuredMotorSpeed = (encoderAngle-prevEncoderAngle)/TWO_PI/timePassed_s;
 			lastReferenceAngle = referenceAngle; // required to compute speed
 
 			// send new pwm value to motor
@@ -363,12 +373,10 @@ void BrushlessMotorDriver::enable(bool doit) {
 			repeat = false;
 
 			lastLoopCall_ms = 0;				// time of last loop call
-			measuredMotorSpeed = 0;				// [rev/s]
 			referenceAngle = 0;					// [rad] target angle of the rotor
 			lastReferenceAngle = 0;				// [rad]
 			currentReferenceMotorSpeed = 0;		// [rev/s]
 			currentReferenceMotorAccel = 0;
-			measuredMotorSpeed = 0;
 			targetMotorSpeed = 0;
 			targetAcc = 0;
 			advanceAngle = 0;
