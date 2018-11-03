@@ -200,8 +200,8 @@ void IMU::loop() {
 			}
 
 			// compute dT for kalman filter
-			uint32_t now = micros();
-			dT = ((float)(now - lastInvocationTime_ms))/1000000.0;
+			uint32_t now = millis();
+			dT = ((float)(now - lastInvocationTime_ms))/1000.0;
 			lastInvocationTime_ms = now;
 
 			// turn the coordinate system of the IMU into that one of the bot:
@@ -241,10 +241,7 @@ void IMU::loop() {
 			// indicate that new value is available
 			valueIsUpdated = true;
 
-			uint32_t end = micros();
-
-			uint32_t duration_us = end - now;
-			averageTime_us = averageTime_us/2 + duration_us/2;
+			averageTime_ms = (averageTime_ms + (millis() - now))/2;
 
 			if (logIMUValues) {
 				command->print("dT=");
@@ -269,7 +266,7 @@ void IMU::loop() {
 				command->print(")");
 
 				command->print("kalman t=");
-				command->print(averageTime_us);
+				command->print(averageTime_ms);
 				command->println("us");
 			}
 		}
@@ -277,7 +274,7 @@ void IMU::loop() {
 }
 
 float IMU::getAvrLoopTime() {
-	return averageTime_us;
+	return ((float)averageTime_ms)/1000.0;
 }
 
 

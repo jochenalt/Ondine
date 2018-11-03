@@ -35,8 +35,8 @@ void Engine::loop() {
 		bool didSomething = wheel[i]->loop();
 		uint32_t end = micros();
 		if (didSomething) {
-			averageTime_us += (end - start)*3; // total time of 3 wheels
-			averageTime_us /= 2; // low pass
+			averageTime_ms += (end - start)*3; // total time of 3 wheels
+			averageTime_ms /= 2; // low pass
 		}
 	}
 
@@ -143,8 +143,8 @@ void Engine::menuLoop(char ch, bool continously) {
 		else
 			command->print("disabled.");
 		command->print("loop t=");
-		command->print(averageTime_us);
-		command->print("us");
+		command->print(averageTime_ms);
+		command->print("ms");
 
 		command->print(" active wheel");
 		command->print(activeMenuWheel);
