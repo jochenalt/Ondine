@@ -330,10 +330,6 @@ float BrushlessMotorDriver::getIntegratedMotorAngle() {
 void BrushlessMotorDriver::enable(bool doit) {
 	enabled = doit;
 	if (enabled) {
-		logger->print("enable motor ");
-		logger->print(motorNo);
-		logger->print(":");
-
 		// startup procedure to find the angle of the motor's rotor
 		// - turn magnetic field with min torque (120° max) until encoder recognizes a significant movement
 		// - turn in other direction until this movement until encoder gives original position
@@ -359,9 +355,12 @@ void BrushlessMotorDriver::enable(bool doit) {
 		const int maxTries = 3;
 		bool repeat = true;
 		while ((tries++ <= maxTries) && (repeat == true)) {
+			logger->print("enable motor ");
+			logger->print(motorNo);
+			logger->print(":");
+
+
 			repeat = false;
-			if (tries > 1)
-				logger->println("restart ");
 
 			lastLoopCall_ms = 0;				// time of last loop call
 			measuredMotorSpeed = 0;				// [rev/s]
@@ -439,7 +438,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 				lastLoopEncoderAngle = encoderAngle;
 				float encoderResolution = TWO_PI/((float)encoderCPR)*2.0;
 				if (abs(encoderAngleDiff) < encoderResolution && abs(encoderAngle) < encoderResolution) {
-					targetTorque += dT*5.0;
+					targetTorque += dT*8.0;
 					targetTorque = min(targetTorque, maxTorque);
 					torqueReduced = false;
 				}
@@ -447,7 +446,6 @@ void BrushlessMotorDriver::enable(bool doit) {
 				// as soon a movement is detected, reduce the torque since friction has been overcome
 				// and we want to avoid to push the encoder even more into a deviation
 				if (!torqueReduced && (abs(encoderAngleDiff) > encoderResolution)) {
-					logger->print("-");
 					targetTorque *= 0.8; // ratio between gliding friction and stiction
 					targetTorque = min(targetTorque, maxTorque);
 					torqueReduced = true;
@@ -473,7 +471,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 			if (repeat) {
 				logger->print(" failed(");
 				logger->print(degrees(maxEncoderAngle),1);
-				logger->print("°,");
+				logger->print(",");
 				logger->print(targetTorque,1);
 				logger->print("PWM,");
 				logger->print(elapsedTime,1);
