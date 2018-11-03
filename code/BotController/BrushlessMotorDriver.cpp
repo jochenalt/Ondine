@@ -13,10 +13,10 @@
 
 #include <TimePassedBy.h>
 
-const float maxAngleError = radians(30);
-const float maxAdvancePhaseAngle = radians(10);
+const float maxAngleError = radians(30);						// limit for PID controller
+const float maxAdvancePhaseAngle = radians(10);					// maximum phase between voltage and current due to EMF
 const float RevPerSecondPerVolt = 5;							// motor constant of Maxon EC max 40 W
-const float voltage = 12;										// [V] coming from the battery to server the motors
+const float voltage = 16;										// [V] coming from the battery to server the motors
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 

@@ -28,8 +28,8 @@ class ControlPlane {
 		float lastBodySpeed;
 		float lastBallSpeed;
 		float lastTargetSpeed;
-		float bodyAccel;
-		float ballAccel;
+		float absBodyAccel;
+		float absBallAccel;
 		float errorAngle;
 		float errorAngularVelocity;
 		float errorBallPosition;
