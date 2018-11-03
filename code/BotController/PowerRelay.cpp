@@ -6,14 +6,14 @@
  */
 
 #include <Arduino.h>
+#include <PowerRelay.h>
 #include <setup.h>
-#include <Power.h>
 
-void Power::setup() {
-	motorPower(false);
+void PowerRelay::setup() {
+	power(false);
 }
 
-void Power::motorPower(bool on) {
+void PowerRelay::power(bool on) {
 	motorOn = on;
 	if (motorOn) {
 		pinMode(POWER_RELAY_PIN, OUTPUT);
@@ -26,6 +26,6 @@ void Power::motorPower(bool on) {
 	}
 }
 
-bool Power::isMotorOn() {
+bool PowerRelay::isPowered() {
 	return motorOn;
 }

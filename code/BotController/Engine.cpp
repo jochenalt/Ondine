@@ -36,7 +36,7 @@ void Engine::loop() {
 		uint32_t end = micros();
 		if (didSomething) {
 			averageTime_us += (end - start)*3; // total time of 3 wheels
-			averageTime_us /= 2;
+			averageTime_us /= 2; // low pass
 		}
 	}
 
@@ -56,6 +56,9 @@ void Engine::getIntegratedWheelAngle(float wheelAngle[3]) {
 void Engine::resetWheelAngleChange() {
 	float wheelAngleChange[3];
 	getWheelAngleChange(wheelAngleChange);
+	wheel[0]->reset();
+	wheel[1]->reset();
+	wheel[2]->reset();
 }
 
 void Engine::getWheelAngleChange(float wheelAngleChange[3]) {

@@ -140,7 +140,7 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	lastTurnTime_us = now_us;
 	float timePassed_s = (float)timePassed_us/1000000.0;
 	if (timePassed_s > (2.0/(float)SampleFrequency)) {
-		// this happens if this methods isnt called often enough. Mostly
+		// this happens if this methods is not called often enough. Mostly
 		// when serial communications takes place
 		logger->println("turnReferenceAngle's dT too big!!!!");
 		logger->print(timePassed_s*1000.0);
@@ -160,6 +160,26 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	referenceAngle += currentReferenceMotorSpeed * timePassed_s * TWO_PI;
 
 	return timePassed_s;
+}
+
+void BrushlessMotorDriver::reset() {
+	setMotorSpeed(0);
+	readEncoder();
+}
+
+void BrushlessMotorDriver::resetEncoder() {
+	if (encoder != NULL) {
+		// reset all varables
+		lastEncoderPosition = 0;
+		encoderAngle = 0;
+		encoder->write(0);
+		readEncoder();
+		if (abs(encoderAngle) > 0.01) {
+			logger->print("encoderAngle=");
+			logger->print(degrees(encoderAngle));
+			fatalError("resetEncoder failed");
+		}
+	}
 }
 
 void BrushlessMotorDriver::readEncoder() {
@@ -189,10 +209,9 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 // call me as often as possible
 bool BrushlessMotorDriver::loop() {
 	if (enabled) {
-		// run only if at least one ms passed
-		uint32_t now = millis();
 
-		// max frequency of motor control is 1000Hz
+		// frequency of motor control is 1000Hz max
+		uint32_t now = millis();
 		if (now - lastLoopCall_ms < 1000/MaxBrushlessDriverFrequency)
 			return false;
 		lastLoopCall_ms = now;
@@ -217,7 +236,7 @@ bool BrushlessMotorDriver::loop() {
 
 			// carry out posh PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
-			float speedRatio = sqrt(min(abs(measuredMotorSpeed)/maxRevolutionSpeed,1.0));
+			float speedRatio = min(abs(measuredMotorSpeed)/maxRevolutionSpeed,1.0);
 			float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
 											-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
 											errorAngle,  timePassed_s);
@@ -311,20 +330,18 @@ float BrushlessMotorDriver::getIntegratedMotorAngle() {
 void BrushlessMotorDriver::enable(bool doit) {
 	enabled = doit;
 	if (enabled) {
-		if (memory.persistentMem.logConfig.calibrationLog) {
-			logger->print("calibrating motor ");
-			logger->print(motorNo);
-			logger->println();
-		}
+		logger->print("enable motor ");
+		logger->print(motorNo);
+		logger->print(":");
 
 		// startup procedure to find the angle of the motor's rotor
 		// - turn magnetic field with min torque (120° max) until encoder recognizes a significant movement
 		// - turn in other direction until this movement until encoder gives original position
 		// if the encoder does not indicate a movement, increase torque and try again
 
-		if (encoder == NULL)
-			delete encoder;
-		encoder = new Encoder(encoderAPin, encoderBPin);
+		// if (encoder == NULL)
+		// 	delete encoder;
+		// encoder = new Encoder(encoderAPin, encoderBPin);
 
 		// enable driver, but PWM has no duty cycle yet.
 		sendPWMDuty(0);
@@ -340,9 +357,10 @@ void BrushlessMotorDriver::enable(bool doit) {
 		// end calibration by setting the current reference angle to the measured rotors position
 		int tries = 0;
 		const int maxTries = 3;
-		bool repeat = false;
-		do {
-			if ((tries > 0) && (memory.persistentMem.logConfig.calibrationLog))
+		bool repeat = true;
+		while ((tries++ <= maxTries) && (repeat == true)) {
+			repeat = false;
+			if (tries > 1)
 				logger->println("restart ");
 
 			lastLoopCall_ms = 0;				// time of last loop call
@@ -358,11 +376,14 @@ void BrushlessMotorDriver::enable(bool doit) {
 			lastTurnTime_us = 0;
 			pid.reset();
 
-			magneticFieldAngle = tries*radians(360/7);
-			encoderAngle = 0;
-			lastEncoderPosition = 0;
+			// in case of a nth try start at a different angle
+			magneticFieldAngle = (tries-1)*radians(360/3);
 			float lastLoopEncoderAngle = 0;
+
+			resetEncoder();
+			reset();
 			readEncoder();
+			pid_setup.reset();
 
 			float targetTorque = 0.0;
 			float lastTorque = 0;
@@ -371,9 +392,14 @@ void BrushlessMotorDriver::enable(bool doit) {
 			uint32_t now_us = micros();
 			float maxEncoderAngle = 0;
 			float elapsedTime = 0;
-			const float timeOut = 3.0;
-			pid_setup.reset();
+			const float timeOut = 2.0;
 			bool torqueReduced = false; // after first movement is detected, torque is reduced once
+			if ((abs(encoderAngle) > 0.1)) {
+				logger->print("encoderAngle=");
+				logger->print(degrees(encoderAngle));
+				fatalError("wrong encoder initialization");
+			}
+
 			while ((targetTorque < maxTorque) && (elapsedTime < timeOut)) { // quit when above 80% torque or timeout of 5. happened
 				now_us = micros();
 				float dT = (now_us - lastTime_us)/1000000.0;
@@ -383,9 +409,12 @@ void BrushlessMotorDriver::enable(bool doit) {
 					logger->print(10-(int)(targetTorque/maxTorque*10.));
 					logger->print("(m");
 					logger->print(degrees(magneticFieldAngle),1);
-					logger->print("° e");
+					logger->print(" e");
 					logger->print(degrees(encoderAngle),1);
-					logger->print("°) ");
+					logger->print(" t");
+					logger->print(targetTorque,1);
+
+					logger->print(") ");
 
 					lastTorque = targetTorque;
 				}
@@ -407,6 +436,7 @@ void BrushlessMotorDriver::enable(bool doit) {
 				if (abs(maxEncoderAngle) < abs(encoderAngle))
 					maxEncoderAngle = encoderAngle;
 				float encoderAngleDiff = encoderAngle - lastLoopEncoderAngle;
+				lastLoopEncoderAngle = encoderAngle;
 				float encoderResolution = TWO_PI/((float)encoderCPR)*2.0;
 				if (abs(encoderAngleDiff) < encoderResolution && abs(encoderAngle) < encoderResolution) {
 					targetTorque += dT*5.0;
@@ -417,12 +447,12 @@ void BrushlessMotorDriver::enable(bool doit) {
 				// as soon a movement is detected, reduce the torque since friction has been overcome
 				// and we want to avoid to push the encoder even more into a deviation
 				if (!torqueReduced && (abs(encoderAngleDiff) > encoderResolution)) {
+					logger->print("-");
 					targetTorque *= 0.8; // ratio between gliding friction and stiction
 					targetTorque = min(targetTorque, maxTorque);
 					torqueReduced = true;
 				}
 
-				lastLoopEncoderAngle = encoderAngle;
 				if (memory.persistentMem.logConfig.calibrationLog) {
 					logger->print("mag=");
 					logger->print(degrees(magneticFieldAngle));
@@ -441,23 +471,21 @@ void BrushlessMotorDriver::enable(bool doit) {
 			// We should move at least 2°
 			repeat  = (targetTorque < maxTorque) || (elapsedTime >= timeOut);
 			if (repeat) {
-				logger->print("repeat");
 				logger->print(" failed(");
 				logger->print(degrees(maxEncoderAngle),1);
 				logger->print("°,");
 				logger->print(targetTorque,1);
 				logger->print("PWM,");
 				logger->print(elapsedTime,1);
-				logger->print("s) ");
+				logger->println("s) ");
 			}
-		}
-		while ((tries++ < maxTries) && (repeat == true));
+		} // while retry
 		readEncoder();
 		referenceAngle = magneticFieldAngle;
 		encoderAngle = magneticFieldAngle;
 		lastReferenceAngle = magneticFieldAngle;
 
-		if (tries >= maxTries) {
+		if (tries > maxTries) {
 			digitalWrite(enablePin, HIGH);
 			enabled = false;
 			logger->println(" failed.");
@@ -484,6 +512,7 @@ void BrushlessMotorDriver::printHelp() {
 	command->println("T/t - increase torque");
 	command->println("P/p - increase PIs controller p");
 	command->println("I/i - increase PIs controller i");
+	command->println("D/d - increase PIs controller d");
 
 	command->println("e - enable");
 

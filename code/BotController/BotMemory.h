@@ -24,6 +24,8 @@ public:
 	boolean performanceLog;
 	boolean calibrationLog;
 	boolean debugBalanceLog;
+	boolean debugStateLog;
+
 };
 
 class StateControllerConfig {
@@ -31,25 +33,54 @@ public:
 	void null();
 	void initDefaultValues();
 	void print() {
+		StateControllerConfig defValue;
+		defValue.initDefaultValues();
 		logger->println("state controller configuration:");
 		logger->print("   angle=");
 		logger->print(angleWeight);
+		logger->print("(");
+		logger->print(defValue.angleWeight);
+		logger->print(")");
 		logger->print(" angularSpeed=");
-		logger->println(angularSpeedWeight);
-		logger->print("   ballVelocity=");
-		logger->print(ballVelocityWeight);
-		logger->print(" ballPosition=");
+		logger->print(angularSpeedWeight);
+		logger->print("(");
+		logger->print(defValue.angularSpeedWeight);
+		logger->println(")");
+		logger->print("   ballPos=");
 		logger->print(ballPositionWeight);
+		logger->print("(");
+		logger->print(defValue.ballPositionWeight);
+		logger->print(")");
+		logger->print(" ballSpeed=");
+		logger->print(ballVelocityWeight);
+		logger->print("(");
+		logger->print(defValue.ballVelocityWeight);
+		logger->print(")");
 		logger->print(" ballAccel=");
-		logger->println(ballAccelWeight);
-		logger->print("   bodyVelocity=");
-		logger->print(bodyVelocityWeight);
-		logger->print(" bodyPosition=");
+		logger->print(ballAccelWeight);
+		logger->print("(");
+		logger->print(defValue.ballAccelWeight);
+		logger->println(")");
+		logger->print("   bodyPosition=");
 		logger->print(bodyPositionWeight);
+		logger->print("(");
+		logger->print(defValue.bodyPositionWeight);
+		logger->print(")");
+		logger->print(" bodySpeed=");
+		logger->print(bodyVelocityWeight);
+		logger->print("(");
+		logger->print(defValue.bodyVelocityWeight);
+		logger->print(")");
 		logger->print(" bodyAccel=");
-		logger->println(bodyAccelWeight);
+		logger->print(bodyAccelWeight);
+		logger->print("(");
+		logger->print(defValue.bodyAccelWeight);
+		logger->println(")");
 		logger->print("   omega=");
-		logger->println(omegaWeight);
+		logger->print(omegaWeight);
+		logger->print("(");
+		logger->print(defValue.omegaWeight);
+		logger->println(")");
 	}
 
 	float angleWeight;

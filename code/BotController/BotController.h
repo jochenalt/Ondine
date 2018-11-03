@@ -15,7 +15,7 @@
 #include <IMU.h>
 #include <Kinematics.h>
 #include <BrushedMotorDriver.h>
-#include <Power.h>
+#include <PowerRelay.h>
 #include <TimePassedBy.h>
 
 class BotController : public Menuable {
@@ -29,12 +29,16 @@ public:
 	void printHelp();
 	void menuLoop(char ch, bool continously);
 
+	void powerEngine(bool doIt);
+	bool isEnginePowered();
+
 	// turn on/off the balancing mode
 	void balanceMode(Mode mode) {
 		this->mode = mode;
 
 		// set current position as starting psition
 		ballDrive.reset();
+		state.reset();
 	}
 private:
 	BallDrive ballDrive;
@@ -43,7 +47,6 @@ private:
 	StateController state;
 	BotMovement targetBotMovement;
 	BrushedMotorDriver lifter;
-	Power power;
 	TimePassedBy performanceLogTimer;
 	Mode mode = OFF;
 };

@@ -15,10 +15,9 @@
 
 class ControlPlane {
 	public:
-		void init ();
+		void reset ();
 		float targetAngle;			// expected angle out of acceleration
 		float bodyVelocity;			// absolute velocity of body
-		float targetBallPos;		// absolute to-be position of the bot
 		float lastTargetAngle;
 		float lastTargetBodyPos;
 		float lastTargetBallPos;
@@ -27,8 +26,6 @@ class ControlPlane {
 		float lastBodySpeed;
 		float lastBallSpeed;
 		float lastTargetSpeed;
-		float absBodyAccel;
-		float absBallAccel;
 		float errorAngle;
 		float errorAngularVelocity;
 		float errorBallPosition;
@@ -64,6 +61,7 @@ public:
 	void setup(MenuController* menuCtrl);
 	void loop();
 
+	void reset();
 	virtual void printHelp();
 	virtual void menuLoop(char ch, bool continously);
 

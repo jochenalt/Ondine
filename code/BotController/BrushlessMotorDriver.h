@@ -27,6 +27,8 @@ public:
 	void setupMotor( int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin);
 	void setupEncoder( int EncoderAPin, int EncoderBPin, int CPR);
 
+	void reset();
+
 	// engine loop, returns true, if engine did something
 	bool loop( );
 
@@ -46,6 +48,7 @@ public:
 	virtual void printHelp();
 	virtual void menuLoop(char ch, bool continously);
 private:
+	void resetEncoder();
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3
 	int motorNo = 0;

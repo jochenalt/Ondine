@@ -13,7 +13,7 @@
 #include <StateController.h>
 
 
-void ControlPlane::init () {
+void ControlPlane::reset () {
 			lastTargetAngle = 0;
 			lastAbsBodyPos = 0; // absolute body position of last loop
 			lastAbsBallPos = 0;
@@ -22,7 +22,6 @@ void ControlPlane::init () {
 			lastTargetBodyPos = 0;
 			lastTargetBallPos = 0;
 			lastTargetSpeed = 0;
-			targetBallPos = 0; // to-be position of the base
 			bodyVelocity = 0,	// absolute velocity the bot's body has
 			speed = 0;
 			targetAngle = 0;
@@ -64,7 +63,7 @@ void ControlPlane::update(float dT,
 		// target angle out of acceleration, assume tan(x) = x
 		targetAngle = targetAccel/Gravity;
 
-		if (memory.persistentMem.logConfig.debugBalanceLog) {
+		if (memory.persistentMem.logConfig.debugStateLog) {
 			logger->print("currV=");
 			logger->print(currentSpeed);
 			logger->print(" currA=");
@@ -79,23 +78,23 @@ void ControlPlane::update(float dT,
 		// target angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 
-		// compute absolute position of the ball's centre of gravity
-		float absBallPos = lastAbsBallPos + currentSpeed*dT - sensorAngle * CentreOfGravityHeight;
+		// compute absolute position of the body
+		float absBodyPos = lastAbsBodyPos + currentSpeed*dT;
 
-		// compute absolute position of the body, assume sin(x) = x for small angle
-		float absBodyPos = absBallPos + sensorAngle * CentreOfGravityHeight;
+		// compute absolute position of the ball's centre of gravity, assume sin(x) = x
+		float absBallPos = absBodyPos - sensorAngle * CentreOfGravityHeight;
 
 		// compute the velocity the ball has
 		float absBallSpeed = (absBallPos - lastAbsBallPos)/dT;
 
-		// compute the ABSOLUTE velocity the robot's body really has
-		float absBodySpeed = (absBodyPos - lastAbsBodyPos)/dT;
+		// absolute speed of the body is given as parameter
+		float absBodySpeed = currentSpeed; // = (absBodyPos - lastAbsBodyPos)/dT;
 
 		// compute absolute position of the position where we expect the bot to be
-		targetBallPos += targetSpeed*dT  - targetAngle * CentreOfGravityHeight;
+		float targetBodyPos = lastTargetBodyPos +  targetSpeed*dT;
 
 		// compute absolute position of the body where we expect the bot to be
-		float targetBodyPos = targetBallPos + targetAngle * CentreOfGravityHeight;
+		float targetBallPos = targetBodyPos - targetAngle * CentreOfGravityHeight;
 
 		// compute target speed of ball (considering the dynamic tilt angle)
 		float targetBodySpeed = (targetBodyPos - lastTargetBodyPos)/dT;
@@ -103,19 +102,18 @@ void ControlPlane::update(float dT,
 		// compute target speed of ball (considering the dynamic tilt angle)
 		float targetBallSpeed = (targetBallPos - lastTargetBallPos)/dT;
 
+		// compute the ABSOLUTE acceleration the robot's body really has
+		float absBodyAccel = inputBodyAccel.update((absBodySpeed-lastBodySpeed) / dT);
+		// float absBodyAccel = (absBodySpeed-lastBodySpeed) / dT;
+
+		// compute the ABSOLUTE acceleration the robot's base really has
+		float absBallAccel = inputBallAccel.update((absBallSpeed-lastBallSpeed) / dT);
+		// float absBallAccel = (absBallSpeed-lastBallSpeed) / dT;
+
 		// compute acceleration the robot is supposed to have
 		float targetAbsAccel = (targetSpeed - lastTargetSpeed)/dT;
 
-
-		// compute the ABSOLUTE acceleration the robot's body really has
-		// bodyAccel = inputBodyAccel.update((absBodySpeed-lastBodySpeed) / dT);
-		absBodyAccel = (absBodySpeed-lastBodySpeed) / dT;
-
-		// compute the ABSOLUTE acceleration the robot's base really has
-		// ballAccel = inputBallAccel.update((currentSpeed-lastBallSpeed) / dT);
-		absBallAccel = (currentSpeed-lastBallSpeed) / dT;
-
-		if (memory.persistentMem.logConfig.debugBalanceLog) {
+		if (memory.persistentMem.logConfig.debugStateLog) {
 			logger->print(" body=(");
 			logger->print(absBodyPos);
 			logger->print(",");
@@ -132,29 +130,33 @@ void ControlPlane::update(float dT,
 		}
 
 
+		//
+		// compute difference between all target state and current state.
+		// These error denote how the current position is ahead of the target
+
 		// compute the error of the angle
-		errorAngle = targetAngle-sensorAngle;
+		errorAngle = sensorAngle-targetAngle;
 
 		// compute the error in angular velocity
-		errorAngularVelocity = targetAngularVelocity-sensorAngularVelocity;
+		errorAngularVelocity = sensorAngularVelocity-targetAngularVelocity;
 
 		// compute the delta of absolute as-is and to-be position of the base (positive means tobe > as-is)
-		errorBallPosition = targetBallPos-absBallPos;
+		errorBallPosition = absBallPos-targetBallPos;
 
 		// compute the delta of absolute as-is and to-be position of the body
-		errorBodyPosition = targetBodyPos - absBodyPos;
+		errorBodyPosition = absBodyPos-targetBodyPos;
 
 		// compute the delta of the as-is and to-be speed (positive means tobe > as-is)
-		errorBallVelocity = targetBallSpeed - absBallSpeed;
+		errorBallVelocity =  absBallSpeed- targetBallSpeed;
 
 		// compute the delta of the as-is and to-be speed (positive means tobe > as-is)
-		errorBodyVelocity = targetBodySpeed - absBodySpeed;
+		errorBodyVelocity = absBodySpeed-targetBodySpeed;
 
 		// compute the difference between the as-is and to-be body acceleration (positive means tobe > as-is)
-		errorBodyAccel = (targetAccel - absBodyAccel);
+		errorBodyAccel =  absBodyAccel-targetAccel;
 
 		// compute the difference between the as-is and to-be body acceleration (positive means tobe > as-is)
-		errorBallAccel = targetAbsAccel - absBallAccel;
+		errorBallAccel = absBallAccel-targetAbsAccel;
 
 		// compute error against centripedal force, which is f=omega*v*m*c, where m*c is the weight
 		float errorCentripedal = targetOmega * targetSpeed;
@@ -174,12 +176,12 @@ void ControlPlane::update(float dT,
 		float error_centripedal     = memory.persistentMem.ctrlConfig.omegaWeight        * errorCentripedal;
 
 		// sum up all weighted errors
-		float error =       -error_tilt - error_angular_speed
-							-error_ball_velocity - error_ball_position - error_ball_accel
-							-error_body_velocity - error_body_position - error_body_accel
-							-error_centripedal;
+		float error =	error_tilt + error_angular_speed +
+						error_ball_velocity + error_ball_position + error_ball_accel +
+						error_body_velocity + error_body_position + error_body_accel +
+						error_centripedal;
 
-		if (memory.persistentMem.logConfig.debugBalanceLog) {
+		if (memory.persistentMem.logConfig.debugStateLog) {
 			logger->print("error=(");
 			logger->print(error_tilt);
 			logger->print(",");
@@ -219,7 +221,7 @@ void ControlPlane::update(float dT,
 
 		// in order to increase gain of state controller, filter with FIR 20Hz 4th order
 		filteredSpeed = outputSpeedFilter.update(speed);
-		if (memory.persistentMem.logConfig.debugBalanceLog) {
+		if (memory.persistentMem.logConfig.debugStateLog) {
 			logger->print(" output=(");
 			logger->print(accel);
 			logger->print(",");
@@ -233,12 +235,14 @@ void ControlPlane::update(float dT,
 
 void StateController::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
-	planeX.init();
-	planeY.init();
-	rampedTargetMovement.init();
-
+	reset();
 }
 
+void StateController::reset() {
+	planeX.reset();
+	planeY.reset();
+	rampedTargetMovement.reset();
+}
 
 void StateController::update(float dT, const BotMovement& currentMovement,
 							 const IMUSample& sensorSample,

@@ -23,7 +23,6 @@ const int LifterCPR = 48;
 
 void BotController::setup() {
 	registerMenuController(&menuController);
-	power.setup();
 	ballDrive.setup(&menuController);
 	imu.setup(&menuController);
 	imu.setup();
@@ -40,6 +39,7 @@ void BotController::printHelp() {
 	command->println("Bot Menu");
 	command->println();
 	command->println("e - ball engine");
+	command->println("p - engine on/off");
 	command->println("s - state controller");
 	command->println("i - imu");
 	command->println("l - lifter");
@@ -54,22 +54,31 @@ void BotController::printHelp() {
 	command->println("m - save configuration to epprom");
 }
 
+void BotController::powerEngine(bool doIt) {
+	if (doIt) {
+		ballDrive.power(true);
+		if (ballDrive.isPowered()) {
+			// relay has been turned on successfully
+			ballDrive.enable(true);
+			if (!ballDrive.isEnabled())
+				ballDrive.power(false);
+		}
+	} else {
+		ballDrive.enable(false);
+		ballDrive.power(false);
+	}
+}
+
+bool BotController::isEnginePowered() {
+	return ballDrive.isPowered() && ballDrive.isEnabled();
+}
+
 void BotController::menuLoop(char ch, bool continously) {
 	bool cmd = true;
 	switch (ch) {
 	case 'b':
 		balanceMode((mode==BALANCE)?OFF:BALANCE);
 		break;
-	case 'p':
-		if (power.isMotorOn()) {
-			command->println("turning motor power off");
-			power.motorPower(false);
-		} else {
-			command->println("turning motor power on");
-			power.motorPower(true);
-		}
-		break;
-
 	case 'e':
 		ballDrive.pushMenu();
 		break;
@@ -85,6 +94,15 @@ void BotController::menuLoop(char ch, bool continously) {
 	case 's':
 		state.pushMenu();
 		break;
+	case 'p': {
+		bool doIt = !isEnginePowered();
+		logger->print("turn engine ");
+		logger->println((doIt?"on":"off"));
+		powerEngine(doIt);
+		logger->print("engine is ");
+		logger->println((isEnginePowered()?"on":"off"));
+		break;
+	}
 	case '1':
 		memory.persistentMem.logConfig.performanceLog = !memory.persistentMem.logConfig.performanceLog;
 		break;
@@ -93,6 +111,9 @@ void BotController::menuLoop(char ch, bool continously) {
 		break;
 	case '3':
 		memory.persistentMem.logConfig.debugBalanceLog = !memory.persistentMem.logConfig.debugBalanceLog;
+		break;
+	case '4':
+		memory.persistentMem.logConfig.debugStateLog = !memory.persistentMem.logConfig.debugStateLog;
 		break;
 
 	case 'h':
@@ -124,6 +145,8 @@ void BotController::loop() {
 	// check if new IMU orientation is there
 	imu.loop();
 
+	ballDrive.loop();
+
 	// drive the lifter
 	lifter.loop();
 
@@ -134,22 +157,26 @@ void BotController::loop() {
 	float dT = 0; // set by isNewValueAvailable
 	if ((mode == BALANCE) && imu.isNewValueAvailable(dT)) {
 		IMUSample sensorSample = imu.getSample();
+		ballDrive.loop();
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		BotMovement currentMovement;
 		ballDrive.getSpeed(sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::Y].angle,
 				           currentMovement.speedX, currentMovement.speedY, currentMovement.omega);
+		ballDrive.loop();
 
 		// compute new movement out of current angle, angular velocity, velocity, position
 		state.update(dT, currentMovement, sensorSample, targetBotMovement);
-		uint32_t balanceTime = micros()-now;
 
+		ballDrive.loop();
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
 
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
+		ballDrive.loop();
+		uint32_t balanceTime = micros()-now;
 
 		if (memory.persistentMem.logConfig.debugBalanceLog) {
 			logger->print("a=(");
@@ -186,6 +213,15 @@ void BotController::loop() {
 			logger->print("ms");
 			logger->println(")");
 		}
+	} else {
+		/*
+		float angleX, angleY;
+		ballDrive.getSetAngle(angleX,  angleY);
+		float speedX, speedY, omega;
+		ballDrive.getSpeed(angleX, angleY, speedX, speedY, omega);
+		ballDrive.setSpeed(angleX, angleY, omega, angleX, angleY);
+		delay(2);
+		*/
 	}
 }
 

@@ -14,11 +14,15 @@ void BotMemory::setDefaults() {
 	memory.persistentMem.ctrlConfig.initDefaultValues();
 	memory.persistentMem.motorControllerConfig.initDefaultValues();
 	memory.persistentMem.imuControllerConfig.initDefaultValues();
+	memory.persistentMem.logConfig.initDefaultValues();
 }
 
 
 void BotMemory::println() {
-	logger->println("EEPROM memory:");
+	logger->print("EEPROM memory (V");
+	logger->print(EEPROMVersion());
+	logger->println("):");
+
 	persistentMem.ctrlConfig.print();
 	logger->println();
 	persistentMem.motorControllerConfig.print();;
@@ -39,15 +43,15 @@ void StateControllerConfig::initDefaultValues() {
 	//  ball position, ball speed, ball acceleration,
 	//  body position, body speed, body acceleration,
 	// omega)
-	angleWeight				= 39.0;
-	angularSpeedWeight		= 21.00;
+	angleWeight				= 0*39.0 + 10;
+	angularSpeedWeight		= 0*21.00;
 
-	ballPositionWeight		= 1.5;
+	ballPositionWeight		= 0*1.5;
 	ballVelocityWeight		= 0.0;
-	ballAccelWeight			= 1.3;
+	ballAccelWeight			= 0*1.3;
 
 	bodyPositionWeight		= 0.0;
-	bodyVelocityWeight		= 9.0;
+	bodyVelocityWeight		= 0*9.0;
 	bodyAccelWeight			= 0.0;
 
 	omegaWeight				= 0.0;
@@ -57,12 +61,14 @@ void LogConfig::null() {
 	performanceLog = false;
 	calibrationLog = false;
 	debugBalanceLog = false;
+	debugStateLog = false;
 }
 
 void LogConfig::initDefaultValues() {
-	performanceLog = false;
+	performanceLog = true;
 	calibrationLog = false;
-	debugBalanceLog = false;
+	debugBalanceLog = true;
+	debugStateLog = false;
 }
 
 void LogConfig::print() {
@@ -71,18 +77,20 @@ void LogConfig::print() {
 	logger->println(performanceLog?"true":"false");
 	logger->print("   calib  :");
 	logger->println(calibrationLog?"true":"false");
-	logger->print("   debug  :");
+	logger->print("   balance:");
 	logger->println(debugBalanceLog?"true":"false");
+	logger->print("   state  :");
+	logger->println(debugStateLog?"true":"false");
 
 }
 
 void MotorConfig::initDefaultValues() {
 	// at slow speeds PID controller is aggressivly keeping the position
-	pid_position.Kp = 3.0;
+	pid_position.Kp = 1.5;
 	pid_position.Ki = 1.2;
-	pid_position.Kd = 0.000;
+	pid_position.Kd = 0.0;
 
-	pid_speed.Kp = .8;
+	pid_speed.Kp = .9;
 	pid_speed.Ki = 0.5;
 	pid_speed.Kd = 0.02;
 

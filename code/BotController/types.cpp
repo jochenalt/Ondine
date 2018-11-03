@@ -4,7 +4,7 @@
 #include <setup.h>
 
 BotMovement::BotMovement() {
-	init();
+	reset();
 }
 
 BotMovement::BotMovement(float speedX, float speedY, float omega) {
@@ -32,7 +32,7 @@ BotMovement& BotMovement::operator=(const BotMovement& t) {
 		return *this;
 }
 
-void BotMovement::init() {
+void BotMovement::reset() {
 	speedX = 0;
 	speedY = 0;
 	accelX = 0;

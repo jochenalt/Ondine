@@ -13,6 +13,7 @@
 
 #include <Engine.h>
 #include <MenuController.h>
+#include <PowerRelay.h>
 #include <types.h>
 
 class BallDrive : public Menuable {
@@ -26,22 +27,38 @@ public:
 	void enable(bool doit) {
 		engine.enable(doit);
 	}
+
+	void power(bool doit) {
+		powerRelay.power(doit);
+		delay(50); // await powering up, otherwise motors get PWM signals without having full power yet which gives a jerk
+	}
+
+	bool isPowered() {
+		return powerRelay.isPowered();
+	}
+
 	bool isEnabled() { return engine.isEnabled(); };
 
 	// set delta wheel angle to zero
 	void reset() {
 		engine.resetWheelAngleChange();
 		lastCall_ms = millis();
+
+		// set speed to zero
+		float wheelSpeed[3] = {0,0,0};
+		engine.setWheelSpeed(wheelSpeed);
 	}
 
 	void setSpeed(float speedX,float speedY, float omega, float angleX, float angleY);
 	void getSpeed(float angleX, float angleY, float &speedX,float &speedY,float & omega);
+	void getSetAngle(float &angleX, float &angleY);
 
 	virtual void menuLoop(char ch, bool continously);
 	virtual void printHelp();
 
 	Engine engine;
 	Kinematix kinematics;
+	PowerRelay powerRelay;
 
 private:
 	uint32_t lastCall_ms = 0;	// used by getSpeed to compute time since last call
@@ -52,6 +69,9 @@ private:
 	float menuOmega = 0;
 	float menuAngleX = 0;
 	float menuAngleY = 0;
+
+	float lastSetAngleX = 0;
+	float lastSetAngleY = 0;
 
 };
 

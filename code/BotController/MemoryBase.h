@@ -51,6 +51,9 @@ class MemoryBase {
 
 		// to be called in uC's loop, checks whether a call of delaySave has to be written to EEPROM
 		void loop(uint32_t now);
+
+		int EEPROMVersion();
+
 	private:
 		void read();
 		boolean isEEPROMInitialized();

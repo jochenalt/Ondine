@@ -216,7 +216,7 @@ void IMU::loop() {
 
 			float angularVelocity[3];
 			angularVelocity[Dimension::X] = mpu9250->getGyroY_rads();
-			angularVelocity[Dimension::Y] = mpu9250->getGyroX_rads();
+			angularVelocity[Dimension::Y] = -mpu9250->getGyroX_rads();
 			angularVelocity[Dimension::Z] = mpu9250->getGyroZ_rads();
 
 			// invoke kalman filter separately per plane

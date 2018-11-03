@@ -21,6 +21,7 @@ void BallDrive::printHelp() {
 	command->println();
 	command->println("Ball Drive");
 	command->println();
+	command->println("p - power");
 	command->println("e - enable");
 	command->println("q/a - modify x speed");
 	command->println("w/s - modify y speed");
@@ -36,6 +37,11 @@ void BallDrive::printHelp() {
 	command->println("ESC");
 }
 
+void BallDrive::getSetAngle(float &angleX, float &angleY) {
+	angleX = lastSetAngleX;
+	angleY = lastSetAngleY;
+}
+
 void BallDrive::setSpeed(float speedX,float speedY, float omega,
 		 	 	 	 	 float angleX, float angleY) {
 
@@ -45,6 +51,7 @@ void BallDrive::setSpeed(float speedX,float speedY, float omega,
 											angleX,angleY,
 											newWheelSpeed);
 
+	/*
 	logger->print("kinematics:(");
 	logger->print(speedX);
 	logger->print(",");
@@ -58,6 +65,7 @@ void BallDrive::setSpeed(float speedX,float speedY, float omega,
 	logger->print(",");
 	logger->print(newWheelSpeed[2]);
 	logger->println(")");
+	*/
 	// send new speed to motors
 	engine.setWheelSpeed(newWheelSpeed);
 }
@@ -96,6 +104,12 @@ void BallDrive::loop() {
 	// drive the motors
 	// due to use of brushless motors, this requires permanent invokation of loop
 	engine.loop();
+
+	static uint32_t lastTime = 0;
+	uint32_t now = millis();
+	if (now-lastTime > 1)
+		logger->print(now-lastTime);
+	lastTime = now;
 }
 
 void BallDrive::menuLoop(char ch, bool continously) {
@@ -168,6 +182,15 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		break;
 	case 'h':
 		printHelp();
+		break;
+	case 'p':
+		if (isPowered()) {
+			command->println("turning motor power off");
+			powerRelay.power(false);
+		} else {
+			command->println("turning motor power on");
+			powerRelay.power(true);
+		}
 		break;
 	case 't':
 		kinematics.testKinematics();
