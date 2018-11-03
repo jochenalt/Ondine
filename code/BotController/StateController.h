@@ -19,7 +19,6 @@ class ControlPlane {
 		float targetAngle;			// expected angle out of acceleration
 		float bodyVelocity;			// absolute velocity of body
 		float targetBallPos;		// absolute to-be position of the bot
-		float absBallPos;			// absolute as-is position of the bot
 		float lastTargetAngle;
 		float lastTargetBodyPos;
 		float lastTargetBallPos;
@@ -66,7 +65,7 @@ public:
 	void loop();
 
 	virtual void printHelp();
-	virtual void menuLoop(char ch);
+	virtual void menuLoop(char ch, bool continously);
 
 	void update( float dT, const BotMovement& currentMovement,
 			 	 const IMUSample& sensorSample,

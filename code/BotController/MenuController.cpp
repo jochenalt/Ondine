@@ -70,20 +70,18 @@ void MenuController::pushMenu(const Menuable* menu) {
 void MenuController::loop() {
 	if 	(command->available()) {
 		char ch = command->read();
-		uint32_t start = micros();
-		uint32_t middle = micros();
+		uint32_t now = millis();
 
 		if (ch == 27)
 			popMenu();
-		else
-			menus[activeMenuStack[activeMenuStackPtr]]->menuLoop(ch);
-		uint32_t end = micros();
-		/*
-		logger->print("menu=");
-		logger->print(middle-start);
-		logger->print(" ");
-		logger->print(end-middle);
-		logger->println();
-		*/
+		else {
+			if ((now - lastKeyPressed) < 200) {
+				continousKeyPressCounter++;
+			} else
+				continousKeyPressCounter = 0;
+
+			lastKeyPressed = now;
+			menus[activeMenuStack[activeMenuStackPtr]]->menuLoop(ch, continousKeyPressCounter>5);
+		}
 	}
 }

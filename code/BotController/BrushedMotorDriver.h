@@ -42,7 +42,7 @@ public:
 	void loop();
 
 	virtual void printHelp();
-	virtual void menuLoop(char ch);
+	virtual void menuLoop(char ch, bool continously);
 private:
 	void setMotorPower(float speed);
 

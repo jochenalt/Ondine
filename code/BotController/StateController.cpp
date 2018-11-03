@@ -14,7 +14,6 @@
 
 
 void ControlPlane::init () {
-			absBallPos = 0;		// absolute position of the base (origin = position when the bot has been switched on)
 			lastTargetAngle = 0;
 			lastAbsBodyPos = 0; // absolute body position of last loop
 			lastAbsBallPos = 0;
@@ -36,22 +35,22 @@ void ControlPlane::init () {
 			accel  = 0;
 			filteredSpeed = 0;
 
-			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of preveious state controller
+			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
 			outputSpeedFilter.init(FIR::LOWPASS,
-					         0.01f  			/* allowed ripple in passband in amplitude is 1% */,
-							 1.0e-6 			/* supression in stop band is 60db */,
+					         1.0e-3  			/* allowed ripple in passband in amplitude is 0.1% */,
+							 1.0e-6 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 100 Hz */
 							 15.0f  			/* low pass cut off frequency */);
 
 			inputBallAccel.init(FIR::LOWPASS,
-					         0.1f  			    /* allowed ripple in passband in amplitude is 10% */,
-							 1.0e-6 			/* supression in stop band is 60db */,
+					         1.0e-3  			/* allowed ripple in passband in amplitude is 0.1% */,
+							 1.0e-6 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 100 Hz */
 							 50.0f  			/* low pass cut off frequency */);
 
 			inputBodyAccel.init(FIR::LOWPASS,
-							  0.1f  			/* allowed ripple in passband in amplitude is 10% */,
-							  1.0e-6 			/* supression in stop band is 60db */,
+					          1.0e-3  			/* allowed ripple in passband in amplitude is 0.1% */,
+							  1.0e-6 			/* supression in stop band is -60db */,
 							  SampleFrequency,  /* 100 Hz */
 							  50.0f  			/* low pass cut off frequency */);
 }
@@ -81,13 +80,22 @@ void ControlPlane::update(float dT,
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 
 		// compute absolute position of the ball's centre of gravity
-		absBallPos += currentSpeed*dT - sensorAngularVelocity*dT/TWO_PI * CentreOfGravityHeight;
+		float absBallPos = lastAbsBallPos + currentSpeed*dT - sensorAngle * CentreOfGravityHeight;
+
+		// compute absolute position of the body, assume sin(x) = x for small angle
+		float absBodyPos = absBallPos + sensorAngle * CentreOfGravityHeight;
+
+		// compute the velocity the ball has
+		float absBallSpeed = (absBallPos - lastAbsBallPos)/dT;
+
+		// compute the ABSOLUTE velocity the robot's body really has
+		float absBodySpeed = (absBodyPos - lastAbsBodyPos)/dT;
 
 		// compute absolute position of the position where we expect the bot to be
-		targetBallPos += targetSpeed*dT  - targetAngle/TWO_PI * CentreOfGravityHeight;
+		targetBallPos += targetSpeed*dT  - targetAngle * CentreOfGravityHeight;
 
 		// compute absolute position of the body where we expect the bot to be
-		float targetBodyPos = targetBallPos + targetAngle/TWO_PI * CentreOfGravityHeight;
+		float targetBodyPos = targetBallPos + targetAngle * CentreOfGravityHeight;
 
 		// compute target speed of ball (considering the dynamic tilt angle)
 		float targetBodySpeed = (targetBodyPos - lastTargetBodyPos)/dT;
@@ -95,17 +103,9 @@ void ControlPlane::update(float dT,
 		// compute target speed of ball (considering the dynamic tilt angle)
 		float targetBallSpeed = (targetBallPos - lastTargetBallPos)/dT;
 
-		// compute ABSOLUTE position of the body, assume sin(x) = x for small angle
-		float absBodyPos = absBallPos + sensorAngle*CentreOfGravityHeight;
-
 		// compute acceleration the robot is supposed to have
 		float targetAbsAccel = (targetSpeed - lastTargetSpeed)/dT;
 
-		// compute the ABSOLUTE velocity the robot's body really has
-		float absBodySpeed = (absBodyPos - lastAbsBodyPos)/dT;
-
-		// compute the ABSOLUTE velocity the ball has
-		float absBallSpeed = (absBallPos - lastAbsBallPos)/dT;
 
 		// compute the ABSOLUTE acceleration the robot's body really has
 		// bodyAccel = inputBodyAccel.update((absBodySpeed-lastBodySpeed) / dT);
@@ -246,12 +246,12 @@ void StateController::update(float dT, const BotMovement& currentMovement,
 	// ramp up target speed and omega with a trapezoid profile of constant acceleration
 	rampedTargetMovement.rampUp(targetBotMovement, dT);
 	if (memory.persistentMem.logConfig.debugBalanceLog)
-		logger->print("planeX:");
+		logger->print("   planeX:");
 	planeX.update(dT, currentMovement.speedX, rampedTargetMovement.speedX, rampedTargetMovement.accelX, currentMovement.omega, rampedTargetMovement.omega, sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::X].angularVelocity);
 
 	if (memory.persistentMem.logConfig.debugBalanceLog) {
 		logger->println();
-		logger->print("planeY:");
+		logger->print("   planeY:");
 	}
 	planeY.update(dT, currentMovement.speedY, rampedTargetMovement.speedY, rampedTargetMovement.accelY, currentMovement.omega, rampedTargetMovement.omega, sensorSample.plane[Dimension::Y].angle, sensorSample.plane[Dimension::Y].angularVelocity);
 	if (memory.persistentMem.logConfig.debugBalanceLog) {
@@ -274,16 +274,123 @@ void StateController::printHelp() {
 	command->println();
 	command->println("State controller");
 	command->println();
+
+	command->println("q/Q - angle weight");
+	command->println("a/A - angular speed weight");
+	command->println("w/W - ball position weight");
+	command->println("s/S - ball speed weight");
+	command->println("r/r - ball accel weight");
+	command->println("f/f - body position weight");
+	command->println("t/T - body speed weight");
+	command->println("g/G - body accel weight");
+	command->println("z/Z - omega weight");
+
+	command->println("0   - set null");
+
+	command->println();
 	command->println("ESC");
 }
 
-void StateController::menuLoop(char ch) {
+void StateController::menuLoop(char ch, bool continously) {
 
 		bool cmd = true;
 		switch (ch) {
 		case 'h':
 			printHelp();
 			break;
+		case '0':
+			memory.persistentMem.ctrlConfig.angleWeight = 0.0;
+			memory.persistentMem.ctrlConfig.angularSpeedWeight = 0.0;
+			memory.persistentMem.ctrlConfig.ballPositionWeight = 0.0;
+			memory.persistentMem.ctrlConfig.ballVelocityWeight = 0.;
+			memory.persistentMem.ctrlConfig.ballAccelWeight = 0.0;
+			memory.persistentMem.ctrlConfig.bodyPositionWeight = 0.;
+			memory.persistentMem.ctrlConfig.bodyVelocityWeight = 0.0;
+			memory.persistentMem.ctrlConfig.bodyAccelWeight = 0.;
+			memory.persistentMem.ctrlConfig.omegaWeight = 0.;
+			break;
+		case 'q':
+			memory.persistentMem.ctrlConfig.angleWeight -= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 'Q':
+			memory.persistentMem.ctrlConfig.angleWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+		case 'a':
+			memory.persistentMem.ctrlConfig.angularSpeedWeight -= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 'A':
+			memory.persistentMem.ctrlConfig.angularSpeedWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+		case 'w':
+			memory.persistentMem.ctrlConfig.ballPositionWeight -= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 'W':
+			memory.persistentMem.ctrlConfig.ballPositionWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+		case 'y':
+			memory.persistentMem.ctrlConfig.ballVelocityWeight-= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 'Y':
+			memory.persistentMem.ctrlConfig.ballVelocityWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+		case 'r':
+			memory.persistentMem.ctrlConfig.ballAccelWeight-= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 'R':
+			memory.persistentMem.ctrlConfig.ballAccelWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+		case 'f':
+			memory.persistentMem.ctrlConfig.bodyPositionWeight +=continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+		case 'F':
+			memory.persistentMem.ctrlConfig.bodyPositionWeight-= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 't':
+			memory.persistentMem.ctrlConfig.bodyPositionWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+
+			cmd = true;
+			break;
+		case 'T':
+			memory.persistentMem.ctrlConfig.bodyAccelWeight-= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 'g':
+			memory.persistentMem.ctrlConfig.bodyAccelWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+		case 'G':
+			memory.persistentMem.ctrlConfig.bodyAccelWeight -= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+
 		default:
 			cmd = false;
 			break;

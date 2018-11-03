@@ -176,7 +176,7 @@ void BrushedMotorDriver::printHelp() {
 	command->println("ESC");
 }
 
-void BrushedMotorDriver::menuLoop(char ch) {
+void BrushedMotorDriver::menuLoop(char ch, bool continously) {
 
 		bool cmd = true;
 		switch (ch) {

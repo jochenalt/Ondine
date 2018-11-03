@@ -44,7 +44,7 @@ public:
 	bool isEnabled() { return enabled; };
 
 	virtual void printHelp();
-	virtual void menuLoop(char ch);
+	virtual void menuLoop(char ch, bool continously);
 private:
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3

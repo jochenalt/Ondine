@@ -109,7 +109,7 @@ void Engine::printHelp() {
 	command->println("ESC");
 }
 
-void Engine::menuLoop(char ch) {
+void Engine::menuLoop(char ch, bool continously) {
 	bool cmd = true;
 	switch (ch) {
 	case '0':

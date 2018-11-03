@@ -40,19 +40,11 @@ void BotController::printHelp() {
 	command->println("Bot Menu");
 	command->println();
 	command->println("e - ball engine");
+	command->println("s - state controller");
 	command->println("i - imu");
 	command->println("l - lifter");
 	command->println("p - power on/off");
 	command->println("b - balance on");
-	command->println("q/Q - angle weight");
-	command->println("a/A - angular speed weight");
-	command->println("w/W - ball position weight");
-	command->println("s/S - ball speed weight");
-	command->println("r/r - ball accel weight");
-	command->println("f/f - body position weight");
-	command->println("t/T - body speed weight");
-	command->println("g/G - body accel weight");
-	command->println("z/Z - omega weight");
 
 	command->println();
 	command->println("1 - performance log on");
@@ -62,7 +54,7 @@ void BotController::printHelp() {
 	command->println("m - save configuration to epprom");
 }
 
-void BotController::menuLoop(char ch) {
+void BotController::menuLoop(char ch, bool continously) {
 	bool cmd = true;
 	switch (ch) {
 	case 'b':
@@ -77,92 +69,11 @@ void BotController::menuLoop(char ch) {
 			power.motorPower(true);
 		}
 		break;
-	case 'q':
-		memory.persistentMem.ctrlConfig.angleWeight -= 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd =true;
-		break;
-	case 'Q':
-		memory.persistentMem.ctrlConfig.angleWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
-	case 'a':
-		memory.persistentMem.ctrlConfig.angularSpeedWeight -= 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd =true;
-		break;
-	case 'A':
-		memory.persistentMem.ctrlConfig.angularSpeedWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
-	case 'w':
-		memory.persistentMem.ctrlConfig.ballPositionWeight -= 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd =true;
-		break;
-	case 'W':
-		memory.persistentMem.ctrlConfig.ballPositionWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
-	case 'y':
-		memory.persistentMem.ctrlConfig.ballVelocityWeight-= 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd =true;
-		break;
-	case 'Y':
-		memory.persistentMem.ctrlConfig.ballVelocityWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
-	case 'r':
-		memory.persistentMem.ctrlConfig.ballAccelWeight-= 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd =true;
-		break;
-	case 'R':
-		memory.persistentMem.ctrlConfig.ballAccelWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
-	case 'f':
-		memory.persistentMem.ctrlConfig.bodyPositionWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
-	case 'F':
-		memory.persistentMem.ctrlConfig.bodyPositionWeight-= 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd =true;
-		break;
-	case 't':
-		memory.persistentMem.ctrlConfig.bodyPositionWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-
-		cmd = true;
-		break;
-	case 'T':
-		memory.persistentMem.ctrlConfig.bodyAccelWeight-= 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd =true;
-		break;
-	case 'g':
-		memory.persistentMem.ctrlConfig.bodyAccelWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
-	case 'G':
-		memory.persistentMem.ctrlConfig.bodyAccelWeight += 0.01;
-		memory.persistentMem.ctrlConfig.print();
-		cmd = true;
-		break;
 
 	case 'e':
 		ballDrive.pushMenu();
 		break;
-	case 's':
+	case 'm':
 		memory.save();
 		break;
 	case 'l':
@@ -170,6 +81,9 @@ void BotController::menuLoop(char ch) {
 		break;
 	case 'i':
 		imu.pushMenu();
+		break;
+	case 's':
+		state.pushMenu();
 		break;
 	case '1':
 		memory.persistentMem.logConfig.performanceLog = !memory.persistentMem.logConfig.performanceLog;
@@ -228,6 +142,7 @@ void BotController::loop() {
 
 		// compute new movement out of current angle, angular velocity, velocity, position
 		state.update(dT, currentMovement, sensorSample, targetBotMovement);
+		uint32_t balanceTime = micros()-now;
 
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
@@ -235,7 +150,6 @@ void BotController::loop() {
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
-		uint32_t balanceTime = micros()-now;
 
 		if (memory.persistentMem.logConfig.debugBalanceLog) {
 			logger->print("a=(");
@@ -243,6 +157,12 @@ void BotController::loop() {
 			logger->print(",");
 			logger->print(degrees(sensorSample.plane[Dimension::Y].angle));
 			logger->print(") ");
+			logger->print("a'=(");
+			logger->print(degrees(sensorSample.plane[Dimension::X].angularVelocity));
+			logger->print(",");
+			logger->print(degrees(sensorSample.plane[Dimension::Y].angularVelocity));
+			logger->print(") ");
+
 			logger->print("v=(");
 			logger->print(currentMovement.speedX);
 			logger->print(",");

@@ -32,23 +32,23 @@ public:
 	void initDefaultValues();
 	void print() {
 		logger->println("state controller configuration:");
-		logger->print("   angleWeight:");
+		logger->print("   angle=");
 		logger->print(angleWeight);
-		logger->print(" angularSpeedWeight:");
+		logger->print(" angularSpeed=");
 		logger->println(angularSpeedWeight);
-		logger->print("   ballVelocityWeight:");
+		logger->print("   ballVelocity=");
 		logger->print(ballVelocityWeight);
-		logger->print(" ballPositionWeight:");
+		logger->print(" ballPosition=");
 		logger->print(ballPositionWeight);
-		logger->print(" ballAccelWeight:");
+		logger->print(" ballAccel=");
 		logger->println(ballAccelWeight);
-		logger->print("   bodyVelocityWeight:");
+		logger->print("   bodyVelocity=");
 		logger->print(bodyVelocityWeight);
-		logger->print(" bodyPositionWeight:");
+		logger->print(" bodyPosition=");
 		logger->print(bodyPositionWeight);
-		logger->print(" bodyAccelWeight:");
+		logger->print(" bodyAccel=");
 		logger->println(bodyAccelWeight);
-		logger->print("   omegaWeight:");
+		logger->print("   omega=");
 		logger->println(omegaWeight);
 	}
 

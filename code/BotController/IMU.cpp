@@ -210,13 +210,13 @@ void IMU::loop() {
 			// denote the coordsystem for angualr velocity in the direction of the according axis
 			// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
 			float tilt[3];
-			tilt[Dimension::X] =  -mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
+			tilt[Dimension::X] = -mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
 			tilt[Dimension::Y] = -mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
 			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) - HALF_PI;
 
 			float angularVelocity[3];
 			angularVelocity[Dimension::X] = mpu9250->getGyroY_rads();
-			angularVelocity[Dimension::Y] = -mpu9250->getGyroX_rads();
+			angularVelocity[Dimension::Y] = mpu9250->getGyroX_rads();
 			angularVelocity[Dimension::Z] = mpu9250->getGyroZ_rads();
 
 			// invoke kalman filter separately per plane
@@ -302,7 +302,7 @@ void IMU::printHelp() {
 	command->println("ESC");
 }
 
-void IMU::menuLoop(char ch) {
+void IMU::menuLoop(char ch, bool continously) {
 	bool cmd = true;
 	switch (ch) {
 	case 'r':

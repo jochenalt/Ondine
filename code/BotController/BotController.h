@@ -27,7 +27,7 @@ public:
 	virtual ~BotController() {};
 
 	void printHelp();
-	void menuLoop(char ch);
+	void menuLoop(char ch, bool continously);
 
 	// turn on/off the balancing mode
 	void balanceMode(Mode mode) {

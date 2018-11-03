@@ -490,7 +490,7 @@ void BrushlessMotorDriver::printHelp() {
 	command->println("ESC");
 }
 
-void BrushlessMotorDriver::menuLoop(char ch) {
+void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 
 		bool cmd = true;
 		bool pidChange = false;

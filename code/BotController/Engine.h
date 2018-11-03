@@ -41,7 +41,7 @@ public:
 	// return everage time [s] of an engine loop
 	float getAvrLoopTime() { return ((float)averageTime_us)/1000000.0; };
 
-	virtual void menuLoop(char ch);
+	virtual void menuLoop(char ch, bool continously);
 	virtual void printHelp();
 private:
 	BrushlessMotorDriver* wheel[3] = { NULL, NULL, NULL };

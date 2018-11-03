@@ -37,7 +37,7 @@ public:
 	void setSpeed(float speedX,float speedY, float omega, float angleX, float angleY);
 	void getSpeed(float angleX, float angleY, float &speedX,float &speedY,float & omega);
 
-	virtual void menuLoop(char ch);
+	virtual void menuLoop(char ch, bool continously);
 	virtual void printHelp();
 
 	Engine engine;

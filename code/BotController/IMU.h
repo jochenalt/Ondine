@@ -62,7 +62,7 @@ public:
 	// call when stable and upright before starting up
 	void calibrate();
 	virtual void printHelp();
-	virtual void menuLoop(char ch);
+	virtual void menuLoop(char ch, bool continously);
 
 private:
 	int init();

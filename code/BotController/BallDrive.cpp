@@ -98,7 +98,7 @@ void BallDrive::loop() {
 	engine.loop();
 }
 
-void BallDrive::menuLoop(char ch) {
+void BallDrive::menuLoop(char ch, bool continously) {
 	bool cmd = true;
 	switch (ch) {
 	case '0':
