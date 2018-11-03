@@ -276,6 +276,11 @@ void IMU::loop() {
 	}
 }
 
+float IMU::getAvrLoopTime() {
+	return averageTime_us;
+}
+
+
 // returns true once when a new value is available.
 bool IMU::isNewValueAvailable(float &dT) {
 	bool tmp = valueIsUpdated;

@@ -64,6 +64,9 @@ public:
 	virtual void printHelp();
 	virtual void menuLoop(char ch, bool continously);
 
+	// return average time consumed by loop in [s]
+	float getAvrLoopTime();
+
 private:
 	int init();
 
