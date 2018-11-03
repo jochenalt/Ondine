@@ -142,5 +142,5 @@ void IMUConfig::print() {
 	logger->print(degrees(nullOffsetY));
 	logger->print(",");
 	logger->print(degrees(nullOffsetZ));
-	logger->print("))");
+	logger->println("))");
 }
