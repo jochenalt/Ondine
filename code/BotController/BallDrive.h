@@ -2,7 +2,8 @@
  * BallEngine.h
  *
  * Takes three single wheels, adds kinematics and provides methods to
- * set and retrieve speed in terms of (x,y,omega)
+ * set and retrieve speed in terms of (x,y,omega).
+ *
  *
  *  Created on: 05.10.2018
  *      Author: JochenAlt
@@ -49,29 +50,42 @@ public:
 		engine.setWheelSpeed(wheelSpeed);
 	}
 
+	// Set the speed of the ball drive in terms of a cartesic coord system.
+	// Considers the tilt angle in computation
 	void setSpeed(float speedX,float speedY, float omega, float angleX, float angleY);
+
+	// return speed as measured by encoders (might be different from speed set in method above)
 	void getSpeed(float angleX, float angleY, float &speedX,float &speedY,float & omega);
+
+	// return tilt angles as set in setSpeed
 	void getSetAngle(float &angleX, float &angleY);
 
+	// ascii menu, menu commands are implemented there
 	virtual void menuLoop(char ch, bool continously);
+
+	// print ascii help to console
 	virtual void printHelp();
 
-	Engine engine;
-	Kinematix kinematics;
-	PowerRelay powerRelay;
+	float getAvrLoopTime() { return engine.getAvrLoopTime(); };
 
 private:
+	Engine engine;				// three independent motors
+	Kinematix kinematics;		// computation of speedx/speedy/omega into wheel speed
+	PowerRelay powerRelay;		// turn on power for motors
+
+
 	uint32_t lastCall_ms = 0;	// used by getSpeed to compute time since last call
 
-	// members used by the asci menu only
+	float lastSetAngleX = 0;	// title angleX set in setSpeed
+	float lastSetAngleY = 0;	// title angleY set in setSpeed
+
+	// members used by the ascii menu only
 	float menuSpeedX = 0;
 	float menuSpeedY = 0;
 	float menuOmega = 0;
 	float menuAngleX = 0;
 	float menuAngleY = 0;
 
-	float lastSetAngleX = 0;
-	float lastSetAngleY = 0;
 
 };
 

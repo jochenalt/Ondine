@@ -104,12 +104,6 @@ void BallDrive::loop() {
 	// drive the motors
 	// due to use of brushless motors, this requires permanent invokation of loop
 	engine.loop();
-
-	static uint32_t lastTime = 0;
-	uint32_t now = millis();
-	if (now-lastTime > 1)
-		logger->print(now-lastTime);
-	lastTime = now;
 }
 
 void BallDrive::menuLoop(char ch, bool continously) {
