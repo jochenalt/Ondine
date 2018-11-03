@@ -31,7 +31,7 @@ public:
 
 	void power(bool doit) {
 		powerRelay.power(doit);
-		delay(50); // await powering up, otherwise motors get PWM signals without having full power yet which gives a jerk
+		delay(100); // await powering up, otherwise motors get PWM signals without having full power yet which gives a jerk
 	}
 
 	bool isPowered() {
