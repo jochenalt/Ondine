@@ -73,11 +73,15 @@ public:
 	float getSpeedY();
 	float getOmega();
 
+	// return average time consumed by update in [s]
+	float getAvrLoopTime() { return avrLoopTime; };
+
 private:
 	ControlPlane planeX;
 	ControlPlane planeY;
 
 	BotMovement rampedTargetMovement;
+	float avrLoopTime = 0;
 };
 
 #endif /* STATECONTROLLER_H_ */

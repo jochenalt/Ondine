@@ -247,20 +247,24 @@ void StateController::reset() {
 void StateController::update(float dT, const BotMovement& currentMovement,
 							 const IMUSample& sensorSample,
 							 const BotMovement& targetBotMovement) {
+
+	uint32_t start = millis();
 	// ramp up target speed and omega with a trapezoid profile of constant acceleration
 	rampedTargetMovement.rampUp(targetBotMovement, dT);
-	if (memory.persistentMem.logConfig.debugBalanceLog)
+	if (memory.persistentMem.logConfig.debugStateLog)
 		logger->print("   planeX:");
 	planeX.update(dT, currentMovement.speedX, rampedTargetMovement.speedX, rampedTargetMovement.accelX, currentMovement.omega, rampedTargetMovement.omega, sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::X].angularVelocity);
 
-	if (memory.persistentMem.logConfig.debugBalanceLog) {
+	if (memory.persistentMem.logConfig.debugStateLog) {
 		logger->println();
 		logger->print("   planeY:");
 	}
 	planeY.update(dT, currentMovement.speedY, rampedTargetMovement.speedY, rampedTargetMovement.accelY, currentMovement.omega, rampedTargetMovement.omega, sensorSample.plane[Dimension::Y].angle, sensorSample.plane[Dimension::Y].angularVelocity);
-	if (memory.persistentMem.logConfig.debugBalanceLog) {
+	if (memory.persistentMem.logConfig.debugStateLog) {
 		logger->println();
 	}
+	uint32_t end = millis();
+	avrLoopTime = (avrLoopTime + ((float)(end - start)*0.001))*0.5;
 }
 
 float StateController::getSpeedX() {
