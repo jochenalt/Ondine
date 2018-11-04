@@ -162,7 +162,7 @@ void BotController::loop() {
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		BotMovement currentMovement;
 		ballDrive.getSpeed(sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::Y].angle,
-				           currentMovement.speedX, currentMovement.speedY, currentMovement.omega);
+				           currentMovement.speedX, currentMovement.speedY, currentMovement.omega, currentMovement.posX, currentMovement.posY);
 
 		// call this as often as possible to get a smooth motor movement
 		// the call above contains kinematics from wheel speed to cartesian speed, this takes just below 1ms
@@ -186,8 +186,6 @@ void BotController::loop() {
 
 		if (logTimer.isDue_ms(1000,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
-				float posX, posY;
-				state.getBodyPos(posX,posY);
 				logger->print("a=(");
 				logger->print(degrees(sensorSample.plane[Dimension::X].angle));
 				logger->print(",");
@@ -198,16 +196,7 @@ void BotController::loop() {
 				logger->print(",");
 				logger->print(degrees(sensorSample.plane[Dimension::Y].angularVelocity));
 				logger->print(") ");
-				logger->print("p=(");
-				logger->print(posX);
-				logger->print(",");
-				logger->print(posY);
-				logger->print(") ");
-				logger->print("v=(");
-				logger->print(currentMovement.speedX);
-				logger->print(",");
-				logger->print(currentMovement.speedY);
-				logger->print(") ");
+				currentMovement.print();
 				logger->print(" state=(");
 				logger->print(state.getSpeedX());
 				logger->print(",");
@@ -225,6 +214,15 @@ void BotController::loop() {
 				logger->print(ballDrive.getAvrLoopTime()*1000.0);
 				logger->print("ms");
 				logger->println(")");
+			}
+		}
+	} else {
+		BotMovement currentMovement;
+		ballDrive.getSpeed(0, 0, currentMovement.speedX, currentMovement.speedY, currentMovement.omega, currentMovement.posX, currentMovement.posY);
+
+		if (logTimer.isDue_ms(1000,millis())) {
+			if (memory.persistentMem.logConfig.debugBalanceLog) {
+				currentMovement.print();
 			}
 		}
 	}

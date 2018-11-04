@@ -72,7 +72,7 @@ void BallDrive::setSpeed(float speedX,float speedY, float omega,
 
 // compute the current speed since the last invocation.
 // returns 0 when called first (assuming the we start without motion)
-void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY, float &omega) {
+void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY, float &omega, float &posX, float &posY ) {
 
 	// this function required
 	uint32_t now = millis();
@@ -93,6 +93,9 @@ void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY
 		kinematics.computeActualSpeed(  currentWheelSpeed,
 										angleX, angleY,
 										speedX, speedY, omega);
+
+		posX += dT*speedX;
+		posY += dT*speedY;
 	} else {
 			speedX = 0;
 			speedY = 0;

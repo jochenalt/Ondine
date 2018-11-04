@@ -134,7 +134,7 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	if (now_us < lastTurnTime_us) {
 		logger->println("time overflow!!!");
 		timePassed_us = (4294967295 - timePassed_us) + now_us;
-		logger->print("timepased=");
+		logger->print("timepassed=");
 		logger->println(timePassed_us);
 	}
 	lastTurnTime_us = now_us;
@@ -147,17 +147,24 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 		logger->println("ms");
 	}
 
-	// accelerate to target speed
+	// increase reference speed to reach target speed
 	float speedDiff = targetMotorSpeed - currentReferenceMotorSpeed;
-
+	// limit speed diff to
 	speedDiff = constrain(speedDiff, -abs(targetAcc)*timePassed_s, +abs(targetAcc)*timePassed_s);
-
 	currentReferenceMotorSpeed += speedDiff;
-	if (timePassed_s > 0.0001) // max call frequency should be 1000Hz
-		currentReferenceMotorAccel = speedDiff/timePassed_s;
 
-	// compute angle difference compared to last invokation
+	// increase reference angle with given speed
+	float prevReferenceAngle = referenceAngle;
 	referenceAngle += currentReferenceMotorSpeed * timePassed_s * TWO_PI;
+
+	// if speed is too high, reference angle runs away of the real angle as
+	// indicated by the encoder. Limit that in order to prevent a increasing gap
+	if (abs(referenceAngle - encoderAngle) > maxAngleError) {
+		referenceAngle = constrain(referenceAngle,
+										encoderAngle - maxAngleError,
+										encoderAngle + maxAngleError);
+		currentReferenceMotorSpeed = sgn(currentReferenceMotorSpeed) * abs(prevReferenceAngle-referenceAngle)/(timePassed_s*TWO_PI);
+	}
 
 	return timePassed_s;
 }
@@ -172,7 +179,6 @@ void BrushlessMotorDriver::reset() {
 	magneticFieldAngle = 0;				// [rad] angle of the induced magnetic field 0=1 = 2PI
 	advanceAngle = 0;
 	currentReferenceMotorSpeed = 0;		// [rev/s]
-	currentReferenceMotorAccel = 0;		// [rev/s]
 	measuredMotorSpeed = 0;				// [rev/s]
 }
 
@@ -376,7 +382,6 @@ void BrushlessMotorDriver::enable(bool doit) {
 			referenceAngle = 0;					// [rad] target angle of the rotor
 			lastReferenceAngle = 0;				// [rad]
 			currentReferenceMotorSpeed = 0;		// [rev/s]
-			currentReferenceMotorAccel = 0;
 			targetMotorSpeed = 0;
 			targetAcc = 0;
 			advanceAngle = 0;

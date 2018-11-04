@@ -70,7 +70,6 @@ private:
 	float magneticFieldAngle = 0;			// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float advanceAngle = 0;
 	float currentReferenceMotorSpeed = 0;	// [rev/s] current speed, ramp function towards targetSpeed
-	float currentReferenceMotorAccel = 0;	// [rev/s^2] current acceleration , ramp function towards targetAccel
 	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
 	float lastReferenceAngle = 0;			// [rad] reference angle of last call
 	float encoderAngle = 0;					// [rad] current measured angle coming from encoder

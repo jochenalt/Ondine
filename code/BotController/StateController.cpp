@@ -39,28 +39,28 @@ void ControlPlane::reset () {
 			outputSpeedFilter.init(FIR::LOWPASS,
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-6 			/* supression in stop band is -60db */,
-							 SampleFrequency, 	/* 100 Hz */
-							 20.0f  			/* low pass cut off frequency */);
+							 SampleFrequency, 	/* 200 Hz */
+							 25.0f  			/* low pass cut off frequency */);
 
 			inputBallAccel.init(FIR::LOWPASS,
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-6 			/* supression in stop band is -60db */,
-							 SampleFrequency, 	/* 100 Hz */
+							 SampleFrequency, 	/* 200 Hz */
 							 50.0f  			/* low pass cut off frequency */);
 
 			inputBodyAccel.init(FIR::LOWPASS,
 					          1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							  1.0e-6 			/* supression in stop band is -60db */,
-							  SampleFrequency,  /* 100 Hz */
+							  SampleFrequency,  /* 200 Hz */
 							  50.0f  			/* low pass cut off frequency */);
 }
 
-void ControlPlane::getBodyPos(float& bodyPos) {
-	bodyPos = lastAbsBodyPos;
+float ControlPlane::getBodyPos() {
+	return lastAbsBodyPos;
 }
-void ControlPlane::getBallPos(float& ballPos) {
-	ballPos = lastAbsBallPos;
 
+float ControlPlane::getBallPos() {
+	return lastAbsBallPos;
 }
 
 
@@ -214,13 +214,12 @@ void ControlPlane::update(float dT,
 		}
 		accel = constrain(-error,-MaxBotAccel, MaxBotAccel);
 
-		// accelerate only if not yet on max speed
+		// accelerate if not on max speed already
 		if ((sgn(speed) != sgn(accel)) ||
 			(abs(speed) < MaxBotSpeed)) {
 			speed += accel * dT;
 			speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
 		}
-
 
 		lastTargetAngle = targetAngle;
 		lastAbsBodyPos = absBodyPos;
@@ -341,22 +340,22 @@ void StateController::menuLoop(char ch, bool continously) {
 			memory.persistentMem.ctrlConfig.omegaWeight = 0.;
 			break;
 		case 'q':
-			memory.persistentMem.ctrlConfig.angleWeight -= continously?0.5:0.1;
+			memory.persistentMem.ctrlConfig.angleWeight -= continously?2.0:0.5;
 			memory.persistentMem.ctrlConfig.print();
 			cmd =true;
 			break;
 		case 'Q':
-			memory.persistentMem.ctrlConfig.angleWeight += continously?0.5:0.1;
+			memory.persistentMem.ctrlConfig.angleWeight += continously?2.0:0.5;
 			memory.persistentMem.ctrlConfig.print();
 			cmd = true;
 			break;
 		case 'a':
-			memory.persistentMem.ctrlConfig.angularSpeedWeight -= continously?0.5:0.1;
+			memory.persistentMem.ctrlConfig.angularSpeedWeight -= continously?2.0:0.5;
 			memory.persistentMem.ctrlConfig.print();
 			cmd =true;
 			break;
 		case 'A':
-			memory.persistentMem.ctrlConfig.angularSpeedWeight += continously?0.5:0.1;
+			memory.persistentMem.ctrlConfig.angularSpeedWeight += continously?2.0:0.5;
 			memory.persistentMem.ctrlConfig.print();
 			cmd = true;
 			break;

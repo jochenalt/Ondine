@@ -30,15 +30,18 @@ void computeEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ);
 class BotMovement {
 public:
 	BotMovement();
-	BotMovement(float speedX, float speedY, float omega);
+	BotMovement(float speedX, float speedY, float omega, float posX, float posY);
 	BotMovement(const BotMovement& t);
 	BotMovement& operator=(const BotMovement& t);
 	void reset();
+	void print();
 
 	// increase movement towards target in a jerkless manner,
 	// i.e. the acceleration used increases with a constant rate
 	void rampUp(const BotMovement& target, float dT);
 
+	float posX = 0;
+	float posY = 0;
 	float speedX = 0;
 	float speedY = 0;
 	float accelX = 0;

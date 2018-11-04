@@ -48,6 +48,9 @@ public:
 		// set speed to zero
 		float wheelSpeed[3] = {0,0,0};
 		engine.setWheelSpeed(wheelSpeed);
+
+		posX = 0;
+		posY = 0;
 	}
 
 	// Set the speed of the ball drive in terms of a cartesic coord system.
@@ -55,7 +58,7 @@ public:
 	void setSpeed(float speedX,float speedY, float omega, float angleX, float angleY);
 
 	// return speed as measured by encoders (might be different from speed set in method above)
-	void getSpeed(float angleX, float angleY, float &speedX,float &speedY,float & omega);
+	void getSpeed(float angleX, float angleY, float &speedX,float &speedY,float & omega, float& posX, float& posY);
 
 	// return tilt angles as set in setSpeed
 	void getSetAngle(float &angleX, float &angleY);
@@ -73,7 +76,8 @@ private:
 	Kinematix kinematics;		// computation of speedx/speedy/omega into wheel speed
 	PowerRelay powerRelay;		// turn on power for motors
 
-
+	float posX = 0;
+	float posY = 0;
 	uint32_t lastCall_ms = 0;	// used by getSpeed to compute time since last call
 
 	float lastSetAngleX = 0;	// title angleX set in setSpeed

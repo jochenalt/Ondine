@@ -2,12 +2,34 @@
 #include <Arduino.h>
 #include <types.h>
 #include <setup.h>
+#include <Util.h>
 
 BotMovement::BotMovement() {
 	reset();
 }
 
-BotMovement::BotMovement(float speedX, float speedY, float omega) {
+void BotMovement::print() {
+	logger->print("p=(");
+	logger->print((int)posX);
+	logger->print(",");
+	logger->print((int)posY);
+	logger->print(")");
+	logger->print(" v=(");
+	logger->print(speedX,1);
+	logger->print(",");
+	logger->print(speedY,1);
+	logger->print(")");
+	logger->print(" a=(");
+	logger->print(accelX,1);
+	logger->print(",");
+	logger->print(accelY,1);
+	logger->print(")");
+
+}
+
+BotMovement::BotMovement(float speedX, float speedY, float omega, float posX, float posY) {
+	this->posX = posX;
+	this->posY = posY;
 	this->speedX = speedX;
 	this->speedY = speedY;
 	this->accelX = accelX;
@@ -16,23 +38,29 @@ BotMovement::BotMovement(float speedX, float speedY, float omega) {
 }
 
 BotMovement::BotMovement(const BotMovement& t) {
-		speedX = t.speedX;
-		speedY = t.speedY;
-		accelX = t.accelX;
-		accelY = t.accelY;
-		omega = t.omega;
+	posX = t.posX;
+	posY = t.posY;
+	speedX = t.speedX;
+	speedY = t.speedY;
+	accelX = t.accelX;
+	accelY = t.accelY;
+	omega = t.omega;
 }
 
 BotMovement& BotMovement::operator=(const BotMovement& t) {
-		speedX = t.speedX;
-		speedY = t.speedY;
-		accelX = t.accelX;
-		accelY = t.accelY;
-		omega = t.omega;
-		return *this;
+	posX = t.posX;
+	posY = t.posY;
+	speedX = t.speedX;
+	speedY = t.speedY;
+	accelX = t.accelX;
+	accelY = t.accelY;
+	omega = t.omega;
+	return *this;
 }
 
 void BotMovement::reset() {
+	posX = 0;
+	posY = 0;
 	speedX = 0;
 	speedY = 0;
 	accelX = 0;
