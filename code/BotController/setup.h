@@ -28,11 +28,11 @@ const int EncoderPins[3][2] = { { 12,   11 },
 
 
 // possible values of sample frequency depend on IMU MP9150 are 1000/n with n=0..32,
-// i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz
-const int SampleFrequency 					= 166; 					// [Hz] loop time as imposed by IMU frequency
+// i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz
+const int SampleFrequency 					= 200; 					// [Hz] loop time as imposed by IMU frequency
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time of the general loop
 
-const float CentreOfGravityHeight = 300; 							// [mm] center of gravity height from ground
+const float CentreOfGravityHeight = 200; 							// [mm] center of gravity height from ground
 const float MaxBotSpeed = 1800; 									// [mm/s] max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot

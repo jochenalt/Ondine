@@ -50,6 +50,8 @@ class ControlPlane {
 						float pActualOmega, float pToBeOmega,
 						float pTilt, float pAngularSpeed);
 		void print();
+		void getBallPos(float& ballPos);
+		void getBodyPos(float& bodyPos);
 };
 
 
@@ -72,6 +74,16 @@ public:
 	float getSpeedX();
 	float getSpeedY();
 	float getOmega();
+
+	void getBodyPos(float& bodyPosX, float& bodyPosY) {
+		planeX.getBodyPos(bodyPosX);
+		planeY.getBodyPos(bodyPosY);
+	}
+	void getBallPos(float& ballPosX, float& ballPosY) {
+		planeX.getBallPos(ballPosX);
+		planeY.getBallPos(ballPosY);
+	}
+
 
 	// return average time consumed by update in [s]
 	float getAvrLoopTime() { return avrLoopTime; };

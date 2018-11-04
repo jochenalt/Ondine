@@ -88,7 +88,7 @@ int IMU::init() {
 	// setting low pass bandwith
 	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ);
 
-	// set update rate of gyro to 100 Hz
+	// set update rate of gyro to 200 Hz
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
 
 	mpu9250->setGyroBiasX_rads(0);

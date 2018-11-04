@@ -186,6 +186,8 @@ void BotController::loop() {
 
 		if (logTimer.isDue_ms(1000,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
+				float posX, posY;
+				state.getBodyPos(posX,posY);
 				logger->print("a=(");
 				logger->print(degrees(sensorSample.plane[Dimension::X].angle));
 				logger->print(",");
@@ -196,7 +198,11 @@ void BotController::loop() {
 				logger->print(",");
 				logger->print(degrees(sensorSample.plane[Dimension::Y].angularVelocity));
 				logger->print(") ");
-
+				logger->print("p=(");
+				logger->print(posX);
+				logger->print(",");
+				logger->print(posY);
+				logger->print(") ");
 				logger->print("v=(");
 				logger->print(currentMovement.speedX);
 				logger->print(",");
