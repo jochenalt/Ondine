@@ -17,7 +17,7 @@ PatternBlinker ledBlinker(LED_PIN, 50 /* ms */); // one bit in the patterns abov
 HardwareSerial* logger = &Serial5;			// UART used to log
 HardwareSerial* command = &Serial5;			// UART used to log
 
-BotController botController;
+BotController& botController = BotController::getInstance();
 
 i2c_t3* Wires[3] = { &Wire, &Wire1, &Wire2};
 i2c_t3* IMUWire = NULL;

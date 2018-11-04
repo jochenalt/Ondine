@@ -86,6 +86,11 @@ void BotController::menuLoop(char ch, bool continously) {
 	case 'm':
 		memory.save();
 		break;
+	case 'd':
+		memory.setDefaults();
+		memory.println();
+
+		break;
 	case 'l':
 		lifter.pushMenu();
 		break;

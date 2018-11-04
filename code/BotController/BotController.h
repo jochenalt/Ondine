@@ -23,7 +23,10 @@ public:
 	enum Mode { OFF, BALANCE };
 	void setup();
 	void loop();
-	BotController() {};
+	static BotController& getInstance() {
+		static BotController instance;
+		return instance;
+	}
 	virtual ~BotController() {};
 
 	void printHelp();
@@ -40,7 +43,13 @@ public:
 		ballDrive.reset();
 		state.reset();
 	}
+
+	bool isBalancing() {
+		return mode == BALANCE;
+	}
 private:
+	BotController() {};
+
 	BallDrive ballDrive;
 	MenuController menuController;
 	IMU imu;

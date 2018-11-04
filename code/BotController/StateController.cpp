@@ -11,6 +11,7 @@
 
 #include <MenuController.h>
 #include <StateController.h>
+#include <BotController.h>
 
 
 void ControlPlane::reset () {
@@ -39,7 +40,7 @@ void ControlPlane::reset () {
 					         1.0e-3  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-6 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 100 Hz */
-							 15.0f  			/* low pass cut off frequency */);
+							 20.0f  			/* low pass cut off frequency */);
 
 			inputBallAccel.init(FIR::LOWPASS,
 					         1.0e-3  			/* allowed ripple in passband in amplitude is 0.1% */,
@@ -202,7 +203,7 @@ void ControlPlane::update(float dT,
 			logger->print(error);
 			logger->print(")");
 		}
-		accel = constrain(error,-MaxBotAccel, MaxBotAccel);
+		accel = constrain(-error,-MaxBotAccel, MaxBotAccel);
 
 		// accelerate only if not yet on max speed
 		if ((sgn(speed) != sgn(accel)) ||
@@ -292,6 +293,7 @@ void StateController::printHelp() {
 	command->println("t/T - body speed weight");
 	command->println("g/G - body accel weight");
 	command->println("z/Z - omega weight");
+	command->println("b   - balance on/off");
 
 	command->println("0   - set null");
 
@@ -299,12 +301,22 @@ void StateController::printHelp() {
 	command->println("ESC");
 }
 
+
 void StateController::menuLoop(char ch, bool continously) {
 
 		bool cmd = true;
 		switch (ch) {
 		case 'h':
 			printHelp();
+			break;
+		case 'b':
+			BotController::getInstance().balanceMode(BotController::getInstance().isBalancing()?
+											BotController::Mode::OFF:
+											BotController::Mode::BALANCE);
+			if (BotController::getInstance().isBalancing())
+				logger->println("balancing mode on");
+			else
+				logger->println("balancing mode off");
 			break;
 		case '0':
 			memory.persistentMem.ctrlConfig.angleWeight = 0.0;
@@ -318,22 +330,22 @@ void StateController::menuLoop(char ch, bool continously) {
 			memory.persistentMem.ctrlConfig.omegaWeight = 0.;
 			break;
 		case 'q':
-			memory.persistentMem.ctrlConfig.angleWeight -= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.angleWeight -= continously?0.5:0.1;
 			memory.persistentMem.ctrlConfig.print();
 			cmd =true;
 			break;
 		case 'Q':
-			memory.persistentMem.ctrlConfig.angleWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.angleWeight += continously?0.5:0.1;
 			memory.persistentMem.ctrlConfig.print();
 			cmd = true;
 			break;
 		case 'a':
-			memory.persistentMem.ctrlConfig.angularSpeedWeight -= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.angularSpeedWeight -= continously?0.5:0.1;
 			memory.persistentMem.ctrlConfig.print();
 			cmd =true;
 			break;
 		case 'A':
-			memory.persistentMem.ctrlConfig.angularSpeedWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.angularSpeedWeight += continously?0.5:0.1;
 			memory.persistentMem.ctrlConfig.print();
 			cmd = true;
 			break;
@@ -378,13 +390,13 @@ void StateController::menuLoop(char ch, bool continously) {
 			cmd =true;
 			break;
 		case 't':
-			memory.persistentMem.ctrlConfig.bodyPositionWeight += continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.bodyVelocityWeight += continously?0.05:0.01;
 			memory.persistentMem.ctrlConfig.print();
 
 			cmd = true;
 			break;
 		case 'T':
-			memory.persistentMem.ctrlConfig.bodyAccelWeight-= continously?0.05:0.01;
+			memory.persistentMem.ctrlConfig.bodyVelocityWeight -= continously?0.05:0.01;
 			memory.persistentMem.ctrlConfig.print();
 			cmd =true;
 			break;
