@@ -16,6 +16,7 @@
 #include <MenuController.h>
 #include <PowerRelay.h>
 #include <types.h>
+#include <IMU.h>
 
 class BallDrive : public Menuable {
 public:
@@ -48,9 +49,6 @@ public:
 		// set speed to zero
 		float wheelSpeed[3] = {0,0,0};
 		engine.setWheelSpeed(wheelSpeed);
-
-		posX = 0;
-		posY = 0;
 	}
 
 	// Set the speed of the ball drive in terms of a cartesic coord system.
@@ -58,7 +56,7 @@ public:
 	void setSpeed(float speedX,float speedY, float omega, float angleX, float angleY);
 
 	// return speed as measured by encoders (might be different from speed set in method above)
-	void getSpeed(float angleX, float angleY, float &speedX,float &speedY,float & omega, float& posX, float& posY);
+	void getSpeed(const IMUSample &sample,float & omega,State& x, State& y);
 
 	// return tilt angles as set in setSpeed
 	void getSetAngle(float &angleX, float &angleY);
@@ -76,12 +74,13 @@ private:
 	Kinematix kinematics;		// computation of speedx/speedy/omega into wheel speed
 	PowerRelay powerRelay;		// turn on power for motors
 
-	float posX = 0;
-	float posY = 0;
 	uint32_t lastCall_ms = 0;	// used by getSpeed to compute time since last call
 
 	float lastSetAngleX = 0;	// title angleX set in setSpeed
 	float lastSetAngleY = 0;	// title angleY set in setSpeed
+
+	float lastSpeedX = 0;
+	float lastSpeedY = 0;
 
 	// members used by the ascii menu only
 	float menuSpeedX = 0;

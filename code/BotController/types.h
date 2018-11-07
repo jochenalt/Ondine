@@ -27,10 +27,83 @@ void computeEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ);
 // convenience macro: set a 3-vector
 #define ASSIGN(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
 
+
+
+class Point {
+public:
+	Point();
+	Point(float x, float y);
+	Point(const Point& t);
+	Point& operator=(const Point& t);
+	void print();
+
+	float x = 0;
+	float y = 0;
+};
+
+
+class Speed {
+public:
+	Speed();
+	Speed(float x, float y);
+	Speed(const Speed& t);
+	Speed& operator=(const Speed& t);
+	void print();
+
+	float x = 0;
+	float y = 0;
+};
+
+class Pose {
+public:
+	Pose();
+	Pose(float x, float y, float orientation);
+	Pose(const Point& p, float orientation);
+
+	Pose(const Pose& t);
+	Pose& operator=(const Pose& t);
+	void print();
+
+	Point p;
+	float orientation; // [rad];
+};
+
+
+class Speed3D {
+public:
+	Speed3D();
+	Speed3D(float x, float y, float orientation);
+	Speed3D(const Speed& p, float orientation);
+
+	Speed3D(const Speed3D& t);
+	Speed3D& operator=(const Speed3D& t);
+	void print();
+
+	Speed p;
+	float orientation; // [rad/s];
+};
+
+class State {
+public:
+	State();
+	State(float pos, float speed, float accel);
+	State(const State& t);
+	State& operator=(const State& t);
+	void reset();
+	void print();
+
+	float pos = 0;	 	// [mm]
+	float speed = 0;	// [mm/s]
+	float accel = 0;	// [mm/s*s]
+};
+
+
+
 class BotMovement {
 public:
 	BotMovement();
-	BotMovement(float speedX, float speedY, float omega, float posX, float posY);
+	BotMovement(const State &x, const State& y, float omega);
+
 	BotMovement(const BotMovement& t);
 	BotMovement& operator=(const BotMovement& t);
 	void reset();
@@ -40,12 +113,8 @@ public:
 	// i.e. the acceleration used increases with a constant rate
 	void rampUp(const BotMovement& target, float dT);
 
-	float posX = 0;
-	float posY = 0;
-	float speedX = 0;
-	float speedY = 0;
-	float accelX = 0;
-	float accelY = 0;
+	State x;
+	State y;
 	float omega = 0;
 };
 

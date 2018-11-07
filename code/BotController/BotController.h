@@ -20,23 +20,33 @@
 
 class BotController : public Menuable {
 public:
-	enum Mode { OFF, BALANCE };
-	void setup();
-	void loop();
+	enum BotMode { OFF, BALANCING };
+
+	// singleton
 	static BotController& getInstance() {
 		static BotController instance;
 		return instance;
 	}
+
+	// to be called before anything else happens.
+	// initializes motors, imu, state controller, everything
+	void setup();
+
+	// to be called in main loop as often as possible.
+	// takes are of fetching the IMU values and doing the balancing part
+	void loop();
+
 	virtual ~BotController() {};
 
 	void printHelp();
 	void menuLoop(char ch, bool continously);
 
+	// turn the engine's power  on/off
 	void powerEngine(bool doIt);
 	bool isEnginePowered();
 
 	// turn on/off the balancing mode
-	void balanceMode(Mode mode) {
+	void balanceMode(BotMode mode) {
 		this->mode = mode;
 
 		// set current position as starting psition
@@ -45,7 +55,7 @@ public:
 	}
 
 	bool isBalancing() {
-		return mode == BALANCE;
+		return mode == BALANCING;
 	}
 private:
 	BotController() {};
@@ -57,8 +67,9 @@ private:
 	BotMovement targetBotMovement;
 	BrushedMotorDriver lifter;
 	TimePassedBy performanceLogTimer;
-	Mode mode = OFF;
+	BotMode mode = OFF;
 	TimePassedBy logTimer;
+	float avrLoopTime = 0;
 };
 
 #endif /* BOTCONTROLLER_H_ */

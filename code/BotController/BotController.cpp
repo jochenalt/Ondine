@@ -45,6 +45,7 @@ void BotController::printHelp() {
 	command->println("l - lifter");
 	command->println("p - power on/off");
 	command->println("b - balance on");
+	command->println("t - set trajectory");
 
 	command->println();
 	command->println("1 - performance log on");
@@ -78,7 +79,7 @@ void BotController::menuLoop(char ch, bool continously) {
 	bool cmd = true;
 	switch (ch) {
 	case 'b':
-		balanceMode((mode==BALANCE)?OFF:BALANCE);
+		balanceMode((mode==BALANCING)?OFF:BALANCING);
 		break;
 	case 'e':
 		ballDrive.pushMenu();
@@ -136,6 +137,9 @@ void BotController::menuLoop(char ch, bool continously) {
 }
 
 void BotController::loop() {
+	// performance measurement
+	uint32_t start = micros();
+
 	// give other libraries some time
 	yield();
 
@@ -147,6 +151,7 @@ void BotController::loop() {
 
 	// check if new IMU orientation is there
 	imu.loop();
+	IMUSample sensorSample = imu.getSample();
 
 	ballDrive.loop();
 
@@ -156,13 +161,12 @@ void BotController::loop() {
 	// run main balance loop. Timing is determined by IMU that sends an
 	// interrupt everytime a new value is there.
 	float dT = 0; // set by isNewValueAvailable
-	if ((mode == BALANCE) && imu.isNewValueAvailable(dT)) {
-		IMUSample sensorSample = imu.getSample();
+	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		BotMovement currentMovement;
-		ballDrive.getSpeed(sensorSample.plane[Dimension::X].angle, sensorSample.plane[Dimension::Y].angle,
-				           currentMovement.speedX, currentMovement.speedY, currentMovement.omega, currentMovement.posX, currentMovement.posY);
+		ballDrive.getSpeed(sensorSample,
+				           currentMovement.omega, currentMovement.x, currentMovement.y);
 
 		// call this as often as possible to get a smooth motor movement
 		// the call above contains kinematics from wheel speed to cartesian speed, this takes just below 1ms
@@ -183,6 +187,9 @@ void BotController::loop() {
 		// call this as often as possible to get a smooth motor movement
 		// (call above takes just below 1ms, it contains kinematics from cartesian speed to wheel speed)
 		ballDrive.loop();
+
+		uint32_t end = micros();
+		avrLoopTime = (((float)(end-start))/1000000.0 + avrLoopTime)/2.0;
 
 		if (logTimer.isDue_ms(1000,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
@@ -212,13 +219,15 @@ void BotController::loop() {
 				logger->print(state.getAvrLoopTime()*1000.0);
 				logger->print("ms,eng=");
 				logger->print(ballDrive.getAvrLoopTime()*1000.0);
-				logger->print("ms");
-				logger->println(")");
+				logger->print("ms, cpu=");
+				logger->print((avrLoopTime / SamplingTime) * 100.0,0);
+				logger->println(")%");
 			}
 		}
+
 	} else {
 		BotMovement currentMovement;
-		ballDrive.getSpeed(0, 0, currentMovement.speedX, currentMovement.speedY, currentMovement.omega, currentMovement.posX, currentMovement.posY);
+		ballDrive.getSpeed(sensorSample, currentMovement.omega, currentMovement.x, currentMovement.y);
 
 		if (logTimer.isDue_ms(1000,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {

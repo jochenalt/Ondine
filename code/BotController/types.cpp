@@ -9,64 +9,37 @@ BotMovement::BotMovement() {
 }
 
 void BotMovement::print() {
-	logger->print("p=(");
-	logger->print((int)posX);
-	logger->print(",");
-	logger->print((int)posY);
-	logger->print(")");
-	logger->print(" v=(");
-	logger->print(speedX,1);
-	logger->print(",");
-	logger->print(speedY,1);
-	logger->print(")");
-	logger->print(" a=(");
-	logger->print(accelX,1);
-	logger->print(",");
-	logger->print(accelY,1);
-	logger->print(")");
-
+	logger->print("x=");
+	x.print();
+	logger->print(" y=");
+	y.print();
 }
 
-BotMovement::BotMovement(float speedX, float speedY, float omega, float posX, float posY) {
-	this->posX = posX;
-	this->posY = posY;
-	this->speedX = speedX;
-	this->speedY = speedY;
-	this->accelX = accelX;
-	this->accelY = accelY;
+BotMovement::BotMovement(const State &x, const State& y, float omega) {
+	this->x = x;
+	this->y = y;
 	this->omega = omega;
 }
 
 BotMovement::BotMovement(const BotMovement& t) {
-	posX = t.posX;
-	posY = t.posY;
-	speedX = t.speedX;
-	speedY = t.speedY;
-	accelX = t.accelX;
-	accelY = t.accelY;
+	x = t.x;
+	y = t.y;
 	omega = t.omega;
 }
 
 BotMovement& BotMovement::operator=(const BotMovement& t) {
-	posX = t.posX;
-	posY = t.posY;
-	speedX = t.speedX;
-	speedY = t.speedY;
-	accelX = t.accelX;
-	accelY = t.accelY;
+	x = t.x;
+	y = t.y;
 	omega = t.omega;
 	return *this;
 }
 
 void BotMovement::reset() {
-	posX = 0;
-	posY = 0;
-	speedX = 0;
-	speedY = 0;
-	accelX = 0;
-	accelY = 0;
+	x.reset();
+	y.reset();
 	omega = 0;
 }
+
 
 // increase currentSpeed towards newSpeed, adapt currentAcceleration.
 // Consider maximum acceleration MaxBotAccel, and
@@ -95,13 +68,200 @@ void increaseWithDifferentiableAcceleration(float &currentSpeed, float &currentA
 	}
 }
 
+
 void BotMovement::rampUp(const BotMovement& target, float dT) {
-	increaseWithDifferentiableAcceleration(speedX, accelX, target.speedX, dT);
-	increaseWithDifferentiableAcceleration(speedY, accelY, target.speedY, dT);
+	increaseWithDifferentiableAcceleration(x.speed, x.accel, target.x.speed, dT);
+	increaseWithDifferentiableAcceleration(y.speed, y.accel, target.y.speed, dT);
 
 	omega = constrain(target.omega, omega - MaxBotOmegaAccel*dT, omega +  MaxBotOmegaAccel*dT);
 	omega = constrain(omega, -MaxBotOmega, +MaxBotOmega);
 }
+
+
+
+Point::Point() {
+}
+
+void Point::print() {
+	logger->print("(");
+	logger->print(x,1);
+	logger->print(",");
+	logger->print(y,1);
+	logger->print(")");
+
+}
+
+Point::Point(float x, float y) {
+	this->x= x;
+	this->y= y;
+}
+
+Point::Point(const Point& t) {
+	x = t.x;
+	y = t.y;
+}
+
+Point& Point::operator=(const Point& t) {
+	x = t.x;
+	y = t.y;
+	return *this;
+}
+
+
+
+Speed::Speed() {
+}
+
+void Speed::print() {
+	logger->print("(");
+	logger->print(x,1);
+	logger->print(",");
+	logger->print(y,1);
+	logger->print(")");
+
+}
+
+Speed::Speed(float x, float y) {
+	this->x= x;
+	this->y= y;
+}
+
+Speed::Speed(const Speed& t) {
+	x = t.x;
+	y = t.y;
+}
+
+Speed& Speed::operator=(const Speed& t) {
+	x = t.x;
+	y = t.y;
+	return *this;
+}
+
+
+
+Pose::Pose() {
+}
+
+void Pose::print() {
+	logger->print("(");
+	logger->print(p.x,1);
+	logger->print(",");
+	logger->print(p.y,1);
+	logger->print(",");
+	logger->print(orientation,1);
+
+	logger->print(")");
+
+}
+
+Pose::Pose(float x, float y, float orientation) {
+	this->p.x= x;
+	this->p.y= y;
+	this->orientation= orientation;
+
+}
+
+
+Pose::Pose(const Point & p, float orientation) {
+	this->p = p;
+	this->orientation= orientation;
+}
+
+
+Pose::Pose(const Pose& t) {
+	p = t.p;
+	orientation = t.orientation;
+}
+
+Pose& Pose::operator=(const Pose& t) {
+	p = t.p;
+	orientation = t.orientation;
+	return *this;
+}
+
+
+
+Speed3D::Speed3D() {
+}
+
+void Speed3D::print() {
+	logger->print("(");
+	logger->print(p.x,1);
+	logger->print(",");
+	logger->print(p.y,1);
+	logger->print(",");
+	logger->print(orientation,1);
+
+	logger->print(")");
+
+}
+
+Speed3D::Speed3D(float x, float y, float orientation) {
+	this->p.x= x;
+	this->p.y= y;
+	this->orientation= orientation;
+
+}
+
+
+Speed3D::Speed3D(const Speed & p, float orientation) {
+	this->p = p;
+	this->orientation= orientation;
+}
+
+
+Speed3D::Speed3D(const Speed3D& t) {
+	p = t.p;
+	orientation = t.orientation;
+}
+
+Speed3D& Speed3D::operator=(const Speed3D& t) {
+	p = t.p;
+	orientation = t.orientation;
+	return *this;
+}
+
+
+State::State() {
+	reset();
+}
+
+void State::print() {
+	logger->print("(");
+	logger->print((int)pos);
+	logger->print(",");
+	logger->print(speed,1);
+	logger->print(",");
+	logger->print(accel,1);
+	logger->print(")");
+
+}
+
+State::State(float pos, float speed, float accel) {
+	this->pos = pos;
+	this->speed = speed;
+	this->accel = accel;
+}
+
+State::State(const State& t) {
+	pos = t.pos;
+	speed = t.speed;
+	accel = t.accel;
+}
+
+State& State::operator=(const State& t) {
+	pos = t.pos;
+	speed = t.speed;
+	accel = t.accel;
+	return *this;
+}
+
+void State::reset() {
+	pos = 0;
+	speed = 0;
+	accel = 0;
+}
+
 
 
 // return Rz * Ry * Rz

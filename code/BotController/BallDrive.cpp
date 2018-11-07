@@ -72,7 +72,7 @@ void BallDrive::setSpeed(float speedX,float speedY, float omega,
 
 // compute the current speed since the last invocation.
 // returns 0 when called first (assuming the we start without motion)
-void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY, float &omega, float &posX, float &posY ) {
+void BallDrive::getSpeed(const IMUSample &sample, float &omega,State& x, State& y) {
 
 	// this function required
 	uint32_t now = millis();
@@ -91,14 +91,23 @@ void BallDrive::getSpeed(float angleX, float angleY, float &speedX,float &speedY
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		kinematics.computeActualSpeed(  currentWheelSpeed,
-										angleX, angleY,
-										speedX, speedY, omega);
+										sample.plane[X].angle, sample.plane[Y].angle,
+										x.speed, y.speed, omega);
 
-		posX += dT*speedX;
-		posY += dT*speedY;
+		x.pos += dT*x.speed;
+		y.pos += dT*y.speed;
+		x.accel = (x.speed - lastSpeedX)/dT;
+		y.accel = (y.speed - lastSpeedY)/dT;
+		lastSpeedX = x.speed;
+		lastSpeedY = y.speed;
+
 	} else {
-			speedX = 0;
-			speedY = 0;
+			x.speed = 0;
+			y.speed = 0;
+			x.pos = 0;
+			y.pos = 0;
+			x.accel = 0;
+			y.accel = 0;
 			omega = 0;
 	}
 }

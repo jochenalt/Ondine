@@ -14,8 +14,8 @@
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
 
-const float MaxAcceleration = 1000.0; // [rev/s^2]
-const float GearBoxRatio = 18.0/54.0*18.0/54.0; // two timing belts with 54/18*54/18 pulleys = 9
+const float MaxWheelAcceleration = 2000.0; 			// [rev/s^2]
+const float GearBoxRatio = 18.0/54.0*18.0/54.0; 	// two timing belts with 54/18*54/18 pulleys = 1:9
 
 class BrushlessMotorDriver : virtual public Menuable {
 public:
@@ -33,12 +33,12 @@ public:
 	bool loop( );
 
 	// set speed of motor
-	void setMotorSpeed(float speed /* [rotations per second] */, float acc = MaxAcceleration /* [rotations per second^2] */);
+	void setMotorSpeed(float speed /* [rotations per second] */, float acc = MaxWheelAcceleration /* [rotations per second^2] */);
 	float getMotorSpeed();
 	float getIntegratedMotorAngle();
 
 	// set speed of wheel including the gear box
-	void setSpeed(float speed /* [rotations per second] */, float acc = MaxAcceleration /* [rotations per second^2] */);
+	void setSpeed(float speed /* [rotations per second] */, float acc = MaxWheelAcceleration /* [rotations per second^2] */);
 	float getSpeed();
 	float getIntegratedAngle();
 
@@ -91,7 +91,7 @@ private:
 
 	// ascii menu functionality
 	float menuSpeed = 0;
-	int menuAcc = MaxAcceleration;
+	int menuAcc = MaxWheelAcceleration;
 	float menuTorque = 0.0;
 	bool menuEnable = false;
 	uint32_t lastLoopCall_ms = 0;

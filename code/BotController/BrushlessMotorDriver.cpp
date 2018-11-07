@@ -28,8 +28,8 @@ const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 //     / |
 // ---   |-1
 // (but smooth of course)
-float sigmoid(float gain, float x) {
-    return 1.0-2.0/(1.0 + exp(gain * x));
+float sigmoid(float gain /* derivation at 0 */, float x) {
+    return 1.0-2.0/(1.0 + exp(gain*2.0 * x));
 }
 
 
@@ -234,15 +234,6 @@ bool BrushlessMotorDriver::loop() {
 		// turn reference angle along the set speed
 		float timePassed_s = turnReferenceAngle();
 		if (timePassed_s > 0) {
-			/*
-			logger->print("loop t=");
-			logger->print(timePassed_s,4);
-			logger->print(" r=");
-			logger->print(referenceAngle);
-			logger->print(" e=");
-			logger->print(encoderAngle);
-			logger->println();
-			*/
 			// read the current encoder value
 			float prevEncoderAngle = encoderAngle;
 			readEncoder();
@@ -265,8 +256,7 @@ bool BrushlessMotorDriver::loop() {
 
 			// torque is max at -90/+90 degrees
 			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-			// advanceAngle = radians(90) * sgn(controlOutput)*pow(abs(controlOutput)/maxAngleError,0.1);
-            advanceAngle = radians(90) * sigmoid(40.0, controlOutput/maxAngleError);
+            advanceAngle = radians(90) * sigmoid(20.0 /* derivation at 0 */, controlOutput/maxAngleError);
 
 			float torque = abs(controlOutput)/maxAngleError;
 
@@ -283,35 +273,6 @@ bool BrushlessMotorDriver::loop() {
 			// send new pwm value to motor
 			sendPWMDuty(min(abs(torque),1.0));
 
-
-			/*
-			static uint32_t lastoutput = 0;
-
-			if (millis() - lastoutput >  100) {
-				lastoutput = millis();
-			command->print("time=");
-			command->print(timePassed_s*1000.0);
-			command->print("ms v=");
-			command->print(currentReferenceMotorSpeed);
-			command->print("/");
-			command->print(actualMotorSpeed);
-			command->print(" r=");
-			command->print(degrees(referenceAngle));
-			command->print("° enc=");
-			command->print(degrees(encoderAngle));
-			command->print("° err=");
-			command->print(degrees(errorAngle));
-			command->print(" control=");
-			command->print(degrees(controlOutput));
-			command->print(" aa=");
-			command->print(degrees(advanceAngle));
-			command->print("° tq=");
-			command->print(torque);
-			command->print("m=");
-			command->print(degrees(magneticFieldAngle));
-			command->println();
-			}
-		*/
 			return true;
 		}
 	}
@@ -327,20 +288,20 @@ float BrushlessMotorDriver::getMotorSpeed() {
 	return (reverse?-1.0:1.0)*measuredMotorSpeed;
 }
 
+float BrushlessMotorDriver::getIntegratedMotorAngle() {
+	return (reverse?-1.0:1.0)*encoderAngle;
+}
+
 void BrushlessMotorDriver::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
 	setMotorSpeed((reverse?-1.0:1.0)*speed/GearBoxRatio,acc);
 }
 
 float BrushlessMotorDriver::getSpeed() {
-	return (reverse?-1.0:1.0)*measuredMotorSpeed*GearBoxRatio;
+	return getMotorSpeed()*GearBoxRatio;
 }
 
 float BrushlessMotorDriver::getIntegratedAngle() {
-	return (reverse?-1.0:1.0)*referenceAngle*GearBoxRatio;
-}
-
-float BrushlessMotorDriver::getIntegratedMotorAngle() {
-	return (reverse?-1.0:1.0)*referenceAngle;
+	return getIntegratedMotorAngle()*GearBoxRatio;
 }
 
 void BrushlessMotorDriver::enable(bool doit) {

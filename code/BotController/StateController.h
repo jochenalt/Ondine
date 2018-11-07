@@ -12,28 +12,20 @@
 #include <types.h>
 #include <setup.h>
 #include <IMU.h>
+#include <TimePassedBy.h>
 
 class ControlPlane {
 	public:
 		void reset ();
-		float targetAngle;			// expected angle out of acceleration
-		float bodyVelocity;			// absolute velocity of body
 		float lastTargetAngle;
 		float lastTargetBodyPos;
 		float lastTargetBallPos;
-		float lastAbsBallPos;
-		float lastAbsBodyPos;		// absolute as-is position of last loop
+		float lastTargetBallSpeed;
+		float lastBallPos;
+		float lastBodyPos;		// absolute as-is position of last loop
 		float lastBodySpeed;
 		float lastBallSpeed;
-		float lastTargetSpeed;
-		float errorAngle;
-		float errorAngularVelocity;
-		float errorBallPosition;
-		float errorBodyPosition;
-		float errorBallVelocity;
-		float errorBodyVelocity;
-		float errorBodyAccel;
-		float errorBallAccel;
+		float lastTargetBodySpeed;
 
 		float speed;			// speed in x direction [mm/s]
 		float error;			// current error of control loop used to compute the acceleration
@@ -46,13 +38,14 @@ class ControlPlane {
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
 		void update(float dT,
-						float pActualSpeed, float pToBeSpeed, float targetAccel,
+					const State& current, const State& target,
 						float pActualOmega, float pToBeOmega,
-						float pTilt, float pAngularSpeed);
+					const IMUSamplePlane &sensor);
 		void print();
 		float getBodyPos();
 		float getBallPos();
 
+		TimePassedBy logTimer;
 };
 
 
