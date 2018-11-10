@@ -43,15 +43,16 @@ void StateControllerConfig::initDefaultValues() {
 	//  ball position, ball speed, ball acceleration,
 	//  body position, body speed, body acceleration,
 	// omega)
-	angleWeight				= 1200.0; // 39.0;
-	angularSpeedWeight		= 720.0; // 21.00;
+	angleWeight				= 2200.0; // 39.0;
+	angularSpeedWeight		= 1400.0; // 21.00;
+	integratedAngleWeight   = 0;
 
-	ballPositionWeight		= 0*1.5;
+	ballPositionWeight		= 1.5; // 1.5;
 	ballVelocityWeight		= 0.0;
-	ballAccelWeight			= 0*1.3;
+	ballAccelWeight			= 1.3; // 1.3
 
 	bodyPositionWeight		= 0.0;
-	bodyVelocityWeight		= 0*9.0;
+	bodyVelocityWeight		= 9.0; // 9.0
 	bodyAccelWeight			= 0.0;
 
 	omegaWeight				= 0.0;
@@ -129,9 +130,10 @@ void MotorConfig::print() {
 }
 
 void IMUConfig::initDefaultValues() {
-	nullOffsetX = radians(-1.73);
-	nullOffsetY = radians(-1.45);
+	nullOffsetX = radians(1.73);
+	nullOffsetY = radians(-1.80);
 	nullOffsetZ = radians(1.18);
+	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
 void IMUConfig::print() {
@@ -143,4 +145,7 @@ void IMUConfig::print() {
 	logger->print(",");
 	logger->print(degrees(nullOffsetZ));
 	logger->println("))");
+	logger->print("   kalman noise variance=");
+	logger->println(kalmanNoiseVariance,2);
+
 }

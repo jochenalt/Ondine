@@ -65,8 +65,6 @@ void ControlPlane::update(bool log, float dT,
 	if (dT) {
 		// limit position/speed/accel error to that of max tilt error
 		const float maxPositionError = 50.0;
-		const float maxSpeedError    = maxPositionError / dT;
-		const float maxAccelError    = maxSpeedError / dT;
 
 		// target angle out of acceleration, assume tan(x) = x
 		float targetAngle = target.accel/Gravity;
@@ -77,7 +75,7 @@ void ControlPlane::update(bool log, float dT,
 		// compute pos,speed,accel of ball and body
 		float absBallPos   		= current.pos;
 		float absBallSpeed 		= current.speed;
-		float absBallAccel 		= current.accel;
+		float absBallAccel 		= inputBallAccel.update(current.accel);
 
 		float absBodyPos   		= current.pos + sensor.angle * CentreOfGravityHeight;
 		float absBodySpeed 		= (absBodyPos - lastBodyPos)/dT;
@@ -93,26 +91,26 @@ void ControlPlane::update(bool log, float dT,
 		float targetBallAccel 	= (targetBallAccel - lastTargetBallSpeed)/dT;
 
 		// error
-		float error_tilt			= (sensor.angle-targetAngle)/MaxTiltAngle;
-		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity)/MaxTiltAngle;
+		float error_tilt			= (sensor.angle-targetAngle)/MaxTiltAngle;						// 39
+		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity)/MaxTiltAngle;	// 21
 
-		float error_ball_position 	= (absBallPos 	-	targetBallPos)/maxPositionError;
-		float error_ball_velocity 	= (absBallSpeed	- 	targetBallSpeed)/maxPositionError; // [0]
-		float error_ball_accel		= (absBallAccel	-	targetBallAccel)/maxPositionError;
+		float error_ball_position 	= (absBallPos 	-	targetBallPos);			// 1.5
+		float error_ball_velocity 	= (absBallSpeed	- 	targetBallSpeed); 			// [0]
+		float error_ball_accel		= (absBallAccel	-	targetBallAccel);			// 1.3
 
-		float error_body_position	= (absBodyPos	-	targetBodyPos)/maxPositionError; // [0]
-		float error_body_velocity	= (absBodySpeed	-	targetBodySpeed)/maxPositionError;
-		float error_body_accel		= (absBodyAccel	-	targetBodyAccel)/maxPositionError;    // [0]
+		float error_body_position	= (absBodyPos	-	targetBodyPos); 			// [0]
+		float error_body_velocity	= (absBodySpeed	-	targetBodySpeed);			// 9
+		float error_body_accel		= (absBodyAccel	-	targetBodyAccel);    		// [0]
 
 		float error_centripedal     = targetOmega * target.speed;
-
-		error_tilt = constrain(error_tilt, -1.0, MaxTiltAngle);
-		error_ball_position = constrain(error_ball_position, -1.0, maxPositionError);
-		error_body_position = constrain(error_body_position, -maxPositionError, maxPositionError);
+		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
+		if (config.ballPositionWeight > 0.01)
+			error_ball_position = constrain(error_ball_position,  -config.angleWeight*MaxTiltAngle/config.ballPositionWeight, -config.angleWeight*MaxTiltAngle/config.ballPositionWeight);
+		if (config.bodyPositionWeight > 0.01)
+			error_body_position = constrain(error_body_position,  -config.angleWeight*MaxTiltAngle/config.bodyPositionWeight, -config.angleWeight*MaxTiltAngle/config.bodyPositionWeight);
 
 		// sum up all weighted errors
-		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
-		float error =	+ config.angleWeight*error_tilt + memory.persistentMem.ctrlConfig.angularSpeedWeight*error_angular_speed
+		float error =	+ config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed
 						+ config.ballPositionWeight*error_ball_position + config.ballVelocityWeight*error_ball_velocity + config.ballAccelWeight*error_ball_accel
 						+ config.bodyPositionWeight*error_ball_position + config.bodyVelocityWeight*error_body_velocity + config.bodyAccelWeight*error_body_accel
 						+ config.omegaWeight * error_centripedal;
@@ -261,6 +259,8 @@ void StateController::printHelp() {
 
 	command->println("q/Q - angle weight");
 	command->println("a/A - angular speed weight");
+	command->println("e/D - integrated angle");
+
 	command->println("w/W - ball position weight");
 	command->println("s/S - ball speed weight");
 	command->println("r/r - ball accel weight");
@@ -314,6 +314,17 @@ void StateController::menuLoop(char ch, bool continously) {
 			memory.persistentMem.ctrlConfig.print();
 			cmd = true;
 			break;
+		case 'e':
+			memory.persistentMem.ctrlConfig.integratedAngleWeight-= continously?2.0:0.5;
+			memory.persistentMem.ctrlConfig.print();
+			cmd =true;
+			break;
+		case 'E':
+			memory.persistentMem.ctrlConfig.integratedAngleWeight += continously?2.0:0.5;
+			memory.persistentMem.ctrlConfig.print();
+			cmd = true;
+			break;
+
 		case 'a':
 			memory.persistentMem.ctrlConfig.angularSpeedWeight -= continously?2.0:0.5;
 			memory.persistentMem.ctrlConfig.print();

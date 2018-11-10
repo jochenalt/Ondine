@@ -45,6 +45,11 @@ public:
 		logger->print(angularSpeedWeight);
 		logger->print("(");
 		logger->print(defValue.angularSpeedWeight);
+
+		logger->print(" intAngle=");
+		logger->print(integratedAngleWeight);
+		logger->print("(");
+		logger->print(defValue.integratedAngleWeight);
 		logger->println(")");
 		logger->print("   ballPos=");
 		logger->print(ballPositionWeight);
@@ -85,6 +90,8 @@ public:
 
 	float angleWeight;
 	float angularSpeedWeight;
+	float integratedAngleWeight;
+
 	float ballVelocityWeight;
 	float ballPositionWeight;
 	float ballAccelWeight;
@@ -115,6 +122,7 @@ class IMUConfig {
 	float nullOffsetX;
 	float nullOffsetY;
 	float nullOffsetZ;
+	float kalmanNoiseVariance;
 };
 
 

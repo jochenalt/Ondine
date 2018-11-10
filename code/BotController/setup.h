@@ -11,7 +11,7 @@ const float Gravity_mm = Gravity*1000.0;							// [mm/s^2]
 
 
 // --- mechanical constants ---
-const float CentreOfGravityHeight = 200; 							// [mm] center of gravity height from ground
+const float CentreOfGravityHeight = 180; 							// [mm] center of gravity height from ground
 const float MaxBotSpeed = 1800; 									// [mm/s] max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot

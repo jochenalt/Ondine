@@ -25,7 +25,6 @@ void BotController::setup() {
 	registerMenuController(&menuController);
 	ballDrive.setup(&menuController);
 	imu.setup(&menuController);
-	imu.setup();
 	state.setup(&menuController);
 	lifter.setup(&menuController);
 	lifter.setupMotor(LifterEnablePin, LifterIn1Pin, LifterIn2Pin,LifterCurrentSensePin);
@@ -54,6 +53,7 @@ void BotController::printHelp() {
 	command->println("4 - state log on");
 
 	command->println("m - save configuration to epprom");
+	command->println("M - reset to factory settings");
 }
 
 void BotController::powerEngine(bool doIt) {
@@ -86,6 +86,11 @@ void BotController::menuLoop(char ch, bool continously) {
 		break;
 	case 'm':
 		memory.save();
+		logger->println("EEPROM saved");
+		break;
+	case 'M':
+		memory.setDefaults();
+		logger->println("EPPROM reset to factory settings");
 		break;
 	case 'd':
 		memory.setDefaults();
@@ -169,13 +174,8 @@ void BotController::loop() {
 	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
-		// logger->print("BEFORE");
-		// currentMovement.print();
-		// logger->println();
 		ballDrive.getSpeed(sensorSample,currentMovement);
-		// logger->print("AFTER");
-		// currentMovement.print();
-		// logger->println();
+
 		// call this as often as possible to get a smooth motor movement
 		// the call above contains kinematics from wheel speed to cartesian speed, this takes just below 1ms
 		ballDrive.loop();
@@ -232,7 +232,7 @@ void BotController::loop() {
 				logger->print(ballDrive.getAvrLoopTime()*1000.0);
 				logger->print("ms, cpu=");
 				logger->print((avrLoopTime / SamplingTime) * 100.0,0);
-				logger->println(")%");
+				logger->println("%)");
 			}
 		}
 

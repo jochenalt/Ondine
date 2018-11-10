@@ -15,6 +15,8 @@ public:
 
     void setup(float angle);
 
+    void setNoiseVariance(float noiseVariance);
+
     // Set the starting angle
     void setAngle(float angle);
 

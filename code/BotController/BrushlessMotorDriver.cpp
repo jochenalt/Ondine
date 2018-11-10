@@ -85,8 +85,8 @@ void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl, bool re
 	this->reverse = reverse;
 	registerMenuController(menuCtrl);
 
-	// low pass the speed with 20 Hz
-	speedFilter.init(1000/20,SampleFrequency);
+	// low pass the speed with 50 Hz
+	speedFilter.init(1000/50,SampleFrequency);
 }
 
 void BrushlessMotorDriver::setupMotor(int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {

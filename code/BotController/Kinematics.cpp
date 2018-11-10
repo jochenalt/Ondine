@@ -123,13 +123,13 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 	float m02_12 = cm[0][2] * trm[1][2];
 
 
-	float  lVz = -pOmegaZ * BallRadius;
+	float  lVz = pOmegaZ * BallRadius;
 
 	// final computation of kinematics:
 	// compute wheel's speed in rad/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
-	pWheel_speed[0] = ((m01_11 + m02_12) * pVx	         + (-m02_02) * pVy           + ( m01_21 + m02_22         ) * lVz)  ;
-	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( m10_20 + m11_21 + m02_22) * lVz) ;
-	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + (m10_00 - m02_02) * pVy   + (-m10_20 + m11_21 + m02_22) * lVz) ;
+	pWheel_speed[0] = ((m01_11 + m02_12) * pVx	         + (-m02_02) * pVy           + ( -m01_21 - m02_22         ) * lVz)  ;
+	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
+	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
 
 
 	/*logger->println(F("kinematics matrix"));

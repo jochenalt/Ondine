@@ -17,7 +17,7 @@ void KalmanFilter::setup(float angle) {
     Q_angle = 0.001f;	// default 0.001
 
     Q_bias = 0.003f;	// default 0.003
-    R_measure = 0.03f;	// default 0.03
+    R_measure = 0.1;	// default 0.03
 
     this->angle = angle;
     bias = 0.0f;
@@ -26,6 +26,10 @@ void KalmanFilter::setup(float angle) {
     P01 = 0.0f;
     P10 = 0.0f;
     P11 = 0.0f;
+}
+
+void KalmanFilter::setNoiseVariance(float noiseVariance) {
+    R_measure = noiseVariance;	// default 0.03
 }
 
 // The angle should be in degrees and the rate should be in degrees per second and the delta time in seconds

@@ -48,7 +48,8 @@ public:
 	}
 
 	void setup(MenuController* menuCtrl);
-	void setup();
+
+	void setNoiseVariance(float noiseVariance);
 
 	void loop();
 
@@ -76,6 +77,7 @@ private:
 	void updateFilter();
 	MPU9250* mpu9250 = NULL;
 	KalmanFilter kalman[3]; // one kalman filter per dimension
+	float noiseVariance = 0.1; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
 
 	IMUSample currentSample;
 	IMUSample lastSample;
@@ -86,7 +88,6 @@ private:
 	float dT = 0;
 
 	matrix33_t nullRotation;
-	const bool preciseNullCalibration = false;
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */

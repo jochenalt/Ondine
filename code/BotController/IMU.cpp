@@ -85,6 +85,24 @@ bool IMU::isValid() {
 
 void IMU::setup(MenuController *newMenuCtrl) {
 	registerMenuController(newMenuCtrl);
+
+	// in case of repeated calls of setup, delete old memory
+	if (mpu9250 != NULL) {
+		delete mpu9250;
+	}
+
+	// initialize high speed I2C to IMU
+	IMUWire = &Wire;
+	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
+	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
+
+	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_400);
+	int status = mpu9250->begin();
+	if (status < 0) {
+		fatalError("I2C-IMU setup failed ");
+	}
+
+	status = init();
 }
 
 int IMU::init() {
@@ -121,29 +139,12 @@ int IMU::init() {
 	kalman[Dimension::Y].setup(0);
 	kalman[Dimension::Z].setup(0);
 
+	kalman[Dimension::X].setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
+	kalman[Dimension::Y].setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
+	kalman[Dimension::Z].setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
+
 	return status;
 }
-
-void IMU::setup() {
-	// in case of repeated calls of setup, delete old memory
-	if (mpu9250 != NULL) {
-		delete mpu9250;
-	}
-
-	// initialize high speed I2C to IMU
-	IMUWire = &Wire;
-	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
-	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
-
-	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_400);
-	int status = mpu9250->begin();
-	if (status < 0) {
-		fatalError("I2C-IMU setup failed ");
-	}
-
-	status = init();
-}
-
 
 void IMU::calibrate() {
 	logger->println("calibrate imu");
@@ -219,26 +220,18 @@ void IMU::loop() {
 			// denote the coordsystem for angualr velocity in the direction of the according axis
 			// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
 			float tilt[3];
-			tilt[Dimension::X] = -mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
+			tilt[Dimension::X] = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
 			tilt[Dimension::Y] = -mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
 			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) - HALF_PI;
 
 			float angularVelocity[3];
 			angularVelocity[Dimension::X] = mpu9250->getGyroY_rads();
-			angularVelocity[Dimension::Y] = -mpu9250->getGyroX_rads();
+			angularVelocity[Dimension::Y] = mpu9250->getGyroX_rads();
 			angularVelocity[Dimension::Z] = mpu9250->getGyroZ_rads();
 
 			// invoke kalman filter separately per plane
 			for (int i = 0;i<3;i++)
 				kalman[i].update(tilt[i], angularVelocity[i], dT);
-
-			if (preciseNullCalibration) {
-				matrix33_t currentRotation;
-				computeZYXRotationMatrix(kalman[Dimension::X].getAngle(), kalman[Dimension::Y].getAngle(), kalman[Dimension::Z].getAngle(), currentRotation);
-				matrix33_t result;
-				computeZYXRotationMatrix(kalman[Dimension::X].getRate(), kalman[Dimension::Y].getRate(), kalman[Dimension::Z].getRate(), currentRotation);
-				multiplyMatrix(currentRotation, nullRotation, result);
-			}
 
 			lastSample = currentSample;
 			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetX;
@@ -304,12 +297,17 @@ float IMU::getAngularVelocity(Dimension dim) {
 	return currentSample.plane[dim].angularVelocity;
 }
 
+void IMU::setNoiseVariance(float noiseVariance) {
+	kalman[0].setNoiseVariance(noiseVariance);
+	kalman[1].setNoiseVariance(noiseVariance);
+	kalman[2].setNoiseVariance(noiseVariance);
+}
 
 void IMU::printHelp() {
 	command->println("IMU controller");
-	command->println("s - setup");
-	command->println("r - read values");
-	command->println("c - calibrate ");
+	command->println("r    - read values");
+	command->println("c    - calibrate ");
+	command->println("n/M  - set kalman noise variance");
 
 	command->println("ESC");
 }
@@ -320,14 +318,25 @@ void IMU::menuLoop(char ch, bool continously) {
 	case 'r':
 		logIMUValues = !logIMUValues;
 		break;
-	case 's':
-		setup();
-		break;
 	case 'h':
 		printHelp();
 		break;
 	case 'c':
 		calibrate();
+		break;
+	case 'N':
+		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance < 1.0)
+			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance += 0.01;
+		logger->print("kalman noise variance ");
+		logger->println(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,2);
+		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
+		break;
+	case 'n':
+		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance > 0.01)
+			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance -= 0.01;
+		logger->print("kalman noise variance ");
+		logger->println(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,2);
+		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
 		break;
 	case 27:
 		popMenu();
