@@ -14,7 +14,7 @@
 
 #include <MenuController.h>
 #include <types.h>
-#include <IMU.h>
+#include <setup.h>
 
 class Trajectory : public Menuable {
 public:
@@ -25,7 +25,8 @@ public:
 	void loop();
 
 	void setSpeed(const Speed3D& speed);
-	void setOdom(const Pose& odom);
+	void setOdom(const Pose& pose, uint32_t approachingTime, const Speed& targetSpeed);
+	void setAcceleration(float accel = MaxBotAccel);
 
 	BotMovement getCurrentBotMovement();
 
@@ -39,10 +40,11 @@ private:
 	enum MovementMode { SPEED, POSITION };
 
 	Pose targetPose;
-
-	Speed3D targetSpeed;
-
+	Speed targetSpeed;
+	uint32_t targetTime = 0;;
 	BotMovement current;
+
+	uint32_t lastLoopTime = 0;
 };
 
 #endif /* BALLDRIVE_H_ */

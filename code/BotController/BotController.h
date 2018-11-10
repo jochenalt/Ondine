@@ -52,11 +52,15 @@ public:
 		// set current position as starting psition
 		ballDrive.reset();
 		state.reset();
+		currentMovement.reset();
 	}
+
+	void setTarget(const BotMovement& target);
 
 	bool isBalancing() {
 		return mode == BALANCING;
 	}
+	StateController& getStateController() { return state; };
 private:
 	BotController() {};
 
@@ -64,6 +68,7 @@ private:
 	MenuController menuController;
 	IMU imu;
 	StateController state;
+	BotMovement currentMovement;
 	BotMovement targetBotMovement;
 	BrushedMotorDriver lifter;
 	TimePassedBy performanceLogTimer;

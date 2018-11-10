@@ -44,7 +44,7 @@ void StateControllerConfig::initDefaultValues() {
 	//  body position, body speed, body acceleration,
 	// omega)
 	angleWeight				= 2000.0; // 39.0;
-	angularSpeedWeight		= 1260.0; // 21.00;
+	angularSpeedWeight		= 1200.0; // 21.00;
 
 	ballPositionWeight		= 0*1.5;
 	ballVelocityWeight		= 0.0;

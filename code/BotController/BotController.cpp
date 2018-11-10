@@ -136,6 +136,11 @@ void BotController::menuLoop(char ch, bool continously) {
 	}
 }
 
+void BotController::setTarget(const BotMovement& target) {
+	targetBotMovement = target;
+}
+
+
 void BotController::loop() {
 	// performance measurement
 	uint32_t start = micros();
@@ -164,16 +169,14 @@ void BotController::loop() {
 	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
-		BotMovement currentMovement;
-		ballDrive.getSpeed(sensorSample,
-				           currentMovement.omega, currentMovement.x, currentMovement.y);
+		ballDrive.getSpeed(sensorSample,currentMovement);
 
 		// call this as often as possible to get a smooth motor movement
 		// the call above contains kinematics from wheel speed to cartesian speed, this takes just below 1ms
 		ballDrive.loop();
 
 		// compute new movement out of current angle, angular velocity, velocity, position
-		state.update(dT, currentMovement, sensorSample, targetBotMovement);
+		state.update(dT, sensorSample, currentMovement, targetBotMovement);
 
 		// call this as often as possible to get a smooth motor movement
 		// (call above contains lots of computations)
@@ -225,15 +228,6 @@ void BotController::loop() {
 			}
 		}
 
-	} else {
-		BotMovement currentMovement;
-		ballDrive.getSpeed(sensorSample, currentMovement.omega, currentMovement.x, currentMovement.y);
-
-		if (logTimer.isDue_ms(1000,millis())) {
-			if (memory.persistentMem.logConfig.debugBalanceLog) {
-				currentMovement.print();
-			}
-		}
 	}
 }
 

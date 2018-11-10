@@ -37,7 +37,7 @@ class ControlPlane {
 		FIR::Filter inputBodyAccel;
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
-		void update(float dT,
+		void update(bool log,float dT,
 					const State& current, const State& target,
 						float pActualOmega, float pToBeOmega,
 					const IMUSamplePlane &sensor);
@@ -45,7 +45,6 @@ class ControlPlane {
 		float getBodyPos();
 		float getBallPos();
 
-		TimePassedBy logTimer;
 };
 
 
@@ -61,9 +60,10 @@ public:
 	virtual void printHelp();
 	virtual void menuLoop(char ch, bool continously);
 
-	void update( float dT, const BotMovement& currentMovement,
-			 	 const IMUSample& sensorSample,
-				 const BotMovement& targetMovement);
+	void update( 	float dT,
+					const IMUSample& sensorSample,
+					const BotMovement& currentMovement,
+					const BotMovement& targetMovement);
 
 	float getSpeedX();
 	float getSpeedY();
@@ -85,6 +85,8 @@ private:
 
 	BotMovement rampedTargetMovement;
 	float avrLoopTime = 0;
+	TimePassedBy logTimer;
+
 };
 
 #endif /* STATECONTROLLER_H_ */

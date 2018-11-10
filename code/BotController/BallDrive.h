@@ -56,7 +56,7 @@ public:
 	void setSpeed(float speedX,float speedY, float omega, float angleX, float angleY);
 
 	// return speed as measured by encoders (might be different from speed set in method above)
-	void getSpeed(const IMUSample &sample,float & omega,State& x, State& y);
+	void getSpeed(const IMUSample &sample,BotMovement &current);
 
 	// return tilt angles as set in setSpeed
 	void getSetAngle(float &angleX, float &angleY);
