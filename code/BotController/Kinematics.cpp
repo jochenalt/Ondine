@@ -106,7 +106,7 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 	// due to the slightly moved touch point of the ball
 	computeTiltRotationMatrix(pTiltX,pTiltY);
 
-	// logger->println(F("tilt matrix"));
+	// logger->println(F("cm"));
 	// logMatrix(trm);
 
 	// rotate construction matrix by tilt (by multiplying with tilt rotation matrix)
@@ -122,23 +122,38 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 	float m02_22 = cm[0][2] * trm[2][2];
 	float m02_12 = cm[0][2] * trm[1][2];
 
-	// logger->println(F("kinematics matrix"));
-	// logMatrix(km);
 
 	float  lVz = -pOmegaZ * BallRadius;
 
 	// final computation of kinematics:
-	// compute wheel's speed in °/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
-	pWheel_speed[0] = ((m01_11 + m02_12) * pVx	         - (m02_02) * pVy           + ( m01_21 + m02_22         ) * lVz)  ;
-	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  - (m10_00 + m02_02) * pVy  + ( m10_20 + m11_21 + m02_22) * lVz) ;
-	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + (m10_00 - m02_02) * pVy  + (-m10_20 + m11_21 + m02_22) * lVz) ;
+	// compute wheel's speed in rad/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
+	pWheel_speed[0] = ((m01_11 + m02_12) * pVx	         + (-m02_02) * pVy           + ( m01_21 + m02_22         ) * lVz)  ;
+	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( m10_20 + m11_21 + m02_22) * lVz) ;
+	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + (m10_00 - m02_02) * pVy   + (-m10_20 + m11_21 + m02_22) * lVz) ;
 
-	// logger->print(" ws0=");
-	// logger->print(wheelSpeed0);
-	// logger->print(" ws1=");
-	// logger->print(wheelSpeed1);
-	// logger->print(" ws2=");
-	// logger->print(wheelSpeed2);
+
+	/*logger->println(F("kinematics matrix"));
+	float t[3][3];
+	t[0][0] = m01_11 + m02_12;
+	t[0][1] = -m02_02;
+	t[0][2] = (m01_21 + m02_22 )*-BallRadius;
+	t[1][0] = m10_10 + m11_11 + m02_12;
+	t[1][1] =-m10_00 - m02_02;
+	t[1][2] = ( m10_20 + m11_21 + m02_22)*-BallRadius;
+	t[2][0] = -m10_10+ m11_11 + m02_12;
+	t[2][1] = m10_00 - m02_02;
+	t[2][2] = (-m10_20 + m11_21 + m02_22)*-BallRadius;
+	logMatrix(t);
+	 logger->print(" ws0=");
+	 logger->print(pWheel_speed[0]);
+	 logger->print(" ws1=");
+	 logger->print(pWheel_speed[1]);
+	 logger->print(" ws2=");
+	 logger->print(pWheel_speed[2]);
+
+	*/
+
+
 
 	// if one wheel's speed exceeds max speed
 	// reduce all speeds by same factor to comply with the max speed restriction
@@ -150,6 +165,12 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 				pWheel_speed[j] *= factor;
 		}
 	}
+
+	// compute rad/s in revolutions /s
+	pWheel_speed[0] /= TWO_PI;
+	pWheel_speed[1] /= TWO_PI;
+	pWheel_speed[2] /= TWO_PI;
+
 }
 
 // compute actual speed in the coord-system of the IMU out of the encoder's data depending on the given tilt

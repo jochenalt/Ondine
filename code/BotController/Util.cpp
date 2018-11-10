@@ -10,7 +10,7 @@
 
 void fatalError(const char s[]) {
 	if (logger) {
-		logger->print("FATAL");
+		logger->print("FATAL:");
 		logger->println(s);
 	}
 	delay(100); // wait until serial sent that before crashing

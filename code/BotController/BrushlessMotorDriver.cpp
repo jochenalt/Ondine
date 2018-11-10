@@ -84,6 +84,9 @@ void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl, bool re
 	this->motorNo = motorNo;
 	this->reverse = reverse;
 	registerMenuController(menuCtrl);
+
+	// low pass the speed with 20 Hz
+	speedFilter.init(1000/20,SampleFrequency);
 }
 
 void BrushlessMotorDriver::setupMotor(int EnablePin, int Input1Pin, int Input2Pin, int Input3Pin) {
@@ -142,9 +145,9 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 	if (timePassed_s > (2.0/(float)SampleFrequency)) {
 		// this happens if this methods is not called often enough. Mostly
 		// when serial communications takes place
-		logger->println("turnReferenceAngle's dT too big!!!!");
-		logger->print(timePassed_s*1000.0);
-		logger->println("ms");
+		// logger->println("turnReferenceAngle's dT too big!!!!");
+		// logger->print(timePassed_s*1000.0);
+		// logger->println("ms");
 	}
 
 	// increase reference speed to reach target speed
@@ -155,7 +158,7 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 
 	// increase reference angle with given speed
 	float prevReferenceAngle = referenceAngle;
-	referenceAngle += currentReferenceMotorSpeed * timePassed_s * TWO_PI;
+	referenceAngle += currentReferenceMotorSpeed * TWO_PI * timePassed_s;
 
 	// if speed is too high, reference angle runs away of the real angle as
 	// indicated by the encoder. Limit that in order to prevent a increasing gap
@@ -267,7 +270,7 @@ bool BrushlessMotorDriver::loop() {
 			referenceAngle = constrain(referenceAngle, encoderAngle - maxAngleError, encoderAngle  + maxAngleError);
 			// recompute speed, since set speed might not be achieved
 
-			measuredMotorSpeed = (encoderAngle-prevEncoderAngle)/TWO_PI/timePassed_s;
+			measuredMotorSpeed = speedFilter.addSample((encoderAngle-prevEncoderAngle)/TWO_PI/timePassed_s);
 			lastReferenceAngle = referenceAngle; // required to compute speed
 
 			// send new pwm value to motor
@@ -498,7 +501,7 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 		switch (ch) {
 		case '0':
 			menuSpeed = 0;
-			setMotorSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed,  menuAcc);
 			break;
 		case '+':
 			if (abs(menuSpeed) < 2)
@@ -506,26 +509,26 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 			else
 				menuSpeed += 1.0;
 
-			setMotorSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed,  menuAcc);
 			break;
 		case '-':
 			if (abs(menuSpeed) < 2)
 				menuSpeed -= 0.05;
 			else
 				menuSpeed -= 1.0;
-			setMotorSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed,  menuAcc);
 			break;
 		case '*':
 			menuAcc++;
-			setMotorSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed,  menuAcc);
 			break;
 		case '_':
 			menuAcc--;
-			setMotorSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed,  menuAcc);
 			break;
 		case 'r':
 			menuSpeed = -menuSpeed;
-			setMotorSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed,  menuAcc);
 			break;
 		case 'P':
 			if (abs(currentReferenceMotorSpeed) < 15)
@@ -600,21 +603,19 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 			command->println(")");
 		}
 		if (cmd) {
-			command->print("v=");
+			command->print("v_set");
 			command->print(menuSpeed);
-			command->print(" motorspeed=");
-            command->print(getMotorSpeed());
-            command->print("rev/s gearspeed= ");
+            command->print("rev/s v= ");
             command->print(getSpeed());
-            command->print("rev/s)");
+            command->print("rev/s angle");
+            command->print(degrees(getIntegratedAngle()));
+            command->print("°");
 
 			command->print(" a=");
 			command->print(menuAcc);
 			command->print(" T=");
 			command->print(menuTorque);
 			command->print(" t=");
-			command->print(" ref=");
-			command->print(degrees(referenceAngle));
 
 			command->print(micros());
 			if (menuEnable)

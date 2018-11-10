@@ -17,7 +17,7 @@ void KalmanFilter::setup(float angle) {
     Q_angle = 0.001f;	// default 0.001
 
     Q_bias = 0.003f;	// default 0.003
-    R_measure = 0.01f;	// default 0.03
+    R_measure = 0.03f;	// default 0.03
 
     this->angle = angle;
     bias = 0.0f;

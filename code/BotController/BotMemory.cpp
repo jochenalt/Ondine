@@ -43,8 +43,8 @@ void StateControllerConfig::initDefaultValues() {
 	//  ball position, ball speed, ball acceleration,
 	//  body position, body speed, body acceleration,
 	// omega)
-	angleWeight				= 2000.0; // 39.0;
-	angularSpeedWeight		= 1200.0; // 21.00;
+	angleWeight				= 1200.0; // 39.0;
+	angularSpeedWeight		= 720.0; // 21.00;
 
 	ballPositionWeight		= 0*1.5;
 	ballVelocityWeight		= 0.0;
@@ -129,9 +129,9 @@ void MotorConfig::print() {
 }
 
 void IMUConfig::initDefaultValues() {
-	nullOffsetX = degrees(-2.03);
-	nullOffsetY = degrees(1.45);
-	nullOffsetZ = degrees(1.09);
+	nullOffsetX = radians(-1.73);
+	nullOffsetY = radians(-1.45);
+	nullOffsetZ = radians(1.18);
 }
 
 void IMUConfig::print() {

@@ -42,14 +42,14 @@ void BallDrive::getSetAngle(float &angleX, float &angleY) {
 	angleY = lastSetAngleY;
 }
 
-void BallDrive::setSpeed(float speedX,float speedY, float omega,
+void BallDrive::setSpeed(float speedX, float speedY, float omega,
 		 	 	 	 	 float angleX, float angleY) {
 
 	// apply kinematics to compute wheel speed out of x,y, omega
 	float  newWheelSpeed[3] = { 0, 0, 0};
 	kinematics.computeWheelSpeed(speedX, speedY, omega,
-											angleX,angleY,
-											newWheelSpeed);
+								angleX,angleY,
+								newWheelSpeed);
 
 	/*
 	logger->print("kinematics:(");
@@ -67,6 +67,14 @@ void BallDrive::setSpeed(float speedX,float speedY, float omega,
 	logger->println(")");
 	*/
 	// send new speed to motors
+	// logger->print("wheelspeed");
+	// logger->print(newWheelSpeed[0]);
+	//logger->print(",");
+	// logger->print(newWheelSpeed[1]);
+	// logger->print(",");
+	// logger->print(newWheelSpeed[02]);
+	// logger->println("");
+
 	engine.setWheelSpeed(newWheelSpeed);
 }
 
@@ -85,9 +93,9 @@ void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 		engine.getWheelAngleChange(angleChange);
 
 		float currentWheelSpeed[3];
-		currentWheelSpeed[0] = angleChange[0] * TWO_PI / dT;	// compute wheel speed out of delta-angle
-		currentWheelSpeed[1] = angleChange[1] * TWO_PI / dT;
-		currentWheelSpeed[2] = angleChange[2] * TWO_PI / dT;
+		currentWheelSpeed[0] = angleChange[0]  / dT;	// compute wheel speed out of delta-angle
+		currentWheelSpeed[1] = angleChange[1]  / dT;
+		currentWheelSpeed[2] = angleChange[2]  / dT;
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		kinematics.computeActualSpeed(  currentWheelSpeed,
@@ -100,15 +108,9 @@ void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 		current.y.accel = (current.y.speed - lastSpeedY)/dT;
 		lastSpeedX = current.x.speed;
 		lastSpeedY = current.y.speed;
-
 	} else {
-		current.x.speed = 0;
-		current.y.speed = 0;
-		current.x.pos = 0;
-		current.y.pos = 0;
-		current.x.accel = 0;
-		current.y.accel = 0;
-		current.omega = 0;
+		lastSpeedX = current.x.speed;
+		lastSpeedY = current.y.speed;
 	}
 }
 
@@ -225,9 +227,10 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		logger->print(degrees(menuAngleY));
 		logger->print(")");
 
+		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
+		getSpeed(a,  menuMovement);
+		menuMovement.print();
 		command->println(" >");
-
-
 	}
 }
 

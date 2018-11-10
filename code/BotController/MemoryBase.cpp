@@ -10,7 +10,7 @@
 #include "Util.h"
 #include "MemoryBase.h"
 
-#define EEMEM_MAGICNUMBER 1563 					// thats my birthday, used to check if eeprom has been initialized
+#define EEMEM_MAGICNUMBER 1565 					// thats my birthday, used to check if eeprom has been initialized
 void* magicMemoryNumberAddress = (void*)0;  	// my birthday is stored at this address
 void* memoryAddress = (void*)sizeof(int16_t);	// address of user-defined EEPROM area
 

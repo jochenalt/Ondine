@@ -18,6 +18,8 @@ const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration o
 const float MaxBotAccel= 1000.0;							 		// [mm/s^2] max acceleration of bot
 const float MaxBotAccelAccel= 100.0;							 	// [mm/s^3] max acceleration acceleration of bot
 const float MaxTiltAngle = atan(MaxBotAccel/Gravity_mm); 			// [rad] max tilt angle, 5°
+const float MaxAngularVelocityAngle =
+		            MaxBotSpeed/CentreOfGravityHeight ; 			// [rad/s]
 
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy

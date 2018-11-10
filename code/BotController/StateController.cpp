@@ -33,7 +33,7 @@ void ControlPlane::reset () {
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-6 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 200 Hz */
-							 20.0f  			/* low pass cut off frequency */);
+							 15.0f  			/* low pass cut off frequency */);
 
 			inputBallAccel.init(FIR::LOWPASS,
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
@@ -63,10 +63,8 @@ void ControlPlane::update(bool log, float dT,
 		const IMUSamplePlane &sensor) {
 
 	if (dT) {
-		float maxTiltError     			= MaxTiltAngle;
-		float maxAngularVelocityError   = MaxTiltAngle/dT;
-
-		const float maxPositionError = memory.persistentMem.ctrlConfig.angleWeight * maxTiltError;
+		// limit position/speed/accel error to that of max tilt error
+		const float maxPositionError = 50.0;
 		const float maxSpeedError    = maxPositionError / dT;
 		const float maxAccelError    = maxSpeedError / dT;
 
@@ -94,31 +92,30 @@ void ControlPlane::update(bool log, float dT,
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 		float targetBallAccel 	= (targetBallAccel - lastTargetBallSpeed)/dT;
 
-		// now multiply all deltas in each state variable with the according weight
-		float error_tilt			= memory.persistentMem.ctrlConfig.angleWeight 		 * (sensor.angle-targetAngle);
-		float error_angular_speed	= memory.persistentMem.ctrlConfig.angularSpeedWeight * (sensor.angularVelocity-targetAngularVelocity);
+		// error
+		float error_tilt			= (sensor.angle-targetAngle)/MaxTiltAngle;
+		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity)/MaxTiltAngle;
 
-		float error_ball_position 	= memory.persistentMem.ctrlConfig.ballPositionWeight * (absBallPos 		-	targetBallPos);
-		float error_ball_velocity 	= memory.persistentMem.ctrlConfig.ballVelocityWeight * (absBallSpeed	- 	targetBallSpeed); // [0]
-		float error_ball_accel		= memory.persistentMem.ctrlConfig.ballAccelWeight 	 * (absBallAccel	-	targetBallAccel);
+		float error_ball_position 	= (absBallPos 	-	targetBallPos)/maxPositionError;
+		float error_ball_velocity 	= (absBallSpeed	- 	targetBallSpeed)/maxPositionError; // [0]
+		float error_ball_accel		= (absBallAccel	-	targetBallAccel)/maxPositionError;
 
-		float error_body_position	= memory.persistentMem.ctrlConfig.bodyPositionWeight * (absBodyPos		-	targetBodyPos); // [0]
-		float error_body_velocity	= memory.persistentMem.ctrlConfig.bodyVelocityWeight * (absBodySpeed	-	targetBodySpeed);
-		float error_body_accel		= memory.persistentMem.ctrlConfig.bodyAccelWeight    * (absBodyAccel	-	targetBodyAccel);    // [0]
+		float error_body_position	= (absBodyPos	-	targetBodyPos)/maxPositionError; // [0]
+		float error_body_velocity	= (absBodySpeed	-	targetBodySpeed)/maxPositionError;
+		float error_body_accel		= (absBodyAccel	-	targetBodyAccel)/maxPositionError;    // [0]
 
-		// compute error against centripedal force, which is f=omega*v*m*c, where m*c is the weight
-		float error_centripedal     = memory.persistentMem.ctrlConfig.omegaWeight        * targetOmega * target.speed;
+		float error_centripedal     = targetOmega * target.speed;
 
-		error_ball_position = constrain(error_ball_position, -maxPositionError, maxPositionError);
-		error_ball_accel = constrain(error_ball_accel, -maxAccelError, maxAccelError);
+		error_tilt = constrain(error_tilt, -1.0, MaxTiltAngle);
+		error_ball_position = constrain(error_ball_position, -1.0, maxPositionError);
 		error_body_position = constrain(error_body_position, -maxPositionError, maxPositionError);
-		error_body_accel = constrain(error_body_accel, -maxAccelError, maxAccelError);
 
 		// sum up all weighted errors
-		float error =	-error_tilt - error_angular_speed -
-						-error_ball_velocity - error_ball_position - error_ball_accel +
-						-error_body_velocity - error_body_position - error_body_accel +
-						-error_centripedal;
+		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
+		float error =	+ config.angleWeight*error_tilt + memory.persistentMem.ctrlConfig.angularSpeedWeight*error_angular_speed
+						+ config.ballPositionWeight*error_ball_position + config.ballVelocityWeight*error_ball_velocity + config.ballAccelWeight*error_ball_accel
+						+ config.bodyPositionWeight*error_ball_position + config.bodyVelocityWeight*error_body_velocity + config.bodyAccelWeight*error_body_accel
+						+ config.omegaWeight * error_centripedal;
 
 		if (log) {
 			if (memory.persistentMem.logConfig.debugStateLog) {
@@ -171,7 +168,7 @@ void ControlPlane::update(bool log, float dT,
 		// accelerate if not on max speed already
 		if ((sgn(speed) != sgn(accel)) ||
 			(abs(speed) < MaxBotSpeed)) {
-			speed += accel * dT;
+			speed -= accel * dT;
 			speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
 		}
 
@@ -189,7 +186,7 @@ void ControlPlane::update(bool log, float dT,
 		lastTargetBallSpeed = targetBallSpeed;
 
 
-		// in order to increase gain of state controller, filter with FIR 20Hz 4th order
+		// in order to increase gain of state controller, filter with FIR 15Hz 4th order
 		filteredSpeed = outputSpeedFilter.update(speed);
 		if (log)
 			if (memory.persistentMem.logConfig.debugStateLog) {

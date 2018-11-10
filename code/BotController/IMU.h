@@ -52,6 +52,7 @@ public:
 
 	void loop();
 
+	bool isValid();
 	// stateful method to indicate that a new value from IMU is available. returns true only once per new value
 	// This is the main timer determining the sample frequency
 	bool isNewValueAvailable(float &dT /* time since last call in [s] */);
@@ -77,6 +78,7 @@ private:
 	KalmanFilter kalman[3]; // one kalman filter per dimension
 
 	IMUSample currentSample;
+	IMUSample lastSample;
 	bool valueIsUpdated = false;
 	bool logIMUValues = false;
 	uint32_t lastInvocationTime_ms = 0;

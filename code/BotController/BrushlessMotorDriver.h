@@ -10,6 +10,7 @@
 
 #include <MenuController.h>
 #include <PIDController.h>
+#include <Filter/ComplementaryFilter.h>
 
 #define ENCODER_USE_INTERRUPTS
 #include <Encoder/Encoder.h>
@@ -96,6 +97,7 @@ private:
 	bool menuEnable = false;
 	uint32_t lastLoopCall_ms = 0;
 	PIDController pid_setup;
+	LowPassFilter speedFilter;
 };
 
 #endif /* BLDCCONTROLLER_H_ */

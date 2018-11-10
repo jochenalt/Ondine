@@ -62,7 +62,6 @@ IMUSample::IMUSample(const IMUSample& t) {
 	this->plane[0] = t.plane[0];
 	this->plane[1] = t.plane[1];
 	this->plane[2] = t.plane[2];
-
 }
 
 IMUSample& IMUSample::operator=(const IMUSample& t) {
@@ -74,19 +73,29 @@ IMUSample& IMUSample::operator=(const IMUSample& t) {
 }
 
 
+bool IMU::isValid() {
+	return ((millis() - updateTimer.mLastCall_ms < 2000/SampleFrequency) &&
+			(abs(currentSample.plane[X].angle) < MaxTiltAngle) &&
+			(abs(currentSample.plane[Y].angle) < MaxTiltAngle) &&
+			(abs(currentSample.plane[X].angularVelocity) < MaxTiltAngle/SamplingTime) &&
+			(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime) &&
+			(abs(currentSample.plane[X].angle - lastSample.plane[X].angle) < MaxAngularVelocityAngle) &&
+			(abs(currentSample.plane[Y].angle - lastSample.plane[Y].angle) < MaxAngularVelocityAngle));
+}
+
 void IMU::setup(MenuController *newMenuCtrl) {
 	registerMenuController(newMenuCtrl);
 }
 
 int IMU::init() {
 	// setting the accelerometer full scale range to +/-8G
-	mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_8G);
+	mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
 
 	// setting the gyroscope full scale range to +/-500 deg/s
 	int status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_500DPS);
 
 	// setting low pass bandwith
-	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ);
+	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // default, kalman filter takes over
 
 	// set update rate of gyro to 200 Hz
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
@@ -190,7 +199,7 @@ void IMU::loop() {
 				updateTimer.dT(); // reset timer of updateTimer
 				newDataAvailable = false;
 			} else {
-				warnMsg("interrupt of IMU not working");
+				warnMsg("IMU does not send interrupts");
 			}
 
 			// read raw values
@@ -231,6 +240,7 @@ void IMU::loop() {
 				multiplyMatrix(currentRotation, nullRotation, result);
 			}
 
+			lastSample = currentSample;
 			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetX;
 			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetY;
 			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetZ;

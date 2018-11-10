@@ -88,6 +88,7 @@ private:
 	float menuOmega = 0;
 	float menuAngleX = 0;
 	float menuAngleY = 0;
+	BotMovement menuMovement;
 
 
 };

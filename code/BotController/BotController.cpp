@@ -169,8 +169,13 @@ void BotController::loop() {
 	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
+		// logger->print("BEFORE");
+		// currentMovement.print();
+		// logger->println();
 		ballDrive.getSpeed(sensorSample,currentMovement);
-
+		// logger->print("AFTER");
+		// currentMovement.print();
+		// logger->println();
 		// call this as often as possible to get a smooth motor movement
 		// the call above contains kinematics from wheel speed to cartesian speed, this takes just below 1ms
 		ballDrive.loop();
@@ -196,15 +201,18 @@ void BotController::loop() {
 
 		if (logTimer.isDue_ms(1000,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
-				logger->print("a=(");
+				logger->print("a=(X:");
 				logger->print(degrees(sensorSample.plane[Dimension::X].angle));
 				logger->print(",");
-				logger->print(degrees(sensorSample.plane[Dimension::Y].angle));
-				logger->print(") ");
-				logger->print("a'=(");
 				logger->print(degrees(sensorSample.plane[Dimension::X].angularVelocity));
 				logger->print(",");
+				logger->print(currentMovement.x.pos,1);
+				logger->print(") Y:(");
+				logger->print(degrees(sensorSample.plane[Dimension::Y].angle));
+				logger->print(",");
 				logger->print(degrees(sensorSample.plane[Dimension::Y].angularVelocity));
+				logger->print(",");
+				logger->print(currentMovement.y.pos,1);
 				logger->print(") ");
 				currentMovement.print();
 				logger->print(" state=(");
