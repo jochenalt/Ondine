@@ -62,6 +62,52 @@ void precomputeSVPMWave() {
 	}
 }
 
+
+void MotorConfig::initDefaultValues() {
+	// at slow speeds PID controller is aggressivly keeping the position
+	pid_position.Kp = 1.5;
+	pid_position.Ki = 1.2;
+	pid_position.Kd = 0.0;
+
+	pid_speed.Kp = .9;
+	pid_speed.Ki = 0.5;
+	pid_speed.Kd = 0.02;
+
+	pid_lifter.Kp = 0.01;
+	pid_lifter.Ki = 0.005;
+	pid_lifter.Kd = 0.0;
+
+}
+
+void MotorConfig::print() {
+	logger->println("motor controller configuration:");
+	logger->print("   PID (speed=0)  : ");
+	logger->print("P=");
+	logger->print(pid_position.Kp);
+	logger->print(" I=");
+	logger->print(pid_position.Ki);
+	logger->print(" D=");
+	logger->println(pid_position.Kd);
+	logger->print("   PID (speed=max): ");
+	logger->print("P=");
+	logger->print(pid_speed.Kp);
+	logger->print(" I=");
+	logger->print(pid_speed.Ki);
+	logger->print(" D=");
+	logger->println(pid_speed.Kd);
+	logger->println();
+	logger->println("lifter controller configuration:");
+	logger->print("   PID (speed=max): ");
+	logger->print("P=");
+	logger->print(pid_lifter.Kp);
+	logger->print(" I=");
+	logger->print(pid_lifter.Ki);
+	logger->print(" D=");
+	logger->println(pid_lifter.Kd);
+
+}
+
+
 int BrushlessMotorDriver::getPWMValue(float torque, float angle_rad) {
 	// map input angle to 0..2*PI
 	if (angle_rad < 0)

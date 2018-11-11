@@ -14,6 +14,29 @@
 #include <IMU.h>
 #include <TimePassedBy.h>
 
+
+class StateControllerConfig {
+public:
+	void null();
+	void initDefaultValues();
+	void print();
+	float angleWeight;
+	float angularSpeedWeight;
+
+	float ballPosIntegratedWeight;
+	float ballPositionWeight;
+	float ballVelocityWeight;
+	float ballAccelWeight;
+
+	float bodyPosIntegratedWeight;
+	float bodyVelocityWeight;
+	float bodyPositionWeight;
+	float bodyAccelWeight;
+	float omegaWeight;
+};
+
+
+
 class ControlPlane {
 	public:
 		void reset ();
@@ -28,9 +51,9 @@ class ControlPlane {
 		float lastTargetBodySpeed;
 
 		float speed;			// speed in x direction [mm/s]
-		float error;			// current error of control loop used to compute the acceleration
-		float accel;			// final acceleration out of the control loop
 		float filteredSpeed;
+		float ballPosIntegrated;
+		float bodyPosIntegrated;
 
 		FIR::Filter outputSpeedFilter;
 		FIR::Filter inputBallAccel;
@@ -44,7 +67,6 @@ class ControlPlane {
 		void print();
 		float getBodyPos();
 		float getBallPos();
-
 };
 
 

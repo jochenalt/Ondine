@@ -29,6 +29,29 @@ void imuInterrupt() {
 	newDataAvailable = true;
 }
 
+
+void IMUConfig::initDefaultValues() {
+	nullOffsetX = radians(2.9);
+	nullOffsetY = radians(2.20);
+	nullOffsetZ = radians(1.18);
+	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
+}
+
+void IMUConfig::print() {
+	logger->println("imu configuration");
+	logger->print("   null=(");
+	logger->print(degrees(nullOffsetX));
+	logger->print(",");
+	logger->print(degrees(nullOffsetY));
+	logger->print(",");
+	logger->print(degrees(nullOffsetZ));
+	logger->println("))");
+	logger->print("   kalman noise variance=");
+	logger->println(kalmanNoiseVariance,2);
+
+}
+
+
 IMUSamplePlane::IMUSamplePlane() {
 	angle = 0;
 	angularVelocity = 0;
@@ -178,19 +201,12 @@ void IMU::calibrate() {
 	while (millis() - now < 1000) {
 		loop();
 	}
-	logger->println("compute nullify rotation matrix");
 
 	memory.persistentMem.imuControllerConfig.nullOffsetX = kalman[Dimension::X].getAngle();
 	memory.persistentMem.imuControllerConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
 	memory.persistentMem.imuControllerConfig.nullOffsetZ = kalman[Dimension::Z].getAngle();
 
 	memory.persistentMem.imuControllerConfig.print();
-	matrix33_t current;
-	computeZYXRotationMatrix(memory.persistentMem.imuControllerConfig.nullOffsetX ,
-							 memory.persistentMem.imuControllerConfig.nullOffsetY,
-							 memory.persistentMem.imuControllerConfig.nullOffsetZ, current);
-	computeInverseMatrix(current, nullRotation);
-
 }
 
 void IMU::loop() {
@@ -222,7 +238,7 @@ void IMU::loop() {
 			float tilt[3];
 			tilt[Dimension::X] = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
 			tilt[Dimension::Y] = -mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
-			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) - HALF_PI;
+			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) + HALF_PI;
 
 			float angularVelocity[3];
 			angularVelocity[Dimension::X] = mpu9250->getGyroY_rads();

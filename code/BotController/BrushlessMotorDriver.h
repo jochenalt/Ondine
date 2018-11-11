@@ -18,6 +18,18 @@
 const float MaxWheelAcceleration = 2000.0; 			// [rev/s^2]
 const float GearBoxRatio = 18.0/54.0*18.0/54.0; 	// two timing belts with 54/18*54/18 pulleys = 1:9
 
+class MotorConfig {
+public:
+	void initDefaultValues();
+	void print();
+
+	// PID values for control at 0 rev/s
+	PIDControllerConfig pid_position;
+	PIDControllerConfig pid_speed;
+	PIDControllerConfig pid_lifter;
+};
+
+
 class BrushlessMotorDriver : virtual public Menuable {
 public:
 

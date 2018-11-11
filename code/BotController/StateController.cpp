@@ -14,6 +14,92 @@
 #include <BotController.h>
 
 
+void StateControllerConfig::print() {
+	StateControllerConfig defValue;
+	defValue.initDefaultValues();
+	logger->println("state controller configuration:");
+	logger->print("   angle=");
+	logger->print(angleWeight);
+	logger->print("(");
+	logger->print(defValue.angleWeight);
+	logger->print(")");
+	logger->print(" angularSpeed=");
+	logger->print(angularSpeedWeight);
+	logger->print("(");
+	logger->println(defValue.angularSpeedWeight);
+	logger->print("   intBallPos=");
+	logger->print(ballPosIntegratedWeight);
+	logger->print("(");
+	logger->print(defValue.ballPosIntegratedWeight);
+	logger->print(")");
+	logger->print(" ballPos=");
+	logger->print(ballPositionWeight);
+	logger->print("(");
+	logger->print(defValue.ballPositionWeight);
+	logger->print(")");
+	logger->print(" ballSpeed=");
+	logger->print(ballVelocityWeight);
+	logger->print("(");
+	logger->print(defValue.ballVelocityWeight);
+	logger->print(")");
+	logger->print(" ballAccel=");
+	logger->print(ballAccelWeight);
+	logger->print("(");
+	logger->print(defValue.ballAccelWeight);
+	logger->println(")");
+	logger->print("   intBodyPos=");
+	logger->print(bodyPosIntegratedWeight);
+	logger->print("(");
+	logger->print(defValue.bodyPosIntegratedWeight);
+	logger->print(")");
+	logger->print(" bodyPosition=");
+	logger->print(bodyPositionWeight);
+	logger->print("(");
+	logger->print(defValue.bodyPositionWeight);
+	logger->print(")");
+	logger->print(" bodySpeed=");
+	logger->print(bodyVelocityWeight);
+	logger->print("(");
+	logger->print(defValue.bodyVelocityWeight);
+	logger->print(")");
+	logger->print(" bodyAccel=");
+	logger->print(bodyAccelWeight);
+	logger->print("(");
+	logger->print(defValue.bodyAccelWeight);
+	logger->println(")");
+	logger->print("   omega=");
+	logger->print(omegaWeight);
+	logger->print("(");
+	logger->print(defValue.omegaWeight);
+	logger->println(")");
+}
+
+void StateControllerConfig::initDefaultValues() {
+
+	// initialize the weights used for the state controller per
+	// computed state dimension
+	// state controller consists of
+	// (angle, angular speed,
+	//  ball position, ball speed, ball acceleration,
+	//  body position, body speed, body acceleration,
+	// omega)
+	angleWeight				= 2200.0; // 39.0;
+	angularSpeedWeight		= 1400.0; // 21.00;
+
+	ballPosIntegratedWeight   = 0;
+	ballPositionWeight		= -1.5; // 1.5;
+	ballVelocityWeight		= 0.0;
+	ballAccelWeight			= 0.0; // 1.3
+
+	bodyPosIntegratedWeight   = 0;
+	bodyPositionWeight		= 0.0;
+	bodyVelocityWeight		= 9.0; // 9.0
+	bodyAccelWeight			= 0.0;
+
+	omegaWeight				= 0.0;
+}
+
+
 void ControlPlane::reset () {
 			lastTargetAngle = 0;
 			lastBodyPos = 0; // absolute body position of last loop
@@ -24,9 +110,10 @@ void ControlPlane::reset () {
 			lastTargetBallPos = 0;
 			lastTargetBallSpeed = 0;
 			lastTargetBodySpeed = 0;
-			speed = 0;
-			accel  = 0;
 			filteredSpeed = 0;
+			speed = 0;
+			ballPosIntegrated = 0;
+			bodyPosIntegrated = 0;
 
 			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
 			outputSpeedFilter.init(FIR::LOWPASS,
@@ -39,13 +126,13 @@ void ControlPlane::reset () {
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-6 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 200 Hz */
-							 50.0f  			/* low pass cut off frequency */);
+							 30.0f  			/* low pass cut off frequency */);
 
 			inputBodyAccel.init(FIR::LOWPASS,
 					          1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							  1.0e-6 			/* supression in stop band is -60db */,
 							  SampleFrequency,  /* 200 Hz */
-							  50.0f  			/* low pass cut off frequency */);
+							  30.0f  			/* low pass cut off frequency */);
 }
 
 float ControlPlane::getBodyPos() {
@@ -72,47 +159,52 @@ void ControlPlane::update(bool log, float dT,
 		// target angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 
-		// compute pos,speed,accel of ball and body
+		// compute pos,speed,accel of the ball
 		float absBallPos   		= current.pos;
 		float absBallSpeed 		= current.speed;
-		float absBallAccel 		= inputBallAccel.update(current.accel);
+		float absBallAccel 		= inputBallAccel.update(current.accel); // lowpass the acceleration with 30 Hz
 
+		// compute pos,speed,accel in he centre of gravity of the body
 		float absBodyPos   		= current.pos + sensor.angle * CentreOfGravityHeight;
 		float absBodySpeed 		= (absBodyPos - lastBodyPos)/dT;
-		float absBodyAccel 		= (absBodySpeed - lastBodySpeed) / dT;
+		float absBodyAccel 		= inputBodyAccel.update((absBodySpeed - lastBodySpeed) / dT); // lowpass the acceleration with 30 Hz
 
-		// compute position,speed,accel where we expect the bot to be
+		// compute target position,speed, and accel
 		float targetBodyPos 	= target.pos;
 		float targetBodySpeed	= target.speed;
 		float targetBodyAccel	= (target.speed - lastTargetBodySpeed)/dT;
 
 		float targetBallPos	 	= target.pos - targetAngle * CentreOfGravityHeight;
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
-		float targetBallAccel 	= (targetBallAccel - lastTargetBallSpeed)/dT;
+		float targetBallAccel 	= (targetBallAccel - lastTargetBallSpeed)/dT;	// does not need to be filtered, it is generated in a smooth way already
 
-		// error
+		// errors
 		float error_tilt			= (sensor.angle-targetAngle)/MaxTiltAngle;						// 39
 		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity)/MaxTiltAngle;	// 21
 
-		float error_ball_position 	= (absBallPos 	-	targetBallPos);			// 1.5
-		float error_ball_velocity 	= (absBallSpeed	- 	targetBallSpeed); 			// [0]
-		float error_ball_accel		= (absBallAccel	-	targetBallAccel);			// 1.3
+		float error_ball_position 	= (absBallPos 	- targetBallPos);		    	// 1.5
+		ballPosIntegrated 			+= error_ball_position*dT;
+		float error_ball_velocity 	= (absBallSpeed	- targetBallSpeed); 			// [0]
+		float error_ball_accel		= (absBallAccel	- targetBallAccel);			// 1.3
 
-		float error_body_position	= (absBodyPos	-	targetBodyPos); 			// [0]
-		float error_body_velocity	= (absBodySpeed	-	targetBodySpeed);			// 9
-		float error_body_accel		= (absBodyAccel	-	targetBodyAccel);    		// [0]
+		float error_body_position	= (absBodyPos	- targetBodyPos); 			// [0]
+		bodyPosIntegrated 			+= error_body_position*dT;
+
+		float error_body_velocity	= (absBodySpeed	- targetBodySpeed);			// 9
+		float error_body_accel		= (absBodyAccel	- targetBodyAccel);    		// [0]
 
 		float error_centripedal     = targetOmega * target.speed;
 		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
-		if (config.ballPositionWeight > 0.01)
+		/*
+		if (abs(config.ballPositionWeight) > 0.01)
 			error_ball_position = constrain(error_ball_position,  -config.angleWeight*MaxTiltAngle/config.ballPositionWeight, -config.angleWeight*MaxTiltAngle/config.ballPositionWeight);
-		if (config.bodyPositionWeight > 0.01)
+		if (abs(config.bodyPositionWeight) > 0.01)
 			error_body_position = constrain(error_body_position,  -config.angleWeight*MaxTiltAngle/config.bodyPositionWeight, -config.angleWeight*MaxTiltAngle/config.bodyPositionWeight);
-
+		*/
 		// sum up all weighted errors
 		float error =	+ config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed
-						+ config.ballPositionWeight*error_ball_position + config.ballVelocityWeight*error_ball_velocity + config.ballAccelWeight*error_ball_accel
-						+ config.bodyPositionWeight*error_ball_position + config.bodyVelocityWeight*error_body_velocity + config.bodyAccelWeight*error_body_accel
+						- config.ballPosIntegratedWeight*ballPosIntegrated - config.ballPositionWeight*error_ball_position - config.ballVelocityWeight*error_ball_velocity - config.ballAccelWeight*error_ball_accel
+						- config.bodyPosIntegratedWeight*bodyPosIntegrated - config.bodyPositionWeight*error_body_position - config.bodyVelocityWeight*error_body_velocity - config.bodyAccelWeight*error_body_accel
 						+ config.omegaWeight * error_centripedal;
 
 		if (log) {
@@ -145,12 +237,16 @@ void ControlPlane::update(bool log, float dT,
 				logger->print(",");
 				logger->print(error_angular_speed);
 				logger->print("|");
+				logger->print(ballPosIntegrated);
+				logger->print(",");
 				logger->print(error_ball_position);
 				logger->print(",");
 				logger->print(error_ball_velocity);
 				logger->print(",");
 				logger->print(error_ball_accel);
 				logger->print("|");
+				logger->print(bodyPosIntegrated);
+				logger->print(",");
 				logger->print(error_body_position);
 				logger->print(",");
 				logger->print(error_body_velocity);
@@ -161,7 +257,7 @@ void ControlPlane::update(bool log, float dT,
 				logger->print(")");
 			}
 		}
-		accel = constrain(error,-MaxBotAccel, MaxBotAccel);
+		float accel = constrain(error,-MaxBotAccel, MaxBotAccel);
 
 		// accelerate if not on max speed already
 		if ((sgn(speed) != sgn(accel)) ||
@@ -169,6 +265,8 @@ void ControlPlane::update(bool log, float dT,
 			speed -= accel * dT;
 			speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
 		}
+		// in order to increase gain of state controller, filter with FIR 15Hz 4th order
+		filteredSpeed = outputSpeedFilter.update(speed);
 
 		lastTargetAngle = targetAngle;
 		lastBodyPos = absBodyPos;
@@ -184,8 +282,6 @@ void ControlPlane::update(bool log, float dT,
 		lastTargetBallSpeed = targetBallSpeed;
 
 
-		// in order to increase gain of state controller, filter with FIR 15Hz 4th order
-		filteredSpeed = outputSpeedFilter.update(speed);
 		if (log)
 			if (memory.persistentMem.logConfig.debugStateLog) {
 				logger->print(" output=(");
@@ -259,11 +355,13 @@ void StateController::printHelp() {
 
 	command->println("q/Q - angle weight");
 	command->println("a/A - angular speed weight");
-	command->println("e/D - integrated angle");
-
+	command->println();
+	command->println("e/E - ball pos integrated weight");
 	command->println("w/W - ball position weight");
 	command->println("s/S - ball speed weight");
 	command->println("r/r - ball accel weight");
+	command->println();
+	command->println("d/D - body pos integrated weight");
 	command->println("f/f - body position weight");
 	command->println("t/T - body speed weight");
 	command->println("g/G - body accel weight");
@@ -280,6 +378,7 @@ void StateController::printHelp() {
 void StateController::menuLoop(char ch, bool continously) {
 
 		bool cmd = true;
+		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
 		switch (ch) {
 		case 'h':
 			printHelp();
@@ -294,106 +393,119 @@ void StateController::menuLoop(char ch, bool continously) {
 				logger->println("balancing mode off");
 			break;
 		case '0':
-			memory.persistentMem.ctrlConfig.angleWeight = 0.0;
-			memory.persistentMem.ctrlConfig.angularSpeedWeight = 0.0;
-			memory.persistentMem.ctrlConfig.ballPositionWeight = 0.0;
-			memory.persistentMem.ctrlConfig.ballVelocityWeight = 0.;
-			memory.persistentMem.ctrlConfig.ballAccelWeight = 0.0;
-			memory.persistentMem.ctrlConfig.bodyPositionWeight = 0.;
-			memory.persistentMem.ctrlConfig.bodyVelocityWeight = 0.0;
-			memory.persistentMem.ctrlConfig.bodyAccelWeight = 0.;
-			memory.persistentMem.ctrlConfig.omegaWeight = 0.;
+			config.angleWeight = 0.0;
+			config.angularSpeedWeight = 0.0;
+			config.ballPosIntegratedWeight = 0.0;
+			config.ballPositionWeight = 0.0;
+			config.ballVelocityWeight = 0.;
+			config.ballAccelWeight = 0.0;
+			config.bodyPosIntegratedWeight = 0.0;
+			config.bodyPositionWeight = 0.;
+			config.bodyVelocityWeight = 0.0;
+			config.bodyAccelWeight = 0.;
+			config.omegaWeight = 0.;
 			break;
 		case 'q':
-			memory.persistentMem.ctrlConfig.angleWeight -= continously?2.0:0.5;
-			memory.persistentMem.ctrlConfig.print();
+			config.angleWeight -= continously?2.0:0.5;
+			config.print();
 			cmd =true;
 			break;
 		case 'Q':
-			memory.persistentMem.ctrlConfig.angleWeight += continously?2.0:0.5;
-			memory.persistentMem.ctrlConfig.print();
+			config.angleWeight += continously?2.0:0.5;
+			config.print();
 			cmd = true;
 			break;
 		case 'e':
-			memory.persistentMem.ctrlConfig.integratedAngleWeight-= continously?2.0:0.5;
-			memory.persistentMem.ctrlConfig.print();
-			cmd =true;
+			config.ballPosIntegratedWeight-= continously?1.0:0.2;
+			config.print();
+			cmd = true;
 			break;
 		case 'E':
-			memory.persistentMem.ctrlConfig.integratedAngleWeight += continously?2.0:0.5;
-			memory.persistentMem.ctrlConfig.print();
+			config.ballPosIntegratedWeight += continously?1.0:0.2;
+			config.print();
+			cmd = true;
+			break;
+		case 'd':
+			config.bodyPosIntegratedWeight-= continously?1.0:0.2;
+			config.print();
+			cmd =true;
+			break;
+		case 'D':
+			config.bodyPosIntegratedWeight += continously?1.0:0.2;
+			config.print();
 			cmd = true;
 			break;
 
+
 		case 'a':
-			memory.persistentMem.ctrlConfig.angularSpeedWeight -= continously?2.0:0.5;
-			memory.persistentMem.ctrlConfig.print();
+			config.angularSpeedWeight -= continously?2.0:0.5;
+			config.print();
 			cmd =true;
 			break;
 		case 'A':
-			memory.persistentMem.ctrlConfig.angularSpeedWeight += continously?2.0:0.5;
-			memory.persistentMem.ctrlConfig.print();
+			config.angularSpeedWeight += continously?2.0:0.5;
+			config.print();
 			cmd = true;
 			break;
 		case 'w':
-			memory.persistentMem.ctrlConfig.ballPositionWeight -= continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.ballPositionWeight -= continously?0.05:0.01;
+			config.print();
 			cmd =true;
 			break;
 		case 'W':
-			memory.persistentMem.ctrlConfig.ballPositionWeight += continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.ballPositionWeight += continously?0.05:0.01;
+			config.print();
 			cmd = true;
 			break;
 		case 'y':
-			memory.persistentMem.ctrlConfig.ballVelocityWeight-= continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.ballVelocityWeight-= continously?0.05:0.01;
+			config.print();
 			cmd =true;
 			break;
 		case 'Y':
-			memory.persistentMem.ctrlConfig.ballVelocityWeight += continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.ballVelocityWeight += continously?0.05:0.01;
+			config.print();
 			cmd = true;
 			break;
 		case 'r':
-			memory.persistentMem.ctrlConfig.ballAccelWeight-= continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.ballAccelWeight-= continously?0.05:0.01;
+			config.print();
 			cmd =true;
 			break;
 		case 'R':
-			memory.persistentMem.ctrlConfig.ballAccelWeight += continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.ballAccelWeight += continously?0.05:0.01;
+			config.print();
 			cmd = true;
 			break;
 		case 'f':
-			memory.persistentMem.ctrlConfig.bodyPositionWeight +=continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.bodyPositionWeight +=continously?0.05:0.01;
+			config.print();
 			cmd = true;
 			break;
 		case 'F':
-			memory.persistentMem.ctrlConfig.bodyPositionWeight-= continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.bodyPositionWeight-= continously?0.05:0.01;
+			config.print();
 			cmd =true;
 			break;
 		case 't':
-			memory.persistentMem.ctrlConfig.bodyVelocityWeight += continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.bodyVelocityWeight += continously?0.05:0.01;
+			config.print();
 
 			cmd = true;
 			break;
 		case 'T':
-			memory.persistentMem.ctrlConfig.bodyVelocityWeight -= continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.bodyVelocityWeight -= continously?0.05:0.01;
+			config.print();
 			cmd =true;
 			break;
 		case 'g':
-			memory.persistentMem.ctrlConfig.bodyAccelWeight += continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.bodyAccelWeight += continously?0.05:0.01;
+			config.print();
 			cmd = true;
 			break;
 		case 'G':
-			memory.persistentMem.ctrlConfig.bodyAccelWeight -= continously?0.05:0.01;
-			memory.persistentMem.ctrlConfig.print();
+			config.bodyAccelWeight -= continously?0.05:0.01;
+			config.print();
 			cmd = true;
 			break;
 

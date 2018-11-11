@@ -47,17 +47,22 @@ public:
 
 	// turn on/off the balancing mode
 	void balanceMode(BotMode mode) {
-		if (!imu.isValid()) {
-			fatalError("IMU is not working properly");
+		if (mode == this->mode)
 			return;
-		}
-		if (!ballDrive.isPowered()) {
-			fatalError("power is not turned on");
-			return;
-		}
-		if (!ballDrive.isEnabled()) {
-			fatalError("engine is not engaged");
-			return;
+
+		if (this->mode == OFF) {
+			if (!imu.isValid()) {
+				fatalError("IMU is not working properly");
+				return;
+			}
+			if (!ballDrive.isPowered()) {
+				fatalError("power is not turned on");
+				return;
+			}
+			if (!ballDrive.isEnabled()) {
+				fatalError("engine is not engaged");
+				return;
+			}
 		}
 
 		this->mode = mode;

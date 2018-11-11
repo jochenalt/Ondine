@@ -14,6 +14,20 @@
 #include <Kinematics.h>
 
 
+class IMUConfig {
+	public:
+		void initDefaultValues();
+
+		void print();
+
+	float nullOffsetX;
+	float nullOffsetY;
+	float nullOffsetZ;
+	float kalmanNoiseVariance;
+};
+
+
+
 class IMUSamplePlane {
 public:
 	IMUSamplePlane();
@@ -86,8 +100,6 @@ private:
 	uint32_t lastInvocationTime_ms = 0;
 	uint32_t averageTime_ms = 0;
 	float dT = 0;
-
-	matrix33_t nullRotation;
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */
