@@ -26,12 +26,7 @@ public:
 	float ballPosIntegratedWeight;
 	float ballPositionWeight;
 	float ballVelocityWeight;
-	float ballAccelWeight;
 
-	float bodyPosIntegratedWeight;
-	float bodyVelocityWeight;
-	float bodyPositionWeight;
-	float bodyAccelWeight;
 	float omegaWeight;
 };
 
@@ -45,19 +40,13 @@ class ControlPlane {
 		float lastTargetBallPos;
 		float lastTargetBallSpeed;
 		float lastBallPos;
-		float lastBodyPos;		// absolute as-is position of last loop
-		float lastBodySpeed;
 		float lastBallSpeed;
-		float lastTargetBodySpeed;
 
-		float speed;			// speed in x direction [mm/s]
+		float speed;			// speed in x direction [m/s]
 		float filteredSpeed;
 		float ballPosIntegrated;
-		float bodyPosIntegrated;
 
 		FIR::Filter outputSpeedFilter;
-		FIR::Filter inputBallAccel;
-		FIR::Filter inputBodyAccel;
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
 		void update(bool log,float dT,

@@ -9,9 +9,8 @@
 #include "Arduino.h"
 #include "Kinematics.h"
 #include "Util.h"
+#include "setup.h"
 
-const float WheelRadius = 35.;
-const float BallRadius = 90.;
 const float WheelAngleRad= radians(45.);
 const float MaxWheelSpeed = 2000.;
 
@@ -98,7 +97,7 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 
 // compute speed of all motors depending from the speed in the IMU's coordinate system in (Vx, Vy, OmegaZ) 
 // corrected by the tilt of the imu pTiltX, pTiltY 
-void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
+void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float pOmegaZ /* rev/s */,
 		float pTiltX, float pTiltY,
 		float pWheel_speed[3]) {
 	
@@ -166,7 +165,7 @@ void Kinematix::computeWheelSpeed( float pVx, float pVy, float pOmegaZ,
 		}
 	}
 
-	// compute rad/s in revolutions /s
+	// convert rad/s in revolutions /s
 	pWheel_speed[0] /= TWO_PI;
 	pWheel_speed[1] /= TWO_PI;
 	pWheel_speed[2] /= TWO_PI;

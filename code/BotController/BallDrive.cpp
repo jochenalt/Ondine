@@ -133,22 +133,22 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		cmd = true;
 		break;
 	case 'q':
-		menuSpeedX += 0.1;
+		menuSpeedX += 0.0001;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'a':
-		menuSpeedX -= 0.1;
+		menuSpeedX -= 0.0001;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'w':
-		menuSpeedY += 0.1;
+		menuSpeedY += 0.0001;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 's':
-		menuSpeedY -= (0.1);
+		menuSpeedY -= (0.0001);
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;

@@ -101,9 +101,7 @@ bool IMU::isValid() {
 			(abs(currentSample.plane[X].angle) < MaxTiltAngle) &&
 			(abs(currentSample.plane[Y].angle) < MaxTiltAngle) &&
 			(abs(currentSample.plane[X].angularVelocity) < MaxTiltAngle/SamplingTime) &&
-			(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime) &&
-			(abs(currentSample.plane[X].angle - lastSample.plane[X].angle) < MaxAngularVelocityAngle) &&
-			(abs(currentSample.plane[Y].angle - lastSample.plane[Y].angle) < MaxAngularVelocityAngle));
+			(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime));
 }
 
 void IMU::setup(MenuController *newMenuCtrl) {

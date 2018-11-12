@@ -92,9 +92,9 @@ public:
 	void reset();
 	void print();
 
-	float pos = 0;	 	// [mm]
-	float speed = 0;	// [mm/s]
-	float accel = 0;	// [mm/s*s]
+	float pos = 0;	 	// [m]
+	float speed = 0;	// [m/s]
+	float accel = 0;	// [m/s*s]
 };
 
 
