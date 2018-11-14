@@ -19,3 +19,4 @@ schematics/*#*
 *settings.txt
 CAD/Images/
 *.d
+code/BotController/.settings/

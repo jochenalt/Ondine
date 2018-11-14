@@ -314,7 +314,6 @@ bool BrushlessMotorDriver::loop() {
 
 			// if the motor is not able to follow the magnetic field , limit the reference angle accordingly
 			referenceAngle = constrain(referenceAngle, encoderAngle - maxAngleError, encoderAngle  + maxAngleError);
-			// recompute speed, since set speed might not be achieved
 
 			measuredMotorSpeed = speedFilter.addSample((encoderAngle-prevEncoderAngle)/TWO_PI/timePassed_s);
 			lastReferenceAngle = referenceAngle; // required to compute speed
