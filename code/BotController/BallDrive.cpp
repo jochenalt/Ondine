@@ -52,28 +52,28 @@ void BallDrive::setSpeed(float speedX, float speedY, float omega,
 								newWheelSpeed);
 
 	/*
-	logger->print("kinematics:(");
-	logger->print(speedX);
-	logger->print(",");
-	logger->print(speedY);
-	logger->print(",");
-	logger->print(omega);
-	logger->print(")->(");
-	logger->print(newWheelSpeed[0]);
-	logger->print(",");
-	logger->print(newWheelSpeed[1]);
-	logger->print(",");
-	logger->print(newWheelSpeed[2]);
-	logger->println(")");
+	log("kinematics:(");
+	log(speedX);
+	log(",");
+	log(speedY);
+	log(",");
+	log(omega);
+	log(")->(");
+	log(newWheelSpeed[0]);
+	log(",");
+	log(newWheelSpeed[1]);
+	log(",");
+	log(newWheelSpeed[2]);
+	logln(")");
 	*/
 	// send new speed to motors
-	// logger->print("wheelspeed");
-	// logger->print(newWheelSpeed[0]);
-	//logger->print(",");
-	// logger->print(newWheelSpeed[1]);
-	// logger->print(",");
-	// logger->print(newWheelSpeed[02]);
-	// logger->println("");
+	// log("wheelspeed");
+	// log(newWheelSpeed[0]);
+	//log(",");
+	// log(newWheelSpeed[1]);
+	// log(",");
+	// log(newWheelSpeed[02]);
+	// logln("");
 
 	engine.setWheelSpeed(newWheelSpeed);
 }
@@ -211,21 +211,21 @@ void BallDrive::menuLoop(char ch, bool continously) {
 	}
 	if (cmd) {
 		if (isEnabled())
-			logger->print("enabled.");
+			log("enabled.");
 		else
-			logger->print("disabled.");
-		logger->print(" t=");
-		logger->print(engine.getAvrLoopTime()*1000000.0);
-		logger->print("us");
-		logger->print(" speed=(");
-		logger->print(menuSpeedX);
-		logger->print(",");
-		logger->print(menuSpeedY);
-		logger->print(") angle=(");
-		logger->print(degrees(menuAngleX));
-		logger->print(",");
-		logger->print(degrees(menuAngleY));
-		logger->print(")");
+			log("disabled.");
+		log(" t=");
+		log(engine.getAvrLoopTime()*1000000.0);
+		log("us");
+		log(" speed=(");
+		log(menuSpeedX,2,3);
+		log(",");
+		log(menuSpeedY,2,3);
+		log(") angle=(");
+		log(degrees(menuAngleX),4,0);
+		log(",");
+		log(degrees(menuAngleY),4,0);
+		log(")");
 
 		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
 		getSpeed(a,  menuMovement);

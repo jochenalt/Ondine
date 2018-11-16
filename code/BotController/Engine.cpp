@@ -79,9 +79,9 @@ void Engine::enable(bool doIt) {
 			wheel[i]->enable(true);
 			if (!wheel[i]->isEnabled()) {
 				ok = false;
-				logger->print("enable wheel ");
-				logger->print(i);
-				logger->print(" failed!");
+				log("enable wheel ");
+				log(i);
+				log(" failed!");
 			}
 		}
 		if (ok)
@@ -101,15 +101,15 @@ void Engine::enable(bool doIt) {
 }
 
 void Engine::printHelp() {
-	command->println();
-	command->println("Engine Menu");
-	command->println();
-	command->println("e - enable");
-	command->println("0 - set wheel 0");
-	command->println("1 - set wheel 1");
-	command->println("2 - set wheel 2");
+	logln();
+	logln("Engine Menu");
+	logln();
+	logln("e - enable");
+	logln("0 - set wheel 0");
+	logln("1 - set wheel 1");
+	logln("2 - set wheel 2");
 
-	command->println("ESC");
+	logln("ESC");
 }
 
 void Engine::menuLoop(char ch, bool continously) {
@@ -139,33 +139,33 @@ void Engine::menuLoop(char ch, bool continously) {
 	}
 	if (cmd) {
 		if (enabled)
-			command->print("enabled.");
+			log("enabled.");
 		else
-			command->print("disabled.");
-		command->print("loop t=");
-		command->print(averageTime_ms);
-		command->print("ms");
+			log("disabled.");
+		log("loop t=");
+		log(averageTime_ms);
+		log("ms");
 
-		command->print(" active wheel");
-		command->print(activeMenuWheel);
+		log(" active wheel");
+		log(activeMenuWheel);
 
-		command->print(" angle=(");
-		command->print(degrees(wheel[0]->getIntegratedAngle()));
-		command->print(",");
-		command->print(degrees(wheel[1]->getIntegratedAngle()));
-		command->print(",");
-		command->print(degrees(wheel[2]->getIntegratedAngle()));
-		command->print(")");
+		log(" angle=(");
+		log(degrees(wheel[0]->getIntegratedAngle()),4,0);
+		log(",");
+		log(degrees(wheel[1]->getIntegratedAngle()),4,0);
+		log(",");
+		log(degrees(wheel[2]->getIntegratedAngle()),4,0);
+		log(")");
 
-		command->print(" speed=(");
-		command->print((wheel[0]->getSpeed()));
-		command->print(",");
-		command->print((wheel[1]->getSpeed()));
-		command->print(",");
-		command->print((wheel[2]->getSpeed()));
-		command->print(")");
+		log(" speed=(");
+		log((wheel[0]->getSpeed()),2,3);
+		log(",");
+		log((wheel[1]->getSpeed()),2,3);
+		log(",");
+		log((wheel[2]->getSpeed()),2,3);
+		log(")");
 
-		command->println(" >");
+		logln(" >");
 	}
 }
 

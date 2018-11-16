@@ -17,42 +17,43 @@
 void StateControllerConfig::print() {
 	StateControllerConfig defValue;
 	defValue.initDefaultValues();
-	logger->println("state controller configuration:");
-	logger->print("   angle=");
-	logger->print(angleWeight);
-	logger->print("(");
-	logger->print(defValue.angleWeight);
-	logger->print(")");
-	logger->print(" angularSpeed=");
-	logger->print(angularSpeedWeight);
-	logger->print("(");
-	logger->println(defValue.angularSpeedWeight);
-	logger->print("   intBallPos=");
-	logger->print(ballPosIntegratedWeight);
-	logger->print("(");
-	logger->print(defValue.ballPosIntegratedWeight);
-	logger->print(")");
-	logger->print(" ballPos=");
-	logger->print(ballPositionWeight);
-	logger->print("(");
-	logger->print(defValue.ballPositionWeight);
-	logger->print(")");
-	logger->print(" ballSpeed=");
-	logger->print(ballVelocityWeight);
-	logger->print("(");
-	logger->print(defValue.ballVelocityWeight);
-	logger->print(")");
-	logger->print("   omega=");
-	logger->print(omegaWeight);
-	logger->print("(");
-	logger->print(defValue.omegaWeight);
-	logger->println(")");
+	logln("state controller configuration:");
+	log("   angle=");
+	log(angleWeight,4,0);
+	log("(");
+	log(defValue.angleWeight);
+	log(")");
+	log(" angularSpeed=");
+	log(angularSpeedWeight,4,0);
+	log("(");
+	logln(defValue.angularSpeedWeight);
+	log("   intBallPos=");
+	log(ballPosIntegratedWeight,4,0);
+	log("(");
+	log(defValue.ballPosIntegratedWeight,4,0);
+	log(")");
+	log(" ballPos=");
+	log(ballPositionWeight,4,0);
+	log("(");
+	log(defValue.ballPositionWeight,4,0);
+	log(")");
+	log(" ballSpeed=");
+	log(ballVelocityWeight,4,0);
+	log("(");
+	log(defValue.ballVelocityWeight,4,0);
+	log(")");
+	log("   omega=");
+	log(omegaWeight,4,0);
+	log("(");
+	log(defValue.omegaWeight,4,0);
+	logln(")");
 }
 
 void StateControllerConfig::initDefaultValues() {
 
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
+	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
 	angleWeight				= 200.0; // 39.0;
 	angularSpeedWeight		= 10.0; // 21.00;
 
@@ -92,7 +93,7 @@ float ControlPlane::getBallPos() {
 }
 
 
-void ControlPlane::update(bool log, float dT,
+void ControlPlane::update(bool doLogging, float dT,
 		const State& current, const State& target,
 		float currentOmega, float targetOmega,
 		const IMUSamplePlane &sensor) {
@@ -139,32 +140,32 @@ void ControlPlane::update(bool log, float dT,
 						+ config.ballPosIntegratedWeight*ballPosIntegrated + config.ballPositionWeight*error_ball_position + config.ballVelocityWeight*error_ball_velocity
 						+ config.omegaWeight * error_centripedal;
 
-		if (log) {
+		if (doLogging) {
 			if (memory.persistentMem.logConfig.debugStateLog) {
-				logger->print("v=");
-				logger->print(current.speed);
-				logger->print(" a=");
-				logger->print(sensor.angle);
-				logger->print(" w=");
-				logger->print(sensor.angularVelocity);
-				logger->print(" x=");
-				logger->print(absBallPos);
-				logger->print(" v=");
-				logger->print(absBallSpeed);
+				log("v=");
+				log(current.speed,2,3);
+				log(" a=");
+				log(sensor.angle,2,3);
+				log(" w=");
+				log(sensor.angularVelocity,2,3);
+				log(" x=");
+				log(absBallPos,2,3);
+				log(" v=");
+				log(absBallSpeed,2,3);
 
-				logger->print(" error=");
-				logger->print(error_tilt);
-				logger->print(",");
-				logger->print(error_angular_speed);
-				logger->print("|");
-				logger->print(ballPosIntegrated);
-				logger->print(",");
-				logger->print(error_ball_position);
-				logger->print(",");
-				logger->print(error_ball_velocity);
-				logger->print("|=");
-				logger->print(error);
-				logger->print(")");
+				log(" error=");
+				log(error_tilt,3,3);
+				log(",");
+				log(error_angular_speed,3,3);
+				log("|");
+				log(ballPosIntegrated,3,3);
+				log(",");
+				log(error_ball_position,3,3);
+				log(",");
+				log(error_ball_velocity,3,3);
+				log("|=");
+				log(error,3,3);
+				log(")");
 			}
 		}
 
@@ -192,15 +193,15 @@ void ControlPlane::update(bool log, float dT,
 		lastTargetBallSpeed = targetBallSpeed;
 
 
-		if (log)
+		if (doLogging)
 			if (memory.persistentMem.logConfig.debugStateLog) {
-				logger->print(" output=(");
-				logger->print(accel);
-				logger->print(",");
-				logger->print(speed);
-				logger->print(",");
-				logger->print(filteredSpeed);
-				logger->print(")");
+				log(" output=(");
+				log(accel,3,3);
+				log(",");
+				log(speed,3,3);
+				log(",");
+				log(filteredSpeed,3,3);
+				log(")");
 			}
 	};
 }
@@ -224,24 +225,24 @@ void StateController::update(float dT,
 	uint32_t start = millis();
 	// ramp up target speed and omega with a trapezoid profile of constant acceleration
 	rampedTargetMovement.rampUp(targetBotMovement, dT);
-	bool log = logTimer.isDue_ms(1000,millis());
-	if (log && memory.persistentMem.logConfig.debugStateLog)
-		logger->print("   planeX:");
-	planeX.update(log, dT,
+	bool doLogging = logTimer.isDue_ms(1000,millis());
+	if (doLogging && memory.persistentMem.logConfig.debugStateLog)
+		log("   planeX:");
+	planeX.update(doLogging, dT,
 					currentMovement.x, rampedTargetMovement.x,
 					currentMovement.omega, rampedTargetMovement.omega,
 					sensorSample.plane[Dimension::X]);
 
-	if (log && memory.persistentMem.logConfig.debugStateLog) {
-		logger->println();
-		logger->print("   planeY:");
+	if (doLogging && memory.persistentMem.logConfig.debugStateLog) {
+		logln();
+		log("   planeY:");
 	}
-	planeY.update(log, dT,
+	planeY.update(doLogging, dT,
 					currentMovement.y, rampedTargetMovement.y,
 					currentMovement.omega, rampedTargetMovement.omega,
 					sensorSample.plane[Dimension::Y]);
-	if (log && memory.persistentMem.logConfig.debugStateLog) {
-		logger->println();
+	if (doLogging && memory.persistentMem.logConfig.debugStateLog) {
+		logln();
 	}
 	uint32_t end = millis();
 	avrLoopTime = (avrLoopTime + ((float)(end - start)*0.001))*0.5;
@@ -293,9 +294,9 @@ void StateController::menuLoop(char ch, bool continously) {
 											BotController::BotMode::OFF:
 											BotController::BotMode::BALANCING);
 			if (BotController::getInstance().isBalancing())
-				logger->println("balancing mode on");
+				logln("balancing mode on");
 			else
-				logger->println("balancing mode off");
+				logln("balancing mode off");
 			break;
 		case '0':
 			config.angleWeight = 0.0;

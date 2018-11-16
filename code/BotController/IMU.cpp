@@ -14,6 +14,7 @@
 #include <Util.h>
 #include <types.h>
 #include <BotMemory.h>
+#include <I2CPortScanner.h>
 
 // flag indicating that IMU has a new measurement, this is set in interrupt
 // and evaluated in loop(), so this needs to be declared volatile
@@ -38,16 +39,16 @@ void IMUConfig::initDefaultValues() {
 }
 
 void IMUConfig::print() {
-	logger->println("imu configuration");
-	logger->print("   null=(");
-	logger->print(degrees(nullOffsetX));
-	logger->print(",");
-	logger->print(degrees(nullOffsetY));
-	logger->print(",");
-	logger->print(degrees(nullOffsetZ));
-	logger->println("))");
-	logger->print("   kalman noise variance=");
-	logger->println(kalmanNoiseVariance,2);
+	logln("imu configuration");
+	log("   null=(");
+	log(degrees(nullOffsetX));
+	log(",");
+	log(degrees(nullOffsetY));
+	log(",");
+	log(degrees(nullOffsetZ));
+	logln("))");
+	log("   kalman noise variance=");
+	logln(kalmanNoiseVariance,1,3);
 
 }
 
@@ -117,13 +118,23 @@ void IMU::setup(MenuController *newMenuCtrl) {
 	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
 
-	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_400);
+	// doI2CPortScan(F("I2C"),IMUWire , logger);
+	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_800);
 	int status = mpu9250->begin();
 	if (status < 0) {
 		fatalError("I2C-IMU setup failed ");
 	}
 
 	status = init();
+	if (status < 0) {
+		fatalError("I2C-IMU init failed ");
+	}
+
+	if (status < 0) {
+		if (mpu9250 != NULL)
+			delete mpu9250;
+		mpu9250 = NULL;
+	}
 }
 
 int IMU::init() {
@@ -168,26 +179,26 @@ int IMU::init() {
 }
 
 void IMU::calibrate() {
-	logger->println("calibrate imu");
+	logln("calibrate imu");
 	int status = mpu9250->calibrateAccel();
 	if (status != 1) {
-		logger->print("accl calibration status error");
-		logger->println(status);
+		log("accl calibration status error");
+		logln(status);
 		fatalError("fatal error");
 	}
 
 	status = mpu9250->calibrateGyro();
 	if (status != 1) {
-		logger->print("accl calibration status error");
-		logger->println(status);
+		log("accl calibration status error");
+		logln(status);
 		fatalError("fatal error");
 	}
 
 	status = init();
 
 	if (status != 1) {
-		logger->print("status error");
-		logger->println(status);
+		log("status error");
+		logln(status);
 		fatalError("fatal error");
 	}
 	// measure for 1s, run kalman filter and take final orientation as null value
@@ -220,7 +231,8 @@ void IMU::loop() {
 			// read raw values
 			int status = mpu9250->readSensor();
 			if (status != 1) {
-				fatalError("IMU status error");
+				fatalError("loop IMU status error ");
+				logln(status);
 			}
 
 			// compute dT for kalman filter
@@ -341,15 +353,15 @@ void IMU::menuLoop(char ch, bool continously) {
 	case 'N':
 		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance < 1.0)
 			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance += 0.01;
-		logger->print("kalman noise variance ");
-		logger->println(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,2);
+		log("kalman noise variance ");
+		logln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
 		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
 		break;
 	case 'n':
 		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance > 0.01)
 			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance -= 0.01;
-		logger->print("kalman noise variance ");
-		logger->println(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,2);
+		log("kalman noise variance ");
+		logln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
 		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
 		break;
 	case 27:
@@ -366,6 +378,5 @@ void IMU::menuLoop(char ch, bool continously) {
 		command->print("readvalue=");
 		command->print(logIMUValues);
 		command->println(" >");
-
 	}
 }

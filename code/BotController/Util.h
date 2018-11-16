@@ -23,6 +23,13 @@ template <typename T> int sqr(T val) {
     return (T(0)*T(0));
 }
 
+void log(float x, uint8_t digitsBeforeComma, uint8_t digitsAfterComma);
+void logln(float x, uint8_t digitsBeforeComma, uint8_t digitsAfterComma);
+
+void log(String s);
+void logln();
+void logln(String s);
+
 extern HardwareSerial* logger;
 extern HardwareSerial* command;
 extern i2c_t3* IMUWire;

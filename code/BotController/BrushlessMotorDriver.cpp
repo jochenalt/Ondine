@@ -66,7 +66,7 @@ void precomputeSVPMWave() {
 void MotorConfig::initDefaultValues() {
 	// at slow speeds PID controller is aggressivly keeping the position
 	pid_position.Kp = 1.5;
-	pid_position.Ki = 1.2;
+	pid_position.Ki = 5.0;
 	pid_position.Kd = 0.0;
 
 	pid_speed.Kp = .9;
@@ -193,7 +193,7 @@ float BrushlessMotorDriver::turnReferenceAngle() {
 		// when serial communications takes place
 		// logger->println("turnReferenceAngle's dT too big!!!!");
 		// logger->print(timePassed_s*1000.0);
-		// logger->println("ms");
+		// logger->println("ms");hhh
 	}
 
 	// increase reference speed to reach target speed
@@ -305,7 +305,7 @@ bool BrushlessMotorDriver::loop() {
 
 			// torque is max at -90/+90 degrees
 			// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-            advanceAngle = radians(90) * sigmoid(20.0 /* derivation at 0 */, controlOutput/maxAngleError);
+            advanceAngle = radians(90) * sigmoid(40.0 /* derivation at 0 */, controlOutput/maxAngleError);
 
 			float torque = abs(controlOutput)/maxAngleError;
 

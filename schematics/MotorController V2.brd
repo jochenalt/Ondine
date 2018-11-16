@@ -172,8 +172,8 @@
 GND</text>
 <text x="41.91" y="49.53" size="0.762" layer="25">GND</text>
 <text x="41.91" y="52.07" size="0.762" layer="25">3.3V</text>
-<text x="41.91" y="54.61" size="0.762" layer="25">SDA</text>
-<text x="41.91" y="56.8325" size="0.762" layer="25">SCL</text>
+<text x="41.91" y="56.515" size="0.762" layer="25">SDA</text>
+<text x="41.91" y="54.9275" size="0.762" layer="25">SCL</text>
 <text x="41.91" y="59.3725" size="0.762" layer="25">INT</text>
 <text x="41.91" y="72.0725" size="0.762" layer="25">VDD</text>
 <text x="41.91" y="69.5325" size="0.762" layer="25">GND</text>
@@ -5191,7 +5191,7 @@ design rules under a new name.</description>
 <wire x1="-58.2295" y1="-2.667" x2="-58.42" y2="-2.54" width="0.254" layer="1"/>
 <via x="-39.5605" y="-2.667" extent="1-16" drill="0.635"/>
 </signal>
-<signal name="IMU-SDA">
+<signal name="IMU-SCL">
 <contactref element="IMU-I2C" pad="3"/>
 <contactref element="PRJ1" pad="19/A5/SCL"/>
 <wire x1="-6.223" y1="64.008" x2="-6.223" y2="63.5635" width="0.254" layer="16"/>
@@ -5589,7 +5589,7 @@ design rules under a new name.</description>
 <wire x1="38.227" y1="36.67125" x2="38.1" y2="36.83" width="0.254" layer="16"/>
 <wire x1="-6.223" y1="22.89175" x2="-6.35" y2="22.86" width="0.254" layer="16"/>
 </signal>
-<signal name="IMU-SCL">
+<signal name="IMU-SDA">
 <contactref element="PRJ1" pad="18/A4/SDA"/>
 <contactref element="IMU-I2C" pad="2"/>
 <wire x1="-3.1115" y1="64.23025" x2="-6.223" y2="61.11875" width="0.254" layer="16"/>
@@ -5661,9 +5661,6 @@ design rules under a new name.</description>
 <wire x1="-29.11475" y1="44.45" x2="-29.21" y2="44.45" width="0.254" layer="1"/>
 </signal>
 <signal name="3V">
-<contactref element="U$3" pad="11"/>
-<contactref element="U$3" pad="16"/>
-<contactref element="U$3" pad="25"/>
 <wire x1="2.2225" y1="48.4505" x2="1.3335" y2="48.4505" width="0.254" layer="16"/>
 <wire x1="3.77825" y1="50.00625" x2="2.2225" y2="48.4505" width="0.254" layer="16"/>
 <wire x1="3.77825" y1="69.342" x2="3.77825" y2="61.11875" width="0.254" layer="16"/>
@@ -5673,6 +5670,9 @@ design rules under a new name.</description>
 <wire x1="1.3335" y1="48.4505" x2="1.27" y2="48.26" width="0.254" layer="16"/>
 <wire x1="3.77825" y1="61.11875" x2="29.11475" y2="61.11875" width="0.254" layer="16"/>
 <wire x1="29.11475" y1="61.11875" x2="29.21" y2="60.96" width="0.254" layer="16"/>
+<contactref element="U$3" pad="11"/>
+<contactref element="U$3" pad="16"/>
+<contactref element="U$3" pad="25"/>
 </signal>
 <signal name="N$41">
 <contactref element="R15" pad="2"/>
