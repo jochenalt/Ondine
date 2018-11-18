@@ -16,7 +16,7 @@ void PIDController::reset() {
 float PIDController::update (const PIDControllerConfig& params, float error, float dT, float min, float max) {
 		float pOut = params.Kp*error;
 		integrativeError += error * dT;
-		// integrativeError = constrain(integrativeError, min, max);
+		integrativeError = constrain(integrativeError, min, max);
 		float iOut = params.Ki* integrativeError;
 		float dError = error - lastError;
 		float dOut  = 0;

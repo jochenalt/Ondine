@@ -39,16 +39,16 @@ void IMUConfig::initDefaultValues() {
 }
 
 void IMUConfig::print() {
-	logln("imu configuration");
-	log("   null=(");
-	log(degrees(nullOffsetX));
-	log(",");
-	log(degrees(nullOffsetY));
-	log(",");
-	log(degrees(nullOffsetZ));
-	logln("))");
-	log("   kalman noise variance=");
-	logln(kalmanNoiseVariance,1,3);
+	loggingln("imu configuration");
+	logging("   null=(");
+	logging(degrees(nullOffsetX),3,2);
+	logging(",");
+	logging(degrees(nullOffsetY),3,2);
+	logging(",");
+	logging(degrees(nullOffsetZ),3,2);
+	loggingln("))");
+	logging("   kalman noise variance=");
+	loggingln(kalmanNoiseVariance,1,3);
 
 }
 
@@ -98,11 +98,36 @@ IMUSample& IMUSample::operator=(const IMUSample& t) {
 
 
 bool IMU::isValid() {
-	return ((millis() - updateTimer.mLastCall_ms < 2000/SampleFrequency) &&
+	if (!(millis() - updateTimer.mLastCall_ms < 2000/SampleFrequency))
+		logging("IMU frequency too low");
+	if (!(abs(currentSample.plane[X].angle) < MaxTiltAngle))
+		logging("X tilt ange too high");
+	if (!(abs(currentSample.plane[Y].angle) < MaxTiltAngle))
+		logging("Y tilt ange too high");
+	if (!(abs(currentSample.plane[X].angularVelocity) < MaxTiltAngle/SamplingTime))
+		logging("X angular velocity ange too high");
+	if (!(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime))
+		logging("Y X angular velocity too high");
+
+	bool result = ((millis() - updateTimer.mLastCall_ms < 2000/SampleFrequency) &&
 			(abs(currentSample.plane[X].angle) < MaxTiltAngle) &&
 			(abs(currentSample.plane[Y].angle) < MaxTiltAngle) &&
 			(abs(currentSample.plane[X].angularVelocity) < MaxTiltAngle/SamplingTime) &&
 			(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime));
+	if (!result) {
+		logging("t=");
+		logging(millis() - updateTimer.mLastCall_ms);
+		logging("a=");
+		logging(currentSample.plane[X].angle,3,1);
+		logging(",");
+		logging(currentSample.plane[Y].angle,3,1);
+		logging("w=");
+		logging(currentSample.plane[X].angularVelocity,3,1);
+		logging(",");
+		logging(currentSample.plane[Y].angularVelocity,3,1);
+		loggingln();
+	}
+	return result;
 }
 
 void IMU::setup(MenuController *newMenuCtrl) {
@@ -179,26 +204,26 @@ int IMU::init() {
 }
 
 void IMU::calibrate() {
-	logln("calibrate imu");
+	loggingln("calibrate imu");
 	int status = mpu9250->calibrateAccel();
 	if (status != 1) {
-		log("accl calibration status error");
-		logln(status);
+		logging("accl calibration status error");
+		loggingln(status);
 		fatalError("fatal error");
 	}
 
 	status = mpu9250->calibrateGyro();
 	if (status != 1) {
-		log("accl calibration status error");
-		logln(status);
+		logging("accl calibration status error");
+		loggingln(status);
 		fatalError("fatal error");
 	}
 
 	status = init();
 
 	if (status != 1) {
-		log("status error");
-		logln(status);
+		logging("status error");
+		loggingln(status);
 		fatalError("fatal error");
 	}
 	// measure for 1s, run kalman filter and take final orientation as null value
@@ -232,7 +257,7 @@ void IMU::loop() {
 			int status = mpu9250->readSensor();
 			if (status != 1) {
 				fatalError("loop IMU status error ");
-				logln(status);
+				loggingln(status);
 			}
 
 			// compute dT for kalman filter
@@ -273,30 +298,32 @@ void IMU::loop() {
 			averageTime_ms = (averageTime_ms + (millis() - now))/2;
 
 			if (logIMUValues) {
-				command->print("dT=");
-				command->print(dT,3);
-				command->print("a=(X:");
-				command->print(degrees(tilt[Dimension::X]),2);
-				command->print("/");
-				command->print(degrees(angularVelocity[Dimension::X]),2);
-				command->print("Y:");
-				command->print(degrees(tilt[Dimension::Y]),2);
-				command->print("/");
-				command->print(degrees(angularVelocity[Dimension::Y]),2);
-				command->print("Z:");
-				command->print(degrees(tilt[Dimension::Z]),2);
-				command->print("/");
-				command->print(degrees(angularVelocity[Dimension::Z]),2);
+				if (logTimer.isDue_ms(500,millis())) {
+					logging("dT=");
+					logging(dT,1,3);
+					logging("a=(X:");
+					logging(degrees(tilt[Dimension::X]),2,2);
+					logging("/");
+					logging(degrees(angularVelocity[Dimension::X]),2,2);
+					logging("Y:");
+					logging(degrees(tilt[Dimension::Y]),2,2);
+					logging("/");
+					logging(degrees(angularVelocity[Dimension::Y]),2,2);
+					logging("Z:");
+					logging(degrees(tilt[Dimension::Z]),2,2);
+					logging("/");
+					logging(degrees(angularVelocity[Dimension::Z]),2,2);
 
-				command->print(" angle=(");
-				command->print(degrees(getAngleRad(Dimension::X)));
-				command->print(",");
-				command->print(degrees(getAngleRad(Dimension::Y)));
-				command->print(")");
+					logging(" angle=(");
+					logging(degrees(getAngleRad(Dimension::X)),2,2);
+					logging(",");
+					logging(degrees(getAngleRad(Dimension::Y)),2,2);
+					logging(")");
 
-				command->print("kalman t=");
-				command->print(averageTime_ms);
-				command->println("us");
+					logging("kalman t=");
+					logging(averageTime_ms);
+					loggingln("us");
+				}
 			}
 		}
 	}
@@ -330,12 +357,12 @@ void IMU::setNoiseVariance(float noiseVariance) {
 }
 
 void IMU::printHelp() {
-	command->println("IMU controller");
-	command->println("r    - read values");
-	command->println("c    - calibrate ");
-	command->println("n/M  - set kalman noise variance");
+	loggingln("IMU controller");
+	loggingln("r    - read values");
+	loggingln("c    - calibrate ");
+	loggingln("n/M  - set kalman noise variance");
 
-	command->println("ESC");
+	loggingln("ESC");
 }
 
 void IMU::menuLoop(char ch, bool continously) {
@@ -353,15 +380,15 @@ void IMU::menuLoop(char ch, bool continously) {
 	case 'N':
 		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance < 1.0)
 			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance += 0.01;
-		log("kalman noise variance ");
-		logln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
+		logging("kalman noise variance ");
+		loggingln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
 		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
 		break;
 	case 'n':
 		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance > 0.01)
 			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance -= 0.01;
-		log("kalman noise variance ");
-		logln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
+		logging("kalman noise variance ");
+		loggingln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
 		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
 		break;
 	case 27:
@@ -375,8 +402,8 @@ void IMU::menuLoop(char ch, bool continously) {
 
 
 	if (cmd) {
-		command->print("readvalue=");
-		command->print(logIMUValues);
-		command->println(" >");
+		logging("readvalue=");
+		logging(logIMUValues);
+		loggingln(" >");
 	}
 }

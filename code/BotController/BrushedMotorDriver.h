@@ -17,7 +17,6 @@
 #include <Encoder/Encoder.h>
 
 
-
 class BrushedMotorDriver : virtual public Menuable {
 public:
 	const float MaxAcceleration = 1000.0; // [rev/s^2]

@@ -43,6 +43,10 @@ void setup()
 
 	botController.setup(); 	// this takes 4.5s seconds (mainly due to IMU initialization)
 
+	// initialize LED_PIN after botController.setup()
+	// since SPI does use it default wise for SCK, but this is remapped
+	pinMode(LED_PIN, OUTPUT);
+
 	i2cSlave->setup(); 		// join the i2c bus with the webserver
 
 	// initialize configuration values coming from EEPROM

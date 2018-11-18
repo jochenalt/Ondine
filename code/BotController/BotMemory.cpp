@@ -19,9 +19,9 @@ void BotMemory::setDefaults() {
 
 
 void BotMemory::println() {
-	logger->print("EEPROM memory (V");
+	logger->print("EEPROM V");
 	logger->print(EEPROMVersion());
-	logger->println("):");
+	logger->println();
 
 	persistentMem.ctrlConfig.print();
 	logger->println();

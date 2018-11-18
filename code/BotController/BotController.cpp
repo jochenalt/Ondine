@@ -5,6 +5,7 @@
  *      Author: JochenAlt
  */
 
+#include <AS5047D.h>
 #include <types.h>
 #include <Util.h>
 
@@ -23,6 +24,7 @@ const int LifterCPR = 48;
 
 void BotController::setup() {
 	registerMenuController(&menuController);
+
 	ballDrive.setup(&menuController);
 	imu.setup(&menuController);
 	state.setup(&menuController);
@@ -31,6 +33,8 @@ void BotController::setup() {
 	lifter.setupEncoder(LifterEncoderAPin, LifterEncoderBPin, LifterCPR);
 
 	performanceLogTimer.setRate(5000);
+
+
 }
 
 void BotController::printHelp() {
@@ -130,6 +134,7 @@ void BotController::menuLoop(char ch, bool continously) {
 
 	case 'h':
 		printHelp();
+		loggingln();
 		memory.println();
 		break;
 	default:
@@ -201,25 +206,25 @@ void BotController::loop() {
 
 		if (logTimer.isDue_ms(1000,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
-				logger->print("a=(X:");
-				logger->print(degrees(sensorSample.plane[Dimension::X].angle));
-				logger->print(",");
-				logger->print(degrees(sensorSample.plane[Dimension::X].angularVelocity));
-				logger->print(",");
-				logger->print(currentMovement.x.pos,1);
-				logger->print(") Y:(");
-				logger->print(degrees(sensorSample.plane[Dimension::Y].angle));
-				logger->print(",");
-				logger->print(degrees(sensorSample.plane[Dimension::Y].angularVelocity));
-				logger->print(",");
-				logger->print(currentMovement.y.pos,1);
-				logger->print(") ");
+				logging("a=(X:");
+				logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
+				logging(",");
+				logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
+				logging(",");
+				logging(currentMovement.x.pos,2,3);
+				logging(") Y:(");
+				logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
+				logging(",");
+				logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
+				logging(",");
+				logging(currentMovement.y.pos,2,3);
+				logging(") ");
 				currentMovement.print();
-				logger->print(" state=(");
-				logger->print(state.getSpeedX());
-				logger->print(",");
-				logger->print(state.getSpeedY());
-				logger->print(")");
+				logging(" state=(");
+				logging(state.getSpeedX(),2,3);
+				logging(",");
+				logging(state.getSpeedY(),2,3);
+				logging(")");
 			}
 			if (memory.persistentMem.logConfig.performanceLog) {
 				logger->print(" t=(dT=");

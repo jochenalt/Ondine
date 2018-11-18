@@ -22,13 +22,18 @@ template <typename T> int sgn(T val) {
 template <typename T> int sqr(T val) {
     return (T(0)*T(0));
 }
+float roundToDigits(float y,uint8_t i);
 
-void log(float x, uint8_t digitsBeforeComma, uint8_t digitsAfterComma);
-void logln(float x, uint8_t digitsBeforeComma, uint8_t digitsAfterComma);
+void logging(float x, uint8_t digitsBeforeComma, uint8_t digitsAfterComma);
+void loggingln(float x, uint8_t digitsBeforeComma, uint8_t digitsAfterComma);
+void logging(float x, uint8_t digitsAfterComma);
+void loggingln(float x, uint8_t digitsAfterComma);
 
-void log(String s);
-void logln();
-void logln(String s);
+void loggingln();
+void logging(String s);
+void loggingln(String s);
+void logging(int s);
+void loggingln(int s);
 
 extern HardwareSerial* logger;
 extern HardwareSerial* command;

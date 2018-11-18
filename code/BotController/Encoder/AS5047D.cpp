@@ -7,32 +7,59 @@
 
 
 
-#include <AS5047DD.h>
+#include <AS5047D.h>
 #include "Arduino.h"
 #include "SPI.h"
-AS5047D::AS5047D(uint16_t mosiPin, uint16_t misoPin, uint16_t SCKPin, uint16_t SelectPin)
-         : selectPin(SelectPin)
+#include "Util.h"
+
+
+bool AS5047D::busInitialized = false;
+
+
+void AS5047D::setupBus(uint16_t mosiPin, uint16_t misoPin, uint16_t SCKPin) {
+	// do this only once.
+	if (!busInitialized) {
+		SPI.setClockDivider( SPI_CLOCK_DIV16 ); // 886KHz, that's pretty fast for our purpose
+		SPI.setMOSI(mosiPin);
+		SPI.setMISO(misoPin);
+		SPI.setSCK(SCKPin);
+		SPI.setDataMode(1); // The AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
+		SPI.begin();
+		busInitialized = true;
+	}
+}
+
+void AS5047D::setup(uint16_t clientSelectPin)
 {
-         pinMode(selectPin, OUTPUT);
-         // SPCR = (1<<SPE) | (1<<MSTR) | (1<<CPHA) | (1<<SPR1) | (1<<SPR0); // slow down clock speed, set up spi
-         SPI.setClockDivider( SPI_CLOCK_DIV128 );
-         SPI.setMOSI(mosiPin);
-         SPI.setMISO(misoPin);
-         SPI.setSCK(SCKPin);
-         SPI.setDataMode(1); // The AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
-         SPI.begin();
+	if (!busInitialized) {
+		fatalError("SPI bus needs to be initialized before sensor setup");
+	}
+    selectPin = clientSelectPin;
+    pinMode(selectPin, OUTPUT);
+
+    // dont start with 0 but the absolute position
+	reset();
 }
 
 uint32_t AS5047D::sensorRead(void)
 {
 	uint16_t angle = readRegister(0x3FFF);
-    return angle;
+    return resolution-angle;
+}
+
+void AS5047D::reset() {
+	float sensorValue = sensorRead();
+	currentAngle = ((float)sensorValue)/((float)resolution)*TWO_PI;
+	lastSensorRead = sensorValue;
 }
 
 float AS5047D::readAngle() {
 	int sensorValue = sensorRead();
 
-	int diff = sensorValue - lastSensorRead;
+
+	int32_t diff = sensorValue - lastSensorRead;
+	lastSensorRead = sensorValue;
+
 	// did we cross the 0 value coming from large angle ?
 	if (abs(diff) > abs ( diff + resolution))
 		diff += resolution;
@@ -40,7 +67,7 @@ float AS5047D::readAngle() {
 	if (abs(diff) > abs ( diff - resolution))
 		diff -= resolution;
 
-	currentAngle += ((float)diff)/((float)resolution);
+	currentAngle += ((float)diff)/((float)resolution)*TWO_PI;
 	return currentAngle;
 }
 
@@ -60,7 +87,7 @@ uint32_t AS5047D::readRegister(uint32_t thisRegister)
         result = SPI.transfer(lowbyte); 	// first byte out
         digitalWrite(selectPin, HIGH);		// unselect sensor
 
-        delayMicroseconds(10);
+        delayMicroseconds(10);				// at least 350ns (datasheet)
 
         digitalWrite(selectPin, LOW);		// select sensor
         int bytesToRead = 2;

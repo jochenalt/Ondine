@@ -12,7 +12,7 @@
 #include <MPU9250/src/MPU9250.h>
 #include <Filter/KalmanFilter.h>
 #include <Kinematics.h>
-
+#include <TimePassedBy.h>
 
 class IMUConfig {
 	public:
@@ -100,6 +100,7 @@ private:
 	uint32_t lastInvocationTime_ms = 0;
 	uint32_t averageTime_ms = 0;
 	float dT = 0;
+	TimePassedBy logTimer;
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */

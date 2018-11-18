@@ -9,9 +9,9 @@ BotMovement::BotMovement() {
 }
 
 void BotMovement::print() {
-	logger->print("x=");
+	logging("x=");
 	x.print();
-	logger->print(" y=");
+	logging(" y=");
 	y.print();
 }
 
@@ -83,11 +83,11 @@ Point::Point() {
 }
 
 void Point::print() {
-	logger->print("(");
-	logger->print(x,1);
-	logger->print(",");
-	logger->print(y,1);
-	logger->print(")");
+	logging("(");
+	logging(x,2,3);
+	logging(",");
+	logging(y,2,3);
+	logging(")");
 
 }
 
@@ -113,11 +113,11 @@ Speed::Speed() {
 }
 
 void Speed::print() {
-	logger->print("(");
-	logger->print(x,1);
-	logger->print(",");
-	logger->print(y,1);
-	logger->print(")");
+	logging("(");
+	logging(x,2,3);
+	logging(",");
+	logging(y,2,3);
+	logging(")");
 
 }
 
@@ -143,14 +143,14 @@ Pose::Pose() {
 }
 
 void Pose::print() {
-	logger->print("(");
-	logger->print(p.x,1);
-	logger->print(",");
-	logger->print(p.y,1);
-	logger->print(",");
-	logger->print(orientation,1);
+	logging("(");
+	logging(p.x,2,3);
+	logging(",");
+	logging(p.y,2,3);
+	logging(",");
+	logging(orientation,2,3);
 
-	logger->print(")");
+	logging(")");
 
 }
 
@@ -185,14 +185,14 @@ Speed3D::Speed3D() {
 }
 
 void Speed3D::print() {
-	logger->print("(");
-	logger->print(p.x,1);
-	logger->print(",");
-	logger->print(p.y,1);
-	logger->print(",");
-	logger->print(orientation,1);
+	logging("(");
+	logging(p.x,3,1);
+	logging(",");
+	logging(p.y,3,1);
+	logging(",");
+	logging(orientation,3,1);
 
-	logger->print(")");
+	logging(")");
 
 }
 
@@ -227,13 +227,13 @@ State::State() {
 }
 
 void State::print() {
-	logger->print("(");
-	logger->print((int)pos);
-	logger->print(",");
-	logger->print(speed,1);
-	logger->print(",");
-	logger->print(accel,1);
-	logger->print(")");
+	logging("(");
+	logging(pos,2,3);
+	logging(",");
+	logging(speed,2,3);
+	logging(",");
+	logging(accel,2,3);
+	logging(")");
 
 }
 

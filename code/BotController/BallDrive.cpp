@@ -211,21 +211,21 @@ void BallDrive::menuLoop(char ch, bool continously) {
 	}
 	if (cmd) {
 		if (isEnabled())
-			log("enabled.");
+			logging("enabled.");
 		else
-			log("disabled.");
-		log(" t=");
+			logging("disabled.");
+		logging(" t=");
 		log(engine.getAvrLoopTime()*1000000.0);
-		log("us");
-		log(" speed=(");
-		log(menuSpeedX,2,3);
-		log(",");
-		log(menuSpeedY,2,3);
-		log(") angle=(");
-		log(degrees(menuAngleX),4,0);
-		log(",");
-		log(degrees(menuAngleY),4,0);
-		log(")");
+		logging("us");
+		logging(" speed=(");
+		logging(menuSpeedX,2,3);
+		logging(",");
+		logging(menuSpeedY,2,3);
+		logging(") angle=(");
+		logging(degrees(menuAngleX),4,0);
+		logging(",");
+		logging(degrees(menuAngleY),4,0);
+		logging(")");
 
 		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
 		getSpeed(a,  menuMovement);

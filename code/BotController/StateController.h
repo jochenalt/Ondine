@@ -13,6 +13,7 @@
 #include <setup.h>
 #include <IMU.h>
 #include <TimePassedBy.h>
+#include <Filter/ComplementaryFilter.h>
 
 
 class StateControllerConfig {
@@ -36,6 +37,7 @@ class ControlPlane {
 	public:
 		void reset ();
 		float lastTargetAngle;
+		float lastAngle;
 		float lastTargetBodyPos;
 		float lastTargetBallPos;
 		float lastTargetBallSpeed;
@@ -44,9 +46,9 @@ class ControlPlane {
 
 		float speed;			// speed in x direction [m/s]
 		float filteredSpeed;
-		float ballPosIntegrated;
+		float posErrorIntegrated;
 
-		FIR::Filter outputSpeedFilter;
+		FIR::Filter outputSpeedFilter1;
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
 		void update(bool log,float dT,

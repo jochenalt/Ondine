@@ -16,6 +16,7 @@ void Engine::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
 
 	// initialize all brushless motors and their encoders
+	// unfortunately,sequence of motors in schematics is different than sequence of motors used in code
 	static int MotorIdx [3] =  { 1,0,2 };
 
 	// array that assigns the motors pins to the right order
@@ -25,7 +26,7 @@ void Engine::setup(MenuController* menuCtrl) {
 		wheel[i] = new BrushlessMotorDriver();
 		wheel[i]->setup(i, menuCtrl, ReverseDirection[idx]);
 		wheel[i]->setupMotor(BRUSHLESS_DRIVER_ENABLE_PIN, BrushlessDriverPWMPins[idx][0], BrushlessDriverPWMPins[idx][1], BrushlessDriverPWMPins[idx][2]);
-		wheel[i]->setupEncoder(EncoderPins[idx][0],EncoderPins[idx][1], 1024);
+		wheel[i]->setupEncoder(SS_PIN[idx]);
 	}
 }
 
@@ -79,9 +80,9 @@ void Engine::enable(bool doIt) {
 			wheel[i]->enable(true);
 			if (!wheel[i]->isEnabled()) {
 				ok = false;
-				log("enable wheel ");
+				logging("enable wheel ");
 				log(i);
-				log(" failed!");
+				logging(" failed!");
 			}
 		}
 		if (ok)
@@ -101,15 +102,15 @@ void Engine::enable(bool doIt) {
 }
 
 void Engine::printHelp() {
-	logln();
-	logln("Engine Menu");
-	logln();
-	logln("e - enable");
-	logln("0 - set wheel 0");
-	logln("1 - set wheel 1");
-	logln("2 - set wheel 2");
+	loggingln();
+	loggingln("Engine Menu");
+	loggingln();
+	loggingln("e - enable");
+	loggingln("0 - set wheel 0");
+	loggingln("1 - set wheel 1");
+	loggingln("2 - set wheel 2");
 
-	logln("ESC");
+	loggingln("ESC");
 }
 
 void Engine::menuLoop(char ch, bool continously) {
@@ -139,33 +140,33 @@ void Engine::menuLoop(char ch, bool continously) {
 	}
 	if (cmd) {
 		if (enabled)
-			log("enabled.");
+			logging("enabled.");
 		else
-			log("disabled.");
-		log("loop t=");
+			logging("disabled.");
+		logging("loop t=");
 		log(averageTime_ms);
-		log("ms");
+		logging("ms");
 
-		log(" active wheel");
+		logging(" active wheel");
 		log(activeMenuWheel);
 
-		log(" angle=(");
-		log(degrees(wheel[0]->getIntegratedAngle()),4,0);
-		log(",");
-		log(degrees(wheel[1]->getIntegratedAngle()),4,0);
-		log(",");
-		log(degrees(wheel[2]->getIntegratedAngle()),4,0);
-		log(")");
+		logging(" angle=(");
+		logging(degrees(wheel[0]->getIntegratedAngle()),4,0);
+		logging(",");
+		logging(degrees(wheel[1]->getIntegratedAngle()),4,0);
+		logging(",");
+		logging(degrees(wheel[2]->getIntegratedAngle()),4,0);
+		logging(")");
 
-		log(" speed=(");
-		log((wheel[0]->getSpeed()),2,3);
-		log(",");
-		log((wheel[1]->getSpeed()),2,3);
-		log(",");
-		log((wheel[2]->getSpeed()),2,3);
-		log(")");
+		logging(" speed=(");
+		logging((wheel[0]->getSpeed()),2,3);
+		logging(",");
+		logging((wheel[1]->getSpeed()),2,3);
+		logging(",");
+		logging((wheel[2]->getSpeed()),2,3);
+		logging(")");
 
-		logln(" >");
+		loggingln(" >");
 	}
 }
 
