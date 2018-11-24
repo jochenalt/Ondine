@@ -3,6 +3,7 @@
 
 
 #include <math.h>
+#include <Arduino.h>
 
 // --- general constants ---
 const float OneMicrosecond_s = 0.000001;
@@ -46,20 +47,23 @@ const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time of th
 // PWM ist used for the brushless motors
 // max PWM value is (1<<pwmResolution)-1
 const int pwmResolution = 10;
+
+// timing of wave form in brushless motors is measured in [ms], so max frequency to recompute PWM wave is 1000Hz
 const int MaxBrushlessDriverFrequency = 1000;
+
 // Pins for Drotek L6234 breakout, need to be PWM pins
 //                                            PWM1,PWM2,PWM3
 const int BrushlessDriverPWMPins[3][3] = {  { 2,    3,   4},
 											{ 5,    6,   7},
 											{ 8,    9,   10}};
 
-// all L6234 are connected to one enable pin
+// all L6234 are connected to a common enable pin
 #define BRUSHLESS_DRIVER_ENABLE_PIN  24
 
-// Magnetic Encoder via SPI with star connection,i.e. three separate client select lines
-const int MISO_PIN = 12;
-const int MOSI_PIN = 11;
-const int SCK_PIN = 27;
-const int SS_PIN[3] = { 28,25,26};
+// Magnetic Encoder AS4057D are connected via SPI with three separate CS lines
+const uint16_t MISO_PIN = 12;
+const uint16_t MOSI_PIN = 11;
+const uint16_t SCK_PIN = 27;
+const uint16_t SS_PIN[3] = { 26, 25,28};
 
 #endif /* SETUP_H_ */

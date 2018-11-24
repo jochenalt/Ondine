@@ -44,7 +44,7 @@ public:
 	virtual void menuLoop(char ch, bool continously);
 	virtual void printHelp();
 private:
-	BrushlessMotorDriver* wheel[3] = { NULL, NULL, NULL };
+	BrushlessMotorDriver wheel[3];
 	int activeMenuWheel = 0;
 	uint32_t averageTime_ms = 0;
 	uint32_t lastLoop_ms = 0;

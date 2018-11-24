@@ -91,9 +91,9 @@ void MotorConfig::initDefaultValues() {
 	pid_lifter.Ki = 0.005;
 	pid_lifter.Kd = 0.0;
 
-	phaseAAngle[0] = 0;
-	phaseAAngle[1] = radians(341.19);
-	phaseAAngle[2] = 0;
+	phaseAAngle[0] = radians(231.4);
+	phaseAAngle[1] = radians(128.6);
+	phaseAAngle[2] = radians(229.8);;
 }
 
 void MotorConfig::print() {
@@ -164,7 +164,7 @@ void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl, bool re
 
 	// initialize SPI bus used to communicate with AS5047D magnetic encoders
 	// (this is done once only)
-	AS5047D::setupBus(MOSI_PIN, MISO_PIN, SCK_PIN);
+	AS5047D::setupBus(MOSI_PIN, MISO_PIN, SCK_PIN, SS_PIN);
 
 }
 
@@ -208,20 +208,7 @@ void BrushlessMotorDriver::turnReferenceAngle(float dT) {
 	speedDiff = constrain(speedDiff, -abs(targetAcc)*dT, +abs(targetAcc)*dT);
 	currentReferenceMotorSpeed += speedDiff;
 	currentReferenceMotorSpeed = constrain(currentReferenceMotorSpeed, -maxRevolutionSpeed, + maxRevolutionSpeed);
-	/*
 
-	logging("tar=");
-	logging(targetMotorSpeed);
-	logging("speeddif=");
-	logging(speedDiff);
-	logging("targetAcc=");
-	logging(targetAcc);
-	logging("currV");
-	logging(currentReferenceMotorSpeed);
-	logging("ref");
-	logging(referenceAngle);
-	loggingln();
-*/
 	// increase reference angle with given speed
 	referenceAngle += currentReferenceMotorSpeed * TWO_PI * dT;
 }
@@ -239,19 +226,6 @@ void BrushlessMotorDriver::reset() {
 	measuredMotorSpeed = 0;				// [rev/s]
 	lastTurnTime_us = 0;
 	pid.reset();
-
-							logging("a=");
-							logging(degrees(getEncoderAngle()));
-							logging(" ref=");
-							logging(degrees(referenceAngle));
-							logging(" vref=");
-							logging(degrees(currentReferenceMotorSpeed));
-							logging(" mag=");
-							logging(degrees(magneticFieldAngle));
-							logging(" v=");
-							logging(targetMotorSpeed,3);
-							loggingln();
-
 }
 
 
@@ -269,6 +243,8 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 
 // call me as often as possible
 bool BrushlessMotorDriver::loop() {
+
+	readEncoderAngle();
 	if (enabled) {
 
 		// frequency of motor control is 1000Hz max
@@ -299,13 +275,7 @@ bool BrushlessMotorDriver::loop() {
 		float speedRatio = min(abs(currentReferenceMotorSpeed)/maxRevolutionSpeed,1.0);
 		float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
 										-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
-											errorAngle,  dT);
-
-		// estimate the current shift of current behind voltage (back EMF). This is typically set to increase linearly with the voltage
-		// which is proportional to the torque for the PWM output
-		// (according to https://www.digikey.gr/en/articles/techzone/2017/jan/why-and-how-to-sinusoidally-control-three-phase-brushless-dc-motors)
-		// (according to "Advance Angle Calculation for Improvement of the Torque-to Current Ratio of Brushless DC Motor Drives")
-		float advanceAnglePhaseShift = (currentReferenceMotorSpeed/maxRevolutionSpeed)*maxAdvancePhaseAngle;
+										errorAngle,  dT);
 
 		// torque is max at -90/+90 degrees
 		// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
@@ -321,11 +291,8 @@ bool BrushlessMotorDriver::loop() {
 
 		// send new pwm value to motor
 		sendPWMDuty(min(abs(torque),1.0));
-/*
-						static TimePassedBy timer;
-						if (timer.isDue_ms(2000,millis())) {
-							logging("a=");
-							logging(degrees(getEncoderAngle()));
+
+		/*
 							logging(" aa=");
 							logging(degrees(advanceAngle));
 							logging(" sr=");

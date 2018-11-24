@@ -13,29 +13,33 @@
 #include "Util.h"
 
 
-bool AS5047D::busInitialized = false;
+bool AS5047D::SPIBusInitialized = false;
 
 
-void AS5047D::setupBus(uint16_t mosiPin, uint16_t misoPin, uint16_t SCKPin) {
+void AS5047D::setupBus(uint16_t mosiPin, uint16_t misoPin, uint16_t SCKPin, const uint16_t SS[3]) {
 	// do this only once.
-	if (!busInitialized) {
-		SPI.setClockDivider( SPI_CLOCK_DIV16 ); // 886KHz, that's pretty fast for our purpose
+	if (!SPIBusInitialized) {
+	    pinMode(SS[0], OUTPUT);
+	    digitalWrite(SS[0], HIGH);
+	    pinMode(SS[1], OUTPUT);
+	    digitalWrite(SS[1], HIGH);
+	    pinMode(SS[2], OUTPUT);
+	    digitalWrite(SS[2], HIGH);
+
 		SPI.setMOSI(mosiPin);
 		SPI.setMISO(misoPin);
 		SPI.setSCK(SCKPin);
-		SPI.setDataMode(1); // The AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
 		SPI.begin();
-		busInitialized = true;
+		SPIBusInitialized = true;
 	}
 }
 
 void AS5047D::setup(uint16_t clientSelectPin)
 {
-	if (!busInitialized) {
+	if (!SPIBusInitialized) {
 		fatalError("SPI bus needs to be initialized before sensor setup");
 	}
     selectPin = clientSelectPin;
-    pinMode(selectPin, OUTPUT);
 
     // dont start with 0 but the absolute position
 	reset();
@@ -43,8 +47,10 @@ void AS5047D::setup(uint16_t clientSelectPin)
 
 uint32_t AS5047D::sensorRead(void)
 {
-	uint16_t angle = readRegister(0x3FFF);
+	uint32_t angle = readRegister(0x3FFF);
+
     return resolution-angle;
+
 }
 
 void AS5047D::reset() {
@@ -75,20 +81,34 @@ float AS5047D::getAngle() {
 	return currentAngle;
 }
 
+float AS5047D::getSensorRead() {
+	return ((float)lastSensorRead)/((float)resolution)*TWO_PI;
+}
+
+
+
 uint32_t AS5047D::readRegister(uint32_t thisRegister)
 {
         byte inByte = 0;   					// incoming byte from the SPI
-        uint32_t result = 0;   					// result to return
+        uint32_t result = 0;   				// result to return
         byte lowbyte = thisRegister & 0b0000000011111111;
         byte highbyte = (thisRegister >> 8);
+        pinMode(selectPin, OUTPUT);
 
+        // AS5047D is capable of running at 10MHz.
+        // But 2MHz is more than enough for this purpose
+        SPISettings settings(2000000,MSBFIRST,SPI_MODE1);
+        SPI.beginTransaction(settings);
         digitalWrite(selectPin, LOW);		// select sensor
+
         SPI.transfer(highbyte); 			// first byte in
         result = SPI.transfer(lowbyte); 	// first byte out
         digitalWrite(selectPin, HIGH);		// unselect sensor
+        SPI.endTransaction();
 
         delayMicroseconds(10);				// at least 350ns (datasheet)
 
+        SPI.beginTransaction(settings);
         digitalWrite(selectPin, LOW);		// select sensor
         int bytesToRead = 2;
         while (bytesToRead-- > 0) {
@@ -98,7 +118,10 @@ uint32_t AS5047D::readRegister(uint32_t thisRegister)
                 result = result | inByte;
         }
         digitalWrite(selectPin, HIGH);		// deselect sensor
+        SPI.endTransaction();
 
-        result = result & 0b0011111111111111;
+        // mask bits 0-13 (data sheet)
+        result &= 0x3FFF;
+
         return(result);
 }
