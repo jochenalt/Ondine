@@ -9,7 +9,7 @@
 #define BOTCONTROLLER_H_
 
 #include <types.h>
-#include <MenuController.h>
+#include <libraries/MenuController.h>
 #include <StateController.h>
 #include <BallDrive.h>
 #include <IMU.h>

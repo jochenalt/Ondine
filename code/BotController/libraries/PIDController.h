@@ -9,7 +9,7 @@
 #define PIDCONTROLLER_H_
 
 #include <Arduino.h>
-#include <Util.h>
+#include <libraries/Util.h>
 
 class PIDControllerConfig {
 public:
@@ -59,7 +59,7 @@ public:
 
 /* PID controller that consist of two sets of configuration params.
  * One is used for position control, the other for speed control
- * When pid is running, current speed is used to interpolate the PID params sets
+ * Current speed is used to interpolate the PID params sets
  * By this, a high gain with low speeds and low gain at high speeds can be implemented
  */
 class SpeedGainPIDController : public PIDController {

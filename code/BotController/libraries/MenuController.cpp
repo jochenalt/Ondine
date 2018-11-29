@@ -6,8 +6,8 @@
  */
 
 #include <Arduino.h>
-#include <Util.h>
-#include <MenuController.h>
+#include <libraries/Util.h>
+#include <libraries/MenuController.h>
 
 
 void Menuable::registerMenuController(MenuController* newMenuCtrl) {

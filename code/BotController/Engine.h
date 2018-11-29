@@ -9,7 +9,7 @@
 #define ENGINE_H_
 
 #include <BrushlessMotorDriver.h>
-#include <MenuController.h>
+#include <libraries/MenuController.h>
 #include <Kinematics.h>
 
 // Engine combines three wheels and allows to pass speed commands to all of them

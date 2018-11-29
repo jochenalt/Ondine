@@ -7,10 +7,10 @@
 
 #include "Arduino.h"
 #include <BotMemory.h>
-#include <Util.h>
+#include <libraries/Util.h>
 #include <Setup.h>
 
-#include <MenuController.h>
+#include <libraries/MenuController.h>
 #include <StateController.h>
 #include <BotController.h>
 
@@ -84,7 +84,7 @@ void ControlPlane::reset () {
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-6 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 200 Hz */
-							 50.0f  			/* low pass cut off frequency */);
+							 15.0f  			/* low pass cut off frequency */);
 }
 
 float ControlPlane::getBodyPos() {

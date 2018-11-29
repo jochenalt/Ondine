@@ -6,7 +6,7 @@
  */
 
 #include <BrushedMotorDriver.h>
-#include <MenuController.h>
+#include <libraries/MenuController.h>
 
 #include <setup.h>
 #include <BotMemory.h>

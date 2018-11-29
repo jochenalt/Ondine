@@ -5,8 +5,9 @@
  *      Author: JochenAlt
  */
 
-#include <PIDController.h>
-#include <setup.h>
+#include <libraries/PIDController.h>
+
+const float OneMicrosecond_s = 0.000001;
 
 void PIDController::reset() {
 	integrativeError = 0;

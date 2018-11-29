@@ -37,11 +37,6 @@ void BallDrive::printHelp() {
 	command->println("ESC");
 }
 
-void BallDrive::getSetAngle(float &angleX, float &angleY) {
-	angleX = lastSetAngleX;
-	angleY = lastSetAngleY;
-}
-
 void BallDrive::setSpeed(float speedX, float speedY, float omega,
 		 	 	 	 	 float angleX, float angleY) {
 

@@ -15,7 +15,7 @@
 #ifndef KINEMATIX_H_
 #define KINEMATIX_H_
 
-#include "MenuController.h"
+#include "libraries/MenuController.h"
 #include "types.h"
 
 

@@ -20,9 +20,9 @@ void computeInverseMatrix(matrix33_t m, matrix33_t &inverse);
 void vectorTimesMatrix(vector3 v,matrix33_t m, vector3 &result);
 
 // result = v*m
-void multiplyMatrix(matrix33_t v, matrix33_t m, matrix33_t &result);
+void mul(matrix33_t v, matrix33_t m, matrix33_t &result);
 
-void computeEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ);
+void rotationMatrixToEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ);
 
 // convenience macro: set a 3-vector
 #define ASSIGN(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)

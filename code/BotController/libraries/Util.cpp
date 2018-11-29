@@ -6,7 +6,7 @@
  */
 
 #include "Arduino.h"
-#include <Util.h>
+#include <libraries/Util.h>
 
 void fatalError(const char s[]) {
 	if (logger) {

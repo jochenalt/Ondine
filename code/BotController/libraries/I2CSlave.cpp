@@ -5,7 +5,7 @@
  *      Author: JochenAlt
  */
 
-#include <I2CSlave.h>
+#include <libraries/I2CSlave.h>
 
 
 void I2CSlave::setup() {

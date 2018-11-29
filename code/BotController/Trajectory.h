@@ -12,7 +12,7 @@
 #ifndef TRAJECTORY_H_
 #define TRAJECTORY_H_
 
-#include <MenuController.h>
+#include <libraries/MenuController.h>
 #include <types.h>
 #include <setup.h>
 

@@ -6,15 +6,19 @@
  */
 
 #include <Arduino.h>
-#include <MPU9250/src/MPU9250.h>
+#include <MPU9250/MPU9250.h>
 #include <TimePassedBy.h>
 #include <Filter/KalmanFilter.h>
 #include <IMU.h>
 #include <setup.h>
-#include <Util.h>
+#include <libraries/Util.h>
 #include <types.h>
 #include <BotMemory.h>
-#include <I2CPortScanner.h>
+#include <libraries/I2CPortScanner.h>
+
+// instantiated in main.cpp
+extern i2c_t3* IMUWire;
+
 
 // flag indicating that IMU has a new measurement, this is set in interrupt
 // and evaluated in loop(), so this needs to be declared volatile
@@ -32,6 +36,7 @@ void imuInterrupt() {
 
 
 void IMUConfig::initDefaultValues() {
+	// these null values can be calibrated and set in EEPROM
 	nullOffsetX = radians(2.9);
 	nullOffsetY = radians(2.20);
 	nullOffsetZ = radians(1.18);
@@ -232,6 +237,7 @@ void IMU::calibrate() {
 	memory.persistentMem.imuControllerConfig.nullOffsetY = 0;
 	memory.persistentMem.imuControllerConfig.nullOffsetZ = 0;
 
+	// let kalman filter run and calibrate for 1s
 	while (millis() - now < 1000) {
 		loop();
 	}
@@ -399,7 +405,6 @@ void IMU::menuLoop(char ch, bool continously) {
 		cmd = false;
 		break;
 	}
-
 
 	if (cmd) {
 		logging("readvalue=");

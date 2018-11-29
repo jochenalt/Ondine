@@ -8,8 +8,8 @@
 #ifndef BLDCCONTROLLER_H_
 #define BLDCCONTROLLER_H_
 
-#include <MenuController.h>
-#include <PIDController.h>
+#include <libraries/MenuController.h>
+#include <libraries/PIDController.h>
 #include <Filter/ComplementaryFilter.h>
 #include <Encoder/AS5047D.h>
 #include <TimePassedBy.h>
@@ -27,7 +27,7 @@ public:
 	PIDControllerConfig pid_speed;
 	PIDControllerConfig pid_lifter;
 
-	// mounting property: angle between rotor and encoder
+	// mounting property: differing angle between rotor and encoder. Needs to be calibrated after assembly
 	float phaseAAngle[3];
 };
 

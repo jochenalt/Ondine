@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <types.h>
 #include <setup.h>
-#include <Util.h>
+#include <libraries/Util.h>
 
 BotMovement::BotMovement() {
 	reset();
@@ -305,7 +305,7 @@ void computeInverseMatrix(matrix33_t m, matrix33_t &inverse) {
 }
 
 const float floatPrecision = 0.00000001;
-void computeEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ) {
+void rotationMatrixToEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ) {
 	float beta = atan2(-m[2][0], sqrt(m[0][0]*m[0][0] + m[1][0]*m[1][0]));
 	float gamma = 0;
 	float alpha = 0;
@@ -333,7 +333,7 @@ void vectorTimesMatrix(vector3 v, matrix33_t m, vector3 &result) {
 	result[2] = v[0]*m[2][0] + v[1]*m[2][1]  + v[2]*m[2][2];
 }
 
-void multiplyMatrix(matrix33_t v, matrix33_t m, matrix33_t &result) {
+void mul(matrix33_t v, matrix33_t m, matrix33_t &result) {
 	 for(int i = 0; i < 3; ++i)
         for(int j = 0; j < 3; ++j)
         	result[i][j]=0;

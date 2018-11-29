@@ -1,11 +1,12 @@
-#include <BrushlessMotorDriver.h>
 #include "Arduino.h"
-#include "MenuController.h"
+#include <libraries/I2CSlave.h>
+#include "libraries/MenuController.h"
+
+#include <BrushlessMotorDriver.h>
 #include "Engine.h"
 #include "BotController.h"
 
 #include <PatternBlinker.h>
-#include <I2CSlave.h>
 #include <BotMemory.h>
 
 #include <common.h>

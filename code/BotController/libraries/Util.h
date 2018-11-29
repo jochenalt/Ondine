@@ -10,7 +10,6 @@
 
 #include <Arduino.h>
 #include <string.h>
-#include <i2c_t3-v9.1/i2c_t3-v9.1.h>
 
 void fatalError(const char s[]);
 void warnMsg(const char s[]);
@@ -37,6 +36,5 @@ void loggingln(int s);
 
 extern HardwareSerial* logger;
 extern HardwareSerial* command;
-extern i2c_t3* IMUWire;
 
 #endif /* UTIL_H_ */

@@ -9,8 +9,8 @@
 #define BRUSHEDMOTORDRIVER_H_
 
 
-#include <MenuController.h>
-#include <PIDController.h>
+#include <libraries/MenuController.h>
+#include <libraries/PIDController.h>
 #include <Filter/FIRFilter.h>
 
 #define ENCODER_USE_INTERRUPTS

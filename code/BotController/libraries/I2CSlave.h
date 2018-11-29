@@ -11,7 +11,7 @@
 #include <Arduino.h>
 #include <common.h>
 #include <i2c_t3-v9.1/i2c_t3-v9.1.h>
-#include <Util.h>
+#include <libraries/Util.h>
 
 class I2CSlave {
 public:

@@ -7,7 +7,7 @@
 
 #include <types.h>
 #include <Trajectory.h>
-#include <Util.h>
+#include <libraries/Util.h>
 #include <BotController.h>
 
 void Trajectory::setup(MenuController* menuCtrl) {

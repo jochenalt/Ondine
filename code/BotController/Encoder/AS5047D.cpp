@@ -10,7 +10,7 @@
 #include <AS5047D.h>
 #include "Arduino.h"
 #include "SPI.h"
-#include "Util.h"
+#include "libraries/Util.h"
 
 
 bool AS5047D::SPIBusInitialized = false;

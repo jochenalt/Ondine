@@ -13,7 +13,7 @@
 #define BALLDRIVE_H_
 
 #include <Engine.h>
-#include <MenuController.h>
+#include <libraries/MenuController.h>
 #include <PowerRelay.h>
 #include <types.h>
 #include <IMU.h>
@@ -72,15 +72,14 @@ public:
 private:
 	Engine engine;				// three independent motors
 	Kinematix kinematics;		// computation of speedx/speedy/omega into wheel speed
-	PowerRelay powerRelay;		// turn on power for motors
+	PowerRelay powerRelay;		// turn on/off power for motors
 
 	uint32_t lastCall_ms = 0;	// used by getSpeed to compute time since last call
-
-	float lastSetAngleX = 0;	// title angleX set in setSpeed
-	float lastSetAngleY = 0;	// title angleY set in setSpeed
-
-	float lastSpeedX = 0;
+	float lastSpeedX = 0;		// used by getSpeed
 	float lastSpeedY = 0;
+
+	// current movement of bot in terms of position and speed
+	BotMovement menuMovement;
 
 	// members used by the ascii menu only
 	float menuSpeedX = 0;
@@ -88,9 +87,6 @@ private:
 	float menuOmega = 0;
 	float menuAngleX = 0;
 	float menuAngleY = 0;
-	BotMovement menuMovement;
-
-
 };
 
 #endif /* BALLDRIVE_H_ */

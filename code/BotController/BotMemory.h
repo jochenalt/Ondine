@@ -10,8 +10,8 @@
 #ifndef __BOTMEMORY_H__
 #define __BOTMEMORY_H__
 #include "Arduino.h"
-#include "MemoryBase.h"
-#include "PIDController.h"
+#include "libraries/MemoryBase.h"
+#include "libraries/PIDController.h"
 #include "StateController.h"
 #include "BrushlessMotorDriver.h"
 #include "IMU.h"

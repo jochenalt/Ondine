@@ -8,8 +8,8 @@
 #ifndef IMU_IMUCONTROLLER_H_
 #define IMU_IMUCONTROLLER_H_
 
-#include <MenuController.h>
-#include <MPU9250/src/MPU9250.h>
+#include <libraries/MenuController.h>
+#include <MPU9250/MPU9250.h>
 #include <Filter/KalmanFilter.h>
 #include <Kinematics.h>
 #include <TimePassedBy.h>

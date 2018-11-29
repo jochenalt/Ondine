@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 #include "Arduino.h"
 #include "MPU9250.h"
-#include "util.h"
+#include "libraries/Util.h"
 
 /* MPU9250 object, input the I2C bus and address */
 MPU9250::MPU9250(i2c_t3 * bus,uint8_t address, int rate){
