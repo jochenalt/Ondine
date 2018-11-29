@@ -28,7 +28,7 @@ void BrushedMotorDriver::setupMotor(int enablePin,int in1Pin, int in2Pin, int cu
 	pinMode(currentSensePin, INPUT);
 
 	// setup L6234 input PWM pins
-	analogWriteResolution(pwmResolution);
+	analogWriteResolution(pwmResolutionBits);
 
 	digitalWrite(enablePin, LOW); // start with disabled motor
 	analogWriteFrequency(in1Pin, 20000);
@@ -134,7 +134,7 @@ void BrushedMotorDriver::setMotorPower(float powerRatio) {
 	float torque = constrain(powerRatio, -1.0, 1.0);
 	bool direction = (torque > 0);
 	// analogWrite(in2Pin, speed/MaxSpeed*((1<<pwmResolution)-1) );
-	int maxPWM = ((1<<pwmResolution)-1);
+	int maxPWM = ((1<<pwmResolutionBits)-1);
 	int pwmValue = abs(torque*maxPWM);
 	if (!direction)
 		pwmValue = maxPWM - pwmValue;

@@ -73,23 +73,22 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 	// This is actually important, since forward
 	// and inverse kinematics is done once per loop with identical angles,
 	// so this really doubles performance
-	if  (titleCompensationMatrixComputed &&
+	if  (tiltCompensationMatrixComputed &&
 		(lastTiltX == pTiltX) &&
 		(lastTiltY == pTiltY))
 		return;
 	
-	titleCompensationMatrixComputed = true;
+	tiltCompensationMatrixComputed = true;
 	lastTiltX = pTiltX;
 	lastTiltY = pTiltY;
 	
-	// compute sin and cos, needed in rotation matrix
+	// pre-compute sin and cos
 	float sinX = sin(pTiltY);
 	float cosX = cos(pTiltY);
 	float sinY = sin(pTiltX);
 	float cosY = cos(pTiltX);
 
-	// compute Tilt Rotation Matrix (TRM).
-	// computation is coming from kinematix.xls
+	// compute Tilt Rotation Matrix (TRM), which is a standard 2d rotation matrix
 	ASSIGN(trm[0],       cosY,     0,      sinY);
 	ASSIGN(trm[1],  sinX*sinY,  cosX,-sinX*cosY);
 	ASSIGN(trm[2], -cosX*sinY,  sinX, cosX*cosY);
@@ -104,9 +103,6 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	// this matrix depends on the tilt angle and corrects the kinematics 
 	// due to the slightly moved touch point of the ball
 	computeTiltRotationMatrix(pTiltX,pTiltY);
-
-	// logger->println(F("cm"));
-	// logMatrix(trm);
 
 	// rotate construction matrix by tilt (by multiplying with tilt rotation matrix)
 	// compute only those fields that are required afterwards (so we need only 10 out of 81 multiplications of a regular matrix multiplication)
@@ -124,35 +120,10 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 
 	float  lVz = pOmegaZ * BallRadius;
 
-	// final computation of kinematics:
 	// compute wheel's speed in rad/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
 	pWheel_speed[0] = ((m01_11 + m02_12) * pVx	         + (-m02_02) * pVy           + ( -m01_21 - m02_22         ) * lVz)  ;
 	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
 	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
-
-
-	/*logger->println(F("kinematics matrix"));
-	float t[3][3];
-	t[0][0] = m01_11 + m02_12;
-	t[0][1] = -m02_02;
-	t[0][2] = (m01_21 + m02_22 )*-BallRadius;
-	t[1][0] = m10_10 + m11_11 + m02_12;
-	t[1][1] =-m10_00 - m02_02;
-	t[1][2] = ( m10_20 + m11_21 + m02_22)*-BallRadius;
-	t[2][0] = -m10_10+ m11_11 + m02_12;
-	t[2][1] = m10_00 - m02_02;
-	t[2][2] = (-m10_20 + m11_21 + m02_22)*-BallRadius;
-	logMatrix(t);
-	 logger->print(" ws0=");
-	 logger->print(pWheel_speed[0]);
-	 logger->print(" ws1=");
-	 logger->print(pWheel_speed[1]);
-	 logger->print(" ws2=");
-	 logger->print(pWheel_speed[2]);
-
-	*/
-
-
 
 	// if one wheel's speed exceeds max speed
 	// reduce all speeds by same factor to comply with the max speed restriction

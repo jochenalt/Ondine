@@ -54,11 +54,11 @@ class Kinematix {
 		// pre-compute kinematics so that during the loop just a couple of multiplications are required.
 		void setupConstructionMatrix();
 		
-		matrix33_t cm;	    	// construction matrix, computed once during startup
-		matrix33_t icm;	 	// inverse construction matrix, computed once during startup
-		matrix33_t trm;     	// tilt rotation matrix to correct speed/omega depending on the tilt angle, computed in each loop
+		matrix33_t cm;	    // construction matrix, computed and stored once during startup
+		matrix33_t icm;	 	// inverse construction matrix, computed and stored once during startup
+		matrix33_t trm;     // tilt rotation matrix to correct speed/omega depending on the tilt angle, computed in each loop
 
-		bool titleCompensationMatrixComputed = false;
+		bool tiltCompensationMatrixComputed = false;
 		float lastTiltX = 0;
 		float lastTiltY = 0;
 

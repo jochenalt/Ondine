@@ -80,7 +80,6 @@ private:
 	float currentReferenceMotorSpeed = 0;	// [rev/s] current speed, ramp function towards targetSpeed
 	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
 	float lastReferenceAngle = 0;			// [rad] reference angle of last call
-	uint32_t lastTurnTime_us = 0;			// [us] last time we turned the reference angle
 	float measuredMotorSpeed = 0;			// [rev/s] speed as given by encoder
 	SpeedGainPIDController pid;
 

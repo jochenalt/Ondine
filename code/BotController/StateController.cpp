@@ -74,13 +74,12 @@ void ControlPlane::reset () {
 			lastBallSpeed = 0;
 			lastTargetBodyPos = 0;
 			lastTargetBallPos = 0;
-			lastTargetBallSpeed = 0;
 			filteredSpeed = 0;
 			speed = 0;
 			posErrorIntegrated = 0;
 
 			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
-			outputSpeedFilter1.init(FIR::LOWPASS,
+			outputSpeedFilter.init(FIR::LOWPASS,
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-6 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 200 Hz */
@@ -112,28 +111,21 @@ void ControlPlane::update(bool doLogging, float dT,
 		// target angle out of acceleration, assume tan(x) = x
 		float targetAngle = target.accel/Gravity;
 
-		// target angularVelocity out of acceleration
+		// compute current state variables angle, angular velocity, position, speed, accelst arget angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
-
-		// compute pos,speed,accel of the ball
 		float absBallPos   		= current.pos;
 		float absBallSpeed 		= current.speed;
-
-		// compute target position,speed, and accel
 		float targetBallPos	 	= target.pos - targetAngle * CentreOfGravityHeight;
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
-		float targetBallAccel 	= (targetBallAccel - lastTargetBallSpeed)/dT;	// does not need to be filtered, it is generated in a smooth way already
 
-		// errors
+		// compute erros for PD(angle) and PID(position)
 		float error_tilt			= (sensor.angle-targetAngle);
 		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity);
-		// float error_angular_speed	= (sensor.angle - lastAngle)/dT;
 
 		float posError 	= (absBallPos + sensor.angle * CentreOfGravityHeight*0 - targetBallPos);
 		posErrorIntegrated 			+= posError*dT;
-		posErrorIntegrated = constrain(posErrorIntegrated, -MaxTiltAngle, MaxTiltAngle);
-		float posVelocityError 	= (absBallSpeed	- targetBallSpeed);
-		// float posVelocityError 	= (absBallPos-lastBallPos)/dT;
+		posErrorIntegrated 			= constrain(posErrorIntegrated, -MaxTiltAngle, MaxTiltAngle);
+		float posVelocityError 		= (absBallSpeed	- targetBallSpeed);
 
 		float error_centripedal     = targetOmega * target.speed;
 		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
@@ -175,8 +167,7 @@ void ControlPlane::update(bool doLogging, float dT,
 			}
 		}
 
-
-		// outcome of controller is force to be applied at the ball
+		// outcome of controller is force to be applied to the ball
 		// F = m*a
 		float force = error;
 		float accel = force / BallWeight;
@@ -191,8 +182,7 @@ void ControlPlane::update(bool doLogging, float dT,
 		}
 
 		// get rid of trembling by a FIR filter 4th order with 15Hz
-		filteredSpeed = outputSpeedFilter1.update(speed);
-		// filteredSpeed = outputSpeedFilter2.addSample(speed);
+		filteredSpeed = outputSpeedFilter.update(speed);
 
 		lastTargetAngle = targetAngle;
 		lastAngle = sensor.angle;
@@ -200,8 +190,6 @@ void ControlPlane::update(bool doLogging, float dT,
 		lastBallPos = absBallPos;
 		lastBallSpeed = absBallSpeed;
 		lastTargetBallPos = targetBallPos;
-		lastTargetBallSpeed = targetBallSpeed;
-
 
 		if (doLogging)
 			if (memory.persistentMem.logConfig.debugStateLog) {

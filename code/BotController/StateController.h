@@ -40,7 +40,6 @@ class ControlPlane {
 		float lastAngle;
 		float lastTargetBodyPos;
 		float lastTargetBallPos;
-		float lastTargetBallSpeed;
 		float lastBallPos;
 		float lastBallSpeed;
 
@@ -48,7 +47,7 @@ class ControlPlane {
 		float filteredSpeed;
 		float posErrorIntegrated;
 
-		FIR::Filter outputSpeedFilter1;
+		FIR::Filter outputSpeedFilter;
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
 		void update(bool log,float dT,

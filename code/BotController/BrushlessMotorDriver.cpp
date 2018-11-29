@@ -54,7 +54,7 @@ int getPwmTable(int i) {
 }
 
 void precomputeSVPMWave() {
-	const int maxPWMValue = (1<<pwmResolution)-1;
+	const int maxPWMValue = (1<<pwmResolutionBits)-1;
 	const float spaceVectorScaleUpFactor = 1.15; // empiric value to reach full pwm scale
 	static boolean initialized = false;
 	if (!initialized) {
@@ -154,7 +154,6 @@ BrushlessMotorDriver::BrushlessMotorDriver() {
 	// initialize precomputed spvm values
 	// first invocation does the initialization
 	precomputeSVPMWave();
-
 }
 
 void BrushlessMotorDriver::setup( int motorNo, MenuController* menuCtrl, bool reverse) {
@@ -177,7 +176,7 @@ void BrushlessMotorDriver::setupMotor(int EnablePin, int Input1Pin, int Input2Pi
 	input3Pin = Input3Pin;
 
 	// setup L6234 input PWM pins
-	analogWriteResolution(pwmResolution);
+	analogWriteResolution(pwmResolutionBits);
 
 	// choose a frequency that just can't be heard
 	analogWriteFrequency(input1Pin, 20000);
@@ -201,6 +200,7 @@ void BrushlessMotorDriver::setupEncoder(uint8_t clientSelectPin) {
 }
 
 
+// the motor is supposed to follow the reference angle as close as possible
 void BrushlessMotorDriver::turnReferenceAngle(float dT) {
 	// increase reference speed to reach target speed
 	float speedDiff = targetMotorSpeed - currentReferenceMotorSpeed;
@@ -224,7 +224,6 @@ void BrushlessMotorDriver::reset() {
 
 	currentReferenceMotorSpeed = 0;		// [rev/s]
 	measuredMotorSpeed = 0;				// [rev/s]
-	lastTurnTime_us = 0;
 	pid.reset();
 }
 
@@ -258,7 +257,7 @@ bool BrushlessMotorDriver::loop() {
 
 		float dT = ((float)timePassed)/1000.0;
 
-		// turn reference angle along the set speed
+		// turn reference angle along the given speed
 		turnReferenceAngle(dT);
 
 		// read the current encoder value
@@ -270,7 +269,7 @@ bool BrushlessMotorDriver::loop() {
 		// compute position error as input for PID controller
 		float errorAngle = referenceAngle - getEncoderAngle() ;
 
-		// carry out posh PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
+		// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 		// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
 		float speedRatio = min(abs(currentReferenceMotorSpeed)/maxRevolutionSpeed,1.0);
 		float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
@@ -278,8 +277,7 @@ bool BrushlessMotorDriver::loop() {
 										errorAngle,  dT);
 
 		// torque is max at -90/+90 degrees
-		// (https://www.roboteq.com/index.php/applications/100-how-to/359-field-oriented-control-foc-made-ultra-simple)
-         float advanceAngle = radians(90) * sigmoid(40.0 /* derivation at 0 */, controlOutput/maxAngleError);
+        float advanceAngle = radians(90) * sigmoid(40.0 /* derivation at 0 */, controlOutput/maxAngleError);
 
 		float torque = abs(controlOutput)/maxAngleError;
 
@@ -377,7 +375,7 @@ void BrushlessMotorDriver::calibrate() {
 	logging("]");
 
 	enable(true);
-	analogWrite(input1Pin, (1<<pwmResolution)/2.0);
+	analogWrite(input1Pin, (1<<pwmResolutionBits)/2.0);
 	analogWrite(input2Pin, 0);
 	analogWrite(input3Pin, 0);
 	delay(1000);

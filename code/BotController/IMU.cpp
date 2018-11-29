@@ -150,16 +150,16 @@ void IMU::setup(MenuController *newMenuCtrl) {
 
 	// doI2CPortScan(F("I2C"),IMUWire , logger);
 	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_800);
+
 	int status = mpu9250->begin();
-	if (status < 0) {
+	if (status < 0)
 		fatalError("I2C-IMU setup failed ");
-	}
 
 	status = init();
-	if (status < 0) {
+	if (status < 0)
 		fatalError("I2C-IMU init failed ");
-	}
 
+	// clean up if failed
 	if (status < 0) {
 		if (mpu9250 != NULL)
 			delete mpu9250;
@@ -168,14 +168,14 @@ void IMU::setup(MenuController *newMenuCtrl) {
 }
 
 int IMU::init() {
-	// setting the accelerometer full scale range to +/-8G
-	mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
+	// setting the accelerometer full scale range to +/-2G
+	int status =mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
 
 	// setting the gyroscope full scale range to +/-500 deg/s
-	int status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_500DPS);
+	status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
 
 	// setting low pass bandwith
-	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // default, kalman filter takes over
+	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ); // kalman filter does the rest
 
 	// set update rate of gyro to 200 Hz
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
