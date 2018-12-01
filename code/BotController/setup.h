@@ -11,7 +11,7 @@ const float Gravity = 9.81;											// [m/s^2]
 const float Gravity_mm = Gravity*1000.0;							// [mm/s^2]
 
 // --- mechanical constants ---
-const float BallWeight = 0.2;										// [kg]
+const float BallWeight = 0.1;										// [kg]
 // const float MotorWeight = 0.195;									// [kg]
 // const float EnclosureWeight = 0.2;									// [kg]
 // const float BotWeight = 3*MotorWeight + EnclosureWeight;			// [kg]
@@ -60,6 +60,6 @@ const int BrushlessDriverPWMPins[3][3] = {  { 2,    3,   4},   // motor 1, PWM1,
 const uint16_t MISO_PIN = 12;
 const uint16_t MOSI_PIN = 11;
 const uint16_t SCK_PIN = 27;
-const uint16_t SS_PIN[3] = { 26, 25,28};
+const uint16_t SS_PIN[3] = { 26, 28,25};
 
 #endif /* SETUP_H_ */

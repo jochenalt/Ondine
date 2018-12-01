@@ -56,12 +56,12 @@ void StateControllerConfig::initDefaultValues() {
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
-	angleWeight				= 20.0; // 39.0;
-	angularSpeedWeight		= 10.0; // 21.00;
+	angleWeight				= 40.0; // 39.0;
+	angularSpeedWeight		= 20.0; // 21.00;
 
-	ballPositionWeight		= -7.2;
+	ballPositionWeight		= -14.2;
 	ballPosIntegratedWeight = -0.0;
-	ballVelocityWeight		= -6.0;
+	ballVelocityWeight		= -12.0;
 
 	omegaWeight				= 0.0;
 }
@@ -168,7 +168,7 @@ void ControlPlane::update(bool doLogging, float dT,
 		}
 
 		// outcome of controller is force to be applied to the ball
-		// F = m*a
+		// F = m*a,
 		float force = error;
 		float accel = force / BallWeight;
 

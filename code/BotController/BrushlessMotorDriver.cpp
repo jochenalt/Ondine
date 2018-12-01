@@ -78,10 +78,10 @@ void precomputeSVPMWave() {
 
 
 void MotorConfig::initDefaultValues() {
-	// at slow speeds PID controller is aggressivly keeping the position
+	// at slow speeds PID controller is aggressively keeping the position
 	pid_position.Kp = 0.5;
 	pid_position.Ki = 0.2;
-	pid_position.Kd = 0.002;
+	pid_position.Kd = 0.0005;
 
 	pid_speed.Kp = 0.1;
 	pid_speed.Ki = 0.1;
@@ -91,9 +91,9 @@ void MotorConfig::initDefaultValues() {
 	pid_lifter.Ki = 0.005;
 	pid_lifter.Kd = 0.0;
 
-	phaseAAngle[0] = radians(231.4);
-	phaseAAngle[1] = radians(128.6);
-	phaseAAngle[2] = radians(229.8);;
+	phaseAAngle[0] = radians(228.4);
+	phaseAAngle[1] = radians(128.3);
+	phaseAAngle[2] = radians(228.8);
 }
 
 void MotorConfig::print() {
@@ -138,7 +138,7 @@ int BrushlessMotorDriver::getPWMValue(float torque, float angle_rad) {
 
 	// clear negative angles (fmod does not do this)
 	if (angle_rad < 0)
-		angle_rad += (-angle_rad/TWO_PI + 1.0)*TWO_PI;
+		angle_rad += ((int)(-angle_rad/TWO_PI + 1.0))*TWO_PI;
 
 	angle_rad = fmod(angle_rad, TWO_PI);
 
@@ -197,6 +197,13 @@ void BrushlessMotorDriver::setupEncoder(uint8_t clientSelectPin) {
 
 	// initialize SPI's CS
 	magEncoder.setup(clientSelectPin);
+
+	if (abs(magEncoder.getSensorRead() - TWO_PI) < floatPrecision) {
+		logging("Encoder ");
+		logging(motorNo);
+		logging(" does not return a value");
+		fatalError("Encoder fail");
+	}
 }
 
 
@@ -291,12 +298,18 @@ bool BrushlessMotorDriver::loop() {
 		sendPWMDuty(min(abs(torque),1.0));
 
 		/*
+		if (motorNo == 0) {
+			static TimePassedBy t;
+			if (t.isDue_ms(100,millis())) {
 							logging(" aa=");
 							logging(degrees(advanceAngle));
 							logging(" sr=");
 							logging(speedRatio);
 							logging(" co=");
 							logging(degrees(controlOutput));
+
+							logging(" enc=");
+							logging(degrees(getEncoderAngle()));
 
 							logging(" e=");
 							logging(degrees(errorAngle));
@@ -314,7 +327,9 @@ bool BrushlessMotorDriver::loop() {
 							logging(dT,4);
 
 							loggingln();
-							*/
+			}
+		}
+		*/
 		return true;
 	}
 

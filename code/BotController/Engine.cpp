@@ -37,25 +37,16 @@ void Engine::loop() {
 	uint32_t end = micros();
 	averageTime_ms += (end - start);
 	averageTime_ms /= 2; // low pass
-
-
-	/*
-	static TimePassedBy logTimer;
-	if (logTimer.isDue_ms(500,millis())) {
-		logging("a=(");
-		logging( degrees(wheel[0].getIntegratedAngle()),5,1);
-		logging(",");
-		logging(degrees( wheel[1].getIntegratedAngle()),5,1);
-		logging(",");
-		logging(degrees( wheel[2].getIntegratedAngle()),5,1);
-		loggingln(")");
-	}
-	*/
 }
 
 void Engine::setWheelSpeed(float revPerSec[3]) {
 	for (int i = 0;i<3;i++)
 		wheel[i].setSpeed(revPerSec[i]);
+}
+
+void Engine::getWheelSpeed(float revPerSec[3]) {
+	for (int i = 0;i<3;i++)
+		revPerSec[i] = wheel[i].getSpeed();
 }
 
 // get angle of all wheels since invocation of resetWheelAngle
@@ -79,8 +70,6 @@ void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
 		lastWheelAngle[i] = angle;
 	}
 }
-
-
 void Engine::enable(bool doIt) {
 	if (doIt) {
 		bool ok = true;

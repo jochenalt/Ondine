@@ -27,6 +27,8 @@ void rotationMatrixToEuler(matrix33_t m, float eulerX, float eulerY, float euler
 // convenience macro: set a 3-vector
 #define ASSIGN(m,a,b,c) m[0] = (a);m[1] = (b); m[2] = (c)
 
+// mainly used to check for equality
+const float floatPrecision = 0.00000001;
 
 
 class Point {

@@ -22,6 +22,7 @@ public:
 
 	// set target speed of all wheels in revolutions per seconds, accelerate as quick as possible
 	void setWheelSpeed(float revPerSec[3]);
+	void getWheelSpeed(float revPerSec[3]);
 
 	// get angle of all wheels. Accumulates when turning
 	void getIntegratedWheelAngle(float wheelAngle[3]);

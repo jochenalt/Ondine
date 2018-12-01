@@ -43,6 +43,7 @@ void AS5047D::setup(uint16_t clientSelectPin)
 
     // dont start with 0 but the absolute position
 	reset();
+
 }
 
 uint32_t AS5047D::sensorRead(void)

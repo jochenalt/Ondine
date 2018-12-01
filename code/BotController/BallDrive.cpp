@@ -43,8 +43,8 @@ void BallDrive::setSpeed(float speedX, float speedY, float omega,
 	// apply kinematics to compute wheel speed out of x,y, omega
 	float  newWheelSpeed[3] = { 0, 0, 0};
 	kinematics.computeWheelSpeed(speedX, speedY, omega,
-								angleX,angleY,
-								newWheelSpeed);
+ 							angleX,angleY,
+							newWheelSpeed);
 
 	/*
 	log("kinematics:(");
@@ -60,15 +60,16 @@ void BallDrive::setSpeed(float speedX, float speedY, float omega,
 	log(",");
 	log(newWheelSpeed[2]);
 	logln(")");
-	*/
+
 	// send new speed to motors
-	// log("wheelspeed");
-	// log(newWheelSpeed[0]);
-	//log(",");
-	// log(newWheelSpeed[1]);
-	// log(",");
-	// log(newWheelSpeed[02]);
-	// logln("");
+	logging("new wheelspeed");
+	logging(newWheelSpeed[0],3,3);
+	logging(",");
+	logging(newWheelSpeed[1],3,3);
+	logging(",");
+	logging(newWheelSpeed[2],3,3);
+	loggingln("");
+	*/
 
 	engine.setWheelSpeed(newWheelSpeed);
 }
@@ -128,22 +129,22 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		cmd = true;
 		break;
 	case 'q':
-		menuSpeedX += 0.0001;
+		menuSpeedX += 0.001;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'a':
-		menuSpeedX -= 0.0001;
+		menuSpeedX -= 0.001;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'w':
-		menuSpeedY += 0.0001;
+		menuSpeedY += 0.001;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 's':
-		menuSpeedY -= (0.0001);
+		menuSpeedY -= (0.001);
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
@@ -222,9 +223,11 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		logging(degrees(menuAngleY),4,0);
 		logging(")");
 
-		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
+		// IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
+		IMUSample a;
 		getSpeed(a,  menuMovement);
 		menuMovement.print();
+
 		command->println(" >");
 	}
 }

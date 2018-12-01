@@ -304,7 +304,6 @@ void computeInverseMatrix(matrix33_t m, matrix33_t &inverse) {
 
 }
 
-const float floatPrecision = 0.00000001;
 void rotationMatrixToEuler(matrix33_t m, float eulerX, float eulerY, float eulerZ) {
 	float beta = atan2(-m[2][0], sqrt(m[0][0]*m[0][0] + m[1][0]*m[1][0]));
 	float gamma = 0;

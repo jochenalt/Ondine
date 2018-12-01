@@ -182,24 +182,18 @@ void BotController::loop() {
 		ballDrive.getSpeed(sensorSample,currentMovement);
 
 		// call this as often as possible to get a smooth motor movement
-		// the call above contains kinematics from wheel speed to cartesian speed, this takes just below 1ms
 		ballDrive.loop();
 
-		// compute new movement out of current angle, angular velocity, velocity, position
+		// call balance and speed controller
 		state.update(dT, sensorSample, currentMovement, targetBotMovement);
 
 		// call this as often as possible to get a smooth motor movement
-		// (call above contains lots of computations)
 		ballDrive.loop();
 
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
-
-		// call this as often as possible to get a smooth motor movement
-		// (call above takes just below 1ms, it contains kinematics from cartesian speed to wheel speed)
-		ballDrive.loop();
 
 		uint32_t end = micros();
 		avrLoopTime = (((float)(end-start))/1000000.0 + avrLoopTime)/2.0;

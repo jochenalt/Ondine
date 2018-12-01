@@ -17,8 +17,8 @@ void BrushedMotorDriver::setup(MenuController* menuCtrl) {
 
 void BrushedMotorDriver::setupMotor(int enablePin,int in1Pin, int in2Pin, int currentSensePin) {
 	this->enablePin = enablePin;
-	this->in1Pin = in1Pin;
-	this->in2Pin = in2Pin;
+	this->PWMInput1Pin = in1Pin;
+	this->PWMInput2Pin = in2Pin;
 	this->currentSensePin = currentSensePin;
 
 	// has to be pwm pins
@@ -36,7 +36,6 @@ void BrushedMotorDriver::setupMotor(int enablePin,int in1Pin, int in2Pin, int cu
 	lastLoopCall_ms = 0;
 	referenceSpeed = 0;
 	referenceAngle = 0;
-	currentMotorPower = 0;
 	enabled = false;
 }
 
@@ -45,7 +44,7 @@ void BrushedMotorDriver::setupEncoder(int EncoderAPin, int EncoderBPin, int CPR)
 	this->encoderBPin = EncoderBPin;
 	this->CPR = CPR;
 
-	encoder = new Encoder(EncoderAPin, EncoderBPin);
+	encoder = new OpticalEncoder(EncoderAPin, EncoderBPin);
 }
 
 float BrushedMotorDriver::readEncoder() {
@@ -66,12 +65,8 @@ float BrushedMotorDriver::getMotorAngle() {
 	return encoderAngle;
 }
 
-void BrushedMotorDriver::readCurrentSense() {
-	currentCurrent =  (float)analogRead(currentSensePin)/1024.0 / 0.525;
-}
-
-float BrushedMotorDriver::getCurrentCurrent() {
-	return currentCurrent;
+float BrushedMotorDriver::getCurrentSense() {
+	return  (float)analogRead(currentSensePin)/1024.0 / 0.525;
 }
 
 void BrushedMotorDriver::loop() {
@@ -95,9 +90,8 @@ void BrushedMotorDriver::loop() {
 			// PID controller delivers power ratio to be sent to motor
 			// since the encoder is quite coarse with 48 CPR, controller must be relatively low.
 			float outputAngle = pid.update(memory.persistentMem.motorControllerConfig.pid_lifter, angleError, dT, -radians(30), radians(30));
-			currentMotorPower = constrain(outputAngle/radians(30), -1.0, +1.0);
+			float currentMotorPower = constrain(outputAngle/radians(30), -1.0, +1.0);
 			setMotorPower(currentMotorPower);
-			readCurrentSense();
 
 			if (logValues) {
 				logger->print("dT=");
@@ -115,9 +109,6 @@ void BrushedMotorDriver::loop() {
 				logger->print(" int=");
 				logger->print(pid.integrativeError);
 
-				logger->print(" t=");
-				logger->print(currentCurrent*1000);
-				logger->print("mA");
 				logger->println();
 			}
 		}
@@ -139,8 +130,8 @@ void BrushedMotorDriver::setMotorPower(float powerRatio) {
 	if (!direction)
 		pwmValue = maxPWM - pwmValue;
 
-	digitalWrite(in2Pin, (direction)?LOW:HIGH);
-	analogWrite(in1Pin, pwmValue);
+	digitalWrite(PWMInput2Pin, (direction)?LOW:HIGH);
+	analogWrite(PWMInput1Pin, pwmValue);
 }
 
 float BrushedMotorDriver::getMotorSpeed() {
@@ -152,8 +143,7 @@ void BrushedMotorDriver::enable(bool doIt) {
 	digitalWrite(enablePin, doIt?HIGH:LOW);
 	if (enabled) {
 		referenceAngle = encoderAngle;
-		currentMotorPower = 0;
-		setMotorPower(currentMotorPower);
+		setMotorPower(0);
 		lastLoopCall_ms = 0;
 	}
 }

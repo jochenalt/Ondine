@@ -14,7 +14,7 @@
 #include <Encoder/AS5047D.h>
 #include <TimePassedBy.h>
 
-const float MaxWheelAcceleration = 100.0; 			// [rev/s^2]
+const float MaxWheelAcceleration = 200.0; 			// [rev/s^2]
 const float GearBoxRatio = 18.0/54.0*18.0/54.0; 	// two timing belts with 54/18*54/18 pulleys = 1:9
 
 class MotorConfig {
