@@ -30,13 +30,12 @@ void Engine::setup(MenuController* menuCtrl) {
 }
 
 void Engine::loop() {
-	uint32_t start = micros();
+	uint32_t start = millis();
 	for (int i = 0;i<3;i++) {
 		wheel[i].loop();
 	}
-	uint32_t end = micros();
-	averageTime_ms += (end - start);
-	averageTime_ms /= 2; // low pass
+	uint32_t end = millis();
+	averageTime_ms = (averageTime_ms + (end - start)) / 2;
 }
 
 void Engine::setWheelSpeed(float revPerSec[3]) {

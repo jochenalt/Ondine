@@ -56,12 +56,12 @@ void StateControllerConfig::initDefaultValues() {
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
-	angleWeight				= 40.0; // 39.0;
-	angularSpeedWeight		= 20.0; // 21.00;
+	angleWeight				= 2.6; // 39.0;
+	angularSpeedWeight		= 1.7; // 21.00;
 
-	ballPositionWeight		= -14.2;
-	ballPosIntegratedWeight = -0.0;
-	ballVelocityWeight		= -12.0;
+	ballPositionWeight		= 0.3; // -14.2;
+	ballPosIntegratedWeight = 0.25; // -0.0;
+	ballVelocityWeight		= 0.2; // -12.0;
 
 	omegaWeight				= 0.0;
 }

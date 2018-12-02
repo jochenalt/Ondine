@@ -175,7 +175,7 @@ int IMU::init() {
 	status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
 
 	// setting low pass bandwith
-	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ); // kalman filter does the rest
+	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // kalman filter does the rest
 
 	// set update rate of gyro to 200 Hz
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
