@@ -81,7 +81,7 @@ void MotorConfig::initDefaultValues() {
 	// at slow speeds PID controller is aggressively keeping the position
 	pid_position.Kp = 0.5;
 	pid_position.Ki = 0.2;
-	pid_position.Kd = 0.0005;
+	pid_position.Kd = 0.0000;
 
 	pid_speed.Kp = 0.1;
 	pid_speed.Ki = 0.1;

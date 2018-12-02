@@ -99,7 +99,10 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float pOmegaZ /* rev/s */,
 		float pTiltX, float pTiltY,
 		float pWheel_speed[3]) {
-	
+
+	pVx = -pVx;
+	pVy = -pVy;
+
 	// this matrix depends on the tilt angle and corrects the kinematics 
 	// due to the slightly moved touch point of the ball
 	computeTiltRotationMatrix(pTiltX,pTiltY);

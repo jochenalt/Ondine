@@ -22,9 +22,9 @@ const float MaxBotSpeed = 1.8; 										// [m/s] max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot
 const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] max acceleration acceleration of bot
-const float MaxBotAccel= 1.0;							 		    // [m/s^2] max acceleration of bot
+const float MaxBotAccel= 2.0;							 		    // [m/s^2] max acceleration of bot
 
-const float MaxTiltAngle = atan(MaxBotAccel/Gravity); 				// [rad] max tilt angle, 6°
+const float MaxTiltAngle = atan(MaxBotAccel/Gravity); 				// [rad] max tilt angle, 12°
 
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy

@@ -114,6 +114,7 @@ void BallDrive::loop() {
 	// drive the motors
 	// due to use of brushless motors, this requires permanent invokation of loop
 	engine.loop();
+
 }
 
 void BallDrive::menuLoop(char ch, bool continously) {
@@ -223,8 +224,7 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		logging(degrees(menuAngleY),4,0);
 		logging(")");
 
-		// IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
-		IMUSample a;
+		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
 		getSpeed(a,  menuMovement);
 		menuMovement.print();
 

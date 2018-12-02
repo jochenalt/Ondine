@@ -134,7 +134,7 @@ void ControlPlane::update(bool doLogging, float dT,
 			error_ball_position = constrain(error_ball_position,  -config.angleWeight*MaxTiltAngle/config.ballPositionWeight, -config.angleWeight*MaxTiltAngle/config.ballPositionWeight);
 		*/
 		// sum up all weighted errors
-		float error =	- config.angleWeight*error_tilt - config.angularSpeedWeight*error_angular_speed
+		float error =	+ config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed
 						+ config.ballPositionWeight*posError + config.ballPosIntegratedWeight*posErrorIntegrated  + config.ballVelocityWeight*posVelocityError
 						+ config.omegaWeight * error_centripedal;
 
