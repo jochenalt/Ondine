@@ -10,10 +10,6 @@
 #define COMPLEMENTARYFILTER_H_
 
 #include "Arduino.h"
-#include "CircularDelay.h"
-#include "libraries/Util.h"
-
-enum FilterType {Exponentional, Averaging, Frequency};
 
 class LowPassFilterAverage {
 	public:
@@ -110,83 +106,6 @@ class LowPassFilterFrequency{
 };
 
 
-class LowPassFilter2ndOrder{
-public:
-
-	LowPassFilter2ndOrder() {
-	}
-
-	void init(float cutOffFrequency, float sampleFrequency) {
-		float tau = 1.0/(2*M_PI*cutOffFrequency);
-		float dt = 1.0 / sampleFrequency;
-		initInternal(dt, tau);
-	}
-
-	/**
-	 * @brief      Constructor to set sample time and the tau constant
-	 *
-	 * @param[in]  idt     Sample time for the low pass filter
-	 * @param[in]  itua_c  Or
-	 *             @f$ \tau_c
-	 *             @f$ The time constant for the filter. Note that
-	 *             @f$ \tau_c = \frac{1}{2 pi f_c}@f$  where @f$ f_c @f$ is the cutoff frequency
-	 */
-	void initInternal(float dt, float tau_c) {
-		yc[0] = -2 * (pow(dt, 2) - 4 * pow(tau_c, 2)) / (pow(dt, 2) + 2 * sqrt(2) * tau_c * dt + 4 * pow(tau_c, 2));
-		yc[1] = (-pow(dt, 2) + 2 * sqrt(2) * tau_c * dt - 4 * pow(tau_c, 2)) / (pow(dt, 2) + 2 * sqrt(2) * tau_c * dt + 4 * pow(tau_c, 2));
-		xc[0] = pow(dt, 2) / (pow(dt, 2) + 2 * sqrt(2) * tau_c * dt + 4 * pow(tau_c, 2));
-		xc[1] = 2 * pow(dt, 2) / (pow(dt, 2) + 2 * sqrt(2) * tau_c * dt + 4 * pow(tau_c, 2));
-		xc[2] = pow(dt, 2) / (pow(dt, 2) + 2 * sqrt(2) * tau_c * dt + 4 * pow(tau_c, 2));
-		if(tau_c < M_PI * dt){
-			fatalError("LowPassFilter constructor error: tua_c is smaller than the sample time dt.");
-		}
-	}
-	/**
-	 * @brief      Update function to push new value into the low pass filter
-	 *
-	 * @param[in]  newValue  The new value after dt time
-	 *
-	 * @return     The new output value
-	 */
-	float update(float newValue) {
-		x.push(newValue);
-		float output = 0;
-		for (int i = 0; i < 2; ++i)
-			output += y.get(i) * yc[i];
-
-		for (int i = 0; i < 3; ++i)
-			output += x.get(i) * xc[i];
-		return y.push(output);
-	}
-	/**
-	 * @brief      Gets the output.
-	 *
-	 * @return     The output.
-	 */
-	float get() {return y.get(0);}
-	/**
-	 * @brief      Force the output to a desired value
-	 *
-	 *             This can be useful when the output needs to be forced in case
-	 *             of extreme inputs or such
-	 *
-	 * @param[in]  newOutput  The new output
-	 */
-	void set(float newOutput){
-		for(auto& it : x){
-			it = newOutput;
-		}
-		for(auto& it : y){
-			it = newOutput;
-		}
-	}
-private:
-	float yc[2] = {0,0};
-	float xc[3] = {0,0,0};
-	CircularDelay<float, 2> y;
-	CircularDelay<float, 3> x;
-};
-
 class LowPassFilter1stOrder {
 public:
 	LowPassFilter1stOrder() {
@@ -197,14 +116,6 @@ public:
 		float tau = 1.0/(2.0*M_PI*cutOffFrequency);
 		float omega = 1.0/tau;;
 		float dt = 1.0 / sampleFrequency;
-		logging("sampleFrequency");
-		loggingln(sampleFrequency);
-
-		logging("dt");
-		loggingln(dt,3);
-		logging("omega");
-		loggingln(omega,3);
-
 		initInternal(dt, omega);
 	}
 	/**
@@ -219,9 +130,6 @@ public:
 	void initInternal(float idt, float omega_c) {
 		epow = exp(-idt * omega_c);
 		output = 0;
-		logging("epow");
-		loggingln(epow,3);
-
 		if(omega_c < idt){
 				fatalError("LowPassFilter constructor error: tua_c is smaller than the sample time dt.");
 		}
@@ -255,79 +163,6 @@ public:
 private:
 	float epow = 0; /// one time calculation constant
 	float output = 0;
-};
-
-/**
- * @brief      Class for third order high pass filter. This is designed using
- *             the bilinear transform.
- */
-class LowPass3rdOrder {
-public:
-	LowPass3rdOrder () {};
-
-	void init(float cutOffFrequency, float sampleFrequency) {
-		float tau = 1.0/(cutOffFrequency);
-		float omega = 1.0/tau;
-
-		float dt = 1.0 / sampleFrequency;
-		initInternal(dt, omega);
-	}
-
-	void initInternal(float sampleTime, float omega_c) {
-		yc[0] = 1;
-		yc[1] =
-			(float)((3 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) - 8 * sampleTime * omega_c - 24)
-			/
-			(1 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c + 8));
-		yc[2] =
-			(float)((3 * pow(sampleTime * omega_c, 3) - 4 * pow(sampleTime * omega_c, 2) - 8 * sampleTime * omega_c + 24)
-			/
-			(1 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c + 8));
-		yc[3] =
-			(float)((1 * pow(sampleTime * omega_c, 3) - 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c - 8)
-			/
-			(1 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c + 8));
-		xc[0] =
-			(float)(1 * pow(sampleTime * omega_c, 3)
-			/
-			(1 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c + 8));
-		xc[1] =
-			(float)(3 * pow(sampleTime * omega_c, 3)
-			/
-			(1 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c + 8));
-		xc[2] =
-			(float)(3 * pow(sampleTime * omega_c, 3)
-			/
-			(1 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c + 8));
-		xc[3] =
-			(float)(1 * pow(sampleTime * omega_c, 3)
-			/
-			(1 * pow(sampleTime * omega_c, 3) + 4 * pow(sampleTime * omega_c, 2) + 8 * sampleTime * omega_c + 8));
-		if(omega_c < sampleTime){
-			fatalError("LowPassFilter constructor error: tua_c is smaller than the sample time dt.");
-		}
-		}
-	float update(float newValue) {
-		x.push(newValue);
-		double y0 = 0;
-		const float* doubleP = xc;
-		for (auto it = x.rbegin(); it != x.rend(); it++)
-		{
-			y0 += *it * *doubleP++;
-		}
-		doubleP = yc + 1;
-		for (auto it = y.rbegin(); it != y.rend(); it++)
-		{
-			y0 -= *it * *doubleP++;
-		}
-		return y.push(yc[0] * y0);
-	}
-	float get() {return y.get(0);}
-private:
-	float yc[4];
-	float xc[4];
-	CircularDelay<float, 3> y;
-	CircularDelay<float, 4> x;
 };
 
 #endif /* COMPLEMENTARYFILTER_H_ */

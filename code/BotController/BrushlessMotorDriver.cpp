@@ -91,9 +91,9 @@ void MotorConfig::initDefaultValues() {
 	pid_lifter.Ki = 0.005;
 	pid_lifter.Kd = 0.0;
 
-	phaseAAngle[0] = radians(231.4);
-	phaseAAngle[1] = radians(230.3);
-	phaseAAngle[2] = radians(125.8);
+	phaseAAngle[0] = radians(229.4);
+	phaseAAngle[1] = radians(234.3);
+	phaseAAngle[2] = radians(126.8);
 }
 
 void MotorConfig::print() {
