@@ -22,7 +22,6 @@ class IMUConfig {
 
 	float nullOffsetX;
 	float nullOffsetY;
-	float nullOffsetZ;
 	float kalmanNoiseVariance;
 };
 
@@ -80,8 +79,6 @@ public:
 	virtual void printHelp();
 	virtual void menuLoop(char ch, bool continously);
 
-	// return average time consumed by loop in [s]
-	float getAvrLoopTime();
 
 private:
 	int init();
@@ -98,7 +95,6 @@ private:
 	bool valueIsUpdated = false;
 	bool logIMUValues = false;
 	uint32_t lastInvocationTime_ms = 0;
-	uint32_t averageTime_ms = 0;
 	float sampleRate_ms = 0;
 
 	float dT = 0;

@@ -9,11 +9,13 @@
 #define STATECONTROLLER_H_
 
 #include <Filter/FIRFilter.h>
+#include <Filter/IIRFilter.h>
+#include <Filter/ComplementaryFilter.h>
+
 #include <types.h>
 #include <setup.h>
 #include <IMU.h>
 #include <TimePassedBy.h>
-#include <Filter/ComplementaryFilter.h>
 
 
 class StateControllerConfig {
@@ -48,6 +50,7 @@ class ControlPlane {
 		float posErrorIntegrated;
 
 		FIR::Filter outputSpeedFilter;
+		LowPassFilter1stOrder outputSpeedFilter2;
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
 		void update(bool log,float dT,

@@ -56,12 +56,12 @@ void StateControllerConfig::initDefaultValues() {
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
-	angleWeight				= 2.6; // 39.0;
-	angularSpeedWeight		= 1.7; // 21.00;
+	angleWeight				= 5.6; // 39.0;
+	angularSpeedWeight		= 3.9; // 21.00;
 
 	ballPositionWeight		= 0.3; // -14.2;
-	ballPosIntegratedWeight = 0.25; // -0.0;
-	ballVelocityWeight		= 0.2; // -12.0;
+	ballPosIntegratedWeight = 0.75; // -0.0;
+	ballVelocityWeight		= 1.2; // -12.0;
 
 	omegaWeight				= 0.0;
 }
@@ -80,10 +80,11 @@ void ControlPlane::reset () {
 
 			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
 			outputSpeedFilter.init(FIR::LOWPASS,
-					         1.0e-4f  			/* allowed ripple in passband in amplitude is 0.1% */,
-							 1.0e-7 			/* supression in stop band is -60db */,
+					         1.0e-2f  			/* allowed ripple in passband in amplitude is 0.1% */,
+							 1.0e-3f 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 200 Hz */
 							 15.0f  			/* low pass cut off frequency */);
+			outputSpeedFilter2.init(15.0f, SampleFrequency);
 }
 
 float ControlPlane::getBodyPos() {
@@ -183,6 +184,9 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// get rid of trembling by a FIR filter 4th order with 15Hz
 		filteredSpeed = outputSpeedFilter.update(speed);
+		//filteredSpeed = outputSpeedFilter2.update(speed);
+
+		// filteredSpeed = outputLowPass.addSample(speed);
 
 		lastTargetAngle = targetAngle;
 		lastAngle = sensor.angle;

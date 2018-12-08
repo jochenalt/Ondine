@@ -37,9 +37,8 @@ void imuInterrupt() {
 
 void IMUConfig::initDefaultValues() {
 	// these null values can be calibrated and set in EEPROM
-	nullOffsetX = radians(2.9);
-	nullOffsetY = radians(2.20);
-	nullOffsetZ = radians(1.18);
+	nullOffsetX = radians(1.41);
+	nullOffsetY = radians(3.20);
 	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
@@ -49,8 +48,6 @@ void IMUConfig::print() {
 	logging(degrees(nullOffsetX),3,2);
 	logging(",");
 	logging(degrees(nullOffsetY),3,2);
-	logging(",");
-	logging(degrees(nullOffsetZ),3,2);
 	loggingln("))");
 	logging("   kalman noise variance=");
 	loggingln(kalmanNoiseVariance,1,3);
@@ -236,7 +233,6 @@ void IMU::calibrate() {
 	uint32_t now = millis();
 	memory.persistentMem.imuControllerConfig.nullOffsetX = 0;
 	memory.persistentMem.imuControllerConfig.nullOffsetY = 0;
-	memory.persistentMem.imuControllerConfig.nullOffsetZ = 0;
 
 	// let kalman filter run and calibrate for 1s
 	while (millis() - now < 2000) {
@@ -245,7 +241,6 @@ void IMU::calibrate() {
 
 	memory.persistentMem.imuControllerConfig.nullOffsetX = kalman[Dimension::X].getAngle();
 	memory.persistentMem.imuControllerConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
-	memory.persistentMem.imuControllerConfig.nullOffsetZ = kalman[Dimension::Z].getAngle();
 
 	memory.persistentMem.imuControllerConfig.print();
 }
@@ -279,8 +274,12 @@ void IMU::loop() {
 			// denote the coordsystem for angualr velocity in the direction of the according axis
 			// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
 			float tilt[3];
-			tilt[Dimension::X] = atan2(mpu9250->getAccelX_mss(), -mpu9250->getAccelZ_mss()) - memory.persistentMem.imuControllerConfig.nullOffsetX;
-			tilt[Dimension::Y] = atan2(-mpu9250->getAccelY_mss(), -mpu9250->getAccelZ_mss()) - memory.persistentMem.imuControllerConfig.nullOffsetY;
+			tilt[Dimension::X] = atan2( mpu9250->getAccelX_mss(),
+					                    sqrt(   mpu9250->getAccelZ_mss()*mpu9250->getAccelZ_mss() +
+					                    		mpu9250->getAccelY_mss()*mpu9250->getAccelY_mss())) - memory.persistentMem.imuControllerConfig.nullOffsetX;
+			tilt[Dimension::Y] = atan2(-mpu9250->getAccelY_mss(),
+					  	  	  	        sqrt(	mpu9250->getAccelZ_mss()*mpu9250->getAccelZ_mss() +
+					  	  	  	        		mpu9250->getAccelX_mss()*mpu9250->getAccelX_mss())) - memory.persistentMem.imuControllerConfig.nullOffsetY;
 			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss();
 
 			float angularVelocity[3];
@@ -303,8 +302,6 @@ void IMU::loop() {
 
 			// indicate that new value is available
 			valueIsUpdated = true;
-
-			averageTime_ms = (averageTime_ms + (millis() - now))/2;
 
 			if (logIMUValues) {
 				if (logTimer.isDue_ms(50,millis())) {
@@ -329,9 +326,7 @@ void IMU::loop() {
 					logging(degrees(getAngleRad(Dimension::Y)),2,2);
 					logging(")");
 
-					logging("kalman t=");
-					logging(averageTime_ms);
-					logging("us");
+					logging("us ");
 					logging("f=");
 					logging(1000/sampleRate_ms);
 					loggingln("Hz");
@@ -341,11 +336,6 @@ void IMU::loop() {
 		}
 	}
 }
-
-float IMU::getAvrLoopTime() {
-	return ((float)averageTime_ms)/1000.0;
-}
-
 
 // returns true once when a new value is available.
 bool IMU::isNewValueAvailable(float &dT) {

@@ -223,8 +223,6 @@ void BotController::loop() {
 			if (memory.persistentMem.logConfig.performanceLog) {
 				logger->print(" t=(dT=");
 				logger->print(dT*1000.0);
-				logger->print("ms,imu=");
-				logger->print(imu.getAvrLoopTime()*1000.0);
 				logger->print("ms,state=");
 				logger->print(state.getAvrLoopTime()*1000.0);
 				logger->print("ms,eng=");

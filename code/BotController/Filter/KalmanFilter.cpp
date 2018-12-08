@@ -17,7 +17,7 @@ void KalmanFilter::setup(float angle) {
     Q_angle = 0.001f;	// default 0.001
 
     Q_bias = 0.002f;	// default 0.003
-    R_measure = 0.03;	// default 0.03
+    R_measure = 0.1;	// default 0.03
 
     this->angle = angle;
     bias = 0.0f;
@@ -56,13 +56,14 @@ void KalmanFilter::update(float newAngle /* rad */, float newRate /* rad/s */, f
     bias  += K1 * y;
 
     // Update the error covariance
-    float P00_temp = P00;
-    float P01_temp = P01;
+    // (strange: most implementations in the net forget to save the covariance  matrix P before modifying it)
+    float P00saved = P00;
+    float P01saved= P01;
 
-    P00 -= K0 * P00_temp;
-    P01 -= K0 * P01_temp;
-    P10 -= K1 * P00_temp;
-    P11 -= K1 * P01_temp;
+    P00 -= K0 * P00saved;
+    P01 -= K0 * P01saved;
+    P10 -= K1 * P00saved;
+    P11 -= K1 * P01saved;
 };
 
 float KalmanFilter::getAngle() {
