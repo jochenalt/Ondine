@@ -175,10 +175,11 @@ int IMU::init() {
 	status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
 
 	// setting low pass bandwith
-	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // kalman filter does the rest
+	// status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // kalman filter does the rest
 
 	// set update rate of gyro to 200 Hz
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
+
 
 	mpu9250->setGyroBiasX_rads(0);
 	mpu9250->setGyroBiasY_rads(0);
@@ -238,7 +239,7 @@ void IMU::calibrate() {
 	memory.persistentMem.imuControllerConfig.nullOffsetZ = 0;
 
 	// let kalman filter run and calibrate for 1s
-	while (millis() - now < 1000) {
+	while (millis() - now < 2000) {
 		loop();
 	}
 
@@ -253,6 +254,7 @@ void IMU::loop() {
 	if (mpu9250) {
 		if (newDataAvailable || updateTimer.isDue()) {
 			if (newDataAvailable) {
+				sampleRate_ms = (sampleRate_ms + (millis() - updateTimer.mLastCall_ms)) / 2.0;
 				updateTimer.dT(); // reset timer of updateTimer
 				newDataAvailable = false;
 			} else {
@@ -277,9 +279,9 @@ void IMU::loop() {
 			// denote the coordsystem for angualr velocity in the direction of the according axis
 			// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
 			float tilt[3];
-			tilt[Dimension::X] = mpu9250->getAccelX_mss()*(HALF_PI/Gravity);
-			tilt[Dimension::Y] = -mpu9250->getAccelY_mss()*(HALF_PI/Gravity);
-			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss()*(HALF_PI/Gravity) + HALF_PI;
+			tilt[Dimension::X] = atan2(mpu9250->getAccelX_mss(), -mpu9250->getAccelZ_mss()) - memory.persistentMem.imuControllerConfig.nullOffsetX;
+			tilt[Dimension::Y] = atan2(-mpu9250->getAccelY_mss(), -mpu9250->getAccelZ_mss()) - memory.persistentMem.imuControllerConfig.nullOffsetY;
+			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss();
 
 			float angularVelocity[3];
 			angularVelocity[Dimension::X] = mpu9250->getGyroY_rads();
@@ -287,13 +289,14 @@ void IMU::loop() {
 			angularVelocity[Dimension::Z] = mpu9250->getGyroZ_rads();
 
 			// invoke kalman filter separately per plane
-			for (int i = 0;i<3;i++)
-				kalman[i].update(tilt[i], angularVelocity[i], dT);
+			kalman[Dimension::X].update(tilt[Dimension::X], angularVelocity[Dimension::X], dT);
+			kalman[Dimension::Y].update(tilt[Dimension::Y], angularVelocity[Dimension::Y], dT);
+			kalman[Dimension::Z].update(tilt[Dimension::Z], angularVelocity[Dimension::Z], dT);
 
 			lastSample = currentSample;
-			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetX;
-			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetY;
-			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle() - memory.persistentMem.imuControllerConfig.nullOffsetZ;
+			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() ;
+			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle();
+			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle();
 			currentSample.plane[Dimension::X].angularVelocity = kalman[Dimension::X].getRate();
 			currentSample.plane[Dimension::Y].angularVelocity = kalman[Dimension::Y].getRate();
 			currentSample.plane[Dimension::Z].angularVelocity = kalman[Dimension::Z].getRate();
@@ -304,7 +307,7 @@ void IMU::loop() {
 			averageTime_ms = (averageTime_ms + (millis() - now))/2;
 
 			if (logIMUValues) {
-				if (logTimer.isDue_ms(500,millis())) {
+				if (logTimer.isDue_ms(50,millis())) {
 					logging("dT=");
 					logging(dT,1,3);
 					logging("a=(X:");
@@ -328,7 +331,11 @@ void IMU::loop() {
 
 					logging("kalman t=");
 					logging(averageTime_ms);
-					loggingln("us");
+					logging("us");
+					logging("f=");
+					logging(1000/sampleRate_ms);
+					loggingln("Hz");
+
 				}
 			}
 		}

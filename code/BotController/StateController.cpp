@@ -80,8 +80,8 @@ void ControlPlane::reset () {
 
 			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
 			outputSpeedFilter.init(FIR::LOWPASS,
-					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
-							 1.0e-6 			/* supression in stop band is -60db */,
+					         1.0e-4f  			/* allowed ripple in passband in amplitude is 0.1% */,
+							 1.0e-7 			/* supression in stop band is -60db */,
 							 SampleFrequency, 	/* 200 Hz */
 							 15.0f  			/* low pass cut off frequency */);
 }

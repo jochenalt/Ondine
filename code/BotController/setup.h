@@ -35,7 +35,7 @@ const float MaxTiltAngle = atan(MaxBotAccel/Gravity); 				// [rad] max tilt angl
 // --- IMU ---
 // possible values of sample frequency depend on IMU MP9150 are 1000/n with n=0..32,
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz
-// cpu-wise, Teensy 3.5 is capable of going up to 250 Hz, but apparently this does not give an advantage
+// cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
 const int SampleFrequency 					= 250; 					// [Hz] loop time as imposed by IMU frequency
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time of the general loop
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house
