@@ -29,6 +29,7 @@ public:
 	float ballPosIntegratedWeight;
 	float ballPositionWeight;
 	float ballVelocityWeight;
+	float ballAccelWeight;
 
 	float omegaWeight;
 };
@@ -44,17 +45,17 @@ class ControlPlane {
 		float lastTargetBallPos;
 		float lastBallPos;
 		float lastBallSpeed;
-
+		float lastBodyPos;
+		float lastBodySpeed;
+		float lastBodyAccel;
 		float error;
 		float accel;
 		float speed;			// speed in x direction [m/s]
-		float filteredAccel;
 		float filteredSpeed;
 		float posErrorIntegrated;
 
 		FIR::Filter  posFilter;
 		FIR::Filter outputSpeedFilter;
-		FIR::Filter outputAccelFilter;
 
 		LowPassFilter1stOrder outputSpeedFilter2;
 

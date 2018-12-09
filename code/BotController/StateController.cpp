@@ -43,7 +43,13 @@ void StateControllerConfig::print() {
 	logging(ballVelocityWeight,2,2);
 	logging("[");
 	logging(defValue.ballVelocityWeight,2,2);
-	loggingln("])");
+	logging("])");
+	logging(",");
+	logging(ballAccelWeight,2,2);
+	logging("[");
+	logging(defValue.ballAccelWeight,2,2);
+	loggingln("]");
+
 	logging("   P(omega) =(");
 	logging(omegaWeight,2,2);
 	logging("[");
@@ -56,13 +62,13 @@ void StateControllerConfig::initDefaultValues() {
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
-	angleWeight				= 9.6; // 39.0;
-	angularSpeedWeight		= 3.0; // 21.00;
+	angleWeight				= 11.6; // 39.0;
+	angularSpeedWeight		= 6.0; // 21.00;
 
 	ballPositionWeight		= 0.3; // -14.2;
 	ballPosIntegratedWeight = 0.75; // -0.0;
 	ballVelocityWeight		= 1.2; // -12.0;
-
+	ballAccelWeight			= 0;	// 0
 	omegaWeight				= 0.0;
 }
 
@@ -86,11 +92,6 @@ void ControlPlane::reset () {
 							 1.0e-4f 			/* supression in stop band is -40db */,
 							 SampleFrequency, 	/* 200 Hz */
 							 15.0f  			/* low pass cut off frequency */);
-            outputAccelFilter.init(FIR::LOWPASS,
-                             1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
-                             1.0e-4f             /* supression in stop band is -40db */,
-                             SampleFrequency,     /* 200 Hz */
-                             15.0f              /* low pass cut off frequency */);
             posFilter.init(FIR::LOWPASS,
                              1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
                              1.0e-4f             /* supression in stop band is -40db */,
@@ -135,15 +136,17 @@ void ControlPlane::update(bool doLogging, float dT,
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 		float absBallPos   		= current.pos;
 		float absBallSpeed 		= current.speed;
-		// absBallPos = lastBallPos + lastBallSpeed*dT;
-		// absBallSpeed = lastBallSpeed;
+		float bodyPos = absBallPos + sensor.angle * CentreOfGravityHeight;
+		float bodySpeed = (bodyPos - lastBodyPos)/dT;
+		float bodyAccel = (bodySpeed - lastBodySpeed)/dT;
+
 		float targetBallPos	 	= target.pos - targetAngle * CentreOfGravityHeight;
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
 		float error_tilt			= (sensor.angle-targetAngle);
 		float gradient = 10.0;
-		//error_tilt = error_tilt + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
+		error_tilt = error_tilt + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
 		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity);
 
 		float posError 	= (absBallPos - targetBallPos);
@@ -157,13 +160,14 @@ void ControlPlane::update(bool doLogging, float dT,
 					constrain(posErrorIntegrated,
 								-posErrorLimitAngle*config.angleWeight / config.ballPosIntegratedWeight,
 								+posErrorLimitAngle*config.angleWeight / config.ballPosIntegratedWeight);
-		float posVelocityError 		= (absBallSpeed	- targetBallSpeed);
+		float speedError 		= (bodySpeed - targetBallSpeed);
+		float accelError 	    = (bodyAccel - target.accel);
 
 		float error_centripedal     = targetOmega * target.speed;
 
 		// sum up all weighted errors
 		error =	+ config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed
-						+ config.ballPositionWeight*posError + config.ballPosIntegratedWeight*posErrorIntegrated  + config.ballVelocityWeight*posVelocityError
+						+ config.ballPositionWeight*posError + config.ballPosIntegratedWeight*posErrorIntegrated  + config.ballVelocityWeight*speedError+  + config.ballAccelWeight*accelError
 						+ config.omegaWeight * error_centripedal;
 
 
@@ -173,16 +177,12 @@ void ControlPlane::update(bool doLogging, float dT,
 		float force = error;
 		accel = force / BallWeight;
 
-		filteredAccel = accel;
-		// filteredAccel = outputSpeedFilter.update(accel);
-		filteredAccel = constrain(filteredAccel,-MaxBotAccel, MaxBotAccel);
-
-		// filteredAccel = accel;
+		accel = constrain(accel,-MaxBotAccel, MaxBotAccel);
 
 		// accelerate if not on max speed already
-		if ((sgn(speed) != sgn(filteredAccel)) ||
+		if ((sgn(speed) != sgn(accel)) ||
 			(abs(speed) < MaxBotSpeed)) {
-			speed += filteredAccel * dT;
+			speed += accel * dT;
 			speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
 		}
 
@@ -216,6 +216,11 @@ void ControlPlane::update(bool doLogging, float dT,
 		lastBallPos = absBallPos;
 		lastBallSpeed = absBallSpeed;
 		lastTargetBallPos = targetBallPos;
+
+		lastBodyPos = bodyPos;
+		lastBodySpeed = bodySpeed;
+		lastBodyAccel = bodyAccel;
+
 
 		if (doLogging)
 			if (memory.persistentMem.logConfig.debugStateLog) {
@@ -293,7 +298,9 @@ void StateController::printHelp() {
 	loggingln();
 	loggingln("A/a - ball position weight");
 	loggingln("S/s - ball pos integrated weight");
-	loggingln("D/d - ball speed weight");
+	loggingln("D/d - body speed weight");
+	loggingln("F/f - body accel weight");
+
 	loggingln();
 	loggingln("z/Z - omega weight");
 	loggingln("b   - balance on/off");
@@ -382,6 +389,18 @@ void StateController::menuLoop(char ch, bool continously) {
 			config.print();
 			cmd = true;
 			break;
+		case 'f':
+			config.ballAccelWeight-= continously?0.2:0.05;
+			config.print();
+			cmd =true;
+			break;
+		case 'F':
+			config.ballAccelWeight += continously?0.2:0.05;
+			config.print();
+			cmd = true;
+			break;
+
+
 		default:
 			cmd = false;
 			break;
