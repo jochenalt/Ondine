@@ -29,13 +29,10 @@ void Engine::setup(MenuController* menuCtrl) {
 	}
 }
 
-void Engine::loop() {
-	uint32_t start = millis();
+void Engine::loop(uint32_t now_us) {
 	for (int i = 0;i<3;i++) {
-		wheel[i].loop();
+		wheel[i].loop(now_us);
 	}
-	uint32_t end = millis();
-	averageTime_ms = (averageTime_ms + (end - start)) / 2;
 }
 
 void Engine::setWheelSpeed(float revPerSec[3]) {
@@ -139,9 +136,6 @@ void Engine::menuLoop(char ch, bool continously) {
 			logging("enabled.");
 		else
 			logging("disabled.");
-		logging("loop t=");
-		log(averageTime_ms);
-		logging("ms");
 
 		logging(" active wheel");
 		log(activeMenuWheel);

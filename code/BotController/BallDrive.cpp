@@ -89,6 +89,7 @@ void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 		engine.getWheelAngleChange(angleChange);
 
 		float currentWheelSpeed[3];
+		// @TODO bug: wheelspeed = (angleChange / (TWO_PI*dT))
 		currentWheelSpeed[0] = angleChange[0]  / dT;	// compute wheel speed out of delta-angle
 		currentWheelSpeed[1] = angleChange[1]  / dT;
 		currentWheelSpeed[2] = angleChange[2]  / dT;
@@ -110,10 +111,10 @@ void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 	}
 }
 
-void BallDrive::loop() {
+void BallDrive::loop(uint32_t now_us) {
 	// drive the motors
 	// due to use of brushless motors, this requires permanent invokation of loop
-	engine.loop();
+	engine.loop(now_us);
 
 }
 
@@ -211,8 +212,6 @@ void BallDrive::menuLoop(char ch, bool continously) {
 			logging("enabled.");
 		else
 			logging("disabled.");
-		logging(" t=");
-		log(engine.getAvrLoopTime()*1000000.0);
 		logging("us");
 		logging(" speed=(");
 		logging(menuSpeedX,2,3);

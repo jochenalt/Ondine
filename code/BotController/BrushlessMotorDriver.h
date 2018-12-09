@@ -14,7 +14,7 @@
 #include <Encoder/AS5047D.h>
 #include <TimePassedBy.h>
 
-const float MaxWheelAcceleration = 200.0; 			// [rev/s^2]
+const float MaxWheelAcceleration = 1000.0; 			// [rev/s^2]
 const float GearBoxRatio = 18.0/54.0*18.0/54.0; 	// two timing belts with 54/18*54/18 pulleys = 1:9
 
 class MotorConfig {
@@ -27,7 +27,9 @@ public:
 	PIDControllerConfig pid_speed;
 	PIDControllerConfig pid_lifter;
 
-	// mounting property: differing angle between rotor and encoder. Needs to be calibrated after assembly
+	// mounting property: differing angle between rotor and encoder.
+	// Needs to be calibrated after assembly to ake into account that
+	// the magnet gets a random position to the rotor
 	float phaseAAngle[3];
 };
 
@@ -46,16 +48,15 @@ public:
 	void calibrate();
 
 	// engine loop, returns true, if engine did something
-	bool loop( );
+	bool loop(uint32_t now_us );
 
 	// set speed of motor
-	void setMotorSpeed(float speed /* [rotations per second] */, float acc = MaxWheelAcceleration /* [rotations per second^2] */);
+	void setMotorSpeed(float speed /* [rev/s] */, float acc = MaxWheelAcceleration /* [rev/s^2] */);
 	float getMotorSpeed();
 	float getIntegratedMotorAngle();
-	float getSensorAngle() { return magEncoder.getSensorRead(); };
 
 	// set speed of wheel including the gear box
-	void setSpeed(float speed /* [rotations per second] */, float acc = MaxWheelAcceleration /* [rotations per second^2] */);
+	void setSpeed(float speed /* [rev/s] */, float acc = MaxWheelAcceleration /* [rev/s^2] */);
 	float getSpeed();
 	float getIntegratedAngle();
 
@@ -79,7 +80,6 @@ private:
 	float magneticFieldAngle = 0;			// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float currentReferenceMotorSpeed = 0;	// [rev/s] current speed, ramp function towards targetSpeed
 	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
-	float lastReferenceAngle = 0;			// [rad] reference angle of last call
 	float measuredMotorSpeed = 0;			// [rev/s] speed as given by encoder
 	SpeedGainPIDController pid;
 

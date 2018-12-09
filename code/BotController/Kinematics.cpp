@@ -11,8 +11,6 @@
 #include "libraries/Util.h"
 #include "setup.h"
 
-const float WheelAngleRad= radians(45.);
-
 
 void logMatrix(float m[3][3]) {
 	logger->print("| ");logger->print(m[0][0],4);logger->print(" ");
@@ -62,7 +60,6 @@ void Kinematix::setupConstructionMatrix() {
 }
 
 
-
 // tiltRotationMatrix (TRM) is the rotation matrix that is able to compensate the position where
 // the ball touches the ground. This points moves if the robot tilts, so when doing forward and inverse kinematics
 // this angle needs to be taken into account when the wheel speed is computed out of x,y, omega
@@ -97,14 +94,14 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 // corrected by the tilt of the imu pTiltX, pTiltY 
 void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float pOmegaZ /* rev/s */,
 		float pTiltX, float pTiltY,
-		float pWheel_speed[3]) {
+		float wheelSpeed[3]) {
 
 	pVx = -pVx;
 	pVy = -pVy;
 
 	// this matrix depends on the tilt angle and corrects the kinematics 
 	// due to the slightly moved touch point of the ball
-	computeTiltRotationMatrix(pTiltX,pTiltY);
+	computeTiltRotationMatrix(pTiltX, pTiltY);
 
 	// rotate construction matrix by tilt (by multiplying with tilt rotation matrix)
 	// compute only those fields that are required afterwards (so we need only 10 out of 81 multiplications of a regular matrix multiplication)
@@ -122,23 +119,23 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	float  lVz = pOmegaZ * BallRadius;
 
 	// compute wheel's speed in rad/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
-	pWheel_speed[0] = ((m01_11 + m02_12) * pVx	         + (-m02_02) * pVy           + ( -m01_21 - m02_22         ) * lVz)  ;
-	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
-	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
+	wheelSpeed[0] = ((m01_11 + m02_12) * pVx	         + (-m02_02) * pVy           + ( -m01_21 - m02_22         ) * lVz)  ;
+	wheelSpeed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
+	wheelSpeed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
 
 	// convert rad/s in revolutions /s
-	pWheel_speed[0] /= TWO_PI;
-	pWheel_speed[1] /= TWO_PI;
-	pWheel_speed[2] /= TWO_PI;
+	wheelSpeed[0] /= TWO_PI;
+	wheelSpeed[1] /= TWO_PI;
+	wheelSpeed[2] /= TWO_PI;
 
 	// if one wheel's speed exceeds max speed
 	// reduce all speeds by same factor to comply with the max speed restriction
 	// but without changing the direction of movement
-	float highestWheelSpeed = max(max(abs(pWheel_speed[0]), abs(pWheel_speed[1])), abs(pWheel_speed[2]));
+	float highestWheelSpeed = max(max(abs(wheelSpeed[0]), abs(wheelSpeed[1])), abs(wheelSpeed[2]));
 	if (highestWheelSpeed > MaxWheelSpeed) {
 			float factor = MaxWheelSpeed / highestWheelSpeed;
 			for (int j = 0;j<3;j++)
-				pWheel_speed[j] *= factor;
+				wheelSpeed[j] *= factor;
 			logging("wheel speed reduced by ");
 			loggingln(factor,1,2);
 			fatalError("speed exceeds limit");
@@ -146,12 +143,12 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 }
 
 // compute actual speed in the coord-system of the IMU out of the encoder's data depending on the given tilt
-void Kinematix::computeActualSpeed( float pWheel[3],
-									float pTiltX, float pTiltY,
-									float& pVx, float& pVy, float& pOmega) {
+void Kinematix::computeActualSpeed( float wheelSpeed[3],
+									float tiltX, float tiltY,
+									float& vx, float& vy, float& omega) {
 	// this matrix depends on the tilt angle and corrects the kinematics 
-	// due to the moved touch point of the ball
-	computeTiltRotationMatrix(pTiltX,pTiltY);
+	// due to the moving touch point of the ball
+	computeTiltRotationMatrix(tiltX,tiltY);
 
 	// compute the sparse result of the construction matrix * tilt compensation matrix
 	// (multiply only those fields that are required afterwards, so we have only 10 instead of 81 multiplications)
@@ -165,18 +162,17 @@ void Kinematix::computeActualSpeed( float pWheel[3],
 	float m21_10 = trm[2][1] * icm[1][0];
 	float m21_11 = trm[2][1] * icm[1][1];
 	float m22_20 = trm[2][2] * icm[2][0];
-							
 
 	// compute inverse kinematics
-	pVx    =        ( m11_10 + m12_20)           * pWheel[0]
-			      + ( m10_01 + m11_11 + m12_20)  * pWheel[1]
-				  + (-m10_01 + m11_11 + m12_20)  * pWheel[2];
-	pVy    =        (-m02_20)                    * pWheel[0]
-  				  + (-m00_01 - m02_20)           * pWheel[1]
-		          + ( m00_01 - m02_20)           * pWheel[2];
-	pOmega =     (  (-m21_10 - m22_20)           * pWheel[0]
-				  + (-m20_01 - m21_11 - m22_20)  * pWheel[1]
-				  + ( m20_01 - m21_11 - m22_20)  * pWheel[2]) / BallRadius;
+	vx    =        ( m11_10 + m12_20)           * wheelSpeed[0]
+			      + ( m10_01 + m11_11 + m12_20)  * wheelSpeed[1]
+				  + (-m10_01 + m11_11 + m12_20)  * wheelSpeed[2];
+	vy    =        (-m02_20)                    * wheelSpeed[0]
+  				  + (-m00_01 - m02_20)           * wheelSpeed[1]
+		          + ( m00_01 - m02_20)           * wheelSpeed[2];
+	omega =     (  (-m21_10 - m22_20)           * wheelSpeed[0]
+				  + (-m20_01 - m21_11 - m22_20)  * wheelSpeed[1]
+				  + ( m20_01 - m21_11 - m22_20)  * wheelSpeed[2]) / BallRadius;
 }
 
 

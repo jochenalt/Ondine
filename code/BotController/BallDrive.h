@@ -24,7 +24,7 @@ public:
 	virtual ~BallDrive() {};
 
 	void setup(MenuController* menuCtrl);
-	void loop();
+	void loop(uint32_t now_us);
 
 	void enable(bool doit) {
 		engine.enable(doit);
@@ -66,8 +66,6 @@ public:
 
 	// print ascii help to console
 	virtual void printHelp();
-
-	float getAvrLoopTime() { return engine.getAvrLoopTime(); };
 
 private:
 	Engine engine;				// three independent motors

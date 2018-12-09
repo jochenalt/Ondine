@@ -32,9 +32,9 @@ class Kinematix {
 				float pWheel1_speed[3]);
 
 		// inverse kinematix: wheel speed -> speed xy/omega
-		void computeActualSpeed(float pWheel[3],
-						float  pTiltX, float  pTiltY,
-						float & pVx, float & pVy, float & pOmega);
+		void computeActualSpeed(float wheelSpeed[3] /* [rev/s] */,
+								float  tiltX/* [rad] */, float  tiltY/* [rad] */,
+								float & vx /* [m/s] */, float & vy/* [m/s] */, float & omega/* [rad/s] */);
 
 		// test kinematics, to be used in debugger
 		void testKinematics();

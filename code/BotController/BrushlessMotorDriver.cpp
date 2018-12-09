@@ -207,6 +207,8 @@ void BrushlessMotorDriver::turnReferenceAngle(float dT) {
 
 	// increase reference angle with given speed
 	referenceAngle += currentReferenceMotorSpeed * TWO_PI * dT;
+
+	// @TODO Limit reference angle by encoder angle
 }
 
 void BrushlessMotorDriver::reset() {
@@ -214,9 +216,8 @@ void BrushlessMotorDriver::reset() {
 	targetAcc = MaxWheelAcceleration;
 	magEncoder.reset();
 	readEncoderAngle();
-	magneticFieldAngle = getEncoderAngle();				// [rad] angle of the induced magnetic field 0=1 = 2PI
+	magneticFieldAngle = getEncoderAngle();				// [rad] angle of the induced magnetic field
 	referenceAngle = magneticFieldAngle;
-	lastReferenceAngle = magneticFieldAngle;
 
 	currentReferenceMotorSpeed = 0;		// [rev/s]
 	measuredMotorSpeed = 0;				// [rev/s]
@@ -237,11 +238,12 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 
 
 // call me as often as possible
-bool BrushlessMotorDriver::loop() {
+bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 	readEncoderAngle();
 	if (enabled) {
 
+		// @TODO take current time as method parameter. Currently turnReferenceAngle is imprecise due to low resolution of 1ms
 		// frequency of motor control is 1000Hz max
 		uint32_t now = millis();
 		uint32_t timePassed = now - lastLoopCall_ms;
@@ -256,7 +258,7 @@ bool BrushlessMotorDriver::loop() {
 		// turn reference angle along the given speed
 		turnReferenceAngle(dT);
 
-		// read the current encoder value
+		// read the current encoder value to get the delta angle later on
 		float prevEncoderAngle = getEncoderAngle();
 
 		// read new angle from sensor
@@ -280,8 +282,8 @@ bool BrushlessMotorDriver::loop() {
 		// set magnetic field relative to rotor's position
 		magneticFieldAngle = getEncoderAngle() + advanceAngle + radians(90);
 
-		measuredMotorSpeed = (getEncoderAngle()-prevEncoderAngle)/TWO_PI/dT;
-		lastReferenceAngle = referenceAngle; // required to compute speed
+		// low pass current motor speed
+		measuredMotorSpeed = (measuredMotorSpeed + (getEncoderAngle()-prevEncoderAngle)/TWO_PI/dT)/2.0;
 
 		// send new pwm value to motor
 		sendPWMDuty(min(abs(torque),1.0));

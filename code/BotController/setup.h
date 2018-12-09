@@ -12,20 +12,17 @@ const float Gravity_mm = Gravity*1000.0;							// [mm/s^2]
 
 // --- mechanical constants ---
 const float BallWeight = 0.1;										// [kg]
-// const float MotorWeight = 0.195;									// [kg]
-// const float EnclosureWeight = 0.2;									// [kg]
-// const float BotWeight = 3*MotorWeight + EnclosureWeight;			// [kg]
 const float WheelRadius = 0.035;									// [m]
 const float BallRadius = 0.090;										// [m]
-const float CentreOfGravityHeight = 0.200; 							// [m] center of gravity height from ground
-const float MaxBotSpeed = 1.8; 										// [m/s] max speed of bot
-const float MaxBotOmega= 6.0; 										// [rad/s] max vertical turn speed of bot
+const float WheelAngleRad= radians(45.0);							// [rad] 	mounting angle of wheels against horizontal base platform
+const float CentreOfGravityHeight = 0.200; 							// [m] 		center of gravity height from ground
+const float MaxBotSpeed = 1.8; 										// [m/s] 	max speed of bot
+const float MaxBotOmega= 6.0; 										// [rad/s] 	max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot
-const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] max acceleration acceleration of bot
-const float MaxTiltAngle = radians(15);								// [rad] max tilt angle, 15°
-const float MaxBotAccel= tan(MaxTiltAngle)*Gravity;					// [m/s^2] max acceleration of bot
+const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] 	max acceleration acceleration of bot
+const float MaxTiltAngle = radians(15);								// [rad] 	max tilt angle, 15°
+const float MaxBotAccel= tan(MaxTiltAngle)*Gravity;					// [m/s^2] 	max acceleration of bot
 const float MaxWheelSpeed = 3.0;									// [rev/s]
-
 
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy
@@ -41,7 +38,6 @@ const int SampleFrequency 					= 333; 					// [Hz] loop time as imposed by IMU f
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time of the general loop
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house
 #define IMU_I2C_ADDRESS 0x69										// default MPU9050 i2c address
-
 
 // ---  Brushless motors   ---
 const int pwmResolutionBits = 10;

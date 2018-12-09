@@ -153,13 +153,13 @@ void BotController::setTarget(const BotMovement& target) {
 
 void BotController::loop() {
 	// performance measurement
-	uint32_t start = millis();
+	uint32_t start_us = micros();
 
 	// give other libraries some time
 	yield();
 
 	// drive motors
-	ballDrive.loop();
+	ballDrive.loop(start_us);
 
 	// react on serial line
 	menuController.loop();
@@ -168,7 +168,7 @@ void BotController::loop() {
 	imu.loop();
 	IMUSample sensorSample = imu.getSample();
 
-	ballDrive.loop();
+	ballDrive.loop(start_us);
 
 	// drive the lifter
 	lifter.loop();
@@ -181,22 +181,16 @@ void BotController::loop() {
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		ballDrive.getSpeed(sensorSample,currentMovement);
 
-		// call this as often as possible to get a smooth motor movement
-		ballDrive.loop();
-
 		// call balance and speed controller
 		state.update(dT, sensorSample, currentMovement, targetBotMovement);
-
-		// call this as often as possible to get a smooth motor movement
-		ballDrive.loop();
 
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
-		uint32_t end = millis();
-		avrLoopTime = (((float)(end-start))/1000.0 + avrLoopTime)/2.0;
+		uint32_t end_us= micros();
+		avrLoopTime = (((float)(end_us-start_us))/1000000.0 + avrLoopTime)/2.0;
 
 		if (logTimer.isDue_ms(200,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
