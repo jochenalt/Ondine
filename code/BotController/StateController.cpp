@@ -76,12 +76,14 @@ void ControlPlane::reset () {
 			lastTargetBallPos = 0;
 			filteredSpeed = 0;
 			speed = 0;
+			accel = 0;
+			error = 0;
 			posErrorIntegrated = 0;
 
 			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
 			outputSpeedFilter.init(FIR::LOWPASS,
-					         1.0e-2f  			/* allowed ripple in passband in amplitude is 0.1% */,
-							 1.0e-3f 			/* supression in stop band is -60db */,
+					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
+							 1.0e-4f 			/* supression in stop band is -40db */,
 							 SampleFrequency, 	/* 200 Hz */
 							 15.0f  			/* low pass cut off frequency */);
 			outputSpeedFilter2.init(15.0, SampleFrequency);
@@ -93,6 +95,10 @@ float ControlPlane::getBodyPos() {
 
 float ControlPlane::getBallPos() {
 	return lastBallPos;
+}
+
+float ControlPlane::getAccel() {
+	return accel;
 }
 
 
@@ -109,6 +115,8 @@ void ControlPlane::update(bool doLogging, float dT,
 	// F = -kPθ·θ - kDθ·ω + kPx·x + kIx·∫xdt + kDx·v
 
 	if (dT) {
+		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
+
 		// target angle out of acceleration, assume tan(x) = x
 		float targetAngle = target.accel/Gravity;
 
@@ -119,59 +127,37 @@ void ControlPlane::update(bool doLogging, float dT,
 		float targetBallPos	 	= target.pos - targetAngle * CentreOfGravityHeight;
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
-		// compute erros for PD(angle) and PID(position)
+		// compute errors for PD(angle) and PID(position)
 		float error_tilt			= (sensor.angle-targetAngle);
+		float gradient = 0.1;
+		error_tilt = error_tilt*(1.0-2.0*gradient) + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
 		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity);
 
-		float posError 	= (absBallPos + sensor.angle * CentreOfGravityHeight*0 - targetBallPos);
+		float posError 	= (absBallPos - targetBallPos);
+		const float posErrorLimitAngle = radians(3);
+		posError = constrain (posError,
+								-posErrorLimitAngle*config.angleWeight / config.ballPositionWeight,
+								+posErrorLimitAngle*config.angleWeight / config.ballPositionWeight);
 		posErrorIntegrated 			+= posError*dT;
-		posErrorIntegrated 			= constrain(posErrorIntegrated, -MaxTiltAngle, MaxTiltAngle);
+		posErrorIntegrated 			=
+					constrain(posErrorIntegrated,
+								-posErrorLimitAngle*config.angleWeight / config.ballPosIntegratedWeight,
+								+posErrorLimitAngle*config.angleWeight / config.ballPosIntegratedWeight);
 		float posVelocityError 		= (absBallSpeed	- targetBallSpeed);
 
 		float error_centripedal     = targetOmega * target.speed;
-		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
-		/*
-		if (abs(config.ballPositionWeight) > 0.01)
-			error_ball_position = constrain(error_ball_position,  -config.angleWeight*MaxTiltAngle/config.ballPositionWeight, -config.angleWeight*MaxTiltAngle/config.ballPositionWeight);
-		*/
+
 		// sum up all weighted errors
-		float error =	+ config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed
+		error =	+ config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed
 						+ config.ballPositionWeight*posError + config.ballPosIntegratedWeight*posErrorIntegrated  + config.ballVelocityWeight*posVelocityError
 						+ config.omegaWeight * error_centripedal;
 
-		if (doLogging) {
-			if (memory.persistentMem.logConfig.debugStateLog) {
-				logging("v=");
-				logging(current.speed,2,3);
-				logging(" a=");
-				logging(sensor.angle,2,3);
-				logging(" w=");
-				logging(sensor.angularVelocity,2,3);
-				logging(" x=");
-				logging(absBallPos,2,3);
-				logging(" v=");
-				logging(absBallSpeed,2,3);
 
-				logging(" error=");
-				logging(error_tilt,3,3);
-				logging(",");
-				logging(error_angular_speed,3,3);
-				logging("|");
-				logging(posErrorIntegrated,3,3);
-				logging(",");
-				logging(posError,3,3);
-				logging(",");
-				logging(posVelocityError,3,3);
-				logging("|=");
-				logging(error,3,3);
-				logging(")");
-			}
-		}
 
 		// outcome of controller is force to be applied to the ball
 		// F = m*a,
 		float force = error;
-		float accel = force / BallWeight;
+		accel = force / BallWeight;
 
 		accel = constrain(accel,-MaxBotAccel, MaxBotAccel);
 
@@ -186,6 +172,25 @@ void ControlPlane::update(bool doLogging, float dT,
 		filteredSpeed = outputSpeedFilter.update(speed);
 		// filteredSpeed = outputSpeedFilter2.update(speed);
 
+		if (doLogging) {
+				if (memory.persistentMem.logConfig.debugStateLog) {
+					logging("imu=(");
+					logging(sensor.angle,2,3);
+					logging(",");
+					logging(sensor.angularVelocity,2,3);
+					logging(") ");
+
+					logging(" p(");
+					logging(current.pos,2,3);
+					logging(",");
+					logging(current.speed,2,3);
+					logging(")");
+
+					logging(" error=");
+					logging(error,3,3);
+					logging(")");
+				}
+			}
 		lastTargetAngle = targetAngle;
 		lastAngle = sensor.angle;
 

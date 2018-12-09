@@ -45,6 +45,8 @@ class ControlPlane {
 		float lastBallPos;
 		float lastBallSpeed;
 
+		float error;
+		float accel;
 		float speed;			// speed in x direction [m/s]
 		float filteredSpeed;
 		float posErrorIntegrated;
@@ -60,6 +62,7 @@ class ControlPlane {
 		void print();
 		float getBodyPos();
 		float getBallPos();
+		float getAccel();
 };
 
 
@@ -89,6 +92,14 @@ public:
 	}
 	float getPosY() {
 		return planeY.getBallPos();
+	}
+
+	float getAccelX() {
+		return planeX.getAccel();
+	}
+
+	float getAccelY() {
+		return planeY.getAccel();
 	}
 
 	// return average time consumed by update in [s]

@@ -63,11 +63,6 @@ void Trajectory::loop() {
 			current.y.pos += current.y.speed * dT;
 		}
 
-		// in the middle of trajectory, compute speed profile
-		if (targetTime > 0)  {
-			float timeForGoal = ((float)(targetTime - now))/1000.0;
-		}
-
 		// @TODO implement trapezoid profile towards target
 		BotController::getInstance().setTarget(current);
 	}

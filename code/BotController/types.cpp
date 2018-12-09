@@ -342,3 +342,7 @@ void mul(matrix33_t v, matrix33_t m, matrix33_t &result) {
             for(int k = 0; k < 3; ++k)
                 result[i][j] += v[i][k] * m[k][j];
 }
+
+float sigmoid(float gain /* derivation at 0 */, float x) {
+    return 1.0-2.0/(1.0 + exp(gain*2.0 * x));
+}

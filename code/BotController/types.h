@@ -121,5 +121,15 @@ public:
 };
 
 
+// function that looks like
+//      1|  -------
+//       |/
+// ------/--------
+//      /|
+//     / |
+// ---   |-1
+// (but smooth of course)
+float sigmoid(float gain /* derivation at 0 */, float x);
+
 
 #endif

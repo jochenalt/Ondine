@@ -198,26 +198,36 @@ void BotController::loop() {
 		uint32_t end = micros();
 		avrLoopTime = (((float)(end-start))/1000000.0 + avrLoopTime)/2.0;
 
-		if (logTimer.isDue_ms(1000,millis())) {
+		if (logTimer.isDue_ms(200,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
-				logging("a=(X:");
+				logging("a=(");
 				logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
 				logging(",");
 				logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
 				logging(",");
 				logging(currentMovement.x.pos,2,3);
-				logging(") Y:(");
+				logging(",");
+				logging(currentMovement.x.speed,2,3);
+				logging("|");
 				logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
 				logging(",");
 				logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
 				logging(",");
 				logging(currentMovement.y.pos,2,3);
+				logging(",");
+				logging(currentMovement.y.speed,2,3);
 				logging(") ");
-				currentMovement.print();
+				// currentMovement.print();
 				logging(" state=(");
 				logging(state.getSpeedX(),2,3);
 				logging(",");
+				logging(state.getAccelX(),2,3);
+				logging("|");
 				logging(state.getSpeedY(),2,3);
+				logging(",");
+				logging(state.getAccelY(),2,3);
+				logging("|");
+				logging(state.getOmega(),2,3);
 				logging(")");
 			}
 			if (memory.persistentMem.logConfig.performanceLog) {

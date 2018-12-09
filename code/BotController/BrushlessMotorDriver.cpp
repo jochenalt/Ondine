@@ -21,17 +21,6 @@ const float voltage = 16;										// [V] coming from the battery to server the 
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
-// function that looks like
-//      1|  -------
-//       |/
-// ------/--------
-//      /|
-//     / |
-// ---   |-1
-// (but smooth of course)
-float sigmoid(float gain /* derivation at 0 */, float x) {
-    return 1.0-2.0/(1.0 + exp(gain*2.0 * x));
-}
 
 
 // array to store pre-computed values of space vector wave form (SVPWM)

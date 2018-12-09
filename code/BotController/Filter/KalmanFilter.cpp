@@ -15,8 +15,8 @@ KalmanFilter::KalmanFilter() {
 
 void KalmanFilter::setup(float angle) {
     Q_angle = 0.001f;	// default 0.001
-    Q_bias = 0.002f;	// default 0.003
-    R_measure = 0.1;	// default 0.03
+    Q_bias = 0.003f;	// default 0.003
+    R_measure = 0.03;	// default 0.03
 
     this->angle = angle;
     bias = 0.0f;
@@ -43,11 +43,10 @@ void KalmanFilter::update(float newAngle /* rad */, float newRate /* rad/s */, f
     P10 -= dt * P11;
     P11 += Q_bias * dt;
 
-    // compute the Kalman gain
-    float S = P00 + R_measure; // Estimate error
-    float K0, K1; // Kalman gain - This is a 2x1 vector
-    K0 = P00 / S;
-    K1 = P10 / S;
+    // Kalman gain - This is a 2x1 vector
+    float S =  P00 + R_measure; // Estimate error
+    float K0 = P00 / S;
+    float K1 = P10 / S;
 
     // update estimate with passed measurement
     float y = newAngle - angle; // Angle difference
@@ -55,7 +54,7 @@ void KalmanFilter::update(float newAngle /* rad */, float newRate /* rad/s */, f
     bias  += K1 * y;
 
     // Update the error covariance
-    // (strange: most implementations in the net forget to save the covariance  matrix P before modifying it)
+    // (strange: most implementations in the internet forget to save the variables before using it)
     float P00saved = P00;
     float P01saved= P01;
 

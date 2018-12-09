@@ -31,7 +31,7 @@ public:
 
     void setQangle(float Q_angle);
 
-    // tune high tight the filter follows the input values
+    // tune how tight the filter follows the input values
     // Default is 0.003
     // Raise this to follow input more closely,
     // lower this to smooth result

@@ -19,7 +19,6 @@
 // instantiated in main.cpp
 extern i2c_t3* IMUWire;
 
-
 // flag indicating that IMU has a new measurement, this is set in interrupt
 // and evaluated in loop(), so this needs to be declared volatile
 volatile bool newDataAvailable = false;
@@ -39,7 +38,7 @@ void IMUConfig::initDefaultValues() {
 	// these null values can be calibrated and set in EEPROM
 	nullOffsetX = radians(1.41);
 	nullOffsetY = radians(3.20);
-	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
+	kalmanNoiseVariance = 0.1; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
 void IMUConfig::print() {
@@ -172,7 +171,7 @@ int IMU::init() {
 	status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
 
 	// setting low pass bandwith
-	// status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // kalman filter does the rest
+	//status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ); // kalman filter does the rest
 
 	// set update rate of gyro to 200 Hz
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
@@ -292,10 +291,17 @@ void IMU::loop() {
 			kalman[Dimension::Y].update(tilt[Dimension::Y], angularVelocity[Dimension::Y], dT);
 			kalman[Dimension::Z].update(tilt[Dimension::Z], angularVelocity[Dimension::Z], dT);
 
+			// save previous sample
 			lastSample = currentSample;
-			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle() ;
+
+			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle();
 			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle();
 			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle();
+
+			// currentSample.plane[Dimension::X].angularVelocity = (kalman[Dimension::X].getAngle() - lastSample.plane[Dimension::X].angle) / dT;
+			// currentSample.plane[Dimension::Y].angularVelocity = (kalman[Dimension::Y].getAngle() - lastSample.plane[Dimension::Y].angle) / dT;
+			// currentSample.plane[Dimension::Z].angularVelocity = (kalman[Dimension::Z].getAngle() - lastSample.plane[Dimension::Z].angle) / dT;
+
 			currentSample.plane[Dimension::X].angularVelocity = kalman[Dimension::X].getRate();
 			currentSample.plane[Dimension::Y].angularVelocity = kalman[Dimension::Y].getRate();
 			currentSample.plane[Dimension::Z].angularVelocity = kalman[Dimension::Z].getRate();

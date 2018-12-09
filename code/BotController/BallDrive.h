@@ -53,7 +53,7 @@ public:
 
 	// Set the speed of the ball drive in terms of a cartesic coord system.
 	// Considers the tilt angle in computation
-	void setSpeed(float speedX,float speedY, float omega, float angleX, float angleY);
+	void setSpeed(float speedX /* [m/s] */,float speedY /* [m/s] */, float omega, float angleX, float angleY);
 
 	// return speed as measured by encoders (might be different from speed set in method above)
 	void getSpeed(const IMUSample &sample,BotMovement &current);

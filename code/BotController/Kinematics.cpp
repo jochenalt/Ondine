@@ -12,7 +12,6 @@
 #include "setup.h"
 
 const float WheelAngleRad= radians(45.);
-const float MaxWheelSpeed = 2000.;
 
 
 void logMatrix(float m[3][3]) {
@@ -120,7 +119,6 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	float m02_22 = cm[0][2] * trm[2][2];
 	float m02_12 = cm[0][2] * trm[1][2];
 
-
 	float  lVz = pOmegaZ * BallRadius;
 
 	// compute wheel's speed in rad/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
@@ -128,22 +126,23 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	pWheel_speed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
 	pWheel_speed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
 
-	// if one wheel's speed exceeds max speed
-	// reduce all speeds by same factor to comply with the max speed restriction
-	// but without changing the direction of movement
-	for (int i = 0;i<3;i++) {
-		if (abs(pWheel_speed[i]) > MaxWheelSpeed) {
-			float factor = MaxWheelSpeed / abs(pWheel_speed[i]);
-			for (int j = 0;j<3;j++)
-				pWheel_speed[j] *= factor;
-		}
-	}
-
 	// convert rad/s in revolutions /s
 	pWheel_speed[0] /= TWO_PI;
 	pWheel_speed[1] /= TWO_PI;
 	pWheel_speed[2] /= TWO_PI;
 
+	// if one wheel's speed exceeds max speed
+	// reduce all speeds by same factor to comply with the max speed restriction
+	// but without changing the direction of movement
+	float highestWheelSpeed = max(max(abs(pWheel_speed[0]), abs(pWheel_speed[1])), abs(pWheel_speed[2]));
+	if (highestWheelSpeed > MaxWheelSpeed) {
+			float factor = MaxWheelSpeed / highestWheelSpeed;
+			for (int j = 0;j<3;j++)
+				pWheel_speed[j] *= factor;
+			logging("wheel speed reduced by ");
+			loggingln(factor,1,2);
+			fatalError("speed exceeds limit");
+	}
 }
 
 // compute actual speed in the coord-system of the IMU out of the encoder's data depending on the given tilt
