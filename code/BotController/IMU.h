@@ -94,8 +94,8 @@ private:
 	IMUSample lastSample;
 	bool valueIsUpdated = false;
 	bool logIMUValues = false;
-	uint32_t lastInvocationTime_ms = 0;
-	float sampleRate_ms = 0;
+	uint32_t lastInvocationTime_us = 0;
+	float sampleRate_us = 0;
 
 	float dT = 0;
 	TimePassedBy logTimer;

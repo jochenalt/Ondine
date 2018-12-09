@@ -21,7 +21,7 @@ const float voltage = 16;										// [V] coming from the battery to server the 
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
-
+MotorConfig& motorConfig = memory.persistentMem.motorControllerConfig;
 
 // array to store pre-computed values of space vector wave form (SVPWM)
 // array size is choosen by having a maximum difference of 1% in two subsequent table items,
@@ -268,7 +268,7 @@ bool BrushlessMotorDriver::loop() {
 		// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 		// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
 		float speedRatio = min(abs(currentReferenceMotorSpeed)/maxRevolutionSpeed,1.0);
-		float controlOutput = pid.update(memory.persistentMem.motorControllerConfig.pid_position, memory.persistentMem.motorControllerConfig.pid_speed,
+		float controlOutput = pid.update(motorConfig.pid_position, motorConfig.pid_speed,
 										-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
 										errorAngle,  dT);
 
@@ -351,7 +351,7 @@ float BrushlessMotorDriver::getIntegratedAngle() {
 }
 
 float BrushlessMotorDriver::getEncoderAngle() {
-	return magEncoder.getAngle() - 	memory.persistentMem.motorControllerConfig.phaseAAngle[motorNo];
+	return magEncoder.getAngle() - 	motorConfig.phaseAAngle[motorNo];
 }
 
 void BrushlessMotorDriver::readEncoderAngle() {
@@ -394,7 +394,7 @@ void BrushlessMotorDriver::calibrate() {
 	magneticFieldAngle = 0;
 	sendPWMDuty(0.0);
 
-	memory.persistentMem.motorControllerConfig.phaseAAngle[motorNo] = nullAngle;
+	motorConfig.phaseAAngle[motorNo] = nullAngle;
 	enable(false);
 }
 
@@ -461,46 +461,46 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 			break;
 		case 'P':
 			if (abs(currentReferenceMotorSpeed) < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.Kp  += 0.02;
+				motorConfig.pid_position.Kp  += 0.02;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Kp  += 0.02;
+				motorConfig.pid_speed.Kp  += 0.02;
 
 			pidChange = true;
 			break;
 		case 'p':
 			if (abs(currentReferenceMotorSpeed) < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.Kp -= 0.02;
+				motorConfig.pid_position.Kp -= 0.02;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Kp -= 0.02;
+				motorConfig.pid_speed.Kp -= 0.02;
 			pidChange = true;
 			break;
 		case 'D':
 			if (abs(currentReferenceMotorSpeed) < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.Kd += 0.0001;
+				motorConfig.pid_position.Kd += 0.0001;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Kd += 0.0001;
+				motorConfig.pid_speed.Kd += 0.0001;
 			pidChange = true;
 
 			break;
 		case 'd':
 			if (abs(currentReferenceMotorSpeed) < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.Kd -= 0.0001;
+				motorConfig.pid_position.Kd -= 0.0001;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Kd -= 0.0001;
+				motorConfig.pid_speed.Kd -= 0.0001;
 			pidChange = true;
 			break;
 		case 'I':
 			if (abs(currentReferenceMotorSpeed) < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.Ki += 0.02;
+				motorConfig.pid_position.Ki += 0.02;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Ki += 0.02;
+				motorConfig.pid_speed.Ki += 0.02;
 			pidChange = true;
 			break;
 		case 'i':
 			if (abs(currentReferenceMotorSpeed) < 15)
-				memory.persistentMem.motorControllerConfig.pid_position.Ki -= 0.02;
+				motorConfig.pid_position.Ki -= 0.02;
 			else
-				memory.persistentMem.motorControllerConfig.pid_speed.Ki -= 0.02;
+				motorConfig.pid_speed.Ki -= 0.02;
 			pidChange = true;
 			break;
 		case 'e':
@@ -518,18 +518,18 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 
 		if (pidChange) {
 			logging("PID(pos)=(");
-			logging(memory.persistentMem.motorControllerConfig.pid_position.Kp,3);
+			logging(motorConfig.pid_position.Kp,3);
 			logging(",");
-			logging(memory.persistentMem.motorControllerConfig.pid_position.Ki,3);
+			logging(motorConfig.pid_position.Ki,3);
 			logging(",");
-			logging(memory.persistentMem.motorControllerConfig.pid_position.Kd,4);
+			logging(motorConfig.pid_position.Kd,4);
 			loggingln(")");
 			logging("PID(speed)=(");
-			logging(memory.persistentMem.motorControllerConfig.pid_speed.Kp,3);
+			logging(motorConfig.pid_speed.Kp,3);
 			logging(",");
-			logging(memory.persistentMem.motorControllerConfig.pid_speed.Ki,3);
+			logging(motorConfig.pid_speed.Ki,3);
 			logging(",");
-			logging(memory.persistentMem.motorControllerConfig.pid_speed.Kd,4);
+			logging(motorConfig.pid_speed.Kd,4);
 			loggingln(")");
 		}
 		if (cmd) {

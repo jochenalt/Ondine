@@ -22,10 +22,10 @@ const float MaxBotSpeed = 1.8; 										// [m/s] max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot
 const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] max acceleration acceleration of bot
-const float MaxBotAccel= 2.0;							 		    // [m/s^2] max acceleration of bot
-const float MaxWheelSpeed = 3.;										// [rev/s]
+const float MaxTiltAngle = radians(15);								// [rad] max tilt angle, 15°
+const float MaxBotAccel= tan(MaxTiltAngle)*Gravity;					// [m/s^2] max acceleration of bot
+const float MaxWheelSpeed = 3.0;									// [rev/s]
 
-const float MaxTiltAngle = atan(MaxBotAccel/Gravity); 				// [rad] max tilt angle, 12°
 
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy
@@ -37,7 +37,7 @@ const float MaxTiltAngle = atan(MaxBotAccel/Gravity); 				// [rad] max tilt angl
 // possible values of sample frequency depend on IMU MP9150 are 1000/n with n=0..32,
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
-const int SampleFrequency 					= 250; 					// [Hz] loop time as imposed by IMU frequency
+const int SampleFrequency 					= 333; 					// [Hz] loop time as imposed by IMU frequency
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time of the general loop
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house
 #define IMU_I2C_ADDRESS 0x69										// default MPU9050 i2c address

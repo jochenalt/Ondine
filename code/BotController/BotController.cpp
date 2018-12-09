@@ -153,7 +153,7 @@ void BotController::setTarget(const BotMovement& target) {
 
 void BotController::loop() {
 	// performance measurement
-	uint32_t start = micros();
+	uint32_t start = millis();
 
 	// give other libraries some time
 	yield();
@@ -195,8 +195,8 @@ void BotController::loop() {
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
-		uint32_t end = micros();
-		avrLoopTime = (((float)(end-start))/1000000.0 + avrLoopTime)/2.0;
+		uint32_t end = millis();
+		avrLoopTime = (((float)(end-start))/1000.0 + avrLoopTime)/2.0;
 
 		if (logTimer.isDue_ms(200,millis())) {
 			if (memory.persistentMem.logConfig.debugBalanceLog) {
@@ -232,12 +232,8 @@ void BotController::loop() {
 			}
 			if (memory.persistentMem.logConfig.performanceLog) {
 				logger->print(" t=(dT=");
-				logger->print(dT*1000.0);
-				logger->print("ms,state=");
-				logger->print(state.getAvrLoopTime()*1000.0);
-				logger->print("ms,eng=");
-				logger->print(ballDrive.getAvrLoopTime()*1000.0);
-				logger->print("ms, cpu=");
+				logger->print(dT*1000000.0);
+				logger->print("us, cpu=");
 				logger->print((avrLoopTime / SamplingTime) * 100.0,0);
 				logger->println("%)");
 			}

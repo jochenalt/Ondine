@@ -28,6 +28,8 @@ volatile bool newDataAvailable = false;
 TimePassedBy updateTimer(2.0*SamplingTime*1000.0 /* [ms] */); // twice the usual sampling frquency
 
 
+IMUConfig& imuConfig = memory.persistentMem.imuControllerConfig;
+
 // interrupt that is called whenever MPU9250 has a new value (which is setup'ed to happen every 10ms)
 void imuInterrupt() {
 	newDataAvailable = true;
@@ -173,7 +175,8 @@ int IMU::init() {
 	// setting low pass bandwith
 	//status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ); // kalman filter does the rest
 
-	// set update rate of gyro to 200 Hz
+	// set update rate of IMU to 200 Hz
+	// the interrupt indicating new data will fire with that frequency
 	status = mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
 
 
@@ -189,7 +192,7 @@ int IMU::init() {
 	mpu9250->setMagCalY(0.0, 1.0);
 	mpu9250->setMagCalZ(0.0, 1.0);
 
-	// enable interrupt
+	// enable aforementioned interrupt
 	attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
 	mpu9250->enableDataReadyInterrupt();
 
@@ -198,9 +201,9 @@ int IMU::init() {
 	kalman[Dimension::Y].setup(0);
 	kalman[Dimension::Z].setup(0);
 
-	kalman[Dimension::X].setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
-	kalman[Dimension::Y].setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
-	kalman[Dimension::Z].setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
+	kalman[Dimension::X].setNoiseVariance(imuConfig.kalmanNoiseVariance);
+	kalman[Dimension::Y].setNoiseVariance(imuConfig.kalmanNoiseVariance);
+	kalman[Dimension::Z].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 
 	return status;
 }
@@ -230,25 +233,27 @@ void IMU::calibrate() {
 	}
 	// measure for 1s, run kalman filter and take final orientation as null value
 	uint32_t now = millis();
-	memory.persistentMem.imuControllerConfig.nullOffsetX = 0;
-	memory.persistentMem.imuControllerConfig.nullOffsetY = 0;
+	imuConfig.nullOffsetX = 0;
+	imuConfig.nullOffsetY = 0;
 
 	// let kalman filter run and calibrate for 1s
 	while (millis() - now < 2000) {
 		loop();
 	}
 
-	memory.persistentMem.imuControllerConfig.nullOffsetX = kalman[Dimension::X].getAngle();
-	memory.persistentMem.imuControllerConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
+	imuConfig.nullOffsetX = kalman[Dimension::X].getAngle();
+	imuConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
 
-	memory.persistentMem.imuControllerConfig.print();
+	imuConfig.print();
 }
 
 void IMU::loop() {
 	if (mpu9250) {
 		if (newDataAvailable || updateTimer.isDue()) {
+			uint32_t now_us = micros();
+			uint32_t sampleTime_us = now_us-lastInvocationTime_us;
+			sampleRate_us = (sampleRate_us + sampleTime_us)/2.0;
 			if (newDataAvailable) {
-				sampleRate_ms = (sampleRate_ms + (millis() - updateTimer.mLastCall_ms)) / 2.0;
 				updateTimer.dT(); // reset timer of updateTimer
 				newDataAvailable = false;
 			} else {
@@ -263,9 +268,8 @@ void IMU::loop() {
 			}
 
 			// compute dT for kalman filter
-			uint32_t now = millis();
-			dT = ((float)(now - lastInvocationTime_ms))/1000.0;
-			lastInvocationTime_ms = now;
+			dT = ((float)(sampleTime_us))/1000000.0;
+			lastInvocationTime_us = now_us;
 
 			// turn the coordinate system of the IMU into that one of the bot:
 			// front wheel points to the x-axis, y-axis is
@@ -273,40 +277,32 @@ void IMU::loop() {
 			// denote the coordsystem for angualr velocity in the direction of the according axis
 			// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
 			float tilt[3];
-			tilt[Dimension::X] = atan2( mpu9250->getAccelX_mss(),
-					                    sqrt(   mpu9250->getAccelZ_mss()*mpu9250->getAccelZ_mss() +
-					                    		mpu9250->getAccelY_mss()*mpu9250->getAccelY_mss())) - memory.persistentMem.imuControllerConfig.nullOffsetX;
-			tilt[Dimension::Y] = atan2(-mpu9250->getAccelY_mss(),
-					  	  	  	        sqrt(	mpu9250->getAccelZ_mss()*mpu9250->getAccelZ_mss() +
-					  	  	  	        		mpu9250->getAccelX_mss()*mpu9250->getAccelX_mss())) - memory.persistentMem.imuControllerConfig.nullOffsetY;
-			tilt[Dimension::Z] =  mpu9250->getAccelZ_mss();
+			float accelX = mpu9250->getAccelX_mss();
+			float accelY = mpu9250->getAccelY_mss();
+			float accelZ = mpu9250->getAccelZ_mss();
+
+			tilt[Dimension::X] = atan2( accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX;
+			tilt[Dimension::Y] = atan2(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY;
+			tilt[Dimension::Z] = accelZ;
 
 			float angularVelocity[3];
 			angularVelocity[Dimension::X] = mpu9250->getGyroY_rads();
 			angularVelocity[Dimension::Y] = mpu9250->getGyroX_rads();
 			angularVelocity[Dimension::Z] = mpu9250->getGyroZ_rads();
 
-			// invoke kalman filter separately per plane
-			kalman[Dimension::X].update(tilt[Dimension::X], angularVelocity[Dimension::X], dT);
-			kalman[Dimension::Y].update(tilt[Dimension::Y], angularVelocity[Dimension::Y], dT);
-			kalman[Dimension::Z].update(tilt[Dimension::Z], angularVelocity[Dimension::Z], dT);
-
 			// save previous sample
 			lastSample = currentSample;
 
-			currentSample.plane[Dimension::X].angle = kalman[Dimension::X].getAngle();
-			currentSample.plane[Dimension::Y].angle = kalman[Dimension::Y].getAngle();
-			currentSample.plane[Dimension::Z].angle = kalman[Dimension::Z].getAngle();
-
-			// currentSample.plane[Dimension::X].angularVelocity = (kalman[Dimension::X].getAngle() - lastSample.plane[Dimension::X].angle) / dT;
-			// currentSample.plane[Dimension::Y].angularVelocity = (kalman[Dimension::Y].getAngle() - lastSample.plane[Dimension::Y].angle) / dT;
-			// currentSample.plane[Dimension::Z].angularVelocity = (kalman[Dimension::Z].getAngle() - lastSample.plane[Dimension::Z].angle) / dT;
-
-			currentSample.plane[Dimension::X].angularVelocity = kalman[Dimension::X].getRate();
-			currentSample.plane[Dimension::Y].angularVelocity = kalman[Dimension::Y].getRate();
-			currentSample.plane[Dimension::Z].angularVelocity = kalman[Dimension::Z].getRate();
+			for (int i = 0;i<3;i++) {
+				// invoke kalman filter separately per plane
+				kalman[i].update(tilt[i], angularVelocity[i], dT);
+				currentSample.plane[i].angle = kalman[i].getAngle();
+				currentSample.plane[i].angularVelocity = kalman[i].getRate();
+				// currentSample.plane[i].angularVelocity = (kalman[i].getAngle() - lastSample.plane[i].angle) / dT;
+			}
 
 			// indicate that new value is available
+			// next call of isNewValueAvailable will return true one time
 			valueIsUpdated = true;
 
 			if (logIMUValues) {
@@ -332,9 +328,10 @@ void IMU::loop() {
 					logging(degrees(getAngleRad(Dimension::Y)),2,2);
 					logging(")");
 
-					logging("us ");
-					logging("f=");
-					logging(1000/sampleRate_ms);
+					logging(" us=");
+					logging(sampleRate_us);
+					logging(" f=");
+					logging(1000000.0/sampleRate_us);
 					loggingln("Hz");
 
 				}
@@ -387,18 +384,18 @@ void IMU::menuLoop(char ch, bool continously) {
 		calibrate();
 		break;
 	case 'N':
-		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance < 1.0)
-			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance += 0.01;
+		if (imuConfig.kalmanNoiseVariance < 1.0)
+			imuConfig.kalmanNoiseVariance += 0.01;
 		logging("kalman noise variance ");
-		loggingln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
-		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
+		loggingln(imuConfig.kalmanNoiseVariance ,1,3);
+		setNoiseVariance(imuConfig.kalmanNoiseVariance);
 		break;
 	case 'n':
-		if (memory.persistentMem.imuControllerConfig.kalmanNoiseVariance > 0.01)
-			memory.persistentMem.imuControllerConfig.kalmanNoiseVariance -= 0.01;
+		if (imuConfig.kalmanNoiseVariance > 0.01)
+			imuConfig.kalmanNoiseVariance -= 0.01;
 		logging("kalman noise variance ");
-		loggingln(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance ,1,3);
-		setNoiseVariance(memory.persistentMem.imuControllerConfig.kalmanNoiseVariance);
+		loggingln(imuConfig.kalmanNoiseVariance ,1,3);
+		setNoiseVariance(imuConfig.kalmanNoiseVariance);
 		break;
 	case 27:
 		popMenu();

@@ -48,10 +48,14 @@ class ControlPlane {
 		float error;
 		float accel;
 		float speed;			// speed in x direction [m/s]
+		float filteredAccel;
 		float filteredSpeed;
 		float posErrorIntegrated;
 
+		FIR::Filter  posFilter;
 		FIR::Filter outputSpeedFilter;
+		FIR::Filter outputAccelFilter;
+
 		LowPassFilter1stOrder outputSpeedFilter2;
 
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track

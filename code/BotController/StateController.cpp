@@ -86,7 +86,18 @@ void ControlPlane::reset () {
 							 1.0e-4f 			/* supression in stop band is -40db */,
 							 SampleFrequency, 	/* 200 Hz */
 							 15.0f  			/* low pass cut off frequency */);
-			outputSpeedFilter2.init(15.0, SampleFrequency);
+            outputAccelFilter.init(FIR::LOWPASS,
+                             1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
+                             1.0e-4f             /* supression in stop band is -40db */,
+                             SampleFrequency,     /* 200 Hz */
+                             15.0f              /* low pass cut off frequency */);
+            posFilter.init(FIR::LOWPASS,
+                             1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
+                             1.0e-4f             /* supression in stop band is -40db */,
+                             SampleFrequency,     /* 200 Hz */
+                             5.0f                /* low pass cut off frequency */);
+
+            outputSpeedFilter2.init(15.0, SampleFrequency);
 }
 
 float ControlPlane::getBodyPos() {
@@ -124,16 +135,19 @@ void ControlPlane::update(bool doLogging, float dT,
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 		float absBallPos   		= current.pos;
 		float absBallSpeed 		= current.speed;
+		// absBallPos = lastBallPos + lastBallSpeed*dT;
+		// absBallSpeed = lastBallSpeed;
 		float targetBallPos	 	= target.pos - targetAngle * CentreOfGravityHeight;
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
 		float error_tilt			= (sensor.angle-targetAngle);
-		float gradient = 0.1;
-		error_tilt = error_tilt*(1.0-2.0*gradient) + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
+		float gradient = 10.0;
+		//error_tilt = error_tilt + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
 		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity);
 
 		float posError 	= (absBallPos - targetBallPos);
+		posError = posFilter.update(posError);
 		const float posErrorLimitAngle = radians(3);
 		posError = constrain (posError,
 								-posErrorLimitAngle*config.angleWeight / config.ballPositionWeight,
@@ -159,16 +173,21 @@ void ControlPlane::update(bool doLogging, float dT,
 		float force = error;
 		accel = force / BallWeight;
 
-		accel = constrain(accel,-MaxBotAccel, MaxBotAccel);
+		filteredAccel = accel;
+		// filteredAccel = outputSpeedFilter.update(accel);
+		filteredAccel = constrain(filteredAccel,-MaxBotAccel, MaxBotAccel);
+
+		// filteredAccel = accel;
 
 		// accelerate if not on max speed already
-		if ((sgn(speed) != sgn(accel)) ||
+		if ((sgn(speed) != sgn(filteredAccel)) ||
 			(abs(speed) < MaxBotSpeed)) {
-			speed += accel * dT;
-			speed = constrain(speed, -MaxBotSpeed/SamplingTime, + MaxBotSpeed/SamplingTime);
+			speed += filteredAccel * dT;
+			speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
 		}
 
 		// get rid of trembling by a FIR filter 4th order with 15Hz
+		// filteredSpeed = speed;
 		filteredSpeed = outputSpeedFilter.update(speed);
 		// filteredSpeed = outputSpeedFilter2.update(speed);
 
