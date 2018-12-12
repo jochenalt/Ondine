@@ -19,21 +19,12 @@
 // instantiated in main.cpp
 extern i2c_t3* IMUWire;
 
-// flag indicating that IMU has a new measurement, this is set in interrupt
-// and evaluated in loop(), so this needs to be declared volatile
-volatile bool newDataAvailable = false;
-
 // if the interrupt has been missed, use this emergency timer
 // to ask the IMU anyhow.
-TimePassedBy updateTimer(2.0*SamplingTime*1000.0 /* [ms] */); // twice the usual sampling frquency
+TimePassedBy updateTimer(SamplingTime*1000.0 /* [ms] */); // twice the usual sampling frquency
 
 
 IMUConfig& imuConfig = memory.persistentMem.imuControllerConfig;
-
-// interrupt that is called whenever MPU9250 has a new value (which is setup'ed to happen every 10ms)
-void imuInterrupt() {
-	newDataAvailable = true;
-}
 
 
 void IMUConfig::initDefaultValues() {
@@ -147,7 +138,7 @@ void IMU::setup(MenuController *newMenuCtrl) {
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
 
 	// doI2CPortScan(F("I2C"),IMUWire , logger);
-	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_800);
+	mpu9250 = new MPU9250FIFO(IMUWire,IMU_I2C_ADDRESS,I2C_RATE_800);
 
 	int status = mpu9250->begin();
 	if (status < 0)
@@ -166,14 +157,17 @@ void IMU::setup(MenuController *newMenuCtrl) {
 }
 
 int IMU::init() {
+	// enable FIFO mode
+	int status = mpu9250->enableFifo(true,true,false,false);
+
 	// setting the accelerometer full scale range to +/-2G
-	int status =mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
+	status =mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
 
 	// setting the gyroscope full scale range to +/-500 deg/s
 	status = mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
 
 	// setting low pass bandwith
-	//status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ); // kalman filter does the rest
+	// status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_92HZ); // kalman filter does the rest
 
 	// set update rate of IMU to 200 Hz
 	// the interrupt indicating new data will fire with that frequency
@@ -193,8 +187,8 @@ int IMU::init() {
 	mpu9250->setMagCalZ(0.0, 1.0);
 
 	// enable aforementioned interrupt
-	attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
-	mpu9250->enableDataReadyInterrupt();
+	// attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
+	// mpu9250->enableDataReadyInterrupt();
 
 	// initialize Kalman filter
 	kalman[Dimension::X].setup(0);
@@ -204,6 +198,13 @@ int IMU::init() {
 	kalman[Dimension::X].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 	kalman[Dimension::Y].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 	kalman[Dimension::Z].setNoiseVariance(imuConfig.kalmanNoiseVariance);
+
+	accelFilter[Dimension::X].init(0);
+	accelFilter[Dimension::Y].init(0);
+	accelFilter[Dimension::Z].init(0);
+	gyroFilter[Dimension::X].init(0);
+	gyroFilter[Dimension::Y].init(0);
+	gyroFilter[Dimension::Z].init(0);
 
 	return status;
 }
@@ -238,7 +239,7 @@ void IMU::calibrate() {
 
 	// let kalman filter run and calibrate for 1s
 	while (millis() - now < 2000) {
-		loop();
+		loop(micros());
 	}
 
 	imuConfig.nullOffsetX = kalman[Dimension::X].getAngle();
@@ -247,25 +248,46 @@ void IMU::calibrate() {
 	imuConfig.print();
 }
 
-void IMU::loop() {
+void IMU::loop(uint32_t now_us) {
 	if (mpu9250) {
-		if (newDataAvailable || updateTimer.isDue()) {
-			uint32_t now_us = micros();
+		if (updateTimer.isDue()) {
 			uint32_t sampleTime_us = now_us-lastInvocationTime_us;
 			sampleRate_us = (sampleRate_us + sampleTime_us)/2.0;
-			if (newDataAvailable) {
-				updateTimer.dT(); // reset timer of updateTimer
-				newDataAvailable = false;
-			} else {
-				warnMsg("IMU does not send interrupts");
-			}
 
 			// read raw values
-			int status = mpu9250->readSensor();
+			int status = mpu9250->readFifo();
 			if (status != 1) {
 				fatalError("loop IMU status error ");
 				loggingln(status);
 			}
+
+			// fetch all IMU samples since the last loop
+			// (IMU has 1000 Hz sample frequency, we sample at 250 Hz, so typically we average 4 samples )
+			// and compute the averae
+			const int MaxSampleSize = 100;
+			float samples[MaxSampleSize];
+			size_t noOfSamples;
+			mpu9250->getFifoAccelX_mss(&noOfSamples,samples);
+			if (noOfSamples > MaxSampleSize)
+				fatalError("MaxSampleSize too small");
+			for (unsigned i = 0;i<noOfSamples;i++)
+				accelFilter[Dimension::X].update(samples[i]);
+			mpu9250->getFifoAccelY_mss(&noOfSamples,samples);
+			for (unsigned i = 0;i<noOfSamples;i++)
+				accelFilter[Dimension::Y].update(samples[i]);
+			mpu9250->getFifoAccelZ_mss(&noOfSamples,samples);
+			for (unsigned i = 0;i<noOfSamples;i++)
+				accelFilter[Dimension::Z].update(samples[i]);
+
+			mpu9250->getFifoGyroX_rads(&noOfSamples,samples);
+			for (unsigned i = 0;i<noOfSamples;i++)
+				gyroFilter[Dimension::X].update(samples[i]);
+			mpu9250->getFifoGyroX_rads(&noOfSamples,samples);
+			for (unsigned i = 0;i<noOfSamples;i++)
+				gyroFilter[Dimension::Y].update(samples[i]);
+			mpu9250->getFifoGyroX_rads(&noOfSamples,samples);
+			for (unsigned i = 0;i<noOfSamples;i++)
+				gyroFilter[Dimension::Z].update(samples[i]);
 
 			// compute dT for kalman filter
 			dT = ((float)(sampleTime_us))/1000000.0;
@@ -274,21 +296,22 @@ void IMU::loop() {
 			// turn the coordinate system of the IMU into that one of the bot:
 			// front wheel points to the x-axis, y-axis is
 			// for use of the kalman filter, we need to break the convention and
-			// denote the coordsystem for angualr velocity in the direction of the according axis
+			// denote the coordsystem for angular velocity in the direction of the according axis
 			// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
-			float tilt[3];
-			float accelX = mpu9250->getAccelX_mss();
-			float accelY = mpu9250->getAccelY_mss();
-			float accelZ = mpu9250->getAccelZ_mss();
+			float accelX = accelFilter[Dimension::X].get();
+			float accelY = accelFilter[Dimension::Y].get();
+			float accelZ = accelFilter[Dimension::Z].get();
 
+			float angularVelocity[3];
+			angularVelocity[Dimension::X] = gyroFilter[Dimension::Y].get();
+			angularVelocity[Dimension::Y] = gyroFilter[Dimension::X].get();
+			angularVelocity[Dimension::Z] = gyroFilter[Dimension::Z].get();
+
+			float tilt[3];
 			tilt[Dimension::X] = atan2( accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX;
 			tilt[Dimension::Y] = atan2(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY;
 			tilt[Dimension::Z] = accelZ;
 
-			float angularVelocity[3];
-			angularVelocity[Dimension::X] = mpu9250->getGyroY_rads();
-			angularVelocity[Dimension::Y] = mpu9250->getGyroX_rads();
-			angularVelocity[Dimension::Z] = mpu9250->getGyroZ_rads();
 
 			// save previous sample
 			lastSample = currentSample;

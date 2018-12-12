@@ -11,6 +11,7 @@
 #include <libraries/MenuController.h>
 #include <MPU9250/MPU9250.h>
 #include <Filter/KalmanFilter.h>
+#include <Filter/ComplementaryFilter.h>
 #include <Kinematics.h>
 #include <TimePassedBy.h>
 
@@ -64,7 +65,7 @@ public:
 
 	void setNoiseVariance(float noiseVariance);
 
-	void loop();
+	void loop(uint32_t now_us);
 
 	bool isValid();
 	// stateful method to indicate that a new value from IMU is available. returns true only once per new value
@@ -86,8 +87,11 @@ private:
 	float getAngleRad(Dimension dim);
 	float getAngularVelocity(Dimension dim);
 	void updateFilter();
-	MPU9250* mpu9250 = NULL;
+	MPU9250FIFO* mpu9250 = NULL;
 	KalmanFilter kalman[3]; // one kalman filter per dimension
+	LowPassFilterAverage accelFilter[3];
+	LowPassFilterAverage gyroFilter[3];
+
 	float noiseVariance = 0.1; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
 
 	IMUSample currentSample;
