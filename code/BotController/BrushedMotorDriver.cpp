@@ -149,21 +149,21 @@ void BrushedMotorDriver::enable(bool doIt) {
 }
 
 void BrushedMotorDriver::printHelp() {
-	command->println();
+	logger->println();
 
-	command->println("brushed motor menu");
-	command->println();
-	command->println("0   - stop");
-	command->println("P/p - controller's P factor");
-	command->println("I/i - controller's I factor");
+	logger->println("brushed motor menu");
+	logger->println();
+	logger->println("0   - stop");
+	logger->println("P/p - controller's P factor");
+	logger->println("I/i - controller's I factor");
 
-	command->println("+   - inc speed");
-	command->println("-   - dec speed");
-	command->println("r   - revert direction");
-	command->println("l   - log values");
-	command->println("e   - enable");
+	logger->println("+   - inc speed");
+	logger->println("-   - dec speed");
+	logger->println("r   - revert direction");
+	logger->println("l   - log values");
+	logger->println("e   - enable");
 
-	command->println("ESC");
+	logger->println("ESC");
 }
 
 void BrushedMotorDriver::menuLoop(char ch, bool continously) {
@@ -217,29 +217,29 @@ void BrushedMotorDriver::menuLoop(char ch, bool continously) {
 			break;
 		}
 		if (cmd) {
-			command->print("v=");
-			command->print(menuSpeed);
-			command->print(" actual v=");
-			command->print(getMotorSpeed());
-			command->print(" actual angle=");
-			command->print(getMotorAngle());
-			command->print(" PID=(");
-			command->print(memory.persistentMem.motorControllerConfig.pid_lifter.Kp,5);
-			command->print(",");
-			command->print(memory.persistentMem.motorControllerConfig.pid_lifter.Ki,5);
-			command->print(",");
-			command->print(memory.persistentMem.motorControllerConfig.pid_lifter.Kd,5);
-			command->print(")");
+			logger->print("v=");
+			logger->print(menuSpeed);
+			logger->print(" actual v=");
+			logger->print(getMotorSpeed());
+			logger->print(" actual angle=");
+			logger->print(getMotorAngle());
+			logger->print(" PID=(");
+			logger->print(memory.persistentMem.motorControllerConfig.pid_lifter.Kp,5);
+			logger->print(",");
+			logger->print(memory.persistentMem.motorControllerConfig.pid_lifter.Ki,5);
+			logger->print(",");
+			logger->print(memory.persistentMem.motorControllerConfig.pid_lifter.Kd,5);
+			logger->print(")");
 
 
-			command->print(micros());
+			logger->print(micros());
 			if (menuEnable)
-				command->print(" enabled");
+				logger->print(" enabled");
 			else
-				command->print(" disabled");
-			command->println();
+				logger->print(" disabled");
+			logger->println();
 
-			command->print(">");
+			logger->print(">");
 		}
 }
 

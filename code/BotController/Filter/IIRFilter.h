@@ -37,10 +37,6 @@ namespace IIR {
   const float SQRT3 = sqrt(3.0);
   const float SQRT5 = sqrt(5.0);
 
-  const float EPS   = 0.00001;    // Tolerance for numerical constants
-  const float WEPS  = 0.00010;    // Warning threshold for numerical degradation
-  const float KM    = 100.0;      // Pre-multiplier to reduce the impact of the AVRs limited float representation
-
 class Filter {
 public:
 
@@ -61,6 +57,7 @@ public:
   ~Filter();
 
   float update(float input);
+  float get();
 
   void flush();
   void init(bool doFlush=true);
@@ -71,24 +68,19 @@ public:
   void dumpParams();
 
 private:
-  float ts;
-  float hz;
-  ORDER od;
-  TYPE  ty;
+  float ts;	// sample rate in [s]
+  float hz;	// cutoff frequency [Hz]
+  ORDER od;	// order
+  TYPE  ty;	// Low pass or high pass
 
-  // Helper variables during coefficient calcutions
-  float a, b, c, d, e;
-  // Filter coefficients
-  float b0, b1, b2, b3, b4, a0, a1, a2;
   // Difference equation terms
   float k0, k1, k2, k3, k4, k5;
   float j0, j1, j2;
+
   // Filter buffer
   float y[MAX_ORDER], u[MAX_ORDER];
 
   bool f_err, f_warn; ///< Numerical error or warning; only relevant for 8-bit micros
-
-  float ap(float p); ///< Assert Parameter
 
   inline float computeLowPass(float input);
   inline float computeHighPass(float input);

@@ -18,79 +18,51 @@ void BallDrive::setup(MenuController* menuCtrl) {
 
 
 void BallDrive::printHelp() {
-	command->println();
-	command->println("Ball Drive");
-	command->println();
-	command->println("p - power");
-	command->println("e - enable");
-	command->println("q/a - modify x speed");
-	command->println("w/s - modify y speed");
-	command->println("y/x - modify omega speed");
-	command->println("o/l - modify tilt x");
-	command->println("i/k - modify tilt y");
-	command->println("t   - test kinmatics");
+	logger->println();
+	logger->println("Ball Drive");
+	logger->println();
+	logger->println("p - power");
+	logger->println("e - enable");
+	logger->println("q/a - modify x speed");
+	logger->println("w/s - modify y speed");
+	logger->println("y/x - modify omega speed");
+	logger->println("o/l - modify tilt x");
+	logger->println("i/k - modify tilt y");
+	logger->println("t   - test kinmatics");
 
-	command->println("b - single wheel control");
+	logger->println("b - single wheel control");
 
-	command->println("0 - nullify speed");
+	logger->println("0 - nullify speed");
 
-	command->println("ESC");
+	logger->println("ESC");
 }
 
 void BallDrive::setSpeed(float speedX, float speedY, float omega,
 		 	 	 	 	 float angleX, float angleY) {
 
 	// apply kinematics to compute wheel speed out of x,y, omega
-	float  newWheelSpeed[3] = { 0, 0, 0};
+	float  newWheelSpeed[3] = { 0, 0, 0}; // [rev/s]
 	kinematics.computeWheelSpeed(speedX, speedY, omega,
  							angleX,angleY,
 							newWheelSpeed);
-
-	/*
-	log("kinematics:(");
-	log(speedX);
-	log(",");
-	log(speedY);
-	log(",");
-	log(omega);
-	log(")->(");
-	log(newWheelSpeed[0]);
-	log(",");
-	log(newWheelSpeed[1]);
-	log(",");
-	log(newWheelSpeed[2]);
-	logln(")");
-
-	// send new speed to motors
-	logging("new wheelspeed");
-	logging(newWheelSpeed[0],3,3);
-	logging(",");
-	logging(newWheelSpeed[1],3,3);
-	logging(",");
-	logging(newWheelSpeed[2],3,3);
-	loggingln("");
-	*/
 
 	engine.setWheelSpeed(newWheelSpeed);
 }
 
 // compute the current speed since the last invocation.
 // returns 0 when called first (assuming the we start without motion)
-void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
+void BallDrive::getSpeed(uint32_t now_us, const IMUSample &sample, BotMovement &current) {
 
-	// this function required
-	uint32_t now = millis();
-	if ((now > lastCall_ms) && (lastCall_ms > 0))  {
-		float dT = ((float)(now - lastCall_ms))/1000.0; // [s]
-		lastCall_ms = now;
+	if ((now_us > lastCall_us) && (lastCall_us > 0))  {
+		float dT = ((float)(now_us - lastCall_us))/1000000.0; // [s]
+		lastCall_us = now_us;
 
 		// fetch motor encoder values to compute real wheel position
 		float angleChange[3] = {0,0,0};
 		engine.getWheelAngleChange(angleChange);
 
-		float currentWheelSpeed[3];
-		// @TODO bug: wheelspeed = (angleChange / (TWO_PI*dT))
-		currentWheelSpeed[0] = angleChange[0]  / dT;	// compute wheel speed out of delta-angle
+		float currentWheelSpeed[3]; // [rad/s]
+		currentWheelSpeed[0] = angleChange[0]  / dT;
 		currentWheelSpeed[1] = angleChange[1]  / dT;
 		currentWheelSpeed[2] = angleChange[2]  / dT;
 
@@ -101,8 +73,10 @@ void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 
 		current.x.pos += dT*current.x.speed;
 		current.y.pos += dT*current.y.speed;
+
 		current.x.accel = (current.x.speed - lastSpeedX)/dT;
 		current.y.accel = (current.y.speed - lastSpeedY)/dT;
+
 		lastSpeedX = current.x.speed;
 		lastSpeedY = current.y.speed;
 	} else {
@@ -191,10 +165,10 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		break;
 	case 'p':
 		if (isPowered()) {
-			command->println("turning motor power off");
+			logger->println("turning motor power off");
 			powerRelay.power(false);
 		} else {
-			command->println("turning motor power on");
+			logger->println("turning motor power on");
 			powerRelay.power(true);
 		}
 		break;
@@ -212,7 +186,6 @@ void BallDrive::menuLoop(char ch, bool continously) {
 			logging("enabled.");
 		else
 			logging("disabled.");
-		logging("us");
 		logging(" speed=(");
 		logging(menuSpeedX,2,3);
 		logging(",");
@@ -224,10 +197,10 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		logging(")");
 
 		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
-		getSpeed(a,  menuMovement);
+		getSpeed(micros(), a, menuMovement);
 		menuMovement.print();
 
-		command->println(" >");
+		logger->println(" >");
 	}
 }
 

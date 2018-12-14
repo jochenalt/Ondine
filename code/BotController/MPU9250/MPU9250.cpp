@@ -26,9 +26,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 #include "libraries/Util.h"
 
 /* MPU9250 object, input the I2C bus and address */
-MPU9250::MPU9250(i2c_t3 * bus,uint8_t address, int rate){
+MPU9250::MPU9250(i2c_t3 * bus,uint8_t address){
   _i2c = bus; // I2C bus
-  _i2cRate = rate;
   _address = address; // I2C address
   _useSPI = false; // set to use I2C
 }

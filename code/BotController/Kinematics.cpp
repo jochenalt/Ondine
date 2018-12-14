@@ -84,7 +84,7 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 	float sinY = sin(pTiltX);
 	float cosY = cos(pTiltX);
 
-	// compute Tilt Rotation Matrix (TRM), which is a standard 2d rotation matrix
+	// compute Tilt Rotation Matrix (TRM), which is a standard 2d rotation matrix around Y and X
 	ASSIGN(trm[0],       cosY,     0,      sinY);
 	ASSIGN(trm[1],  sinX*sinY,  cosX,-sinX*cosY);
 	ASSIGN(trm[2], -cosX*sinY,  sinX, cosX*cosY);
@@ -123,7 +123,7 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	wheelSpeed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
 	wheelSpeed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
 
-	// convert rad/s in revolutions /s
+	// convert rad/s in rev/s
 	wheelSpeed[0] /= TWO_PI;
 	wheelSpeed[1] /= TWO_PI;
 	wheelSpeed[2] /= TWO_PI;
@@ -164,13 +164,13 @@ void Kinematix::computeActualSpeed( float wheelSpeed[3],
 	float m22_20 = trm[2][2] * icm[2][0];
 
 	// compute inverse kinematics
-	vx    =        ( m11_10 + m12_20)           * wheelSpeed[0]
+	vx    =         ( m11_10 + m12_20)           * wheelSpeed[0]
 			      + ( m10_01 + m11_11 + m12_20)  * wheelSpeed[1]
 				  + (-m10_01 + m11_11 + m12_20)  * wheelSpeed[2];
-	vy    =        (-m02_20)                    * wheelSpeed[0]
+	vy    =         (-m02_20)                    * wheelSpeed[0]
   				  + (-m00_01 - m02_20)           * wheelSpeed[1]
 		          + ( m00_01 - m02_20)           * wheelSpeed[2];
-	omega =     (  (-m21_10 - m22_20)           * wheelSpeed[0]
+	omega =      (  (-m21_10 - m22_20)           * wheelSpeed[0]
 				  + (-m20_01 - m21_11 - m22_20)  * wheelSpeed[1]
 				  + ( m20_01 - m21_11 - m22_20)  * wheelSpeed[2]) / BallRadius;
 }
@@ -269,10 +269,10 @@ void Kinematix::testInverseKinematics() {
 	float  lTiltX,lTiltY;
 	lTiltX = 20.0;
 	lTiltY = -15;
-	command->print(F("TiltX="));
-	command->print(lTiltX);
-	command->print(F(" TiltY="));
-	command->print(lTiltY);command->println();
+	logger->print(F("TiltX="));
+	logger->print(lTiltX);
+	logger->print(F(" TiltY="));
+	logger->print(lTiltY);logger->println();
 	
 	// this matrix depends on the tilt angle and corrects the 
 	computeTiltRotationMatrix(lTiltX,lTiltY);
@@ -290,26 +290,26 @@ void Kinematix::testInverseKinematics() {
 				lVx, lVy, lTiltX, lTiltY,lOmega);
 				
 
-	command->print(F("Vx="));
-	command->print(lVx);
-	command->print(F(" Vy="));
-	command->print(lVy);
-	command->print(F(" Omega="));
-	command->print(lOmega);
-	command->println();
+	logger->print(F("Vx="));
+	logger->print(lVx);
+	logger->print(F(" Vy="));
+	logger->print(lVy);
+	logger->print(F(" Omega="));
+	logger->print(lOmega);
+	logger->println();
 }
 
 
 void Kinematix::testPerformanceKinematics() {
 	
-	command->println(F("Kinematics performance"));
+	logger->println(F("Kinematics performance"));
 	unsigned long start =	millis();
 	unsigned long end =	millis();
-	command->print("End ms=");
-	command->println(end-start);
+	logger->print("End ms=");
+	logger->println(end-start);
 	
 	int i = 0;
-	command->println(F("Start"));
+	logger->println(F("Start"));
 	start =	millis();
 	for (i = 0;i<1000;i++) {
 		float lVx,lVy,lOmega;
@@ -328,14 +328,14 @@ void Kinematix::testPerformanceKinematics() {
 					lVx, lVy, lOmega);
 	}
 	end = millis();
-	command->println(F("Stop"));
+	logger->println(F("Stop"));
 
-	command->print((end-start),DEC);
-	command->print("ms for ");
-	command->print(i,DEC);
-	command->print(" loops, ");
-	command->print(float((end-start)) / float(i));
-	command->println("ms");
+	logger->print((end-start),DEC);
+	logger->print("ms for ");
+	logger->print(i,DEC);
+	logger->print(" loops, ");
+	logger->print(float((end-start)) / float(i));
+	logger->println("ms");
 }
 
 void Kinematix::testTRM() {
@@ -364,7 +364,7 @@ void Kinematix::testTRM() {
 			error += (sin_tilt_x==0)?0:abs ((((trm[2][1]),14) - sin_tilt_x) / sin_tilt_x);
 			error += (cos_tilt_x*cos_tilt_y==0)?0:abs ((((trm[2][2]),14) - cos_tilt_x*cos_tilt_y) / (cos_tilt_x*cos_tilt_y));
 
-			command->print(int(error),DEC);
+			logger->print(int(error),DEC);
 		}	
 		error = 0;
 	}	

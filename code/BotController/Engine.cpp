@@ -16,15 +16,18 @@ void Engine::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
 
 	// initialize all brushless motors and their encoders
-	// unfortunately,sequence of motors in schematics is different than sequence of motors used in code
-	static int MotorIdx [3] =  { 0,1,2 };
+	// (in case sequence of motors in schematics differs from sequence of motors used in code)
+	static int MotorSequenceIdx [3] =  { 0,1,2 };
 
 	// array that assigns the motors pins to the right order
 	static bool ReverseDirection[3] = { true, true, true };
 	for (int i = 0;i<3;i++) {
-		int idx = MotorIdx[i];
+		int idx = MotorSequenceIdx[i];
 		wheel[i].setup(i, menuCtrl, ReverseDirection[idx]); // first call initializes the SPI bus
-		wheel[i].setupMotor(BRUSHLESS_DRIVER_ENABLE_PIN, BrushlessDriverPWMPins[idx][0], BrushlessDriverPWMPins[idx][1], BrushlessDriverPWMPins[idx][2]);
+		wheel[i].setupMotor(BRUSHLESS_DRIVER_ENABLE_PIN,
+							BrushlessDriverPWMPins[idx][0],
+							BrushlessDriverPWMPins[idx][1],
+							BrushlessDriverPWMPins[idx][2]);
 		wheel[i].setupEncoder(SS_PIN[idx]);
 	}
 }

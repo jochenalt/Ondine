@@ -195,35 +195,24 @@ void BrushlessMotorDriver::setupEncoder(uint8_t clientSelectPin) {
 	}
 }
 
-
 // the motor is supposed to follow the reference angle as close as possible
 void BrushlessMotorDriver::turnReferenceAngle(float dT) {
-	// increase reference speed to reach target speed
-	float speedDiff = targetMotorSpeed - currentReferenceMotorSpeed;
-	// limit speed diff to
-	speedDiff = constrain(speedDiff, -abs(targetAcc)*dT, +abs(targetAcc)*dT);
-	currentReferenceMotorSpeed += speedDiff;
-	currentReferenceMotorSpeed = constrain(currentReferenceMotorSpeed, -maxRevolutionSpeed, + maxRevolutionSpeed);
-
-	// increase reference angle with given speed
+	currentReferenceMotorSpeed = constrain(targetMotorSpeed, -maxRevolutionSpeed, + maxRevolutionSpeed);
 	referenceAngle += currentReferenceMotorSpeed * TWO_PI * dT;
-
-	// @TODO Limit reference angle by encoder angle
+	referenceAngle = constrain(referenceAngle, getEncoderAngle() - radians(90), getEncoderAngle() + radians(90) );
 }
 
 void BrushlessMotorDriver::reset() {
 	targetMotorSpeed = 0;
-	targetAcc = MaxWheelAcceleration;
 	magEncoder.reset();
 	readEncoderAngle();
-	magneticFieldAngle = getEncoderAngle();				// [rad] angle of the induced magnetic field
+	magneticFieldAngle = getEncoderAngle();	 // [rad] angle of the induced magnetic field
 	referenceAngle = magneticFieldAngle;
 
 	currentReferenceMotorSpeed = 0;		// [rev/s]
 	measuredMotorSpeed = 0;				// [rev/s]
 	pid.reset();
 }
-
 
 
 // set the pwm values matching the current magnetic field angle
@@ -236,24 +225,21 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 	analogWrite(input3Pin, pwmValueC);
 }
 
-
 // call me as often as possible
 bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 	readEncoderAngle();
 	if (enabled) {
 
-		// @TODO take current time as method parameter. Currently turnReferenceAngle is imprecise due to low resolution of 1ms
+		// @ TODO take current time as method parameter. Currently turnReferenceAngle is imprecise due to low resolution of 1ms
 		// frequency of motor control is 1000Hz max
-		uint32_t now = millis();
-		uint32_t timePassed = now - lastLoopCall_ms;
-		if (timePassed < 1000/MaxBrushlessDriverFrequency) {
-			lastLoopCall_ms = now;
+		uint32_t timePassed_us = now_us - lastLoopCall_us;
+		lastLoopCall_us = now_us;
+		if (timePassed_us < 1000000/MaxBrushlessDriverFrequency) {
 			return false;
 		}
-		lastLoopCall_ms = now;
 
-		float dT = ((float)timePassed)/1000.0;
+		float dT = ((float)timePassed_us)/1000000.0;
 
 		// turn reference angle along the given speed
 		turnReferenceAngle(dT);
@@ -282,7 +268,7 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 		// set magnetic field relative to rotor's position
 		magneticFieldAngle = getEncoderAngle() + advanceAngle + radians(90);
 
-		// low pass current motor speed
+		// low pass current motor speed before returning in BrushlessMototDriver::getSpeed
 		measuredMotorSpeed = (measuredMotorSpeed + (getEncoderAngle()-prevEncoderAngle)/TWO_PI/dT)/2.0;
 
 		// send new pwm value to motor
@@ -327,9 +313,8 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 	return false;
 }
 
-void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
+void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */) {
 	targetMotorSpeed = (reverse?-1.0:1.0)*speed;
-	targetAcc = acc;
 }
 
 float BrushlessMotorDriver::getMotorSpeed() {
@@ -340,8 +325,8 @@ float BrushlessMotorDriver::getIntegratedMotorAngle() {
 	return (reverse?-1.0:1.0)*getEncoderAngle();
 }
 
-void BrushlessMotorDriver::setSpeed(float speed /* rotations per second */, float acc /* rotations per second^2 */) {
-	setMotorSpeed((reverse?-1.0:1.0)*speed/GearBoxRatio,acc);
+void BrushlessMotorDriver::setSpeed(float speed /* rotations per second */) {
+	setMotorSpeed((reverse?-1.0:1.0)*speed/GearBoxRatio);
 }
 
 float BrushlessMotorDriver::getSpeed() {
@@ -408,8 +393,6 @@ void BrushlessMotorDriver::printHelp() {
 	loggingln("0 - stop");
 	loggingln("+ - inc speed");
 	loggingln("- - dec speed");
-	loggingln("* - inc acc");
-	loggingln("_ - dec acc");
 	loggingln("r - revert direction");
 	loggingln("c - calibrate");
 	loggingln("T/t - increase torque");
@@ -429,7 +412,7 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 		switch (ch) {
 		case '0':
 			menuSpeed = 0;
-			setSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed);
 			break;
 		case 'c':
 			calibrate();
@@ -440,26 +423,18 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 			else
 				menuSpeed += 1.0;
 
-			setSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed);
 			break;
 		case '-':
 			if (abs(menuSpeed) < 2)
 				menuSpeed -= 0.05;
 			else
 				menuSpeed -= 1.0;
-			setSpeed(menuSpeed,  menuAcc);
-			break;
-		case '*':
-			menuAcc++;
-			setSpeed(menuSpeed,  menuAcc);
-			break;
-		case '_':
-			menuAcc--;
-			setSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed);
 			break;
 		case 'r':
 			menuSpeed = -menuSpeed;
-			setSpeed(menuSpeed,  menuAcc);
+			setSpeed(menuSpeed);
 			break;
 		case 'P':
 			if (abs(currentReferenceMotorSpeed) < 15)
@@ -546,8 +521,6 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
             logging(degrees(getIntegratedAngle()),1);
             logging("°");
 
-			logging(" a=");
-			logging(menuAcc);
 			logging(" T=");
 			logging(menuTorque);
 			logging(" t=");

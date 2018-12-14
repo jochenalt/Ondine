@@ -22,8 +22,8 @@ using namespace IIR;
 
 // CONSTRUCTOR AND DESTRUCTOR * * * * * * * * * * * * * * *
 
-Filter::Filter(float hz_, float ts_, ORDER od_, TYPE ty_) :
-  ts( ts_ ),
+Filter::Filter(float hz_ /* cutoff frequency [Hz] */, float ts_ /* sample frequency [Hs]*/, ORDER od_, TYPE ty_) :
+  ts( 1.0/ts_ ),
   hz( hz_ ),
   od( od_ ),
   ty( ty_ )
@@ -103,19 +103,23 @@ inline float Filter::computeLowPass(float input) {
         y[0] = k1*y[1] + k0*input;
       break;
     case (uint8_t)ORDER::OD2:
-        y[0] = k1*y[1] - k2*y[2] + (k0*input)/KM;
+        y[0] = k1*y[1] - k2*y[2] + (k0*input);
       break;
     case (uint8_t)ORDER::OD3:
-        y[0] = k1*y[1] - k2*y[2] + k3*y[3] + (k0*input)/KM;
+        y[0] = k1*y[1] - k2*y[2] + k3*y[3] + (k0*input);
       break;
     case (uint8_t)ORDER::OD4:
-        y[0] = k1*y[1] - k2*y[2] + k3*y[3] - k4*y[4] + (k0*input)/KM;
+        y[0] = k1*y[1] - k2*y[2] + k3*y[3] - k4*y[4] + (k0*input);
       break;
     default:
         y[0] = input;
       break;
   }
   return y[0];
+}
+
+float Filter::get() {
+	 return y[0];
 }
 
 inline float Filter::computeHighPass(float input) {
@@ -143,6 +147,11 @@ inline float Filter::computeHighPass(float input) {
 
 
 inline void  Filter::initLowPass() {
+	// Helper variables during coefficient calculations
+  float a,b,c,d;
+  // Filter coefficients
+  float b4, b3, b2, b1;
+
   switch((uint8_t)od) {
     case (uint8_t)ORDER::OD1:
         a  = 2.0*PI*hz;
@@ -152,9 +161,9 @@ inline void  Filter::initLowPass() {
     case (uint8_t)ORDER::OD2:
         a  = -PI*hz*SQRT2;
         b  =  PI*hz*SQRT2;
-        k2 = ap(exp(2.0*ts*a));
-        k1 = ap(2.0*exp(a*ts)*cos(b*ts));
-        k0 = ap(1.0*KM - k1*KM + k2*KM);
+        k2 = exp(2.0*ts*a);
+        k1 = 2.0*exp(a*ts)*cos(b*ts);
+        k0 = 1.0 - k1 + k2;
       break;
     case (uint8_t)ORDER::OD3:
         a  = -PI*hz;
@@ -163,10 +172,10 @@ inline void  Filter::initLowPass() {
         b3 = exp(-c*ts);
         b2 = exp(2.0*ts*a);
         b1 = 2.0*exp(a*ts)*cos(b*ts);
-        k3 = ap(b2*b3);
-        k2 = ap(b2 + b1*b3);
-        k1 = ap(b1 + b3);
-        k0 = ap(1.0*KM - b1*KM + b2*KM -b3*KM + b1*KM*b3 - b2*KM*b3);
+        k3 = b2*b3;
+        k2 = b2 + b1*b3;
+        k1 = b1 + b3;
+        k0 = 1.0 - b1 + b2 -b3 + b1*b3 - b2*b3;
       break;
     case (uint8_t)ORDER::OD4:
         a  = -0.3827*2.0*PI*hz;
@@ -177,11 +186,11 @@ inline void  Filter::initLowPass() {
         b3 = 2.0*exp(c*ts)*cos(d*ts);
         b2 = exp(2.0*ts*a);
         b1 = 2.0*exp(a*ts)*cos(b*ts);
-        k4 = ap(b2*b4);
-        k3 = ap(b1*b4 + b2*b3);
-        k2 = ap(b4 + b1*b3 + b2);
-        k1 = ap(b1 + b3);
-        k0 = ap(1.0*KM - k1*KM + k2*KM - k3*KM + k4*KM);
+        k4 = b2*b4;
+        k3 = b1*b4 + b2*b3;
+        k2 = b4 + b1*b3 + b2;
+        k1 = b1 + b3;
+        k0 = 1.0 - k1 + k2 - k3 + k4;
       break;
   }
 }
@@ -194,6 +203,9 @@ inline void  Filter::initHighPass() {
   // Bilinear transformation
   float k  = 2.0/ts;
   float w0 = 2.0*PI*hz;
+
+  // Filter coefficients
+  float b0, b1, b2,a0, a1, a2;
 
   switch((uint8_t)od) {
       case (uint8_t)ORDER::OD1:
@@ -227,11 +239,5 @@ inline void  Filter::initHighPass() {
           k2 = -a2/a0;
         break;
       }
-}
-
-float Filter::ap(float p) {
-  f_err  = f_err  | (abs(p) <= EPS );
-  f_warn = f_warn | (abs(p) <= WEPS);
-  return (f_err) ? 0.0 : p;
 }
 

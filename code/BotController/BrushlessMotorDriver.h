@@ -14,7 +14,6 @@
 #include <Encoder/AS5047D.h>
 #include <TimePassedBy.h>
 
-const float MaxWheelAcceleration = 1000.0; 			// [rev/s^2]
 const float GearBoxRatio = 18.0/54.0*18.0/54.0; 	// two timing belts with 54/18*54/18 pulleys = 1:9
 
 class MotorConfig {
@@ -51,12 +50,12 @@ public:
 	bool loop(uint32_t now_us );
 
 	// set speed of motor
-	void setMotorSpeed(float speed /* [rev/s] */, float acc = MaxWheelAcceleration /* [rev/s^2] */);
+	void setMotorSpeed(float speed /* [rev/s] */);
 	float getMotorSpeed();
 	float getIntegratedMotorAngle();
 
 	// set speed of wheel including the gear box
-	void setSpeed(float speed /* [rev/s] */, float acc = MaxWheelAcceleration /* [rev/s^2] */);
+	void setSpeed(float speed /* [rev/s] */);
 	float getSpeed();
 	float getIntegratedAngle();
 
@@ -74,7 +73,6 @@ private:
 	int input2Pin = 0;
 	int input3Pin = 0;
 
-	float targetAcc = 0;					// [rev/s^2]
 	float targetMotorSpeed = 0;				// [rev/s]
 
 	float magneticFieldAngle = 0;			// [rad] angle of the induced magnetic field 0=1 = 2PI
@@ -103,10 +101,9 @@ private:
 
 	// ascii menu functionality
 	float menuSpeed = 0;
-	int menuAcc = MaxWheelAcceleration;
 	float menuTorque = 0.0;
 	bool menuEnable = false;
-	uint32_t lastLoopCall_ms = 0;
+	uint32_t lastLoopCall_us = 0;
 	TimePassedBy logTime;
 };
 

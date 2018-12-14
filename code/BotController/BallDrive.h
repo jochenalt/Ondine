@@ -44,7 +44,7 @@ public:
 	// set delta wheel angle to zero
 	void reset() {
 		engine.resetWheelAngleChange();
-		lastCall_ms = millis();
+		lastCall_us = micros();
 
 		// set speed to zero
 		float wheelSpeed[3] = {0,0,0};
@@ -56,7 +56,7 @@ public:
 	void setSpeed(float speedX /* [m/s] */,float speedY /* [m/s] */, float omega, float angleX, float angleY);
 
 	// return speed as measured by encoders (might be different from speed set in method above)
-	void getSpeed(const IMUSample &sample,BotMovement &current);
+	void getSpeed(uint32_t now_us /* [s] */, const IMUSample &sample,BotMovement &current);
 
 	// return tilt angles as set in setSpeed
 	void getSetAngle(float &angleX, float &angleY);
@@ -72,7 +72,7 @@ private:
 	Kinematix kinematics;		// computation of speedx/speedy/omega into wheel speed
 	PowerRelay powerRelay;		// turn on/off power for motors
 
-	uint32_t lastCall_ms = 0;	// used by getSpeed to compute time since last call
+	uint32_t lastCall_us = 0;	// used by getSpeed to compute time since last call
 	float lastSpeedX = 0;		// used by getSpeed
 	float lastSpeedY = 0;
 

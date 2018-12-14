@@ -10,15 +10,64 @@
 #define COMPLEMENTARYFILTER_H_
 
 #include "Arduino.h"
+#include "libraries/Util.h"
 
-class LowPassFilterAverage {
+class Average {
 	public:
 
-	LowPassFilterAverage () {
+	Average () {
 		init(0);
 	}
 
-	LowPassFilterAverage (int noOfPoints) {
+	Average (int taps) {
+		init(0);
+	}
+
+	// get a filtered value
+	void update(float input) {
+		if (NoOfSamples >= MaxNoOfSamples) {
+			// delete first sample
+			for (int i = 0;i<MaxNoOfSamples-1;i++)
+				samples[i] = samples[i+1];
+			NoOfSamples--;
+		}
+		samples[NoOfSamples++] = input;
+	};
+
+	float get() {
+		if (NoOfSamples > 0) {
+			float sum = 0;
+			for (int i = 0;i<NoOfSamples;i++)
+				sum += samples[i];
+			result = sum/NoOfSamples;
+			NoOfSamples = 0;
+		}
+		return result;
+	}
+
+	void init(int points) {
+		this->NoOfSamples = points;
+		this->result = 0;
+	}
+
+private:
+	// complementary value
+	float result = 0;
+	int NoOfSamples = 0;
+	// weight of the latest value over the last complementary value
+	const static int MaxNoOfSamples = 16;
+	float samples[MaxNoOfSamples];
+};
+
+
+class LowPassFilterMovingAverage {
+	public:
+
+	LowPassFilterMovingAverage () {
+		init(0);
+	}
+
+	LowPassFilterMovingAverage (int noOfPoints) {
 		init(noOfPoints);
 	}
 

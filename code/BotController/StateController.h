@@ -57,8 +57,6 @@ class ControlPlane {
 		FIR::Filter  posFilter;
 		FIR::Filter outputSpeedFilter;
 
-		LowPassFilter1stOrder outputSpeedFilter2;
-
 		// compute new speed in the given pane, i.e. returns the error correction that keeps the bot balanced and on track
 		void update(bool log,float dT,
 					const State& current, const State& target,

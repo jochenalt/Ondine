@@ -141,12 +141,12 @@ class Filter{
 		float  m_lambda;
 		float *m_taps;
 		float *m_sr;
-		void designLPF();
-		void designHPF();
+		void designLowPass();
+		void designHighPass();
 
 		// Only needed for the bandpass filter case
 		float m_Fu, m_phi;
-		void designBPF();
+		void designBandPass();
 
 	public:
 		Filter() {};

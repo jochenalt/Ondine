@@ -38,26 +38,26 @@ void BotController::setup() {
 }
 
 void BotController::printHelp() {
-	command->println();
-	command->println("Bot Menu");
-	command->println();
-	command->println("e - ball engine");
-	command->println("p - engine on/off");
-	command->println("s - state controller");
-	command->println("i - imu");
-	command->println("l - lifter");
-	command->println("p - power on/off");
-	command->println("b - balance on");
-	command->println("t - set trajectory");
+	logger->println();
+	logger->println("Bot Menu");
+	logger->println();
+	logger->println("e - ball engine");
+	logger->println("p - engine on/off");
+	logger->println("s - state controller");
+	logger->println("i - imu");
+	logger->println("l - lifter");
+	logger->println("p - power on/off");
+	logger->println("b - balance on");
+	logger->println("t - set trajectory");
 
-	command->println();
-	command->println("1 - performance log on");
-	command->println("2 - calibration log on");
-	command->println("3 - debug log on");
-	command->println("4 - state log on");
+	logger->println();
+	logger->println("1 - performance log on");
+	logger->println("2 - calibration log on");
+	logger->println("3 - debug log on");
+	logger->println("4 - state log on");
 
-	command->println("m - save configuration to epprom");
-	command->println("M - reset to factory settings");
+	logger->println("m - save configuration to epprom");
+	logger->println("M - reset to factory settings");
 }
 
 void BotController::powerEngine(bool doIt) {
@@ -142,7 +142,7 @@ void BotController::menuLoop(char ch, bool continously) {
 		break;
 	}
 	if (cmd) {
-		command->print(">");
+		logger->print(">");
 	}
 }
 
@@ -158,17 +158,12 @@ void BotController::loop() {
 	// give other libraries some time
 	yield();
 
-	// drive motors
-	ballDrive.loop(start_us);
-
 	// react on serial line
 	menuController.loop();
 
 	// check if new IMU orientation is there
-	imu.loop();
+	imu.loop(start_us);
 	IMUSample sensorSample = imu.getSample();
-
-	ballDrive.loop(start_us);
 
 	// drive the lifter
 	lifter.loop();
@@ -179,15 +174,19 @@ void BotController::loop() {
 	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
-		ballDrive.getSpeed(sensorSample,currentMovement);
+		ballDrive.getSpeed(start_us, sensorSample,currentMovement);
 
 		// call balance and speed controller
 		state.update(dT, sensorSample, currentMovement, targetBotMovement);
+
 
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
+
+		// drive motors
+		ballDrive.loop(start_us);
 
 		uint32_t end_us= micros();
 		avrLoopTime = (((float)(end_us-start_us))/1000000.0 + avrLoopTime)/2.0;
@@ -232,7 +231,6 @@ void BotController::loop() {
 				logger->println("%)");
 			}
 		}
-
 	}
 }
 

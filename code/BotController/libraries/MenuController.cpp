@@ -68,8 +68,8 @@ void MenuController::pushMenu(const Menuable* menu) {
 }
 
 void MenuController::loop() {
-	if 	(command->available()) {
-		char ch = command->read();
+	if 	(logger->available()) {
+		char ch = logger->read();
 		uint32_t now = millis();
 
 		if (ch == 27)

@@ -14,6 +14,7 @@
 #include <Filter/ComplementaryFilter.h>
 #include <Kinematics.h>
 #include <TimePassedBy.h>
+#include <libraries/Util.h>
 
 class IMUConfig {
 	public:
@@ -89,8 +90,8 @@ private:
 	void updateFilter();
 	MPU9250FIFO* mpu9250 = NULL;
 	KalmanFilter kalman[3]; // one kalman filter per dimension
-	LowPassFilterAverage accelFilter[3];
-	LowPassFilterAverage gyroFilter[3];
+	Average accelFilter[3];
+	Average gyroFilter[3];
 
 	float noiseVariance = 0.1; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
 
@@ -98,11 +99,11 @@ private:
 	IMUSample lastSample;
 	bool valueIsUpdated = false;
 	bool logIMUValues = false;
-	uint32_t lastInvocationTime_us = 0;
 	float sampleRate_us = 0;
 
 	float dT = 0;
 	TimePassedBy logTimer;
+	TimeLoop timeLoop;
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */

@@ -71,8 +71,8 @@ void Filter::init(filterType filt_t, int num_taps, float SamplingFrequency, floa
 	
 	init();
 
-	if( m_filt_t == LOWPASS ) designLPF();
-	else if( m_filt_t == HIGHPASS ) designHPF();
+	if( m_filt_t == LOWPASS ) designLowPass();
+	else if( m_filt_t == HIGHPASS ) designHighPass();
 	else ECODE(-5);
 
 	return;
@@ -104,7 +104,7 @@ void Filter::init(filterType filt_t, int num_taps, float SamplingFrequency, floa
 	
 	init();
 
-	if( m_filt_t == BANDPASS ) designBPF();
+	if( m_filt_t == BANDPASS ) designBandPass();
 	else ECODE(-16);
 
 	return;
@@ -117,7 +117,7 @@ Filter::~Filter()
 }
 
 void 
-Filter::designLPF()
+Filter::designLowPass()
 {
 	int n;
 	float mm;
@@ -132,7 +132,7 @@ Filter::designLPF()
 }
 
 void 
-Filter::designHPF()
+Filter::designHighPass()
 {
 	int n;
 	float mm;
@@ -147,7 +147,7 @@ Filter::designHPF()
 }
 
 void 
-Filter::designBPF()
+Filter::designBandPass()
 {
 	int n;
 	float mm;

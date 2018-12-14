@@ -97,8 +97,6 @@ void ControlPlane::reset () {
                              1.0e-4f             /* supression in stop band is -40db */,
                              SampleFrequency,     /* 200 Hz */
                              5.0f                /* low pass cut off frequency */);
-
-            outputSpeedFilter2.init(15.0, SampleFrequency);
 }
 
 float ControlPlane::getBodyPos() {
@@ -126,7 +124,7 @@ void ControlPlane::update(bool doLogging, float dT,
 	// 		v = dx/dt [m/s]
 	// F = -kPθ·θ - kDθ·ω + kPx·x + kIx·∫xdt + kDx·v
 
-	if (dT) {
+	if (dT > floatPrecision) {
 		StateControllerConfig& config = memory.persistentMem.ctrlConfig;
 
 		// target angle out of acceleration, assume tan(x) = x
@@ -175,9 +173,7 @@ void ControlPlane::update(bool doLogging, float dT,
 		// outcome of controller is force to be applied to the ball
 		// F = m*a,
 		float force = error;
-		accel = force / BallWeight;
-
-		accel = constrain(accel,-MaxBotAccel, MaxBotAccel);
+		accel = constrain(force / BallWeight,-MaxBotAccel, MaxBotAccel);
 
 		// accelerate if not on max speed already
 		if ((sgn(speed) != sgn(accel)) ||
@@ -187,9 +183,7 @@ void ControlPlane::update(bool doLogging, float dT,
 		}
 
 		// get rid of trembling by a FIR filter 4th order with 15Hz
-		// filteredSpeed = speed;
 		filteredSpeed = outputSpeedFilter.update(speed);
-		// filteredSpeed = outputSpeedFilter2.update(speed);
 
 		if (doLogging) {
 				if (memory.persistentMem.logConfig.debugStateLog) {

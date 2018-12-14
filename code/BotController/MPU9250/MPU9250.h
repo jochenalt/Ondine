@@ -68,7 +68,7 @@ class MPU9250{
       LP_ACCEL_ODR_250HZ = 10,
       LP_ACCEL_ODR_500HZ = 11
     };
-    MPU9250(i2c_t3* bus,uint8_t address, int i2c_rate = I2C_RATE_400);
+    MPU9250(i2c_t3* bus,uint8_t address);
     MPU9250(SPIClass &bus,uint8_t csPin);
     int begin();
     int setAccelRange(AccelRange range);
@@ -121,7 +121,6 @@ class MPU9250{
     // i2c
     uint8_t _address;
     i2c_t3 *_i2c;
-    uint32_t _i2cRate = I2C_RATE_400; // 400 kHz
     size_t _numBytes; // number of bytes received from I2C
     // spi
     SPIClass *_spi;
@@ -284,6 +283,7 @@ class MPU9250FIFO: public MPU9250 {
     using MPU9250::MPU9250;
     int enableFifo(bool accel,bool gyro,bool mag,bool temp);
     int readFifo();
+    int getFifoSize() { return _aSize; };
     void getFifoAccelX_mss(size_t *size,float* data);
     void getFifoAccelY_mss(size_t *size,float* data);
     void getFifoAccelZ_mss(size_t *size,float* data);

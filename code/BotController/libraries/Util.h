@@ -34,7 +34,35 @@ void loggingln(String s);
 void logging(int s);
 void loggingln(int s);
 
+class TimeLoop {
+public:
+	TimeLoop () {
+		lastCall_us = 0;
+	}
+	void init() {
+		lastCall_us = 0;
+	}
+	float dT() {
+		return dT(micros());
+	}
+
+	float dT(uint32_t now_us) {
+		if (lastCall_us == 0) {
+			lastCall_us = now_us;
+			return 0;
+		}
+		float result = ((float)(now_us - lastCall_us))/1000000.0;
+		lastCall_us = now_us;
+		average = (average + result)/2.0;
+		return result;
+	}
+	float getAverageSampleTime() { return average; };
+	float getAverageFrequency() { return 1.0/average; };
+
+	uint32_t lastCall_us = 0;
+	float average = 0;
+};
+
 extern HardwareSerial* logger;
-extern HardwareSerial* command;
 
 #endif /* UTIL_H_ */
