@@ -62,16 +62,16 @@ void BotController::printHelp() {
 
 void BotController::powerEngine(bool doIt) {
 	if (doIt) {
-		// imu.enable(false);
+		imu.enable(false);
 		ballDrive.power(true);
 		if (ballDrive.isPowered()) {
 			// relay has been turned on successfully
-			//imu.enable(true);
+			imu.enable(true);
 			ballDrive.enable(true);
 			if (!ballDrive.isEnabled())
 				ballDrive.power(false);
 		} //else
-		//	imu.enable(true);
+		imu.enable(true);
 
 	} else {
 		ballDrive.enable(false);
@@ -217,10 +217,18 @@ void BotController::loop() {
 				logging(") ");
 				// currentMovement.print();
 				logging(" state=(");
+				logging(state.getTiltErrorX(),2,3);
+				logging(",");
+				logging(state.getPosErrorX(),2,3);
+				logging(",");
 				logging(state.getSpeedX(),2,3);
 				logging(",");
 				logging(state.getAccelX(),2,3);
 				logging("|");
+				logging(state.getTiltErrorY(),2,3);
+				logging(",");
+				logging(state.getPosErrorY(),2,3);
+				logging(",");
 				logging(state.getSpeedY(),2,3);
 				logging(",");
 				logging(state.getAccelY(),2,3);
@@ -229,9 +237,9 @@ void BotController::loop() {
 				logging(")");
 			}
 			if (memory.persistentMem.logConfig.performanceLog) {
-				logger->print(" t=(dT=");
-				logger->print(dT*1000000.0);
-				logger->print("us, cpu=");
+				logger->print(" f=");
+				logger->print(1.0/dT,0);
+				logger->print("Hz, cpu=");
 				logger->print((avrLoopTime / SamplingTime) * 100.0,0);
 				logger->println("%)");
 			}

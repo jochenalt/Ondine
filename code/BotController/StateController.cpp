@@ -19,11 +19,16 @@ void StateControllerConfig::print() {
 	StateControllerConfig defValue;
 	defValue.initDefaultValues();
 	loggingln("state controller:");
-	logging("   PD(angle)=(");
+	logging("   PID(angle)=(");
 	logging(angleWeight,2,2);
 	logging("[");
 	logging(defValue.angleWeight,2,2);
 	logging("]");
+	logging(",");
+	logging(intAngleWeight,2,2);
+	logging("[");
+	logging(defValue.intAngleWeight,2,2);
+	logging("])");
 	logging(",");
 	logging(angularSpeedWeight,2,2);
 	logging("[");
@@ -62,14 +67,15 @@ void StateControllerConfig::initDefaultValues() {
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
-	angleWeight				= 11.6; // 39.0;
-	angularSpeedWeight		= 6.0; // 21.00;
+	angleWeight				= 116; // 39.0;
+	intAngleWeight 			= 20;
+	angularSpeedWeight		= 60; // 21.00;
 
-	ballPositionWeight		= 0.3; // -14.2;
-	ballPosIntegratedWeight = 0.75; // -0.0;
-	ballVelocityWeight		= 1.2; // -12.0;
-	ballAccelWeight			= 0;	// 0
-	omegaWeight				= 0.0;
+	ballPositionWeight		= 3.0; // 14.2;
+	ballPosIntegratedWeight = floatPrecision; // -0.0;
+	ballVelocityWeight		= 12; // 12.0;
+	ballAccelWeight			= floatPrecision;	// 0
+	omegaWeight				= floatPrecision;
 }
 
 
@@ -91,12 +97,12 @@ void ControlPlane::reset () {
 					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
 							 1.0e-4f 			/* supression in stop band is -40db */,
 							 SampleFrequency, 	/* 200 Hz */
-							 15.0f  			/* low pass cut off frequency */);
+							 20.0f  			/* low pass cut off frequency */);
             posFilter.init(FIR::LOWPASS,
                              1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
                              1.0e-4f             /* supression in stop band is -40db */,
                              SampleFrequency,     /* 200 Hz */
-                             100.0f                /* low pass cut off frequency */);
+                             100.0f               /* low pass cut off frequency */);
 }
 
 float ControlPlane::getBodyPos() {
@@ -110,6 +116,13 @@ float ControlPlane::getBallPos() {
 float ControlPlane::getAccel() {
 	return accel;
 }
+float ControlPlane::getPosError() {
+	return totalPositionError;
+}
+float ControlPlane::getTiltError() {
+	return totalTiltError;
+}
+
 
 
 void ControlPlane::update(bool doLogging, float dT,
@@ -132,48 +145,62 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// compute current state variables angle, angular velocity, position, speed, accelst arget angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
-		float absBallPos   		= current.pos;
-		float absBallSpeed 		= current.speed;
-		float bodyPos = absBallPos + sensor.angle * CentreOfGravityHeight;
-		float bodySpeed = (bodyPos - lastBodyPos)/dT;
-		float bodyAccel = (bodySpeed - lastBodySpeed)/dT;
+		float ballPos   		= current.pos;
+		float ballSpeed 		= current.speed;
+		float bodyPos			= ballPos + sensor.angle * CentreOfGravityHeight;
+		float bodySpeed 		= (bodyPos - lastBodyPos)/dT;
+		float bodyAccel 		= (bodySpeed - lastBodySpeed)/dT;
 
+		float targetBodyPos 	= target.pos;
 		float targetBallPos	 	= target.pos - targetAngle * CentreOfGravityHeight;
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
 		float error_tilt			= (sensor.angle-targetAngle);
+		tiltErrorIntegrated 			+= error_tilt*dT;
+		const float maxTiltError = radians(10);
+		tiltErrorIntegrated 			=
+					constrain(tiltErrorIntegrated,
+								-maxTiltError,
+								+maxTiltError);
+
 		float gradient = 10.0;
 		error_tilt = error_tilt + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
 		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity);
 
-		float posError 	= (absBallPos - targetBallPos);
-		posError = posFilter.update(posError);
-		const float posErrorLimitAngle = radians(3);
+		float posError 	= (ballPos - targetBallPos);
+		//posError = posFilter.update(posError);
+		const float posErrorLimitAngle = 0.10; // [m]
 		posError = constrain (posError,
-								-posErrorLimitAngle*config.angleWeight / config.ballPositionWeight,
-								+posErrorLimitAngle*config.angleWeight / config.ballPositionWeight);
+								-posErrorLimitAngle,
+								+posErrorLimitAngle);
 		posErrorIntegrated 			+= posError*dT;
 		posErrorIntegrated 			=
 					constrain(posErrorIntegrated,
-								-posErrorLimitAngle*config.angleWeight / config.ballPosIntegratedWeight,
-								+posErrorLimitAngle*config.angleWeight / config.ballPosIntegratedWeight);
+								-posErrorLimitAngle,
+								+posErrorLimitAngle);
+
 		float speedError 		= (bodySpeed - targetBallSpeed);
 		float accelError 	    = (bodyAccel - target.accel);
 
 		float error_centripedal     = targetOmega * target.speed;
 
 		// sum up all weighted errors
-		error =	+ config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed
-						+ config.ballPositionWeight*posError + config.ballPosIntegratedWeight*posErrorIntegrated  + config.ballVelocityWeight*speedError+  + config.ballAccelWeight*accelError
-						+ config.omegaWeight * error_centripedal;
+		totalTiltError = config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed + config.intAngleWeight *tiltErrorIntegrated;
+		totalPositionError =      config.ballPositionWeight*posError
+								+ config.ballPosIntegratedWeight*posErrorIntegrated
+								+ config.ballVelocityWeight*speedError
+								+ config.ballAccelWeight*accelError
+								+ config.omegaWeight * error_centripedal;
+
+		error =	totalTiltError + totalPositionError;
 
 
 
 		// outcome of controller is force to be applied to the ball
-		// F = m*a,
+		// F = m*a
 		float force = error;
-		accel = constrain(force / BallWeight,-MaxBotAccel, MaxBotAccel);
+		accel = constrain(force,-MaxBotAccel, MaxBotAccel);
 
 		// accelerate if not on max speed already
 		if ((sgn(speed) != sgn(accel)) ||
@@ -207,8 +234,8 @@ void ControlPlane::update(bool doLogging, float dT,
 		lastTargetAngle = targetAngle;
 		lastAngle = sensor.angle;
 
-		lastBallPos = absBallPos;
-		lastBallSpeed = absBallSpeed;
+		lastBallPos = ballPos;
+		lastBallSpeed = ballSpeed;
 		lastTargetBallPos = targetBallPos;
 
 		lastBodyPos = bodyPos;
@@ -237,6 +264,9 @@ void StateController::setup(MenuController* menuCtrl) {
 void StateController::reset() {
 	planeX.reset();
 	planeY.reset();
+	planeX.dim = Dimension::X;
+	planeY.dim = Dimension::Y;
+
 	rampedTargetMovement.reset();
 }
 
@@ -334,62 +364,84 @@ void StateController::menuLoop(char ch, bool continously) {
 			config.omegaWeight = 0.;
 			break;
 		case 'q':
-			config.angleWeight -= continously?2.0:0.2;
+			config.angleWeight -= continously?2.0:0.5;
+			config.angleWeight = max(config.angleWeight, floatPrecision);
+
 			config.print();
 			cmd =true;
 			break;
 		case 'Q':
-			config.angleWeight += continously?2.0:0.2;
+			config.angleWeight += continously?2.0:0.5;
 			config.print();
 			cmd = true;
 			break;
 		case 'w':
-			config.angularSpeedWeight -= continously?1.0:0.1;
+			config.intAngleWeight -= continously?2.0:0.5;
+			config.intAngleWeight = max(config.intAngleWeight, floatPrecision);
+
 			config.print();
 			cmd =true;
 			break;
 		case 'W':
-			config.angularSpeedWeight += continously?1.0:0.1;
+			config.intAngleWeight += continously?2.0:0.5;
+			config.print();
+			cmd = true;
+			break;
+
+		case 'e':
+			config.angularSpeedWeight -= continously?2.0:0.5;
+			config.angularSpeedWeight = max(config.angularSpeedWeight, floatPrecision);
+
+			config.print();
+			cmd =true;
+			break;
+		case 'E':
+			config.angularSpeedWeight += continously?2.0:0.5;
 			config.print();
 			cmd = true;
 			break;
 		case 'a':
-			config.ballPositionWeight -= continously?1.00:0.1;
-			config.print();
+			config.ballPositionWeight -= continously?2.0:0.5;
+			config.ballPositionWeight = max(config.ballPositionWeight, floatPrecision);
+;			config.print();
 			cmd =true;
 			break;
 		case 'A':
-			config.ballPositionWeight += continously?1.00:0.1;
+			config.ballPositionWeight += continously?2.0:0.5;
 			config.print();
 			cmd = true;
 			break;
 		case 's':
-			config.ballPosIntegratedWeight-= continously?0.5:0.05;
+			config.ballPosIntegratedWeight-= continously?2.0:0.5;
+			config.ballPosIntegratedWeight = max(config.ballPosIntegratedWeight, floatPrecision);
+
 			config.print();
 			cmd = true;
 			break;
 		case 'S':
-			config.ballPosIntegratedWeight += continously?0.5:0.05;
+			config.ballPosIntegratedWeight += continously?2.0:0.5;
 			config.print();
 			cmd = true;
 			break;
 		case 'd':
-			config.ballVelocityWeight-= continously?0.5:0.1;
+			config.ballVelocityWeight-= continously?2.0:0.5;
+			config.ballVelocityWeight = max(config.ballVelocityWeight, floatPrecision);
+
 			config.print();
 			cmd =true;
 			break;
 		case 'D':
-			config.ballVelocityWeight += continously?0.5:0.1;
+			config.ballVelocityWeight += continously?2.0:0.5;
 			config.print();
 			cmd = true;
 			break;
 		case 'f':
-			config.ballAccelWeight-= continously?0.2:0.05;
+			config.ballAccelWeight-= continously?2.0:0.5;
 			config.print();
 			cmd =true;
 			break;
 		case 'F':
-			config.ballAccelWeight += continously?0.2:0.05;
+			config.ballAccelWeight += continously?2.0:0.5;
 			config.print();
 			cmd = true;
 			break;

@@ -105,7 +105,6 @@ private:
 	float noiseVariance = 0.1; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
 
 	IMUSample currentSample;
-	IMUSample lastSample;
 	bool valueIsUpdated = false;
 	bool logIMUValues = false;
 	float sampleRate_us = 0;

@@ -37,8 +37,9 @@ class Average {
 	float get() {
 		if (NoOfSamples > 0) {
 			float sum = 0;
-			for (int i = 0;i<NoOfSamples;i++)
+			for (int i = 0;i<NoOfSamples;i++) {
 				sum += samples[i];
+			}
 			result = sum/NoOfSamples;
 			NoOfSamples = 0;
 		}

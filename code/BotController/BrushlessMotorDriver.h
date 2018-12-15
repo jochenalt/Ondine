@@ -67,19 +67,18 @@ public:
 private:
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3
-	int motorNo = 0;
-	int enablePin = 0;
-	int input1Pin = 0;
-	int input2Pin = 0;
-	int input3Pin = 0;
+	int motorNo = 0;						// identificator of the motor 0..2
+	int enablePin = 0;						// Teensy Pin that is connected to L6234 enable PIN
+	int input1Pin = 0;						// Teensy Pin that is connected to L6234 IN1
+	int input2Pin = 0;						// Teensy Pin that is connected to L6234 IN2
+	int input3Pin = 0;						// Teensy Pin that is connected to L6234 IN3
 
 	float targetMotorSpeed = 0;				// [rev/s]
-
 	float magneticFieldAngle = 0;			// [rad] angle of the induced magnetic field 0=1 = 2PI
 	float currentReferenceMotorSpeed = 0;	// [rev/s] current speed, ramp function towards targetSpeed
 	float referenceAngle = 0;				// [rad] the angle the motor should have (input of PID controller)
 	float measuredMotorSpeed = 0;			// [rev/s] speed as given by encoder
-	SpeedGainPIDController pid;
+	SpeedGainPIDController pid;				// PID controller that decreases gain with speed
 
 	int getPWMValue( float torque, float angle_rad);
 	void turnReferenceAngle(float dT);
@@ -88,9 +87,10 @@ private:
 	// motor's winding A (that's normalized during calibration)
 	float getEncoderAngle();
 
-	// read new value from magnetic encoder
+	// read new value from magnetic encoder, getEncoderAngle returns the value read
 	void readEncoderAngle();
 
+	// set PWM value (=torque) to PWM pins that are connected to L6234 driver
 	void sendPWMDuty(float torque);
 
 	bool enabled = false;

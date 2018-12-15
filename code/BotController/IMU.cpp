@@ -36,8 +36,8 @@ void imuInterrupt() {
 
 void IMUConfig::initDefaultValues() {
 	// these null values can be calibrated and set in EEPROM
-	nullOffsetX = radians(1.41);
-	nullOffsetY = radians(3.20);
+	nullOffsetX = radians(-1.0);
+	nullOffsetY = radians(3.2);
 	kalmanNoiseVariance = 0.1; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
@@ -50,9 +50,7 @@ void IMUConfig::print() {
 	loggingln("))");
 	logging("   kalman noise variance=");
 	loggingln(kalmanNoiseVariance,1,3);
-
 }
-
 
 IMUSamplePlane::IMUSamplePlane() {
 	angle = 0;
@@ -141,7 +139,7 @@ void IMU::setup(MenuController *newMenuCtrl) {
 
 	// initialize high speed I2C to IMU
 	IMUWire = &Wire;
-	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_400);
+	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_1000);
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
 
 	// doI2CPortScan(F("I2C"),IMUWire , logger);
@@ -279,11 +277,12 @@ void IMU::loop(uint32_t now_us) {
 				loggingln(status);
 			}
 
-			// fetch all IMU samples since the last loop and filter them by plain average
-			// (IMU has 1000 Hz sample frequency, we sample at 250 Hz, so typically we average 4 samples )
+			// fetch all IMU samples since the last loop and filter them by average low pass
 			int noOfSamples = mpu9250->getFifoSize();
-			if (noOfSamples >=42) {
-				fatalError("IMU FIFO overflow");
+
+			// check if FIFO buffer did not overflow.
+			// FIFO needs to be reinitialized then, other wise there's rubbish data
+			if (mpu9250->fifoOverflow()) {
 
 				// reset and re-initialize FIFO
 				mpu9250->resetFifo();
@@ -296,30 +295,21 @@ void IMU::loop(uint32_t now_us) {
 				if (noOfSamples == 0)
 					fatalError("IMU lost loop");
 			}
+
 			if (noOfSamples > 0) {
 				float accelSamples[3][noOfSamples]; // dont be scared, this has typically a size of 3*4=12
-				float gyroSamples[3][noOfSamples];  // dont be scared, this has typically a size of 3*4=12
+				float gyroSamples[3][noOfSamples];
 
 				size_t noOfSamplesDummy;
+				// fetch all samples from FIFO queue read already
 				mpu9250->getFifoAccelX_mss(&noOfSamplesDummy,&accelSamples[Dimension::X][0]);
-				if (noOfSamples != noOfSamples)
-					fatalError("#IMUSample-1");
 				mpu9250->getFifoAccelY_mss(&noOfSamplesDummy,&accelSamples[Dimension::Y][0]);
-				if (noOfSamples != noOfSamples)
-					fatalError("#IMUSample-2");
 				mpu9250->getFifoAccelZ_mss(&noOfSamplesDummy,&accelSamples[Dimension::Z][0]);
-				if (noOfSamples != noOfSamples)
-					fatalError("#IMUSample-3");
 				mpu9250->getFifoGyroX_rads(&noOfSamplesDummy,&gyroSamples[Dimension::X][0]);
-				if (noOfSamples != noOfSamples)
-					fatalError("#IMUSample-4");
 				mpu9250->getFifoGyroY_rads(&noOfSamplesDummy,&gyroSamples[Dimension::Y][0]);
-				if (noOfSamples != noOfSamples)
-					fatalError("#IMUSample-5");
 				mpu9250->getFifoGyroZ_rads(&noOfSamplesDummy,&gyroSamples[Dimension::Z][0]);
-				if (noOfSamples != noOfSamples)
-					fatalError("#IMUSample-6");
 
+				// filter with average low pass
 				for (int dim = 0;dim<3;dim++) {
 					for (int i = 0;i<noOfSamples;i++) {
 						accelFilter[dim].update(accelSamples[dim][i]);
@@ -337,7 +327,6 @@ void IMU::loop(uint32_t now_us) {
 				float accelY = accelFilter[Dimension::Y].get();
 				float accelZ = accelFilter[Dimension::Z].get();
 
-
 				float angularVelocity[3];
 				angularVelocity[Dimension::X] = gyroFilter[Dimension::Y].get();
 				angularVelocity[Dimension::Y] = gyroFilter[Dimension::X].get();
@@ -348,20 +337,16 @@ void IMU::loop(uint32_t now_us) {
 				tilt[Dimension::Y] = atan2(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY;
 				tilt[Dimension::Z] = accelZ;
 
-				// save previous sample
-				lastSample = currentSample;
-
 				for (int i = 0;i<3;i++) {
-					// invoke kalman filter separately per plane
+					// invoke kalman filter per plane
 					kalman[i].update(tilt[i], angularVelocity[i], dT);
 					currentSample.plane[i].angle = kalman[i].getAngle();
 					currentSample.plane[i].angularVelocity = kalman[i].getRate();
-					// currentSample.plane[i].angularVelocity = (kalman[i].getAngle() - lastSample.plane[i].angle) / dT;
 				}
 
-
 				// indicate that new value is available
-				// next call of isNewValueAvailable will return true one time
+				// next call of isNewValueAvailable will return true
+				// (but only once)
 				valueIsUpdated = true;
 
 				if (logIMUValues) {

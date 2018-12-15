@@ -285,6 +285,8 @@ class MPU9250FIFO: public MPU9250 {
     int resetFifo();
     int readFifo();
     int getFifoSize() { return _aSize; };
+    bool fifoOverflow() { return _aSize >= 42; };
+
     void getFifoAccelX_mss(size_t *size,float* data);
     void getFifoAccelY_mss(size_t *size,float* data);
     void getFifoAccelZ_mss(size_t *size,float* data);
