@@ -417,6 +417,15 @@ int MPU9250::enableWakeOnMotion(float womThresh_mg,LpAccelOdr odr) {
   return 1;
 }
 
+int MPU9250FIFO::resetFifo() {
+	  _useSPIHS = false;
+
+	  if(writeRegister(USER_CTRL, 0x04) < 0){
+		  return -1;
+	  }
+	  return 0;
+}
+
 /* configures and enables the FIFO buffer  */
 int MPU9250FIFO::enableFifo(bool accel,bool gyro,bool mag,bool temp) {
   // use low speed SPI for register setting
@@ -424,9 +433,19 @@ int MPU9250FIFO::enableFifo(bool accel,bool gyro,bool mag,bool temp) {
   if(writeRegister(USER_CTRL, (0x40 | I2C_MST_EN)) < 0){
     return -1;
   }
+
   if(writeRegister(FIFO_EN,(accel*FIFO_ACCEL)|(gyro*FIFO_GYRO)|(mag*FIFO_MAG)|(temp*FIFO_TEMP)) < 0){
     return -2;
   }
+
+  if (readRegisters(CONFIG, 1, _buffer) < 0)
+    return -1;
+
+  if(writeRegister(CONFIG,  0b10111111 & _buffer[0]) < 0){
+    return -1;
+  }
+
+
   _enFifoAccel = accel;
   _enFifoGyro = gyro;
   _enFifoMag = mag;

@@ -68,7 +68,7 @@ void precomputeSVPMWave() {
 
 void MotorConfig::initDefaultValues() {
 	// at slow speeds PID controller is aggressively keeping the position
-	pid_position.Kp = 0.5;
+	pid_position.Kp = 0.2;
 	pid_position.Ki = 0.2;
 	pid_position.Kd = 0.0000;
 
@@ -234,13 +234,14 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 		// @ TODO take current time as method parameter. Currently turnReferenceAngle is imprecise due to low resolution of 1ms
 		// frequency of motor control is 1000Hz max
 		uint32_t timePassed_us = now_us - lastLoopCall_us;
-		lastLoopCall_us = now_us;
+
 		if (timePassed_us < 1000000/MaxBrushlessDriverFrequency) {
 			return false;
 		}
 
-		float dT = ((float)timePassed_us)/1000000.0;
+		lastLoopCall_us = now_us;
 
+		float dT = ((float)timePassed_us)/1000000.0;
 		// turn reference angle along the given speed
 		turnReferenceAngle(dT);
 

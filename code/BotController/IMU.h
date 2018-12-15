@@ -74,6 +74,15 @@ public:
 	bool isNewValueAvailable(float &dT /* time since last call in [s] */);
 
 	IMUSample& getSample() { return currentSample; };
+	void enable(bool doIt) {
+		enabled = doIt;
+		if (doIt) {
+			mpu9250->enableFifo(true,true,false,false);
+		}
+		else
+			mpu9250->enableFifo(false,false,false,false);
+
+	}
 
 
 	// call when stable and upright before starting up
@@ -104,6 +113,7 @@ private:
 	float dT = 0;
 	TimePassedBy logTimer;
 	TimeLoop timeLoop;
+	bool enabled = false;
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */

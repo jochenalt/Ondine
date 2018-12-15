@@ -55,7 +55,7 @@ private:
 	float result = 0;
 	int NoOfSamples = 0;
 	// weight of the latest value over the last complementary value
-	const static int MaxNoOfSamples = 16;
+	const static int MaxNoOfSamples = 64;
 	float samples[MaxNoOfSamples];
 };
 

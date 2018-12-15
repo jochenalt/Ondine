@@ -62,16 +62,23 @@ void BotController::printHelp() {
 
 void BotController::powerEngine(bool doIt) {
 	if (doIt) {
+		// imu.enable(false);
 		ballDrive.power(true);
 		if (ballDrive.isPowered()) {
 			// relay has been turned on successfully
+			//imu.enable(true);
 			ballDrive.enable(true);
 			if (!ballDrive.isEnabled())
 				ballDrive.power(false);
-		}
+		} //else
+		//	imu.enable(true);
+
 	} else {
 		ballDrive.enable(false);
+		imu.enable(false);
 		ballDrive.power(false);
+		imu.enable(true);
+
 	}
 }
 
@@ -150,10 +157,12 @@ void BotController::setTarget(const BotMovement& target) {
 	targetBotMovement = target;
 }
 
-
 void BotController::loop() {
 	// performance measurement
 	uint32_t start_us = micros();
+
+	// drive motors
+	ballDrive.loop(start_us);
 
 	// give other libraries some time
 	yield();
@@ -179,14 +188,10 @@ void BotController::loop() {
 		// call balance and speed controller
 		state.update(dT, sensorSample, currentMovement, targetBotMovement);
 
-
 		// apply kinematics to compute wheel speed out of x,y, omega
 		// and set speed of each wheel
 		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
-
-		// drive motors
-		ballDrive.loop(start_us);
 
 		uint32_t end_us= micros();
 		avrLoopTime = (((float)(end_us-start_us))/1000000.0 + avrLoopTime)/2.0;

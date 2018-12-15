@@ -96,7 +96,7 @@ void ControlPlane::reset () {
                              1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
                              1.0e-4f             /* supression in stop band is -40db */,
                              SampleFrequency,     /* 200 Hz */
-                             5.0f                /* low pass cut off frequency */);
+                             100.0f                /* low pass cut off frequency */);
 }
 
 float ControlPlane::getBodyPos() {

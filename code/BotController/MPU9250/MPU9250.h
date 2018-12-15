@@ -282,6 +282,7 @@ class MPU9250FIFO: public MPU9250 {
   public:
     using MPU9250::MPU9250;
     int enableFifo(bool accel,bool gyro,bool mag,bool temp);
+    int resetFifo();
     int readFifo();
     int getFifoSize() { return _aSize; };
     void getFifoAccelX_mss(size_t *size,float* data);
