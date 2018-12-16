@@ -139,7 +139,7 @@ void IMU::setup(MenuController *newMenuCtrl) {
 
 	// initialize high speed I2C to IMU
 	IMUWire = &Wire;
-	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_1000);
+	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_1200);
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
 
 	// doI2CPortScan(F("I2C"),IMUWire , logger);
@@ -317,7 +317,6 @@ void IMU::loop(uint32_t now_us) {
 					}
 				}
 
-
 				// turn the coordinate system of the IMU into the one of the bot:
 				// front wheel points to the x-axis, y-axis is
 				// for use of the kalman filter, we need to break the convention and
@@ -352,7 +351,7 @@ void IMU::loop(uint32_t now_us) {
 				if (logIMUValues) {
 					if (logTimer.isDue_ms(50,millis())) {
 						logging("dT=");
-						logging(dT,1,3);
+						logging(((float)(micros()-now_us))/1000.0,2);
 						logging("a=(X:");
 						logging(degrees(tilt[Dimension::X]),2,2);
 						logging("/");

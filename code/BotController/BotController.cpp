@@ -180,71 +180,74 @@ void BotController::loop() {
 	// run main balance loop. Timing is determined by IMU that sends an
 	// interrupt everytime a new value is there.
 	float dT = 0; // set by isNewValueAvailable
-	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
+	if (imu.isNewValueAvailable(dT)) {
+		if (mode == BALANCING) {
 
-		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
-		ballDrive.getSpeed(start_us, sensorSample,currentMovement);
+			// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
+			ballDrive.getSpeed(start_us, sensorSample,currentMovement);
 
-		// call balance and speed controller
-		state.update(dT, sensorSample, currentMovement, targetBotMovement);
+			// call balance and speed controller
+			state.update(dT, sensorSample, currentMovement, targetBotMovement);
 
-		// apply kinematics to compute wheel speed out of x,y, omega
-		// and set speed of each wheel
-		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
-				            sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
+			// apply kinematics to compute wheel speed out of x,y, omega
+			// and set speed of each wheel
+			ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
+								sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
-		uint32_t end_us= micros();
-		avrLoopTime = (((float)(end_us-start_us))/1000000.0 + avrLoopTime)/2.0;
+			uint32_t end_us= micros();
+			avrLoopTime = (((float)(end_us-start_us))/1000000.0 + avrLoopTime)/2.0;
 
-		if (logTimer.isDue_ms(200,millis())) {
-			if (memory.persistentMem.logConfig.debugBalanceLog) {
-				logging("a=(");
-				logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
-				logging(",");
-				logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
-				logging(",");
-				logging(currentMovement.x.pos,2,3);
-				logging(",");
-				logging(currentMovement.x.speed,2,3);
-				logging("|");
-				logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
-				logging(",");
-				logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
-				logging(",");
-				logging(currentMovement.y.pos,2,3);
-				logging(",");
-				logging(currentMovement.y.speed,2,3);
-				logging(") ");
-				// currentMovement.print();
-				logging(" state=(");
-				logging(state.getTiltErrorX(),2,3);
-				logging(",");
-				logging(state.getPosErrorX(),2,3);
-				logging(",");
-				logging(state.getSpeedX(),2,3);
-				logging(",");
-				logging(state.getAccelX(),2,3);
-				logging("|");
-				logging(state.getTiltErrorY(),2,3);
-				logging(",");
-				logging(state.getPosErrorY(),2,3);
-				logging(",");
-				logging(state.getSpeedY(),2,3);
-				logging(",");
-				logging(state.getAccelY(),2,3);
-				logging("|");
-				logging(state.getOmega(),2,3);
-				logging(")");
-			}
-			if (memory.persistentMem.logConfig.performanceLog) {
-				logger->print(" f=");
-				logger->print(1.0/dT,0);
-				logger->print("Hz, cpu=");
-				logger->print((avrLoopTime / SamplingTime) * 100.0,0);
-				logger->println("%)");
+			if (logTimer.isDue_ms(250,millis())) {
+				if (memory.persistentMem.logConfig.debugBalanceLog) {
+					logging("a=(");
+					logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
+					logging(",");
+					logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
+					logging(",");
+					logging(currentMovement.x.pos,2,3);
+					logging(",");
+					logging(currentMovement.x.speed,2,3);
+					logging("|");
+					logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
+					logging(",");
+					logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
+					logging(",");
+					logging(currentMovement.y.pos,2,3);
+					logging(",");
+					logging(currentMovement.y.speed,2,3);
+					logging(") ");
+					// currentMovement.print();
+					logging(" state=(");
+					logging(state.getTiltErrorX(),2,3);
+					logging(",");
+					logging(state.getPosErrorX(),2,3);
+					logging(",");
+					logging(state.getSpeedX(),2,3);
+					logging(",");
+					logging(state.getAccelX(),2,3);
+					logging("|");
+					logging(state.getTiltErrorY(),2,3);
+					logging(",");
+					logging(state.getPosErrorY(),2,3);
+					logging(",");
+					logging(state.getSpeedY(),2,3);
+					logging(",");
+					logging(state.getAccelY(),2,3);
+					logging("|");
+					logging(state.getOmega(),2,3);
+					logging(")");
+				}
+				if (memory.persistentMem.logConfig.performanceLog) {
+					logger->print(" f=");
+					logger->print(1.0/dT,0);
+					logger->print("Hz, cpu=");
+					logger->print((avrLoopTime / SamplingTime) * 100.0,0);
+					logger->println("%)");
+				}
 			}
 		}
 	}
+	delayMicroseconds(100);
 }
 
 

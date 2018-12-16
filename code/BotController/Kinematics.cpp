@@ -128,6 +128,7 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	wheelSpeed[1] /= TWO_PI;
 	wheelSpeed[2] /= TWO_PI;
 
+	/*
 	// if one wheel's speed exceeds max speed
 	// reduce all speeds by same factor to comply with the max speed restriction
 	// but without changing the direction of movement
@@ -136,10 +137,11 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 			float factor = MaxWheelSpeed / highestWheelSpeed;
 			for (int j = 0;j<3;j++)
 				wheelSpeed[j] *= factor;
-			logging("wheel speed reduced by ");
-			loggingln(factor,1,2);
-			fatalError("speed exceeds limit");
+			// logging("wheel speed reduced by ");
+			// loggingln(factor,1,2);
+			// fatalError("speed exceeds limit");
 	}
+	*/
 }
 
 // compute actual speed in the coord-system of the IMU out of the encoder's data depending on the given tilt

@@ -101,10 +101,11 @@ private:
 
 	// ascii menu functionality
 	float menuSpeed = 0;
-	float menuTorque = 0.0;
 	bool menuEnable = false;
-	uint32_t lastLoopCall_us = 0;
 	TimePassedBy logTime;
+	TimeLoop timeLoop;
+	TimePassedBy measurementTimer;
+	float measurementAngle = 0;
 };
 
 #endif /* BLDCCONTROLLER_H_ */

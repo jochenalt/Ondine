@@ -51,7 +51,11 @@ public:
 			lastCall_us = now_us;
 			return 0;
 		}
-		float result = ((float)(now_us - lastCall_us))/1000000.0;
+		float result;
+		if (now_us < lastCall_us)
+			result = ((float)(now_us + ((1<<31)-lastCall_us)))/1000000.0;
+		else
+			result = ((float)(now_us - lastCall_us))/1000000.0;
 		lastCall_us = now_us;
 		average = (average + result)/2.0;
 		return result;
