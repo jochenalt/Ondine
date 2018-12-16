@@ -69,11 +69,11 @@ void StateControllerConfig::initDefaultValues() {
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
 	angleWeight				= 31; // 39.0;
 	intAngleWeight 			= 0;
-	angularSpeedWeight		= 38; // 21.00;
+	angularSpeedWeight		= 20; // 21.00;
 
 	ballPositionWeight		= 3; // 14.2;
-	ballPosIntegratedWeight = 1.0; // -0.0;
-	ballVelocityWeight		= 1.5; // 12.0;
+	ballPosIntegratedWeight = 6.5; // -0.0;
+	ballVelocityWeight		= 2.0; // 12.0;
 	ballAccelWeight			= floatPrecision;	// 0
 	omegaWeight				= floatPrecision;
 }
@@ -98,7 +98,10 @@ void ControlPlane::reset () {
 							 1.0e-4f 			/* supression in stop band is -40db */,
 							 SampleFrequency, 	/* 200 Hz */
 							 15.0f  			/* low pass cut off frequency */);
-            posFilter.init(FIR::LOWPASS,
+			outputSpeedFilter.init(FIR::LOWPASS,
+					        16,SampleFrequency, 80);
+
+			posFilter.init(FIR::LOWPASS,
                              1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
                              1.0e-4f             /* supression in stop band is -40db */,
                              SampleFrequency,     /* 200 Hz */
@@ -146,9 +149,13 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// compute current state variables angle, angular velocity, position, speed, accelst arget angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
+		float angle = sensor.angle;
+		float angularVelocity = sensor.angularVelocity;
+		// float angularVelocity = (angle - lastAngle)/dT;
+
 		float ballPos   		= current.pos;
 		float ballSpeed 		= current.speed;
-		float bodyPos			= ballPos + sensor.angle * CentreOfGravityHeight;
+		float bodyPos			= ballPos + angle* CentreOfGravityHeight;
 		float bodySpeed 		= (bodyPos - lastBodyPos)/dT;
 		float bodyAccel 		= (bodySpeed - lastBodySpeed)/dT;
 
@@ -157,7 +164,7 @@ void ControlPlane::update(bool doLogging, float dT,
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
-		float error_tilt			= (sensor.angle-targetAngle);
+		float error_tilt			= (angle-targetAngle);
 		tiltErrorIntegrated 			+= error_tilt*dT;
 		const float maxTiltError = radians(10);
 		tiltErrorIntegrated 			=
@@ -167,7 +174,7 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		float gradient = 1.0;
 		error_tilt = error_tilt + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
-		float error_angular_speed	= (sensor.angularVelocity-targetAngularVelocity);
+		float error_angular_speed	= (angularVelocity-targetAngularVelocity);
 
 		float posError 	= (ballPos - targetBallPos);
 		// float posError 	= (bodyPos - targetBallPos);

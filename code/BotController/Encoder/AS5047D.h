@@ -33,7 +33,7 @@ private:
 	uint32_t sensorRead(void);
 	uint32_t readRegister(uint32_t register);
 	float currentAngle = 0;
-	uint16_t lastSensorRead = 0;
+	uint32_t lastSensorRead = 0;
 	static bool SPIBusInitialized;
 };
 

@@ -12,6 +12,7 @@
 #include <MPU9250/MPU9250.h>
 #include <Filter/KalmanFilter.h>
 #include <Filter/ComplementaryFilter.h>
+#include <Filter/FIRFilter.h>
 #include <Kinematics.h>
 #include <TimePassedBy.h>
 #include <libraries/Util.h>
@@ -99,8 +100,10 @@ private:
 	void updateFilter();
 	MPU9250FIFO* mpu9250 = NULL;
 	KalmanFilter kalman[3]; // one kalman filter per dimension
-	Average accelFilter[3];
-	Average gyroFilter[3];
+	// Average accelFilter[3];
+	// Average gyroFilter[3];
+	FIR::Filter accelFilter[3];
+	FIR::Filter gyroFilter[3];
 
 	float noiseVariance = 0.1; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
 

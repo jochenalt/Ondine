@@ -141,6 +141,7 @@ class Filter{
 		float  m_lambda;
 		float *m_taps;
 		float *m_sr;
+		float result;
 		void designLowPass();
 		void designHighPass();
 
@@ -160,6 +161,7 @@ class Filter{
 		void init();
 
 		float update(float data_sample);
+		float get();
 
 		int get_error_flag(){return m_error_flag;};
 		void get_taps( float *taps );

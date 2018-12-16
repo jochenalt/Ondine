@@ -80,7 +80,10 @@ private:
 	float measuredMotorSpeed = 0;			// [rev/s] speed as given by encoder
 	SpeedGainPIDController pid;				// PID controller that decreases gain with speed
 
+	// get sin wave value out of given torque and angle
 	int getPWMValue( float torque, float angle_rad);
+
+	// called by loop, turns the magnetic field along the passed time
 	void turnReferenceAngle(float dT);
 
 	// return absolute angle of rotor's position relative to
@@ -99,13 +102,17 @@ private:
 	// Encoder library
 	AS5047D magEncoder;
 
+	// time measurement
+	TimeLoop timeLoop;
+
+	// average speed measurement
+	TimePassedBy measurementTimer;
+	float measurementAngle = 0;
+
+
 	// ascii menu functionality
 	float menuSpeed = 0;
 	bool menuEnable = false;
-	TimePassedBy logTime;
-	TimeLoop timeLoop;
-	TimePassedBy measurementTimer;
-	float measurementAngle = 0;
 };
 
 #endif /* BLDCCONTROLLER_H_ */

@@ -75,6 +75,7 @@ void Filter::init(filterType filt_t, int num_taps, float SamplingFrequency, floa
 	else if( m_filt_t == HIGHPASS ) designHighPass();
 	else ECODE(-5);
 
+	result = 0;
 	return;
 }
 
@@ -195,7 +196,6 @@ float
 Filter::update(float data_sample)
 {
 	int i;
-	float result;
 
 	if( m_error_flag != 0 ) return(0);
 
@@ -209,3 +209,10 @@ Filter::update(float data_sample)
 
 	return result;
 }
+
+
+float
+Filter::get()  {
+	return result;
+}
+

@@ -9,6 +9,8 @@
 #include <MPU9250/MPU9250.h>
 #include <TimePassedBy.h>
 #include <Filter/KalmanFilter.h>
+#include <Filter/FIRFilter.h>
+
 #include <IMU.h>
 #include <setup.h>
 #include <libraries/Util.h>
@@ -160,6 +162,7 @@ void IMU::setup(MenuController *newMenuCtrl) {
 		mpu9250 = NULL;
 	}
 
+
 }
 
 int IMU::init() {
@@ -205,12 +208,15 @@ int IMU::init() {
 	kalman[Dimension::Y].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 	kalman[Dimension::Z].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 
-	accelFilter[Dimension::X].init(0);
-	accelFilter[Dimension::Y].init(0);
-	accelFilter[Dimension::Z].init(0);
-	gyroFilter[Dimension::X].init(0);
-	gyroFilter[Dimension::Y].init(0);
-	gyroFilter[Dimension::Z].init(0);
+	const int taps = IMUSamplesPerLoop;
+	const float CutOffFrequency = SampleFrequency;
+
+	accelFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	accelFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency );
+	accelFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	gyroFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	gyroFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	gyroFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency );
 
 	timeLoop.init();
 
@@ -326,15 +332,15 @@ void IMU::loop(uint32_t now_us) {
 				float accelY = accelFilter[Dimension::Y].get();
 				float accelZ = accelFilter[Dimension::Z].get();
 
-				float angularVelocity[3];
-				angularVelocity[Dimension::X] = gyroFilter[Dimension::Y].get();
-				angularVelocity[Dimension::Y] = gyroFilter[Dimension::X].get();
-				angularVelocity[Dimension::Z] = gyroFilter[Dimension::Z].get();
+				float tilt[3] = {
+						atan2f( accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX,
+						atan2f(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY,
+						accelZ };
 
-				float tilt[3];
-				tilt[Dimension::X] = atan2( accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX;
-				tilt[Dimension::Y] = atan2(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY;
-				tilt[Dimension::Z] = accelZ;
+				float angularVelocity[3] = {
+							gyroFilter[Dimension::Y].get(),
+							gyroFilter[Dimension::X].get(),
+							gyroFilter[Dimension::Z].get() };
 
 				for (int i = 0;i<3;i++) {
 					// invoke kalman filter per plane

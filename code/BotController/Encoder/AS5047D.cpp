@@ -55,7 +55,7 @@ uint32_t AS5047D::sensorRead(void)
 }
 
 void AS5047D::reset() {
-	float sensorValue = sensorRead();
+	uint32_t sensorValue = sensorRead();
 	currentAngle = ((float)sensorValue)/((float)resolution)*TWO_PI;
 	lastSensorRead = sensorValue;
 }

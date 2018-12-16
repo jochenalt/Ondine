@@ -180,8 +180,7 @@ void BotController::loop() {
 	// run main balance loop. Timing is determined by IMU that sends an
 	// interrupt everytime a new value is there.
 	float dT = 0; // set by isNewValueAvailable
-	if (imu.isNewValueAvailable(dT)) {
-		if (mode == BALANCING) {
+	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
 			// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 			ballDrive.getSpeed(start_us, sensorSample,currentMovement);
@@ -245,9 +244,8 @@ void BotController::loop() {
 					logger->println("%)");
 				}
 			}
-		}
-	}
-	delayMicroseconds(100);
+	} else
+		delayMicroseconds(100); // ensure that next dT > 0
 }
 
 

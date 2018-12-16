@@ -6,7 +6,7 @@
  */
 
 #include <libraries/PIDController.h>
-
+#include <types.h>
 const float OneMicrosecond_s = 0.000001;
 
 void PIDController::reset() {
@@ -15,6 +15,7 @@ void PIDController::reset() {
 }
 
 float PIDController::update (const PIDControllerConfig& params, float error, float dT, float min, float max) {
+	if ((dT > floatPrecision) && (dT < 1.0)) {
 		float pOut = params.Kp*error;
 		integrativeError += error * dT;
 		integrativeError = constrain(integrativeError, min, max);
@@ -49,5 +50,7 @@ float PIDController::update (const PIDControllerConfig& params, float error, flo
 
 		*/
 		return out;
+	}
+	return 0;
 }
 

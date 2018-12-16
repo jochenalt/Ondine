@@ -22,8 +22,8 @@ const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration o
 const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] 	max acceleration acceleration of bot
 const float MaxTiltAngle = radians(15);								// [rad] 	max tilt angle, 15°
 const float MaxBotAccel= tan(MaxTiltAngle)*Gravity;					// [m/s^2] 	max acceleration of bot
-const float MaxWheelSpeed = 3.0;									// [rev/s]
-const float MaxWheelAcceleration = 1000;							// [rev/s^2]
+const float MaxWheelSpeed = 4.0;									// [rev/s]
+const float MaxWheelAcceleration = 100;								// [rev/s^2]
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy
 
@@ -35,7 +35,7 @@ const float MaxWheelAcceleration = 1000;							// [rev/s^2]
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz, 500Hz, 1000 Hz
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
 const int IMUSamplingFrequency = 1000;								// [Hz] sampling time of IMU
-const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
+const int SampleFrequency = 166;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
 const int IMUSamplesPerLoop = IMUSamplingFrequency/SampleFrequency;	// [#]
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time
 

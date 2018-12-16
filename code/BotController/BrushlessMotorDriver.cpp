@@ -168,9 +168,9 @@ void BrushlessMotorDriver::setupMotor(int EnablePin, int Input1Pin, int Input2Pi
 	analogWriteResolution(pwmResolutionBits);
 
 	// choose a frequency that just can't be heard
-	analogWriteFrequency(input1Pin, 20000);
-	analogWriteFrequency(input2Pin, 20000);
-	analogWriteFrequency(input3Pin, 20000);
+	analogWriteFrequency(input1Pin, 30000);
+	analogWriteFrequency(input2Pin, 30000);
+	analogWriteFrequency(input3Pin, 30000);
 
 	// these pins have to have PWM functionality
 	pinMode(input1Pin, OUTPUT);
@@ -204,7 +204,7 @@ void BrushlessMotorDriver::turnReferenceAngle(float dT) {
 	currentReferenceMotorSpeed += accel*dT;
 	currentReferenceMotorSpeed = constrain(currentReferenceMotorSpeed, -maxRevolutionSpeed, + maxRevolutionSpeed);
 	referenceAngle += currentReferenceMotorSpeed * TWO_PI * dT;
-	referenceAngle = constrain(referenceAngle, getEncoderAngle() - radians(90), getEncoderAngle() + radians(90));
+	referenceAngle = constrain(referenceAngle, getEncoderAngle() - radians(45), getEncoderAngle() + radians(45));
 }
 
 void BrushlessMotorDriver::reset() {
@@ -247,6 +247,8 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 			// compute position error as input for PID controller
 			float errorAngle = referenceAngle - getEncoderAngle() ;
+			if (abs(errorAngle) > radians(45))
+				currentReferenceMotorSpeed = 0;
 
 			// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
@@ -263,14 +265,16 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 			// set magnetic field relative to rotor's position
 			magneticFieldAngle = getEncoderAngle() + advanceAngle + radians(90);
 
+
+			// send new pwm value to motor
+			sendPWMDuty(min(abs(torque),1.0));
+
 			if (measurementTimer.isDue_ms(100, millis())) {
 				// low pass current motor speed before returning in BrushlessMototDriver::getSpeed
 				float angleDiff =  (getEncoderAngle()-measurementAngle);
 				measurementAngle = getEncoderAngle();
 				measuredMotorSpeed= angleDiff/(0.1*TWO_PI);
 			}
-			// send new pwm value to motor
-			sendPWMDuty(min(abs(torque),1.0));
 
 			/*
 			if (motorNo == 0) {
@@ -308,7 +312,9 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 								loggingln();
 				}
-			}*/
+			}
+				*/
+
 			return true;
 	}
 
