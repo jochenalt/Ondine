@@ -21,10 +21,6 @@
 // instantiated in main.cpp
 extern i2c_t3* IMUWire;
 
-// if the interrupt has been missed, use this emergency timer
-// to ask the IMU anyhow.
-TimePassedBy updateTimer(SamplingTime*1000.0 /* [ms] */); // twice the usual sampling frquency
-
 
 IMUConfig& imuConfig = memory.persistentMem.imuControllerConfig;
 
@@ -99,8 +95,6 @@ IMUSample& IMUSample::operator=(const IMUSample& t) {
 
 
 bool IMU::isValid() {
-	if (!(millis() - updateTimer.mLastCall_ms < 2000/SampleFrequency))
-		logging("IMU frequency too low");
 	if (!(abs(currentSample.plane[X].angle) < MaxTiltAngle))
 		logging("X tilt ange too high");
 	if (!(abs(currentSample.plane[Y].angle) < MaxTiltAngle))
@@ -110,14 +104,12 @@ bool IMU::isValid() {
 	if (!(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime))
 		logging("Y X angular velocity too high");
 
-	bool result = ((millis() - updateTimer.mLastCall_ms < 2000/SampleFrequency) &&
+	bool result =
 			(abs(currentSample.plane[X].angle) < MaxTiltAngle) &&
 			(abs(currentSample.plane[Y].angle) < MaxTiltAngle) &&
 			(abs(currentSample.plane[X].angularVelocity) < MaxTiltAngle/SamplingTime) &&
-			(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime));
+			(abs(currentSample.plane[Y].angularVelocity) < MaxTiltAngle/SamplingTime);
 	if (!result) {
-		logging("t=");
-		logging(millis() - updateTimer.mLastCall_ms);
 		logging("a=");
 		logging(degrees(currentSample.plane[X].angle),3,1);
 		logging(",");
@@ -148,7 +140,10 @@ void IMU::setup(MenuController *newMenuCtrl) {
 	mpu9250 = new MPU9250FIFO(IMUWire,IMU_I2C_ADDRESS);
 
 	int status = mpu9250->begin();
-	if (status < 0) {
+	// mpu9250->calibrateAccel();
+	// mpu9250->calibrateGyro();
+
+	if (status < 1) {
 		fatalError("I2C-IMU setup failed ");
 	}
 	status = init();
@@ -161,27 +156,36 @@ void IMU::setup(MenuController *newMenuCtrl) {
 			delete mpu9250;
 		mpu9250 = NULL;
 	}
-
-
 }
 
 int IMU::init() {
 	// enable FIFO mode
 	int status = mpu9250->enableFifo(true,true,false,false);
+	if (status < 1)
+		fatalError("enableFifo");
+
 	enabled = true;
 
 	// setting the accelerometer full scale range to +/-2G
-	status = status | mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
+	status = status | mpu9250->setAccelRange(MPU9250X::ACCEL_RANGE_2G);
+	if (status < 1)
+		fatalError("setAccelRange");
 
 	// setting the gyroscope full scale range to +/-500 deg/s
-	status = status | mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
+	status = status | mpu9250->setGyroRange(MPU9250X::GYRO_RANGE_250DPS);
+	if (status < 1)
+		fatalError("setGyroRange");
 
 	// setting low pass bandwith
-	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // kalman filter does the rest
+	status = status | mpu9250->setDlpfBandwidth(MPU9250X::DLPF_BANDWIDTH_HIGH); // kalman filter does the rest
+	if (status < 1)
+		fatalError("setDlpfBandwidth");
 
 	// set update rate of IMU to 200 Hz
 	// the interrupt indicating new data will fire with that frequency
 	status = status | mpu9250->setSrd(1000/IMUSamplingFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
+	if (status < 1)
+		fatalError("v");
 
 	mpu9250->setGyroBiasX_rads(0);
 	mpu9250->setGyroBiasY_rads(0);
@@ -199,24 +203,17 @@ int IMU::init() {
 	attachInterrupt(IMU_INTERRUPT_PIN, imuInterrupt, RISING);
 	mpu9250->enableDataReadyInterrupt();
 
-	// initialize Kalman filter
-	kalman[Dimension::X].setup(0);
-	kalman[Dimension::Y].setup(0);
-	kalman[Dimension::Z].setup(0);
-
-	kalman[Dimension::X].setNoiseVariance(imuConfig.kalmanNoiseVariance);
-	kalman[Dimension::Y].setNoiseVariance(imuConfig.kalmanNoiseVariance);
-	kalman[Dimension::Z].setNoiseVariance(imuConfig.kalmanNoiseVariance);
-
-	const int taps = IMUSamplesPerLoop;
+	const int taps = IMUSamplesPerLoop; // should be an odd number (FIF Lowpass)
 	const float CutOffFrequency = SampleFrequency;
+	for (int dim = 0;dim<Dimension::Z;dim++) {
+		// initialize FIR filter to create one sample out of the raw samples coming from IMU with 1KHz
+		accelFilter[dim].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+		gyroFilter[dim].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
 
-	accelFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	accelFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency );
-	accelFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	gyroFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	gyroFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	gyroFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency );
+		// initialize Kalman filter
+		kalman[dim].setup(0);
+		kalman[dim].setNoiseVariance(imuConfig.kalmanNoiseVariance);
+	}
 
 	timeLoop.init();
 
@@ -256,7 +253,7 @@ void IMU::calibrate() {
 
 
 	// let kalman filter run and calibrate for 1s
-	while (millis() - now < 2000) {
+	while (millis() - now < 3000) {
 		loop(micros());
 	}
 
@@ -270,11 +267,10 @@ void IMU::loop(uint32_t now_us) {
 	if (mpu9250 && enabled) {
 		if (newDataCounter >= IMUSamplesPerLoop) {
 			newDataCounter = 0;
-			updateTimer.dT();
-		// }
-		// if (updateTimer.isDue()) {
+
 			// compute dT used in filters
 			dT = timeLoop.dT(now_us);
+			logger->println("A");delay(100);
 
 			// read raw values
 			int status = mpu9250->readFifo();
@@ -282,13 +278,16 @@ void IMU::loop(uint32_t now_us) {
 				fatalError("loop IMU status error ");
 				loggingln(status);
 			}
+			logger->println("B");delay(100);
 
 			// fetch all IMU samples since the last loop and filter them by average low pass
 			int noOfSamples = mpu9250->getFifoSize();
+			logger->println("C");delay(100);
 
 			// check if FIFO buffer did not overflow.
 			// FIFO needs to be reinitialized then, other wise there's rubbish data
 			if (mpu9250->fifoOverflow()) {
+				logger->println("D");delay(100);
 
 				// reset and re-initialize FIFO
 				mpu9250->resetFifo();
@@ -300,28 +299,27 @@ void IMU::loop(uint32_t now_us) {
 				noOfSamples = mpu9250->getFifoSize();
 				if (noOfSamples == 0)
 					fatalError("IMU lost loop");
-			}
+				logger->println("E");delay(100);
 
+			}
+			logger->println("F");delay(100);
+			logger->println(noOfSamples);
 			if (noOfSamples > 0) {
 				float accelSamples[3][noOfSamples]; // dont be scared, this has typically a size of 3*4=12
 				float gyroSamples[3][noOfSamples];
 
 				size_t noOfSamplesDummy;
-				// fetch all samples from FIFO queue read already
-				mpu9250->getFifoAccelX_mss(&noOfSamplesDummy,&accelSamples[Dimension::X][0]);
-				mpu9250->getFifoAccelY_mss(&noOfSamplesDummy,&accelSamples[Dimension::Y][0]);
-				mpu9250->getFifoAccelZ_mss(&noOfSamplesDummy,&accelSamples[Dimension::Z][0]);
-				mpu9250->getFifoGyroX_rads(&noOfSamplesDummy,&gyroSamples[Dimension::X][0]);
-				mpu9250->getFifoGyroY_rads(&noOfSamplesDummy,&gyroSamples[Dimension::Y][0]);
-				mpu9250->getFifoGyroZ_rads(&noOfSamplesDummy,&gyroSamples[Dimension::Z][0]);
-
-				// filter with average low pass
+				// fetch samples from FIFO queue, and filter with FIR filter , cutoff frequency is SampleFrequency
 				for (int dim = 0;dim<3;dim++) {
+					mpu9250->getFifoAccel_mss(dim, &noOfSamplesDummy, &accelSamples[dim][0]);
+					mpu9250->getFifoGyro_rads(dim, &noOfSamplesDummy, &gyroSamples[dim][0]);
+
 					for (int i = 0;i<noOfSamples;i++) {
 						accelFilter[dim].update(accelSamples[dim][i]);
 						gyroFilter[dim].update(gyroSamples[dim][i]);
 					}
 				}
+				logger->println("G");delay(100);
 
 				// turn the coordinate system of the IMU into the one of the bot:
 				// front wheel points to the x-axis, y-axis is
@@ -332,15 +330,19 @@ void IMU::loop(uint32_t now_us) {
 				float accelY = accelFilter[Dimension::Y].get();
 				float accelZ = accelFilter[Dimension::Z].get();
 
+				// compute tilt angle out of triangles of acceleration
+				// null values are calibrated by substraction only, although this is not exact,
+				// we should apply a rotation matrix instead
 				float tilt[3] = {
-						atan2f( accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX,
-						atan2f(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY,
+						atan2f( -accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX,
+						atan2f( -accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY,
 						accelZ };
 
 				float angularVelocity[3] = {
 							gyroFilter[Dimension::Y].get(),
-							gyroFilter[Dimension::X].get(),
+							-gyroFilter[Dimension::X].get(),
 							gyroFilter[Dimension::Z].get() };
+
 
 				for (int i = 0;i<3;i++) {
 					// invoke kalman filter per plane
@@ -348,6 +350,7 @@ void IMU::loop(uint32_t now_us) {
 					currentSample.plane[i].angle = kalman[i].getAngle();
 					currentSample.plane[i].angularVelocity = kalman[i].getRate();
 				}
+				logger->println("H");delay(100);
 
 				// indicate that new value is available
 				// next call of isNewValueAvailable will return true
@@ -387,6 +390,7 @@ void IMU::loop(uint32_t now_us) {
 			}
 		}
 	}
+	logger->println("K");delay(100);
 }
 
 // returns true once when a new value is available.

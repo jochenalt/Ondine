@@ -35,8 +35,8 @@ const float MaxWheelAcceleration = 100;								// [rev/s^2]
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz, 500Hz, 1000 Hz
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
 const int IMUSamplingFrequency = 1000;								// [Hz] sampling time of IMU
-const int SampleFrequency = 166;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
-const int IMUSamplesPerLoop = IMUSamplingFrequency/SampleFrequency;	// [#]
+const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
+const int IMUSamplesPerLoop = IMUSamplingFrequency/SampleFrequency;	// [#] should be odd to allow FIF lowpasses
 const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time
 
 

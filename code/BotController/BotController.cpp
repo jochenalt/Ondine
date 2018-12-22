@@ -158,21 +158,25 @@ void BotController::setTarget(const BotMovement& target) {
 }
 
 void BotController::loop() {
+	logger->println("1");delay(100);
 	// performance measurement
 	uint32_t start_us = micros();
 
 	// drive motors
 	ballDrive.loop(start_us);
+	logger->println("2");delay(100);
 
 	// give other libraries some time
 	yield();
 
 	// react on serial line
 	menuController.loop();
+	logger->println("3");delay(100);
 
 	// check if new IMU orientation is there
 	imu.loop(start_us);
 	IMUSample sensorSample = imu.getSample();
+	logger->println("4");delay(100);
 
 	// drive the lifter
 	lifter.loop();

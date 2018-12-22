@@ -25,6 +25,10 @@ public:
     // return angle recently used
     float getAngle();
 
+    // bring angle into range -2PI... 2PI by modulo  (2PI)
+    // returns the difference to before that call
+    float resetAngle();
+
     float getSensorRead();
     // reset to angle between 0..360°
     void reset();

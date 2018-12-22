@@ -247,8 +247,6 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 			// compute position error as input for PID controller
 			float errorAngle = referenceAngle - getEncoderAngle() ;
-			if (abs(errorAngle) > radians(45))
-				currentReferenceMotorSpeed = 0;
 
 			// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
@@ -274,6 +272,40 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 				float angleDiff =  (getEncoderAngle()-measurementAngle);
 				measurementAngle = getEncoderAngle();
 				measuredMotorSpeed= angleDiff/(0.1*TWO_PI);
+			}
+
+			if (abs(errorAngle) > radians(20)) {
+				logging(" error in motor=");
+				logging(motorNo);
+				logging(degrees(advanceAngle));
+				logging(" sr=");
+				logging(speedRatio);
+				logging(" co=");
+				logging(degrees(controlOutput));
+
+				logging(" enc=");
+				logging(degrees(getEncoderAngle()));
+
+				logging(" e=");
+				logging(degrees(errorAngle));
+				logging(" ref=");
+				logging(degrees(referenceAngle));
+				logging(" mag=");
+				logging(degrees(magneticFieldAngle));
+				logging(" v=");
+				logging(getSpeed(),1);
+
+				logging(" ms=");
+				logging(measuredMotorSpeed,2);
+				logging(" tv=");
+				logging(targetMotorSpeed,1);
+				logging(" torque=");
+				logging(torque,2);
+				logging(" dT=");
+				logging(dT,4);
+				logging(" t=");
+				logging(micros());
+				loggingln();
 			}
 
 			/*
@@ -351,6 +383,13 @@ float BrushlessMotorDriver::getEncoderAngle() {
 
 void BrushlessMotorDriver::readEncoderAngle() {
 	magEncoder.readAngle();
+}
+
+float BrushlessMotorDriver::resetAngle() {
+	float difference = magEncoder.resetAngle();
+	magneticFieldAngle += difference;
+	referenceAngle += difference;
+	return difference;
 }
 
 void BrushlessMotorDriver::enable(bool doit) {

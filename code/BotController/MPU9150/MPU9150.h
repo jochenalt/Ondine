@@ -450,10 +450,10 @@ THE SOFTWARE.
 
 // note: DMP code memory blocks defined at end of header file
 
-class MPU9150X {
+class MPU9150 {
     public:
-        MPU9150X();
-        MPU9150X(uint8_t address = MPU9150_DEFAULT_ADDRESS);
+        MPU9150();
+        MPU9150(uint8_t address = MPU9150_DEFAULT_ADDRESS);
 
         void initialize();
         bool testConnection();

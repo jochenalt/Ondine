@@ -488,14 +488,14 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
             // so if user requests more than BUFFER_LENGTH bytes, we have to do it in
             // smaller chunks instead of all at once
             for (uint8_t k = 0; k < length * 2; k += min(length * 2, BUFFER_LENGTH)) {
-                i2c_t3->beginTransmission(devAddr);
-                i2c_t3->write(regAddr);
-                i2c_t3->endTransmission();
-                i2c_t3->beginTransmission(devAddr);
-                i2c_t3->requestFrom(devAddr, (uint8_t)(length * 2)); // length=words, this wants bytes
+            	i2cbus->beginTransmission(devAddr);
+            	i2cbus->write(regAddr);
+            	i2cbus->endTransmission();
+            	i2cbus->beginTransmission(devAddr);
+            	i2cbus->requestFrom(devAddr, (uint8_t)(length * 2)); // length=words, this wants bytes
 
                 bool msb = true; // starts with MSB, then LSB
-                for (; i2c_t3->available() && count < length && (timeout == 0 || millis() - t1 < timeout);) {
+                for (; i2cbus->available() && count < length && (timeout == 0 || millis() - t1 < timeout);) {
                     if (msb) {
                         // first byte is bits 15-8 (MSb=15)
                         data[count] = Wire.read() << 8;
@@ -511,7 +511,7 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
                     msb = !msb;
                 }
 
-                i2c_t3->endTransmission();
+                i2cbus->endTransmission();
             }
     #endif
 
@@ -661,8 +661,8 @@ bool I2Cdev::writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_
         Fastwire::beginTransmission(devAddr);
         Fastwire::write(regAddr);
 	#elif (I2CDEV_IMPLEMENTATION == I2CDEV_T3)
-        i2c_t3->beginTransmission(devAddr);
-        i2c_t3->write((uint8_t) regAddr); // send address
+        i2cbus->beginTransmission(devAddr);
+        i2cbus->write((uint8_t) regAddr); // send address
     #endif
     for (uint8_t i = 0; i < length; i++) {
         #ifdef I2CDEV_SERIAL_DEBUG
@@ -689,7 +689,7 @@ bool I2Cdev::writeBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_
         Fastwire::stop();
         //status = Fastwire::endTransmission();
 	#elif (I2CDEV_IMPLEMENTATION == I2CDEV_T3)
-    	status = i2c_t3->endTransmission();
+    	status = i2cbus->endTransmission();
     #endif
     #ifdef I2CDEV_SERIAL_DEBUG
         Serial.println(". Done.");
@@ -726,8 +726,8 @@ bool I2Cdev::writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16
         Fastwire::beginTransmission(devAddr);
         Fastwire::write(regAddr);
 	#elif (I2CDEV_IMPLEMENTATION == I2CDEV_T3)
-        i2c_t3->beginTransmission(devAddr);
-        i2c_t3->send(regAddr); // send address
+        i2cbus->beginTransmission(devAddr);
+        i2cbus->send(regAddr); // send address
     #endif
     for (uint8_t i = 0; i < length * 2; i++) {
         #ifdef I2CDEV_SERIAL_DEBUG
@@ -746,8 +746,8 @@ bool I2Cdev::writeWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16
             status = Fastwire::write((uint8_t)data[i++]);   // send LSB
             if (status != 0) break;
 		#elif (I2CDEV_IMPLEMENTATION == I2CDEV_T3)
-            i2c_t3->send((uint8_t)(data[i] >> 8));     // send MSB
-            i2c_t3->send((uint8_t)data[i++]);          // send LSB
+            i2cbus->send((uint8_t)(data[i] >> 8));     // send MSB
+            i2cbus->send((uint8_t)data[i++]);          // send LSB
         #endif
     }
     #if ((I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE && ARDUINO < 100) || I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_NBWIRE)

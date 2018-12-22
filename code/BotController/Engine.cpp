@@ -69,6 +69,13 @@ void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
 		lastWheelAngle[i] = angle;
 	}
 }
+
+void Engine::resetAngle() {
+	for (int i = 0;i<3;i++) {
+		float difference = wheel[i].resetAngle();
+		lastWheelAngle[i] += difference;
+	}
+}
 void Engine::enable(bool doIt) {
 	if (doIt) {
 		bool ok = true;

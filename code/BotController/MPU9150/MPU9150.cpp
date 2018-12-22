@@ -43,8 +43,7 @@ THE SOFTWARE.
  * @see MPU9150_DEFAULT_ADDRESS
  */
 
-i2c_t3* i2cbus = NULL;
-MPU9150X::MPU9150X() {
+MPU9150::MPU9150() {
     devAddr = MPU9150_DEFAULT_ADDRESS;
 }
 
@@ -54,7 +53,7 @@ MPU9150X::MPU9150X() {
  * @see MPU9150_ADDRESS_AD0_LOW
  * @see MPU9150_ADDRESS_AD0_HIGH
  */
-MPU9150X::MPU9150X(uint8_t address) {
+MPU9150::MPU9150(uint8_t address) {
     devAddr = address;
 }
 
@@ -65,7 +64,7 @@ MPU9150X::MPU9150X(uint8_t address) {
  * the clock source to use the X Gyro for reference, which is slightly better than
  * the default internal clock source.
  */
-void MPU9150X::initialize() {
+void MPU9150::initialize() {
     setClockSource(MPU9150_CLOCK_PLL_XGYRO);
     setFullScaleGyroRange(MPU9150_GYRO_FS_250);
     setFullScaleAccelRange(MPU9150_ACCEL_FS_2);
@@ -76,7 +75,7 @@ void MPU9150X::initialize() {
  * Make sure the device is connected and responds as expected.
  * @return True if connection is valid, false otherwise
  */
-bool MPU9150X::testConnection() {
+bool MPU9150::testConnection() {
     return getDeviceID() == 0x34;
 }
 
@@ -88,7 +87,7 @@ bool MPU9150X::testConnection() {
  * the MPU-6000, which does not have a VLOGIC pin.
  * @return I2C supply voltage level (0=VLOGIC, 1=VDD)
  */
-uint8_t MPU9150X::getAuxVDDIOLevel() {
+uint8_t MPU9150::getAuxVDDIOLevel() {
     I2Cdev::readBit(devAddr, MPU9150_RA_YG_OFFS_TC, MPU9150_TC_PWR_MODE_BIT, buffer);
     return buffer[0];
 }
@@ -98,7 +97,7 @@ uint8_t MPU9150X::getAuxVDDIOLevel() {
  * the MPU-6000, which does not have a VLOGIC pin.
  * @param level I2C supply voltage level (0=VLOGIC, 1=VDD)
  */
-void MPU9150X::setAuxVDDIOLevel(uint8_t level) {
+void MPU9150::setAuxVDDIOLevel(uint8_t level) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_YG_OFFS_TC, MPU9150_TC_PWR_MODE_BIT, level);
 }
 
@@ -125,7 +124,7 @@ void MPU9150X::setAuxVDDIOLevel(uint8_t level) {
  * @return Current sample rate
  * @see MPU9150_RA_SMPLRT_DIV
  */
-uint8_t MPU9150X::getRate() {
+uint8_t MPU9150::getRate() {
     I2Cdev::readByte(devAddr, MPU9150_RA_SMPLRT_DIV, buffer);
     return buffer[0];
 }
@@ -134,7 +133,7 @@ uint8_t MPU9150X::getRate() {
  * @see getRate()
  * @see MPU9150_RA_SMPLRT_DIV
  */
-void MPU9150X::setRate(uint8_t rate) {
+void MPU9150::setRate(uint8_t rate) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_SMPLRT_DIV, rate);
 }
 
@@ -167,7 +166,7 @@ void MPU9150X::setRate(uint8_t rate) {
  *
  * @return FSYNC configuration value
  */
-uint8_t MPU9150X::getExternalFrameSync() {
+uint8_t MPU9150::getExternalFrameSync() {
     I2Cdev::readBits(devAddr, MPU9150_RA_CONFIG, MPU9150_CFG_EXT_SYNC_SET_BIT, MPU9150_CFG_EXT_SYNC_SET_LENGTH, buffer);
     return buffer[0];
 }
@@ -176,7 +175,7 @@ uint8_t MPU9150X::getExternalFrameSync() {
  * @see MPU9150_RA_CONFIG
  * @param sync New FSYNC configuration value
  */
-void MPU9150X::setExternalFrameSync(uint8_t sync) {
+void MPU9150::setExternalFrameSync(uint8_t sync) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_CONFIG, MPU9150_CFG_EXT_SYNC_SET_BIT, MPU9150_CFG_EXT_SYNC_SET_LENGTH, sync);
 }
 /** Get digital low-pass filter configuration.
@@ -207,7 +206,7 @@ void MPU9150X::setExternalFrameSync(uint8_t sync) {
  * @see MPU9150_CFG_DLPF_CFG_BIT
  * @see MPU9150_CFG_DLPF_CFG_LENGTH
  */
-uint8_t MPU9150X::getDLPFMode() {
+uint8_t MPU9150::getDLPFMode() {
     I2Cdev::readBits(devAddr, MPU9150_RA_CONFIG, MPU9150_CFG_DLPF_CFG_BIT, MPU9150_CFG_DLPF_CFG_LENGTH, buffer);
     return buffer[0];
 }
@@ -219,7 +218,7 @@ uint8_t MPU9150X::getDLPFMode() {
  * @see MPU9150_CFG_DLPF_CFG_BIT
  * @see MPU9150_CFG_DLPF_CFG_LENGTH
  */
-void MPU9150X::setDLPFMode(uint8_t mode) {
+void MPU9150::setDLPFMode(uint8_t mode) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_CONFIG, MPU9150_CFG_DLPF_CFG_BIT, MPU9150_CFG_DLPF_CFG_LENGTH, mode);
 }
 
@@ -242,7 +241,7 @@ void MPU9150X::setDLPFMode(uint8_t mode) {
  * @see MPU9150_GCONFIG_FS_SEL_BIT
  * @see MPU9150_GCONFIG_FS_SEL_LENGTH
  */
-uint8_t MPU9150X::getFullScaleGyroRange() {
+uint8_t MPU9150::getFullScaleGyroRange() {
     I2Cdev::readBits(devAddr, MPU9150_RA_GYRO_CONFIG, MPU9150_GCONFIG_FS_SEL_BIT, MPU9150_GCONFIG_FS_SEL_LENGTH, buffer);
     return buffer[0];
 }
@@ -254,7 +253,7 @@ uint8_t MPU9150X::getFullScaleGyroRange() {
  * @see MPU9150_GCONFIG_FS_SEL_BIT
  * @see MPU9150_GCONFIG_FS_SEL_LENGTH
  */
-void MPU9150X::setFullScaleGyroRange(uint8_t range) {
+void MPU9150::setFullScaleGyroRange(uint8_t range) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_GYRO_CONFIG, MPU9150_GCONFIG_FS_SEL_BIT, MPU9150_GCONFIG_FS_SEL_LENGTH, range);
 }
 
@@ -264,7 +263,7 @@ void MPU9150X::setFullScaleGyroRange(uint8_t range) {
  * @return Self-test enabled value
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-bool MPU9150X::getAccelXSelfTest() {
+bool MPU9150::getAccelXSelfTest() {
     I2Cdev::readBit(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_XA_ST_BIT, buffer);
     return buffer[0];
 }
@@ -272,14 +271,14 @@ bool MPU9150X::getAccelXSelfTest() {
  * @param enabled Self-test enabled value
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-void MPU9150X::setAccelXSelfTest(bool enabled) {
+void MPU9150::setAccelXSelfTest(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_XA_ST_BIT, enabled);
 }
 /** Get self-test enabled value for accelerometer Y axis.
  * @return Self-test enabled value
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-bool MPU9150X::getAccelYSelfTest() {
+bool MPU9150::getAccelYSelfTest() {
     I2Cdev::readBit(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_YA_ST_BIT, buffer);
     return buffer[0];
 }
@@ -287,14 +286,14 @@ bool MPU9150X::getAccelYSelfTest() {
  * @param enabled Self-test enabled value
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-void MPU9150X::setAccelYSelfTest(bool enabled) {
+void MPU9150::setAccelYSelfTest(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_YA_ST_BIT, enabled);
 }
 /** Get self-test enabled value for accelerometer Z axis.
  * @return Self-test enabled value
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-bool MPU9150X::getAccelZSelfTest() {
+bool MPU9150::getAccelZSelfTest() {
     I2Cdev::readBit(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_ZA_ST_BIT, buffer);
     return buffer[0];
 }
@@ -302,7 +301,7 @@ bool MPU9150X::getAccelZSelfTest() {
  * @param enabled Self-test enabled value
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-void MPU9150X::setAccelZSelfTest(bool enabled) {
+void MPU9150::setAccelZSelfTest(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_ZA_ST_BIT, enabled);
 }
 /** Get full-scale accelerometer range.
@@ -322,7 +321,7 @@ void MPU9150X::setAccelZSelfTest(bool enabled) {
  * @see MPU9150_ACONFIG_AFS_SEL_BIT
  * @see MPU9150_ACONFIG_AFS_SEL_LENGTH
  */
-uint8_t MPU9150X::getFullScaleAccelRange() {
+uint8_t MPU9150::getFullScaleAccelRange() {
     I2Cdev::readBits(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_AFS_SEL_BIT, MPU9150_ACONFIG_AFS_SEL_LENGTH, buffer);
     return buffer[0];
 }
@@ -330,7 +329,7 @@ uint8_t MPU9150X::getFullScaleAccelRange() {
  * @param range New full-scale accelerometer range setting
  * @see getFullScaleAccelRange()
  */
-void MPU9150X::setFullScaleAccelRange(uint8_t range) {
+void MPU9150::setFullScaleAccelRange(uint8_t range) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_AFS_SEL_BIT, MPU9150_ACONFIG_AFS_SEL_LENGTH, range);
 }
 /** Get the high-pass filter configuration.
@@ -368,7 +367,7 @@ void MPU9150X::setFullScaleAccelRange(uint8_t range) {
  * @see MPU9150_DHPF_RESET
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-uint8_t MPU9150X::getDHPFMode() {
+uint8_t MPU9150::getDHPFMode() {
     I2Cdev::readBits(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_ACCEL_HPF_BIT, MPU9150_ACONFIG_ACCEL_HPF_LENGTH, buffer);
     return buffer[0];
 }
@@ -378,7 +377,7 @@ uint8_t MPU9150X::getDHPFMode() {
  * @see MPU9150_DHPF_RESET
  * @see MPU9150_RA_ACCEL_CONFIG
  */
-void MPU9150X::setDHPFMode(uint8_t bandwidth) {
+void MPU9150::setDHPFMode(uint8_t bandwidth) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_ACCEL_CONFIG, MPU9150_ACONFIG_ACCEL_HPF_BIT, MPU9150_ACONFIG_ACCEL_HPF_LENGTH, bandwidth);
 }
 
@@ -399,7 +398,7 @@ void MPU9150X::setDHPFMode(uint8_t bandwidth) {
  * @return Current free-fall acceleration threshold value (LSB = 2mg)
  * @see MPU9150_RA_FF_THR
  */
-uint8_t MPU9150X::getFreefallDetectionThreshold() {
+uint8_t MPU9150::getFreefallDetectionThreshold() {
     I2Cdev::readByte(devAddr, MPU9150_RA_FF_THR, buffer);
     return buffer[0];
 }
@@ -408,7 +407,7 @@ uint8_t MPU9150X::getFreefallDetectionThreshold() {
  * @see getFreefallDetectionThreshold()
  * @see MPU9150_RA_FF_THR
  */
-void MPU9150X::setFreefallDetectionThreshold(uint8_t threshold) {
+void MPU9150::setFreefallDetectionThreshold(uint8_t threshold) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_FF_THR, threshold);
 }
 
@@ -431,7 +430,7 @@ void MPU9150X::setFreefallDetectionThreshold(uint8_t threshold) {
  * @return Current free-fall duration threshold value (LSB = 1ms)
  * @see MPU9150_RA_FF_DUR
  */
-uint8_t MPU9150X::getFreefallDetectionDuration() {
+uint8_t MPU9150::getFreefallDetectionDuration() {
     I2Cdev::readByte(devAddr, MPU9150_RA_FF_DUR, buffer);
     return buffer[0];
 }
@@ -440,7 +439,7 @@ uint8_t MPU9150X::getFreefallDetectionDuration() {
  * @see getFreefallDetectionDuration()
  * @see MPU9150_RA_FF_DUR
  */
-void MPU9150X::setFreefallDetectionDuration(uint8_t duration) {
+void MPU9150::setFreefallDetectionDuration(uint8_t duration) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_FF_DUR, duration);
 }
 
@@ -465,7 +464,7 @@ void MPU9150X::setFreefallDetectionDuration(uint8_t duration) {
  * @return Current motion detection acceleration threshold value (LSB = 2mg)
  * @see MPU9150_RA_MOT_THR
  */
-uint8_t MPU9150X::getMotionDetectionThreshold() {
+uint8_t MPU9150::getMotionDetectionThreshold() {
     I2Cdev::readByte(devAddr, MPU9150_RA_MOT_THR, buffer);
     return buffer[0];
 }
@@ -474,7 +473,7 @@ uint8_t MPU9150X::getMotionDetectionThreshold() {
  * @see getMotionDetectionThreshold()
  * @see MPU9150_RA_MOT_THR
  */
-void MPU9150X::setMotionDetectionThreshold(uint8_t threshold) {
+void MPU9150::setMotionDetectionThreshold(uint8_t threshold) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_MOT_THR, threshold);
 }
 
@@ -495,7 +494,7 @@ void MPU9150X::setMotionDetectionThreshold(uint8_t threshold) {
  * @return Current motion detection duration threshold value (LSB = 1ms)
  * @see MPU9150_RA_MOT_DUR
  */
-uint8_t MPU9150X::getMotionDetectionDuration() {
+uint8_t MPU9150::getMotionDetectionDuration() {
     I2Cdev::readByte(devAddr, MPU9150_RA_MOT_DUR, buffer);
     return buffer[0];
 }
@@ -504,7 +503,7 @@ uint8_t MPU9150X::getMotionDetectionDuration() {
  * @see getMotionDetectionDuration()
  * @see MPU9150_RA_MOT_DUR
  */
-void MPU9150X::setMotionDetectionDuration(uint8_t duration) {
+void MPU9150::setMotionDetectionDuration(uint8_t duration) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_MOT_DUR, duration);
 }
 
@@ -535,7 +534,7 @@ void MPU9150X::setMotionDetectionDuration(uint8_t duration) {
  * @return Current zero motion detection acceleration threshold value (LSB = 2mg)
  * @see MPU9150_RA_ZRMOT_THR
  */
-uint8_t MPU9150X::getZeroMotionDetectionThreshold() {
+uint8_t MPU9150::getZeroMotionDetectionThreshold() {
     I2Cdev::readByte(devAddr, MPU9150_RA_ZRMOT_THR, buffer);
     return buffer[0];
 }
@@ -544,7 +543,7 @@ uint8_t MPU9150X::getZeroMotionDetectionThreshold() {
  * @see getZeroMotionDetectionThreshold()
  * @see MPU9150_RA_ZRMOT_THR
  */
-void MPU9150X::setZeroMotionDetectionThreshold(uint8_t threshold) {
+void MPU9150::setZeroMotionDetectionThreshold(uint8_t threshold) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_ZRMOT_THR, threshold);
 }
 
@@ -566,7 +565,7 @@ void MPU9150X::setZeroMotionDetectionThreshold(uint8_t threshold) {
  * @return Current zero motion detection duration threshold value (LSB = 64ms)
  * @see MPU9150_RA_ZRMOT_DUR
  */
-uint8_t MPU9150X::getZeroMotionDetectionDuration() {
+uint8_t MPU9150::getZeroMotionDetectionDuration() {
     I2Cdev::readByte(devAddr, MPU9150_RA_ZRMOT_DUR, buffer);
     return buffer[0];
 }
@@ -575,7 +574,7 @@ uint8_t MPU9150X::getZeroMotionDetectionDuration() {
  * @see getZeroMotionDetectionDuration()
  * @see MPU9150_RA_ZRMOT_DUR
  */
-void MPU9150X::setZeroMotionDetectionDuration(uint8_t duration) {
+void MPU9150::setZeroMotionDetectionDuration(uint8_t duration) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_ZRMOT_DUR, duration);
 }
 
@@ -587,7 +586,7 @@ void MPU9150X::setZeroMotionDetectionDuration(uint8_t duration) {
  * @return Current temperature FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getTempFIFOEnabled() {
+bool MPU9150::getTempFIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_TEMP_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -596,7 +595,7 @@ bool MPU9150X::getTempFIFOEnabled() {
  * @see getTempFIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setTempFIFOEnabled(bool enabled) {
+void MPU9150::setTempFIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_TEMP_FIFO_EN_BIT, enabled);
 }
 /** Get gyroscope X-axis FIFO enabled value.
@@ -605,7 +604,7 @@ void MPU9150X::setTempFIFOEnabled(bool enabled) {
  * @return Current gyroscope X-axis FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getXGyroFIFOEnabled() {
+bool MPU9150::getXGyroFIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_XG_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -614,7 +613,7 @@ bool MPU9150X::getXGyroFIFOEnabled() {
  * @see getXGyroFIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setXGyroFIFOEnabled(bool enabled) {
+void MPU9150::setXGyroFIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_XG_FIFO_EN_BIT, enabled);
 }
 /** Get gyroscope Y-axis FIFO enabled value.
@@ -623,7 +622,7 @@ void MPU9150X::setXGyroFIFOEnabled(bool enabled) {
  * @return Current gyroscope Y-axis FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getYGyroFIFOEnabled() {
+bool MPU9150::getYGyroFIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_YG_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -632,7 +631,7 @@ bool MPU9150X::getYGyroFIFOEnabled() {
  * @see getYGyroFIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setYGyroFIFOEnabled(bool enabled) {
+void MPU9150::setYGyroFIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_YG_FIFO_EN_BIT, enabled);
 }
 /** Get gyroscope Z-axis FIFO enabled value.
@@ -641,7 +640,7 @@ void MPU9150X::setYGyroFIFOEnabled(bool enabled) {
  * @return Current gyroscope Z-axis FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getZGyroFIFOEnabled() {
+bool MPU9150::getZGyroFIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_ZG_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -650,7 +649,7 @@ bool MPU9150X::getZGyroFIFOEnabled() {
  * @see getZGyroFIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setZGyroFIFOEnabled(bool enabled) {
+void MPU9150::setZGyroFIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_ZG_FIFO_EN_BIT, enabled);
 }
 /** Get accelerometer FIFO enabled value.
@@ -660,7 +659,7 @@ void MPU9150X::setZGyroFIFOEnabled(bool enabled) {
  * @return Current accelerometer FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getAccelFIFOEnabled() {
+bool MPU9150::getAccelFIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_ACCEL_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -669,7 +668,7 @@ bool MPU9150X::getAccelFIFOEnabled() {
  * @see getAccelFIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setAccelFIFOEnabled(bool enabled) {
+void MPU9150::setAccelFIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_ACCEL_FIFO_EN_BIT, enabled);
 }
 /** Get Slave 2 FIFO enabled value.
@@ -678,7 +677,7 @@ void MPU9150X::setAccelFIFOEnabled(bool enabled) {
  * @return Current Slave 2 FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getSlave2FIFOEnabled() {
+bool MPU9150::getSlave2FIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_SLV2_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -687,7 +686,7 @@ bool MPU9150X::getSlave2FIFOEnabled() {
  * @see getSlave2FIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setSlave2FIFOEnabled(bool enabled) {
+void MPU9150::setSlave2FIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_SLV2_FIFO_EN_BIT, enabled);
 }
 /** Get Slave 1 FIFO enabled value.
@@ -696,7 +695,7 @@ void MPU9150X::setSlave2FIFOEnabled(bool enabled) {
  * @return Current Slave 1 FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getSlave1FIFOEnabled() {
+bool MPU9150::getSlave1FIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_SLV1_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -705,7 +704,7 @@ bool MPU9150X::getSlave1FIFOEnabled() {
  * @see getSlave1FIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setSlave1FIFOEnabled(bool enabled) {
+void MPU9150::setSlave1FIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_SLV1_FIFO_EN_BIT, enabled);
 }
 /** Get Slave 0 FIFO enabled value.
@@ -714,7 +713,7 @@ void MPU9150X::setSlave1FIFOEnabled(bool enabled) {
  * @return Current Slave 0 FIFO enabled value
  * @see MPU9150_RA_FIFO_EN
  */
-bool MPU9150X::getSlave0FIFOEnabled() {
+bool MPU9150::getSlave0FIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_SLV0_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -723,7 +722,7 @@ bool MPU9150X::getSlave0FIFOEnabled() {
  * @see getSlave0FIFOEnabled()
  * @see MPU9150_RA_FIFO_EN
  */
-void MPU9150X::setSlave0FIFOEnabled(bool enabled) {
+void MPU9150::setSlave0FIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_FIFO_EN, MPU9150_SLV0_FIFO_EN_BIT, enabled);
 }
 
@@ -744,7 +743,7 @@ void MPU9150X::setSlave0FIFOEnabled(bool enabled) {
  * @return Current multi-master enabled value
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-bool MPU9150X::getMultiMasterEnabled() {
+bool MPU9150::getMultiMasterEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_MULT_MST_EN_BIT, buffer);
     return buffer[0];
 }
@@ -753,7 +752,7 @@ bool MPU9150X::getMultiMasterEnabled() {
  * @see getMultiMasterEnabled()
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-void MPU9150X::setMultiMasterEnabled(bool enabled) {
+void MPU9150::setMultiMasterEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_MULT_MST_EN_BIT, enabled);
 }
 /** Get wait-for-external-sensor-data enabled value.
@@ -767,7 +766,7 @@ void MPU9150X::setMultiMasterEnabled(bool enabled) {
  * @return Current wait-for-external-sensor-data enabled value
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-bool MPU9150X::getWaitForExternalSensorEnabled() {
+bool MPU9150::getWaitForExternalSensorEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_WAIT_FOR_ES_BIT, buffer);
     return buffer[0];
 }
@@ -776,7 +775,7 @@ bool MPU9150X::getWaitForExternalSensorEnabled() {
  * @see getWaitForExternalSensorEnabled()
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-void MPU9150X::setWaitForExternalSensorEnabled(bool enabled) {
+void MPU9150::setWaitForExternalSensorEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_WAIT_FOR_ES_BIT, enabled);
 }
 /** Get Slave 3 FIFO enabled value.
@@ -785,7 +784,7 @@ void MPU9150X::setWaitForExternalSensorEnabled(bool enabled) {
  * @return Current Slave 3 FIFO enabled value
  * @see MPU9150_RA_MST_CTRL
  */
-bool MPU9150X::getSlave3FIFOEnabled() {
+bool MPU9150::getSlave3FIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_SLV_3_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -794,7 +793,7 @@ bool MPU9150X::getSlave3FIFOEnabled() {
  * @see getSlave3FIFOEnabled()
  * @see MPU9150_RA_MST_CTRL
  */
-void MPU9150X::setSlave3FIFOEnabled(bool enabled) {
+void MPU9150::setSlave3FIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_SLV_3_FIFO_EN_BIT, enabled);
 }
 /** Get slave read/write transition enabled value.
@@ -807,7 +806,7 @@ void MPU9150X::setSlave3FIFOEnabled(bool enabled) {
  * @return Current slave read/write transition enabled value
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-bool MPU9150X::getSlaveReadWriteTransitionEnabled() {
+bool MPU9150::getSlaveReadWriteTransitionEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_I2C_MST_P_NSR_BIT, buffer);
     return buffer[0];
 }
@@ -816,7 +815,7 @@ bool MPU9150X::getSlaveReadWriteTransitionEnabled() {
  * @see getSlaveReadWriteTransitionEnabled()
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-void MPU9150X::setSlaveReadWriteTransitionEnabled(bool enabled) {
+void MPU9150::setSlaveReadWriteTransitionEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_I2C_MST_P_NSR_BIT, enabled);
 }
 /** Get I2C master clock speed.
@@ -848,7 +847,7 @@ void MPU9150X::setSlaveReadWriteTransitionEnabled(bool enabled) {
  * @return Current I2C master clock speed
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-uint8_t MPU9150X::getMasterClockSpeed() {
+uint8_t MPU9150::getMasterClockSpeed() {
     I2Cdev::readBits(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_I2C_MST_CLK_BIT, MPU9150_I2C_MST_CLK_LENGTH, buffer);
     return buffer[0];
 }
@@ -856,7 +855,7 @@ uint8_t MPU9150X::getMasterClockSpeed() {
  * @reparam speed Current I2C master clock speed
  * @see MPU9150_RA_I2C_MST_CTRL
  */
-void MPU9150X::setMasterClockSpeed(uint8_t speed) {
+void MPU9150::setMasterClockSpeed(uint8_t speed) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_I2C_MST_CTRL, MPU9150_I2C_MST_CLK_BIT, MPU9150_I2C_MST_CLK_LENGTH, speed);
 }
 
@@ -903,7 +902,7 @@ void MPU9150X::setMasterClockSpeed(uint8_t speed) {
  * @return Current address for specified slave
  * @see MPU9150_RA_I2C_SLV0_ADDR
  */
-uint8_t MPU9150X::getSlaveAddress(uint8_t num) {
+uint8_t MPU9150::getSlaveAddress(uint8_t num) {
     if (num > 3) return 0;
     I2Cdev::readByte(devAddr, MPU9150_RA_I2C_SLV0_ADDR + num*3, buffer);
     return buffer[0];
@@ -914,7 +913,7 @@ uint8_t MPU9150X::getSlaveAddress(uint8_t num) {
  * @see getSlaveAddress()
  * @see MPU9150_RA_I2C_SLV0_ADDR
  */
-void MPU9150X::setSlaveAddress(uint8_t num, uint8_t address) {
+void MPU9150::setSlaveAddress(uint8_t num, uint8_t address) {
     if (num > 3) return;
     I2Cdev::writeByte(devAddr, MPU9150_RA_I2C_SLV0_ADDR + num*3, address);
 }
@@ -929,7 +928,7 @@ void MPU9150X::setSlaveAddress(uint8_t num, uint8_t address) {
  * @return Current active register for specified slave
  * @see MPU9150_RA_I2C_SLV0_REG
  */
-uint8_t MPU9150X::getSlaveRegister(uint8_t num) {
+uint8_t MPU9150::getSlaveRegister(uint8_t num) {
     if (num > 3) return 0;
     I2Cdev::readByte(devAddr, MPU9150_RA_I2C_SLV0_REG + num*3, buffer);
     return buffer[0];
@@ -940,7 +939,7 @@ uint8_t MPU9150X::getSlaveRegister(uint8_t num) {
  * @see getSlaveRegister()
  * @see MPU9150_RA_I2C_SLV0_REG
  */
-void MPU9150X::setSlaveRegister(uint8_t num, uint8_t reg) {
+void MPU9150::setSlaveRegister(uint8_t num, uint8_t reg) {
     if (num > 3) return;
     I2Cdev::writeByte(devAddr, MPU9150_RA_I2C_SLV0_REG + num*3, reg);
 }
@@ -951,7 +950,7 @@ void MPU9150X::setSlaveRegister(uint8_t num, uint8_t reg) {
  * @return Current enabled value for specified slave
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-bool MPU9150X::getSlaveEnabled(uint8_t num) {
+bool MPU9150::getSlaveEnabled(uint8_t num) {
     if (num > 3) return 0;
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_EN_BIT, buffer);
     return buffer[0];
@@ -962,7 +961,7 @@ bool MPU9150X::getSlaveEnabled(uint8_t num) {
  * @see getSlaveEnabled()
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-void MPU9150X::setSlaveEnabled(uint8_t num, bool enabled) {
+void MPU9150::setSlaveEnabled(uint8_t num, bool enabled) {
     if (num > 3) return;
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_EN_BIT, enabled);
 }
@@ -977,7 +976,7 @@ void MPU9150X::setSlaveEnabled(uint8_t num, bool enabled) {
  * @return Current word pair byte-swapping enabled value for specified slave
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-bool MPU9150X::getSlaveWordByteSwap(uint8_t num) {
+bool MPU9150::getSlaveWordByteSwap(uint8_t num) {
     if (num > 3) return 0;
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_BYTE_SW_BIT, buffer);
     return buffer[0];
@@ -988,7 +987,7 @@ bool MPU9150X::getSlaveWordByteSwap(uint8_t num) {
  * @see getSlaveWordByteSwap()
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-void MPU9150X::setSlaveWordByteSwap(uint8_t num, bool enabled) {
+void MPU9150::setSlaveWordByteSwap(uint8_t num, bool enabled) {
     if (num > 3) return;
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_BYTE_SW_BIT, enabled);
 }
@@ -1002,7 +1001,7 @@ void MPU9150X::setSlaveWordByteSwap(uint8_t num, bool enabled) {
  * @return Current write mode for specified slave (0 = register address + data, 1 = data only)
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-bool MPU9150X::getSlaveWriteMode(uint8_t num) {
+bool MPU9150::getSlaveWriteMode(uint8_t num) {
     if (num > 3) return 0;
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_REG_DIS_BIT, buffer);
     return buffer[0];
@@ -1013,7 +1012,7 @@ bool MPU9150X::getSlaveWriteMode(uint8_t num) {
  * @see getSlaveWriteMode()
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-void MPU9150X::setSlaveWriteMode(uint8_t num, bool mode) {
+void MPU9150::setSlaveWriteMode(uint8_t num, bool mode) {
     if (num > 3) return;
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_REG_DIS_BIT, mode);
 }
@@ -1028,7 +1027,7 @@ void MPU9150X::setSlaveWriteMode(uint8_t num, bool mode) {
  * @return Current word pair grouping order offset for specified slave
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-bool MPU9150X::getSlaveWordGroupOffset(uint8_t num) {
+bool MPU9150::getSlaveWordGroupOffset(uint8_t num) {
     if (num > 3) return 0;
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_GRP_BIT, buffer);
     return buffer[0];
@@ -1039,7 +1038,7 @@ bool MPU9150X::getSlaveWordGroupOffset(uint8_t num) {
  * @see getSlaveWordGroupOffset()
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-void MPU9150X::setSlaveWordGroupOffset(uint8_t num, bool enabled) {
+void MPU9150::setSlaveWordGroupOffset(uint8_t num, bool enabled) {
     if (num > 3) return;
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_GRP_BIT, enabled);
 }
@@ -1050,7 +1049,7 @@ void MPU9150X::setSlaveWordGroupOffset(uint8_t num, bool enabled) {
  * @return Number of bytes to read for specified slave
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-uint8_t MPU9150X::getSlaveDataLength(uint8_t num) {
+uint8_t MPU9150::getSlaveDataLength(uint8_t num) {
     if (num > 3) return 0;
     I2Cdev::readBits(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_LEN_BIT, MPU9150_I2C_SLV_LEN_LENGTH, buffer);
     return buffer[0];
@@ -1061,7 +1060,7 @@ uint8_t MPU9150X::getSlaveDataLength(uint8_t num) {
  * @see getSlaveDataLength()
  * @see MPU9150_RA_I2C_SLV0_CTRL
  */
-void MPU9150X::setSlaveDataLength(uint8_t num, uint8_t length) {
+void MPU9150::setSlaveDataLength(uint8_t num, uint8_t length) {
     if (num > 3) return;
     I2Cdev::writeBits(devAddr, MPU9150_RA_I2C_SLV0_CTRL + num*3, MPU9150_I2C_SLV_LEN_BIT, MPU9150_I2C_SLV_LEN_LENGTH, length);
 }
@@ -1077,7 +1076,7 @@ void MPU9150X::setSlaveDataLength(uint8_t num, uint8_t length) {
  * @see getSlaveAddress()
  * @see MPU9150_RA_I2C_SLV4_ADDR
  */
-uint8_t MPU9150X::getSlave4Address() {
+uint8_t MPU9150::getSlave4Address() {
     I2Cdev::readByte(devAddr, MPU9150_RA_I2C_SLV4_ADDR, buffer);
     return buffer[0];
 }
@@ -1086,7 +1085,7 @@ uint8_t MPU9150X::getSlave4Address() {
  * @see getSlave4Address()
  * @see MPU9150_RA_I2C_SLV4_ADDR
  */
-void MPU9150X::setSlave4Address(uint8_t address) {
+void MPU9150::setSlave4Address(uint8_t address) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_I2C_SLV4_ADDR, address);
 }
 /** Get the active internal register for the Slave 4.
@@ -1096,7 +1095,7 @@ void MPU9150X::setSlave4Address(uint8_t address) {
  * @return Current active register for Slave 4
  * @see MPU9150_RA_I2C_SLV4_REG
  */
-uint8_t MPU9150X::getSlave4Register() {
+uint8_t MPU9150::getSlave4Register() {
     I2Cdev::readByte(devAddr, MPU9150_RA_I2C_SLV4_REG, buffer);
     return buffer[0];
 }
@@ -1105,7 +1104,7 @@ uint8_t MPU9150X::getSlave4Register() {
  * @see getSlave4Register()
  * @see MPU9150_RA_I2C_SLV4_REG
  */
-void MPU9150X::setSlave4Register(uint8_t reg) {
+void MPU9150::setSlave4Register(uint8_t reg) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_I2C_SLV4_REG, reg);
 }
 /** Set new byte to write to Slave 4.
@@ -1114,7 +1113,7 @@ void MPU9150X::setSlave4Register(uint8_t reg) {
  * @param data New byte to write to Slave 4
  * @see MPU9150_RA_I2C_SLV4_DO
  */
-void MPU9150X::setSlave4OutputByte(uint8_t data) {
+void MPU9150::setSlave4OutputByte(uint8_t data) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_I2C_SLV4_DO, data);
 }
 /** Get the enabled value for the Slave 4.
@@ -1123,7 +1122,7 @@ void MPU9150X::setSlave4OutputByte(uint8_t data) {
  * @return Current enabled value for Slave 4
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-bool MPU9150X::getSlave4Enabled() {
+bool MPU9150::getSlave4Enabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_EN_BIT, buffer);
     return buffer[0];
 }
@@ -1132,7 +1131,7 @@ bool MPU9150X::getSlave4Enabled() {
  * @see getSlave4Enabled()
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-void MPU9150X::setSlave4Enabled(bool enabled) {
+void MPU9150::setSlave4Enabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_EN_BIT, enabled);
 }
 /** Get the enabled value for Slave 4 transaction interrupts.
@@ -1144,7 +1143,7 @@ void MPU9150X::setSlave4Enabled(bool enabled) {
  * @return Current enabled value for Slave 4 transaction interrupts.
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-bool MPU9150X::getSlave4InterruptEnabled() {
+bool MPU9150::getSlave4InterruptEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_INT_EN_BIT, buffer);
     return buffer[0];
 }
@@ -1153,7 +1152,7 @@ bool MPU9150X::getSlave4InterruptEnabled() {
  * @see getSlave4InterruptEnabled()
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-void MPU9150X::setSlave4InterruptEnabled(bool enabled) {
+void MPU9150::setSlave4InterruptEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_INT_EN_BIT, enabled);
 }
 /** Get write mode for Slave 4.
@@ -1165,7 +1164,7 @@ void MPU9150X::setSlave4InterruptEnabled(bool enabled) {
  * @return Current write mode for Slave 4 (0 = register address + data, 1 = data only)
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-bool MPU9150X::getSlave4WriteMode() {
+bool MPU9150::getSlave4WriteMode() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_REG_DIS_BIT, buffer);
     return buffer[0];
 }
@@ -1174,7 +1173,7 @@ bool MPU9150X::getSlave4WriteMode() {
  * @see getSlave4WriteMode()
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-void MPU9150X::setSlave4WriteMode(bool mode) {
+void MPU9150::setSlave4WriteMode(bool mode) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_REG_DIS_BIT, mode);
 }
 /** Get Slave 4 master delay value.
@@ -1192,7 +1191,7 @@ void MPU9150X::setSlave4WriteMode(bool mode) {
  * @return Current Slave 4 master delay value
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-uint8_t MPU9150X::getSlave4MasterDelay() {
+uint8_t MPU9150::getSlave4MasterDelay() {
     I2Cdev::readBits(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_MST_DLY_BIT, MPU9150_I2C_SLV4_MST_DLY_LENGTH, buffer);
     return buffer[0];
 }
@@ -1201,7 +1200,7 @@ uint8_t MPU9150X::getSlave4MasterDelay() {
  * @see getSlave4MasterDelay()
  * @see MPU9150_RA_I2C_SLV4_CTRL
  */
-void MPU9150X::setSlave4MasterDelay(uint8_t delay) {
+void MPU9150::setSlave4MasterDelay(uint8_t delay) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_I2C_SLV4_CTRL, MPU9150_I2C_SLV4_MST_DLY_BIT, MPU9150_I2C_SLV4_MST_DLY_LENGTH, delay);
 }
 /** Get last available byte read from Slave 4.
@@ -1210,7 +1209,7 @@ void MPU9150X::setSlave4MasterDelay(uint8_t delay) {
  * @return Last available byte read from to Slave 4
  * @see MPU9150_RA_I2C_SLV4_DI
  */
-uint8_t MPU9150X::getSlate4InputByte() {
+uint8_t MPU9150::getSlate4InputByte() {
     I2Cdev::readByte(devAddr, MPU9150_RA_I2C_SLV4_DI, buffer);
     return buffer[0];
 }
@@ -1226,7 +1225,7 @@ uint8_t MPU9150X::getSlate4InputByte() {
  * @return FSYNC interrupt status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getPassthroughStatus() {
+bool MPU9150::getPassthroughStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_PASS_THROUGH_BIT, buffer);
     return buffer[0];
 }
@@ -1238,7 +1237,7 @@ bool MPU9150X::getPassthroughStatus() {
  * @return Slave 4 transaction done status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getSlave4IsDone() {
+bool MPU9150::getSlave4IsDone() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_I2C_SLV4_DONE_BIT, buffer);
     return buffer[0];
 }
@@ -1249,7 +1248,7 @@ bool MPU9150X::getSlave4IsDone() {
  * @return Master arbitration lost status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getLostArbitration() {
+bool MPU9150::getLostArbitration() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_I2C_LOST_ARB_BIT, buffer);
     return buffer[0];
 }
@@ -1260,7 +1259,7 @@ bool MPU9150X::getLostArbitration() {
  * @return Slave 4 NACK interrupt status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getSlave4Nack() {
+bool MPU9150::getSlave4Nack() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_I2C_SLV4_NACK_BIT, buffer);
     return buffer[0];
 }
@@ -1271,7 +1270,7 @@ bool MPU9150X::getSlave4Nack() {
  * @return Slave 3 NACK interrupt status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getSlave3Nack() {
+bool MPU9150::getSlave3Nack() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_I2C_SLV3_NACK_BIT, buffer);
     return buffer[0];
 }
@@ -1282,7 +1281,7 @@ bool MPU9150X::getSlave3Nack() {
  * @return Slave 2 NACK interrupt status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getSlave2Nack() {
+bool MPU9150::getSlave2Nack() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_I2C_SLV2_NACK_BIT, buffer);
     return buffer[0];
 }
@@ -1293,7 +1292,7 @@ bool MPU9150X::getSlave2Nack() {
  * @return Slave 1 NACK interrupt status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getSlave1Nack() {
+bool MPU9150::getSlave1Nack() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_I2C_SLV1_NACK_BIT, buffer);
     return buffer[0];
 }
@@ -1304,7 +1303,7 @@ bool MPU9150X::getSlave1Nack() {
  * @return Slave 0 NACK interrupt status
  * @see MPU9150_RA_I2C_MST_STATUS
  */
-bool MPU9150X::getSlave0Nack() {
+bool MPU9150::getSlave0Nack() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_STATUS, MPU9150_MST_I2C_SLV0_NACK_BIT, buffer);
     return buffer[0];
 }
@@ -1317,7 +1316,7 @@ bool MPU9150X::getSlave0Nack() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_INT_LEVEL_BIT
  */
-bool MPU9150X::getInterruptMode() {
+bool MPU9150::getInterruptMode() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_INT_LEVEL_BIT, buffer);
     return buffer[0];
 }
@@ -1327,7 +1326,7 @@ bool MPU9150X::getInterruptMode() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_INT_LEVEL_BIT
  */
-void MPU9150X::setInterruptMode(bool mode) {
+void MPU9150::setInterruptMode(bool mode) {
    I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_INT_LEVEL_BIT, mode);
 }
 /** Get interrupt drive mode.
@@ -1336,7 +1335,7 @@ void MPU9150X::setInterruptMode(bool mode) {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_INT_OPEN_BIT
  */
-bool MPU9150X::getInterruptDrive() {
+bool MPU9150::getInterruptDrive() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_INT_OPEN_BIT, buffer);
     return buffer[0];
 }
@@ -1346,7 +1345,7 @@ bool MPU9150X::getInterruptDrive() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_INT_OPEN_BIT
  */
-void MPU9150X::setInterruptDrive(bool drive) {
+void MPU9150::setInterruptDrive(bool drive) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_INT_OPEN_BIT, drive);
 }
 /** Get interrupt latch mode.
@@ -1355,7 +1354,7 @@ void MPU9150X::setInterruptDrive(bool drive) {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_LATCH_INT_EN_BIT
  */
-bool MPU9150X::getInterruptLatch() {
+bool MPU9150::getInterruptLatch() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_LATCH_INT_EN_BIT, buffer);
     return buffer[0];
 }
@@ -1365,7 +1364,7 @@ bool MPU9150X::getInterruptLatch() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_LATCH_INT_EN_BIT
  */
-void MPU9150X::setInterruptLatch(bool latch) {
+void MPU9150::setInterruptLatch(bool latch) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_LATCH_INT_EN_BIT, latch);
 }
 /** Get interrupt latch clear mode.
@@ -1374,7 +1373,7 @@ void MPU9150X::setInterruptLatch(bool latch) {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_INT_RD_CLEAR_BIT
  */
-bool MPU9150X::getInterruptLatchClear() {
+bool MPU9150::getInterruptLatchClear() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_INT_RD_CLEAR_BIT, buffer);
     return buffer[0];
 }
@@ -1384,7 +1383,7 @@ bool MPU9150X::getInterruptLatchClear() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_INT_RD_CLEAR_BIT
  */
-void MPU9150X::setInterruptLatchClear(bool clear) {
+void MPU9150::setInterruptLatchClear(bool clear) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_INT_RD_CLEAR_BIT, clear);
 }
 /** Get FSYNC interrupt logic level mode.
@@ -1393,7 +1392,7 @@ void MPU9150X::setInterruptLatchClear(bool clear) {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_FSYNC_INT_LEVEL_BIT
  */
-bool MPU9150X::getFSyncInterruptLevel() {
+bool MPU9150::getFSyncInterruptLevel() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_FSYNC_INT_LEVEL_BIT, buffer);
     return buffer[0];
 }
@@ -1403,7 +1402,7 @@ bool MPU9150X::getFSyncInterruptLevel() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_FSYNC_INT_LEVEL_BIT
  */
-void MPU9150X::setFSyncInterruptLevel(bool level) {
+void MPU9150::setFSyncInterruptLevel(bool level) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_FSYNC_INT_LEVEL_BIT, level);
 }
 /** Get FSYNC pin interrupt enabled setting.
@@ -1412,7 +1411,7 @@ void MPU9150X::setFSyncInterruptLevel(bool level) {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_FSYNC_INT_EN_BIT
  */
-bool MPU9150X::getFSyncInterruptEnabled() {
+bool MPU9150::getFSyncInterruptEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_FSYNC_INT_EN_BIT, buffer);
     return buffer[0];
 }
@@ -1422,7 +1421,7 @@ bool MPU9150X::getFSyncInterruptEnabled() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_FSYNC_INT_EN_BIT
  */
-void MPU9150X::setFSyncInterruptEnabled(bool enabled) {
+void MPU9150::setFSyncInterruptEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_FSYNC_INT_EN_BIT, enabled);
 }
 /** Get I2C bypass enabled status.
@@ -1436,7 +1435,7 @@ void MPU9150X::setFSyncInterruptEnabled(bool enabled) {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_I2C_BYPASS_EN_BIT
  */
-bool MPU9150X::getI2CBypassEnabled() {
+bool MPU9150::getI2CBypassEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_I2C_BYPASS_EN_BIT, buffer);
     return buffer[0];
 }
@@ -1451,7 +1450,7 @@ bool MPU9150X::getI2CBypassEnabled() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_I2C_BYPASS_EN_BIT
  */
-void MPU9150X::setI2CBypassEnabled(bool enabled) {
+void MPU9150::setI2CBypassEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_I2C_BYPASS_EN_BIT, enabled);
 }
 /** Get reference clock output enabled status.
@@ -1463,7 +1462,7 @@ void MPU9150X::setI2CBypassEnabled(bool enabled) {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_CLKOUT_EN_BIT
  */
-bool MPU9150X::getClockOutputEnabled() {
+bool MPU9150::getClockOutputEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_CLKOUT_EN_BIT, buffer);
     return buffer[0];
 }
@@ -1476,7 +1475,7 @@ bool MPU9150X::getClockOutputEnabled() {
  * @see MPU9150_RA_INT_PIN_CFG
  * @see MPU9150_INTCFG_CLKOUT_EN_BIT
  */
-void MPU9150X::setClockOutputEnabled(bool enabled) {
+void MPU9150::setClockOutputEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_PIN_CFG, MPU9150_INTCFG_CLKOUT_EN_BIT, enabled);
 }
 
@@ -1489,7 +1488,7 @@ void MPU9150X::setClockOutputEnabled(bool enabled) {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_FF_BIT
  **/
-uint8_t MPU9150X::getIntEnabled() {
+uint8_t MPU9150::getIntEnabled() {
     I2Cdev::readByte(devAddr, MPU9150_RA_INT_ENABLE, buffer);
     return buffer[0];
 }
@@ -1501,7 +1500,7 @@ uint8_t MPU9150X::getIntEnabled() {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_FF_BIT
  **/
-void MPU9150X::setIntEnabled(uint8_t enabled) {
+void MPU9150::setIntEnabled(uint8_t enabled) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_INT_ENABLE, enabled);
 }
 /** Get Free Fall interrupt enabled status.
@@ -1510,7 +1509,7 @@ void MPU9150X::setIntEnabled(uint8_t enabled) {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_FF_BIT
  **/
-bool MPU9150X::getIntFreefallEnabled() {
+bool MPU9150::getIntFreefallEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_FF_BIT, buffer);
     return buffer[0];
 }
@@ -1520,7 +1519,7 @@ bool MPU9150X::getIntFreefallEnabled() {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_FF_BIT
  **/
-void MPU9150X::setIntFreefallEnabled(bool enabled) {
+void MPU9150::setIntFreefallEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_FF_BIT, enabled);
 }
 /** Get Motion Detection interrupt enabled status.
@@ -1529,7 +1528,7 @@ void MPU9150X::setIntFreefallEnabled(bool enabled) {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_MOT_BIT
  **/
-bool MPU9150X::getIntMotionEnabled() {
+bool MPU9150::getIntMotionEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_MOT_BIT, buffer);
     return buffer[0];
 }
@@ -1539,7 +1538,7 @@ bool MPU9150X::getIntMotionEnabled() {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_MOT_BIT
  **/
-void MPU9150X::setIntMotionEnabled(bool enabled) {
+void MPU9150::setIntMotionEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_MOT_BIT, enabled);
 }
 /** Get Zero Motion Detection interrupt enabled status.
@@ -1548,7 +1547,7 @@ void MPU9150X::setIntMotionEnabled(bool enabled) {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_ZMOT_BIT
  **/
-bool MPU9150X::getIntZeroMotionEnabled() {
+bool MPU9150::getIntZeroMotionEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_ZMOT_BIT, buffer);
     return buffer[0];
 }
@@ -1558,7 +1557,7 @@ bool MPU9150X::getIntZeroMotionEnabled() {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_ZMOT_BIT
  **/
-void MPU9150X::setIntZeroMotionEnabled(bool enabled) {
+void MPU9150::setIntZeroMotionEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_ZMOT_BIT, enabled);
 }
 /** Get FIFO Buffer Overflow interrupt enabled status.
@@ -1567,7 +1566,7 @@ void MPU9150X::setIntZeroMotionEnabled(bool enabled) {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_FIFO_OFLOW_BIT
  **/
-bool MPU9150X::getIntFIFOBufferOverflowEnabled() {
+bool MPU9150::getIntFIFOBufferOverflowEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_FIFO_OFLOW_BIT, buffer);
     return buffer[0];
 }
@@ -1577,7 +1576,7 @@ bool MPU9150X::getIntFIFOBufferOverflowEnabled() {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_FIFO_OFLOW_BIT
  **/
-void MPU9150X::setIntFIFOBufferOverflowEnabled(bool enabled) {
+void MPU9150::setIntFIFOBufferOverflowEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_FIFO_OFLOW_BIT, enabled);
 }
 /** Get I2C Master interrupt enabled status.
@@ -1587,7 +1586,7 @@ void MPU9150X::setIntFIFOBufferOverflowEnabled(bool enabled) {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_I2C_MST_INT_BIT
  **/
-bool MPU9150X::getIntI2CMasterEnabled() {
+bool MPU9150::getIntI2CMasterEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_I2C_MST_INT_BIT, buffer);
     return buffer[0];
 }
@@ -1597,7 +1596,7 @@ bool MPU9150X::getIntI2CMasterEnabled() {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_I2C_MST_INT_BIT
  **/
-void MPU9150X::setIntI2CMasterEnabled(bool enabled) {
+void MPU9150::setIntI2CMasterEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_I2C_MST_INT_BIT, enabled);
 }
 /** Get Data Ready interrupt enabled setting.
@@ -1607,7 +1606,7 @@ void MPU9150X::setIntI2CMasterEnabled(bool enabled) {
  * @see MPU9150_RA_INT_ENABLE
  * @see MPU9150_INTERRUPT_DATA_RDY_BIT
  */
-bool MPU9150X::getIntDataReadyEnabled() {
+bool MPU9150::getIntDataReadyEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_DATA_RDY_BIT, buffer);
     return buffer[0];
 }
@@ -1617,7 +1616,7 @@ bool MPU9150X::getIntDataReadyEnabled() {
  * @see MPU9150_RA_INT_CFG
  * @see MPU9150_INTERRUPT_DATA_RDY_BIT
  */
-void MPU9150X::setIntDataReadyEnabled(bool enabled) {
+void MPU9150::setIntDataReadyEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_DATA_RDY_BIT, enabled);
 }
 
@@ -1630,7 +1629,7 @@ void MPU9150X::setIntDataReadyEnabled(bool enabled) {
  * @return Current interrupt status
  * @see MPU9150_RA_INT_STATUS
  */
-uint8_t MPU9150X::getIntStatus() {
+uint8_t MPU9150::getIntStatus() {
     I2Cdev::readByte(devAddr, MPU9150_RA_INT_STATUS, buffer);
     return buffer[0];
 }
@@ -1641,7 +1640,7 @@ uint8_t MPU9150X::getIntStatus() {
  * @see MPU9150_RA_INT_STATUS
  * @see MPU9150_INTERRUPT_FF_BIT
  */
-bool MPU9150X::getIntFreefallStatus() {
+bool MPU9150::getIntFreefallStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_FF_BIT, buffer);
     return buffer[0];
 }
@@ -1652,7 +1651,7 @@ bool MPU9150X::getIntFreefallStatus() {
  * @see MPU9150_RA_INT_STATUS
  * @see MPU9150_INTERRUPT_MOT_BIT
  */
-bool MPU9150X::getIntMotionStatus() {
+bool MPU9150::getIntMotionStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_MOT_BIT, buffer);
     return buffer[0];
 }
@@ -1663,7 +1662,7 @@ bool MPU9150X::getIntMotionStatus() {
  * @see MPU9150_RA_INT_STATUS
  * @see MPU9150_INTERRUPT_ZMOT_BIT
  */
-bool MPU9150X::getIntZeroMotionStatus() {
+bool MPU9150::getIntZeroMotionStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_ZMOT_BIT, buffer);
     return buffer[0];
 }
@@ -1674,7 +1673,7 @@ bool MPU9150X::getIntZeroMotionStatus() {
  * @see MPU9150_RA_INT_STATUS
  * @see MPU9150_INTERRUPT_FIFO_OFLOW_BIT
  */
-bool MPU9150X::getIntFIFOBufferOverflowStatus() {
+bool MPU9150::getIntFIFOBufferOverflowStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_FIFO_OFLOW_BIT, buffer);
     return buffer[0];
 }
@@ -1686,7 +1685,7 @@ bool MPU9150X::getIntFIFOBufferOverflowStatus() {
  * @see MPU9150_RA_INT_STATUS
  * @see MPU9150_INTERRUPT_I2C_MST_INT_BIT
  */
-bool MPU9150X::getIntI2CMasterStatus() {
+bool MPU9150::getIntI2CMasterStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_I2C_MST_INT_BIT, buffer);
     return buffer[0];
 }
@@ -1697,7 +1696,7 @@ bool MPU9150X::getIntI2CMasterStatus() {
  * @see MPU9150_RA_INT_STATUS
  * @see MPU9150_INTERRUPT_DATA_RDY_BIT
  */
-bool MPU9150X::getIntDataReadyStatus() {
+bool MPU9150::getIntDataReadyStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_DATA_RDY_BIT, buffer);
     return buffer[0];
 }
@@ -1720,7 +1719,7 @@ bool MPU9150X::getIntDataReadyStatus() {
  * @see getRotation()
  * @see MPU9150_RA_ACCEL_XOUT_H
  */
-void MPU9150X::getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz) {
+void MPU9150::getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz, int16_t* mx, int16_t* my, int16_t* mz) {
 
     //get accel and gyro
     getMotion6(ax, ay, az, gx, gy, gz);
@@ -1747,7 +1746,7 @@ void MPU9150X::getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, in
  * @see getRotation()
  * @see MPU9150_RA_ACCEL_XOUT_H
  */
-void MPU9150X::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz) {
+void MPU9150::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz) {
     I2Cdev::readBytes(devAddr, MPU9150_RA_ACCEL_XOUT_H, 14, buffer);
     *ax = (((int16_t)buffer[0]) << 8) | buffer[1];
     *ay = (((int16_t)buffer[2]) << 8) | buffer[3];
@@ -1792,7 +1791,7 @@ void MPU9150X::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, in
  * @param z 16-bit signed integer container for Z-axis acceleration
  * @see MPU9150_RA_GYRO_XOUT_H
  */
-void MPU9150X::getAcceleration(int16_t* x, int16_t* y, int16_t* z) {
+void MPU9150::getAcceleration(int16_t* x, int16_t* y, int16_t* z) {
     I2Cdev::readBytes(devAddr, MPU9150_RA_ACCEL_XOUT_H, 6, buffer);
     *x = (((int16_t)buffer[0]) << 8) | buffer[1];
     *y = (((int16_t)buffer[2]) << 8) | buffer[3];
@@ -1803,7 +1802,7 @@ void MPU9150X::getAcceleration(int16_t* x, int16_t* y, int16_t* z) {
  * @see getMotion6()
  * @see MPU9150_RA_ACCEL_XOUT_H
  */
-int16_t MPU9150X::getAccelerationX() {
+int16_t MPU9150::getAccelerationX() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_ACCEL_XOUT_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1812,7 +1811,7 @@ int16_t MPU9150X::getAccelerationX() {
  * @see getMotion6()
  * @see MPU9150_RA_ACCEL_YOUT_H
  */
-int16_t MPU9150X::getAccelerationY() {
+int16_t MPU9150::getAccelerationY() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_ACCEL_YOUT_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1821,7 +1820,7 @@ int16_t MPU9150X::getAccelerationY() {
  * @see getMotion6()
  * @see MPU9150_RA_ACCEL_ZOUT_H
  */
-int16_t MPU9150X::getAccelerationZ() {
+int16_t MPU9150::getAccelerationZ() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_ACCEL_ZOUT_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1832,7 +1831,7 @@ int16_t MPU9150X::getAccelerationZ() {
  * @return Temperature reading in 16-bit 2's complement format
  * @see MPU9150_RA_TEMP_OUT_H
  */
-int16_t MPU9150X::getTemperature() {
+int16_t MPU9150::getTemperature() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_TEMP_OUT_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1871,7 +1870,7 @@ int16_t MPU9150X::getTemperature() {
  * @see getMotion6()
  * @see MPU9150_RA_GYRO_XOUT_H
  */
-void MPU9150X::getRotation(int16_t* x, int16_t* y, int16_t* z) {
+void MPU9150::getRotation(int16_t* x, int16_t* y, int16_t* z) {
     I2Cdev::readBytes(devAddr, MPU9150_RA_GYRO_XOUT_H, 6, buffer);
     *x = (((int16_t)buffer[0]) << 8) | buffer[1];
     *y = (((int16_t)buffer[2]) << 8) | buffer[3];
@@ -1882,7 +1881,7 @@ void MPU9150X::getRotation(int16_t* x, int16_t* y, int16_t* z) {
  * @see getMotion6()
  * @see MPU9150_RA_GYRO_XOUT_H
  */
-int16_t MPU9150X::getRotationX() {
+int16_t MPU9150::getRotationX() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_GYRO_XOUT_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1891,7 +1890,7 @@ int16_t MPU9150X::getRotationX() {
  * @see getMotion6()
  * @see MPU9150_RA_GYRO_YOUT_H
  */
-int16_t MPU9150X::getRotationY() {
+int16_t MPU9150::getRotationY() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_GYRO_YOUT_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1900,7 +1899,7 @@ int16_t MPU9150X::getRotationY() {
  * @see getMotion6()
  * @see MPU9150_RA_GYRO_ZOUT_H
  */
-int16_t MPU9150X::getRotationZ() {
+int16_t MPU9150::getRotationZ() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_GYRO_ZOUT_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1981,7 +1980,7 @@ int16_t MPU9150X::getRotationZ() {
  * @param position Starting position (0-23)
  * @return Byte read from register
  */
-uint8_t MPU9150X::getExternalSensorByte(int position) {
+uint8_t MPU9150::getExternalSensorByte(int position) {
     I2Cdev::readByte(devAddr, MPU9150_RA_EXT_SENS_DATA_00 + position, buffer);
     return buffer[0];
 }
@@ -1990,7 +1989,7 @@ uint8_t MPU9150X::getExternalSensorByte(int position) {
  * @return Word read from register
  * @see getExternalSensorByte()
  */
-uint16_t MPU9150X::getExternalSensorWord(int position) {
+uint16_t MPU9150::getExternalSensorWord(int position) {
     I2Cdev::readBytes(devAddr, MPU9150_RA_EXT_SENS_DATA_00 + position, 2, buffer);
     return (((uint16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -1999,7 +1998,7 @@ uint16_t MPU9150X::getExternalSensorWord(int position) {
  * @return Double word read from registers
  * @see getExternalSensorByte()
  */
-uint32_t MPU9150X::getExternalSensorDWord(int position) {
+uint32_t MPU9150::getExternalSensorDWord(int position) {
     I2Cdev::readBytes(devAddr, MPU9150_RA_EXT_SENS_DATA_00 + position, 4, buffer);
     return (((uint32_t)buffer[0]) << 24) | (((uint32_t)buffer[1]) << 16) | (((uint16_t)buffer[2]) << 8) | buffer[3];
 }
@@ -2011,7 +2010,7 @@ uint32_t MPU9150X::getExternalSensorDWord(int position) {
  * @see MPU9150_RA_MOT_DETECT_STATUS
  * @see MPU9150_MOTION_MOT_XNEG_BIT
  */
-bool MPU9150X::getXNegMotionDetected() {
+bool MPU9150::getXNegMotionDetected() {
     I2Cdev::readBit(devAddr, MPU9150_RA_MOT_DETECT_STATUS, MPU9150_MOTION_MOT_XNEG_BIT, buffer);
     return buffer[0];
 }
@@ -2020,7 +2019,7 @@ bool MPU9150X::getXNegMotionDetected() {
  * @see MPU9150_RA_MOT_DETECT_STATUS
  * @see MPU9150_MOTION_MOT_XPOS_BIT
  */
-bool MPU9150X::getXPosMotionDetected() {
+bool MPU9150::getXPosMotionDetected() {
     I2Cdev::readBit(devAddr, MPU9150_RA_MOT_DETECT_STATUS, MPU9150_MOTION_MOT_XPOS_BIT, buffer);
     return buffer[0];
 }
@@ -2029,7 +2028,7 @@ bool MPU9150X::getXPosMotionDetected() {
  * @see MPU9150_RA_MOT_DETECT_STATUS
  * @see MPU9150_MOTION_MOT_YNEG_BIT
  */
-bool MPU9150X::getYNegMotionDetected() {
+bool MPU9150::getYNegMotionDetected() {
     I2Cdev::readBit(devAddr, MPU9150_RA_MOT_DETECT_STATUS, MPU9150_MOTION_MOT_YNEG_BIT, buffer);
     return buffer[0];
 }
@@ -2038,7 +2037,7 @@ bool MPU9150X::getYNegMotionDetected() {
  * @see MPU9150_RA_MOT_DETECT_STATUS
  * @see MPU9150_MOTION_MOT_YPOS_BIT
  */
-bool MPU9150X::getYPosMotionDetected() {
+bool MPU9150::getYPosMotionDetected() {
     I2Cdev::readBit(devAddr, MPU9150_RA_MOT_DETECT_STATUS, MPU9150_MOTION_MOT_YPOS_BIT, buffer);
     return buffer[0];
 }
@@ -2047,7 +2046,7 @@ bool MPU9150X::getYPosMotionDetected() {
  * @see MPU9150_RA_MOT_DETECT_STATUS
  * @see MPU9150_MOTION_MOT_ZNEG_BIT
  */
-bool MPU9150X::getZNegMotionDetected() {
+bool MPU9150::getZNegMotionDetected() {
     I2Cdev::readBit(devAddr, MPU9150_RA_MOT_DETECT_STATUS, MPU9150_MOTION_MOT_ZNEG_BIT, buffer);
     return buffer[0];
 }
@@ -2056,7 +2055,7 @@ bool MPU9150X::getZNegMotionDetected() {
  * @see MPU9150_RA_MOT_DETECT_STATUS
  * @see MPU9150_MOTION_MOT_ZPOS_BIT
  */
-bool MPU9150X::getZPosMotionDetected() {
+bool MPU9150::getZPosMotionDetected() {
     I2Cdev::readBit(devAddr, MPU9150_RA_MOT_DETECT_STATUS, MPU9150_MOTION_MOT_ZPOS_BIT, buffer);
     return buffer[0];
 }
@@ -2065,7 +2064,7 @@ bool MPU9150X::getZPosMotionDetected() {
  * @see MPU9150_RA_MOT_DETECT_STATUS
  * @see MPU9150_MOTION_MOT_ZRMOT_BIT
  */
-bool MPU9150X::getZeroMotionDetected() {
+bool MPU9150::getZeroMotionDetected() {
     I2Cdev::readBit(devAddr, MPU9150_RA_MOT_DETECT_STATUS, MPU9150_MOTION_MOT_ZRMOT_BIT, buffer);
     return buffer[0];
 }
@@ -2080,7 +2079,7 @@ bool MPU9150X::getZeroMotionDetected() {
  * @param data Byte to write
  * @see MPU9150_RA_I2C_SLV0_DO
  */
-void MPU9150X::setSlaveOutputByte(uint8_t num, uint8_t data) {
+void MPU9150::setSlaveOutputByte(uint8_t num, uint8_t data) {
     if (num > 3) return;
     I2Cdev::writeByte(devAddr, MPU9150_RA_I2C_SLV0_DO + num, data);
 }
@@ -2095,7 +2094,7 @@ void MPU9150X::setSlaveOutputByte(uint8_t num, uint8_t data) {
  * @see MPU9150_RA_I2C_MST_DELAY_CTRL
  * @see MPU9150_DELAYCTRL_DELAY_ES_SHADOW_BIT
  */
-bool MPU9150X::getExternalShadowDelayEnabled() {
+bool MPU9150::getExternalShadowDelayEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_DELAY_CTRL, MPU9150_DELAYCTRL_DELAY_ES_SHADOW_BIT, buffer);
     return buffer[0];
 }
@@ -2105,7 +2104,7 @@ bool MPU9150X::getExternalShadowDelayEnabled() {
  * @see MPU9150_RA_I2C_MST_DELAY_CTRL
  * @see MPU9150_DELAYCTRL_DELAY_ES_SHADOW_BIT
  */
-void MPU9150X::setExternalShadowDelayEnabled(bool enabled) {
+void MPU9150::setExternalShadowDelayEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_MST_DELAY_CTRL, MPU9150_DELAYCTRL_DELAY_ES_SHADOW_BIT, enabled);
 }
 /** Get slave delay enabled status.
@@ -2126,7 +2125,7 @@ void MPU9150X::setExternalShadowDelayEnabled(bool enabled) {
  * @see MPU9150_RA_I2C_MST_DELAY_CTRL
  * @see MPU9150_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
  */
-bool MPU9150X::getSlaveDelayEnabled(uint8_t num) {
+bool MPU9150::getSlaveDelayEnabled(uint8_t num) {
     // MPU9150_DELAYCTRL_I2C_SLV4_DLY_EN_BIT is 4, SLV3 is 3, etc.
     if (num > 4) return 0;
     I2Cdev::readBit(devAddr, MPU9150_RA_I2C_MST_DELAY_CTRL, num, buffer);
@@ -2138,7 +2137,7 @@ bool MPU9150X::getSlaveDelayEnabled(uint8_t num) {
  * @see MPU9150_RA_I2C_MST_DELAY_CTRL
  * @see MPU9150_DELAYCTRL_I2C_SLV0_DLY_EN_BIT
  */
-void MPU9150X::setSlaveDelayEnabled(uint8_t num, bool enabled) {
+void MPU9150::setSlaveDelayEnabled(uint8_t num, bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_I2C_MST_DELAY_CTRL, num, enabled);
 }
 
@@ -2150,7 +2149,7 @@ void MPU9150X::setSlaveDelayEnabled(uint8_t num, bool enabled) {
  * @see MPU9150_RA_SIGNAL_PATH_RESET
  * @see MPU9150_PATHRESET_GYRO_RESET_BIT
  */
-void MPU9150X::resetGyroscopePath() {
+void MPU9150::resetGyroscopePath() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_SIGNAL_PATH_RESET, MPU9150_PATHRESET_GYRO_RESET_BIT, true);
 }
 /** Reset accelerometer signal path.
@@ -2159,7 +2158,7 @@ void MPU9150X::resetGyroscopePath() {
  * @see MPU9150_RA_SIGNAL_PATH_RESET
  * @see MPU9150_PATHRESET_ACCEL_RESET_BIT
  */
-void MPU9150X::resetAccelerometerPath() {
+void MPU9150::resetAccelerometerPath() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_SIGNAL_PATH_RESET, MPU9150_PATHRESET_ACCEL_RESET_BIT, true);
 }
 /** Reset temperature sensor signal path.
@@ -2168,7 +2167,7 @@ void MPU9150X::resetAccelerometerPath() {
  * @see MPU9150_RA_SIGNAL_PATH_RESET
  * @see MPU9150_PATHRESET_TEMP_RESET_BIT
  */
-void MPU9150X::resetTemperaturePath() {
+void MPU9150::resetTemperaturePath() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_SIGNAL_PATH_RESET, MPU9150_PATHRESET_TEMP_RESET_BIT, true);
 }
 
@@ -2188,7 +2187,7 @@ void MPU9150X::resetTemperaturePath() {
  * @see MPU9150_RA_MOT_DETECT_CTRL
  * @see MPU9150_DETECT_ACCEL_ON_DELAY_BIT
  */
-uint8_t MPU9150X::getAccelerometerPowerOnDelay() {
+uint8_t MPU9150::getAccelerometerPowerOnDelay() {
     I2Cdev::readBits(devAddr, MPU9150_RA_MOT_DETECT_CTRL, MPU9150_DETECT_ACCEL_ON_DELAY_BIT, MPU9150_DETECT_ACCEL_ON_DELAY_LENGTH, buffer);
     return buffer[0];
 }
@@ -2198,7 +2197,7 @@ uint8_t MPU9150X::getAccelerometerPowerOnDelay() {
  * @see MPU9150_RA_MOT_DETECT_CTRL
  * @see MPU9150_DETECT_ACCEL_ON_DELAY_BIT
  */
-void MPU9150X::setAccelerometerPowerOnDelay(uint8_t delay) {
+void MPU9150::setAccelerometerPowerOnDelay(uint8_t delay) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_MOT_DETECT_CTRL, MPU9150_DETECT_ACCEL_ON_DELAY_BIT, MPU9150_DETECT_ACCEL_ON_DELAY_LENGTH, delay);
 }
 /** Get Free Fall detection counter decrement configuration.
@@ -2227,7 +2226,7 @@ void MPU9150X::setAccelerometerPowerOnDelay(uint8_t delay) {
  * @see MPU9150_RA_MOT_DETECT_CTRL
  * @see MPU9150_DETECT_FF_COUNT_BIT
  */
-uint8_t MPU9150X::getFreefallDetectionCounterDecrement() {
+uint8_t MPU9150::getFreefallDetectionCounterDecrement() {
     I2Cdev::readBits(devAddr, MPU9150_RA_MOT_DETECT_CTRL, MPU9150_DETECT_FF_COUNT_BIT, MPU9150_DETECT_FF_COUNT_LENGTH, buffer);
     return buffer[0];
 }
@@ -2237,7 +2236,7 @@ uint8_t MPU9150X::getFreefallDetectionCounterDecrement() {
  * @see MPU9150_RA_MOT_DETECT_CTRL
  * @see MPU9150_DETECT_FF_COUNT_BIT
  */
-void MPU9150X::setFreefallDetectionCounterDecrement(uint8_t decrement) {
+void MPU9150::setFreefallDetectionCounterDecrement(uint8_t decrement) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_MOT_DETECT_CTRL, MPU9150_DETECT_FF_COUNT_BIT, MPU9150_DETECT_FF_COUNT_LENGTH, decrement);
 }
 /** Get Motion detection counter decrement configuration.
@@ -2263,7 +2262,7 @@ void MPU9150X::setFreefallDetectionCounterDecrement(uint8_t decrement) {
  * please refer to Registers 29 to 32.
  *
  */
-uint8_t MPU9150X::getMotionDetectionCounterDecrement() {
+uint8_t MPU9150::getMotionDetectionCounterDecrement() {
     I2Cdev::readBits(devAddr, MPU9150_RA_MOT_DETECT_CTRL, MPU9150_DETECT_MOT_COUNT_BIT, MPU9150_DETECT_MOT_COUNT_LENGTH, buffer);
     return buffer[0];
 }
@@ -2273,7 +2272,7 @@ uint8_t MPU9150X::getMotionDetectionCounterDecrement() {
  * @see MPU9150_RA_MOT_DETECT_CTRL
  * @see MPU9150_DETECT_MOT_COUNT_BIT
  */
-void MPU9150X::setMotionDetectionCounterDecrement(uint8_t decrement) {
+void MPU9150::setMotionDetectionCounterDecrement(uint8_t decrement) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_MOT_DETECT_CTRL, MPU9150_DETECT_MOT_COUNT_BIT, MPU9150_DETECT_MOT_COUNT_LENGTH, decrement);
 }
 
@@ -2287,7 +2286,7 @@ void MPU9150X::setMotionDetectionCounterDecrement(uint8_t decrement) {
  * @see MPU9150_RA_USER_CTRL
  * @see MPU9150_USERCTRL_FIFO_EN_BIT
  */
-bool MPU9150X::getFIFOEnabled() {
+bool MPU9150::getFIFOEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_FIFO_EN_BIT, buffer);
     return buffer[0];
 }
@@ -2297,7 +2296,7 @@ bool MPU9150X::getFIFOEnabled() {
  * @see MPU9150_RA_USER_CTRL
  * @see MPU9150_USERCTRL_FIFO_EN_BIT
  */
-void MPU9150X::setFIFOEnabled(bool enabled) {
+void MPU9150::setFIFOEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_FIFO_EN_BIT, enabled);
 }
 /** Get I2C Master Mode enabled status.
@@ -2311,7 +2310,7 @@ void MPU9150X::setFIFOEnabled(bool enabled) {
  * @see MPU9150_RA_USER_CTRL
  * @see MPU9150_USERCTRL_I2C_MST_EN_BIT
  */
-bool MPU9150X::getI2CMasterModeEnabled() {
+bool MPU9150::getI2CMasterModeEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_I2C_MST_EN_BIT, buffer);
     return buffer[0];
 }
@@ -2321,14 +2320,14 @@ bool MPU9150X::getI2CMasterModeEnabled() {
  * @see MPU9150_RA_USER_CTRL
  * @see MPU9150_USERCTRL_I2C_MST_EN_BIT
  */
-void MPU9150X::setI2CMasterModeEnabled(bool enabled) {
+void MPU9150::setI2CMasterModeEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_I2C_MST_EN_BIT, enabled);
 }
 /** Switch from I2C to SPI mode (MPU-6000 only)
  * If this is set, the primary SPI interface will be enabled in place of the
  * disabled primary I2C interface.
  */
-void MPU9150X::switchSPIEnabled(bool enabled) {
+void MPU9150::switchSPIEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_I2C_IF_DIS_BIT, enabled);
 }
 /** Reset the FIFO.
@@ -2337,7 +2336,7 @@ void MPU9150X::switchSPIEnabled(bool enabled) {
  * @see MPU9150_RA_USER_CTRL
  * @see MPU9150_USERCTRL_FIFO_RESET_BIT
  */
-void MPU9150X::resetFIFO() {
+void MPU9150::resetFIFO() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_FIFO_RESET_BIT, true);
 }
 /** Reset the I2C Master.
@@ -2346,7 +2345,7 @@ void MPU9150X::resetFIFO() {
  * @see MPU9150_RA_USER_CTRL
  * @see MPU9150_USERCTRL_I2C_MST_RESET_BIT
  */
-void MPU9150X::resetI2CMaster() {
+void MPU9150::resetI2CMaster() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_I2C_MST_RESET_BIT, true);
 }
 /** Reset all sensor registers and signal paths.
@@ -2361,7 +2360,7 @@ void MPU9150X::resetI2CMaster() {
  * @see MPU9150_RA_USER_CTRL
  * @see MPU9150_USERCTRL_SIG_COND_RESET_BIT
  */
-void MPU9150X::resetSensors() {
+void MPU9150::resetSensors() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_SIG_COND_RESET_BIT, true);
 }
 
@@ -2372,7 +2371,7 @@ void MPU9150X::resetSensors() {
  * @see MPU9150_RA_PWR_MGMT_1
  * @see MPU9150_PWR1_DEVICE_RESET_BIT
  */
-void MPU9150X::reset() {
+void MPU9150::reset() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_DEVICE_RESET_BIT, true);
 }
 /** Get sleep mode status.
@@ -2386,7 +2385,7 @@ void MPU9150X::reset() {
  * @see MPU9150_RA_PWR_MGMT_1
  * @see MPU9150_PWR1_SLEEP_BIT
  */
-bool MPU9150X::getSleepEnabled() {
+bool MPU9150::getSleepEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_SLEEP_BIT, buffer);
     return buffer[0];
 }
@@ -2396,7 +2395,7 @@ bool MPU9150X::getSleepEnabled() {
  * @see MPU9150_RA_PWR_MGMT_1
  * @see MPU9150_PWR1_SLEEP_BIT
  */
-void MPU9150X::setSleepEnabled(bool enabled) {
+void MPU9150::setSleepEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_SLEEP_BIT, enabled);
 }
 /** Get wake cycle enabled status.
@@ -2407,7 +2406,7 @@ void MPU9150X::setSleepEnabled(bool enabled) {
  * @see MPU9150_RA_PWR_MGMT_1
  * @see MPU9150_PWR1_CYCLE_BIT
  */
-bool MPU9150X::getWakeCycleEnabled() {
+bool MPU9150::getWakeCycleEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_CYCLE_BIT, buffer);
     return buffer[0];
 }
@@ -2417,7 +2416,7 @@ bool MPU9150X::getWakeCycleEnabled() {
  * @see MPU9150_RA_PWR_MGMT_1
  * @see MPU9150_PWR1_CYCLE_BIT
  */
-void MPU9150X::setWakeCycleEnabled(bool enabled) {
+void MPU9150::setWakeCycleEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_CYCLE_BIT, enabled);
 }
 /** Get temperature sensor enabled status.
@@ -2431,7 +2430,7 @@ void MPU9150X::setWakeCycleEnabled(bool enabled) {
  * @see MPU9150_RA_PWR_MGMT_1
  * @see MPU9150_PWR1_TEMP_DIS_BIT
  */
-bool MPU9150X::getTempSensorEnabled() {
+bool MPU9150::getTempSensorEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_TEMP_DIS_BIT, buffer);
     return buffer[0] == 0; // 1 is actually disabled here
 }
@@ -2445,7 +2444,7 @@ bool MPU9150X::getTempSensorEnabled() {
  * @see MPU9150_RA_PWR_MGMT_1
  * @see MPU9150_PWR1_TEMP_DIS_BIT
  */
-void MPU9150X::setTempSensorEnabled(bool enabled) {
+void MPU9150::setTempSensorEnabled(bool enabled) {
     // 1 is actually disabled here
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_TEMP_DIS_BIT, !enabled);
 }
@@ -2455,7 +2454,7 @@ void MPU9150X::setTempSensorEnabled(bool enabled) {
  * @see MPU9150_PWR1_CLKSEL_BIT
  * @see MPU9150_PWR1_CLKSEL_LENGTH
  */
-uint8_t MPU9150X::getClockSource() {
+uint8_t MPU9150::getClockSource() {
     I2Cdev::readBits(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_CLKSEL_BIT, MPU9150_PWR1_CLKSEL_LENGTH, buffer);
     return buffer[0];
 }
@@ -2489,7 +2488,7 @@ uint8_t MPU9150X::getClockSource() {
  * @see MPU9150_PWR1_CLKSEL_BIT
  * @see MPU9150_PWR1_CLKSEL_LENGTH
  */
-void MPU9150X::setClockSource(uint8_t source) {
+void MPU9150::setClockSource(uint8_t source) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_PWR_MGMT_1, MPU9150_PWR1_CLKSEL_BIT, MPU9150_PWR1_CLKSEL_LENGTH, source);
 }
 
@@ -2518,7 +2517,7 @@ void MPU9150X::setClockSource(uint8_t source) {
  * @return Current wake frequency
  * @see MPU9150_RA_PWR_MGMT_2
  */
-uint8_t MPU9150X::getWakeFrequency() {
+uint8_t MPU9150::getWakeFrequency() {
     I2Cdev::readBits(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_LP_WAKE_CTRL_BIT, MPU9150_PWR2_LP_WAKE_CTRL_LENGTH, buffer);
     return buffer[0];
 }
@@ -2526,7 +2525,7 @@ uint8_t MPU9150X::getWakeFrequency() {
  * @param frequency New wake frequency
  * @see MPU9150_RA_PWR_MGMT_2
  */
-void MPU9150X::setWakeFrequency(uint8_t frequency) {
+void MPU9150::setWakeFrequency(uint8_t frequency) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_LP_WAKE_CTRL_BIT, MPU9150_PWR2_LP_WAKE_CTRL_LENGTH, frequency);
 }
 
@@ -2536,7 +2535,7 @@ void MPU9150X::setWakeFrequency(uint8_t frequency) {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_XA_BIT
  */
-bool MPU9150X::getStandbyXAccelEnabled() {
+bool MPU9150::getStandbyXAccelEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_XA_BIT, buffer);
     return buffer[0];
 }
@@ -2546,7 +2545,7 @@ bool MPU9150X::getStandbyXAccelEnabled() {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_XA_BIT
  */
-void MPU9150X::setStandbyXAccelEnabled(bool enabled) {
+void MPU9150::setStandbyXAccelEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_XA_BIT, enabled);
 }
 /** Get Y-axis accelerometer standby enabled status.
@@ -2555,7 +2554,7 @@ void MPU9150X::setStandbyXAccelEnabled(bool enabled) {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_YA_BIT
  */
-bool MPU9150X::getStandbyYAccelEnabled() {
+bool MPU9150::getStandbyYAccelEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_YA_BIT, buffer);
     return buffer[0];
 }
@@ -2565,7 +2564,7 @@ bool MPU9150X::getStandbyYAccelEnabled() {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_YA_BIT
  */
-void MPU9150X::setStandbyYAccelEnabled(bool enabled) {
+void MPU9150::setStandbyYAccelEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_YA_BIT, enabled);
 }
 /** Get Z-axis accelerometer standby enabled status.
@@ -2574,7 +2573,7 @@ void MPU9150X::setStandbyYAccelEnabled(bool enabled) {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_ZA_BIT
  */
-bool MPU9150X::getStandbyZAccelEnabled() {
+bool MPU9150::getStandbyZAccelEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_ZA_BIT, buffer);
     return buffer[0];
 }
@@ -2584,7 +2583,7 @@ bool MPU9150X::getStandbyZAccelEnabled() {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_ZA_BIT
  */
-void MPU9150X::setStandbyZAccelEnabled(bool enabled) {
+void MPU9150::setStandbyZAccelEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_ZA_BIT, enabled);
 }
 /** Get X-axis gyroscope standby enabled status.
@@ -2593,7 +2592,7 @@ void MPU9150X::setStandbyZAccelEnabled(bool enabled) {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_XG_BIT
  */
-bool MPU9150X::getStandbyXGyroEnabled() {
+bool MPU9150::getStandbyXGyroEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_XG_BIT, buffer);
     return buffer[0];
 }
@@ -2603,7 +2602,7 @@ bool MPU9150X::getStandbyXGyroEnabled() {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_XG_BIT
  */
-void MPU9150X::setStandbyXGyroEnabled(bool enabled) {
+void MPU9150::setStandbyXGyroEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_XG_BIT, enabled);
 }
 /** Get Y-axis gyroscope standby enabled status.
@@ -2612,7 +2611,7 @@ void MPU9150X::setStandbyXGyroEnabled(bool enabled) {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_YG_BIT
  */
-bool MPU9150X::getStandbyYGyroEnabled() {
+bool MPU9150::getStandbyYGyroEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_YG_BIT, buffer);
     return buffer[0];
 }
@@ -2622,7 +2621,7 @@ bool MPU9150X::getStandbyYGyroEnabled() {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_YG_BIT
  */
-void MPU9150X::setStandbyYGyroEnabled(bool enabled) {
+void MPU9150::setStandbyYGyroEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_YG_BIT, enabled);
 }
 /** Get Z-axis gyroscope standby enabled status.
@@ -2631,7 +2630,7 @@ void MPU9150X::setStandbyYGyroEnabled(bool enabled) {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_ZG_BIT
  */
-bool MPU9150X::getStandbyZGyroEnabled() {
+bool MPU9150::getStandbyZGyroEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_ZG_BIT, buffer);
     return buffer[0];
 }
@@ -2641,7 +2640,7 @@ bool MPU9150X::getStandbyZGyroEnabled() {
  * @see MPU9150_RA_PWR_MGMT_2
  * @see MPU9150_PWR2_STBY_ZG_BIT
  */
-void MPU9150X::setStandbyZGyroEnabled(bool enabled) {
+void MPU9150::setStandbyZGyroEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_PWR_MGMT_2, MPU9150_PWR2_STBY_ZG_BIT, enabled);
 }
 
@@ -2654,7 +2653,7 @@ void MPU9150X::setStandbyZGyroEnabled(bool enabled) {
  * set of sensor data bound to be stored in the FIFO (register 35 and 36).
  * @return Current FIFO buffer size
  */
-uint16_t MPU9150X::getFIFOCount() {
+uint16_t MPU9150::getFIFOCount() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_FIFO_COUNTH, 2, buffer);
     return (((uint16_t)buffer[0]) << 8) | buffer[1];
 }
@@ -2686,18 +2685,18 @@ uint16_t MPU9150X::getFIFOCount() {
  *
  * @return Byte from FIFO buffer
  */
-uint8_t MPU9150X::getFIFOByte() {
+uint8_t MPU9150::getFIFOByte() {
     I2Cdev::readByte(devAddr, MPU9150_RA_FIFO_R_W, buffer);
     return buffer[0];
 }
-void MPU9150X::getFIFOBytes(uint8_t *data, uint8_t length) {
+void MPU9150::getFIFOBytes(uint8_t *data, uint8_t length) {
     I2Cdev::readBytes(devAddr, MPU9150_RA_FIFO_R_W, length, data);
 }
 /** Write byte to FIFO buffer.
  * @see getFIFOByte()
  * @see MPU9150_RA_FIFO_R_W
  */
-void MPU9150X::setFIFOByte(uint8_t data) {
+void MPU9150::setFIFOByte(uint8_t data) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_FIFO_R_W, data);
 }
 
@@ -2710,7 +2709,7 @@ void MPU9150X::setFIFOByte(uint8_t data) {
  * @see MPU9150_WHO_AM_I_BIT
  * @see MPU9150_WHO_AM_I_LENGTH
  */
-uint8_t MPU9150X::getDeviceID() {
+uint8_t MPU9150::getDeviceID() {
     I2Cdev::readBits(devAddr, MPU9150_RA_WHO_AM_I, MPU9150_WHO_AM_I_BIT, MPU9150_WHO_AM_I_LENGTH, buffer);
     return buffer[0];
 }
@@ -2723,7 +2722,7 @@ uint8_t MPU9150X::getDeviceID() {
  * @see MPU9150_WHO_AM_I_BIT
  * @see MPU9150_WHO_AM_I_LENGTH
  */
-void MPU9150X::setDeviceID(uint8_t id) {
+void MPU9150::setDeviceID(uint8_t id) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_WHO_AM_I, MPU9150_WHO_AM_I_BIT, MPU9150_WHO_AM_I_LENGTH, id);
 }
 
@@ -2731,202 +2730,202 @@ void MPU9150X::setDeviceID(uint8_t id) {
 
 // XG_OFFS_TC register
 
-uint8_t MPU9150X::getOTPBankValid() {
+uint8_t MPU9150::getOTPBankValid() {
     I2Cdev::readBit(devAddr, MPU9150_RA_XG_OFFS_TC, MPU9150_TC_OTP_BNK_VLD_BIT, buffer);
     return buffer[0];
 }
-void MPU9150X::setOTPBankValid(bool enabled) {
+void MPU9150::setOTPBankValid(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_XG_OFFS_TC, MPU9150_TC_OTP_BNK_VLD_BIT, enabled);
 }
-int8_t MPU9150X::getXGyroOffsetTC() {
+int8_t MPU9150::getXGyroOffsetTC() {
     I2Cdev::readBits(devAddr, MPU9150_RA_XG_OFFS_TC, MPU9150_TC_OFFSET_BIT, MPU9150_TC_OFFSET_LENGTH, buffer);
     return buffer[0];
 }
-void MPU9150X::setXGyroOffsetTC(int8_t offset) {
+void MPU9150::setXGyroOffsetTC(int8_t offset) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_XG_OFFS_TC, MPU9150_TC_OFFSET_BIT, MPU9150_TC_OFFSET_LENGTH, offset);
 }
 
 // YG_OFFS_TC register
 
-int8_t MPU9150X::getYGyroOffsetTC() {
+int8_t MPU9150::getYGyroOffsetTC() {
     I2Cdev::readBits(devAddr, MPU9150_RA_YG_OFFS_TC, MPU9150_TC_OFFSET_BIT, MPU9150_TC_OFFSET_LENGTH, buffer);
     return buffer[0];
 }
-void MPU9150X::setYGyroOffsetTC(int8_t offset) {
+void MPU9150::setYGyroOffsetTC(int8_t offset) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_YG_OFFS_TC, MPU9150_TC_OFFSET_BIT, MPU9150_TC_OFFSET_LENGTH, offset);
 }
 
 // ZG_OFFS_TC register
 
-int8_t MPU9150X::getZGyroOffsetTC() {
+int8_t MPU9150::getZGyroOffsetTC() {
     I2Cdev::readBits(devAddr, MPU9150_RA_ZG_OFFS_TC, MPU9150_TC_OFFSET_BIT, MPU9150_TC_OFFSET_LENGTH, buffer);
     return buffer[0];
 }
-void MPU9150X::setZGyroOffsetTC(int8_t offset) {
+void MPU9150::setZGyroOffsetTC(int8_t offset) {
     I2Cdev::writeBits(devAddr, MPU9150_RA_ZG_OFFS_TC, MPU9150_TC_OFFSET_BIT, MPU9150_TC_OFFSET_LENGTH, offset);
 }
 
 // X_FINE_GAIN register
 
-int8_t MPU9150X::getXFineGain() {
+int8_t MPU9150::getXFineGain() {
     I2Cdev::readByte(devAddr, MPU9150_RA_X_FINE_GAIN, buffer);
     return buffer[0];
 }
-void MPU9150X::setXFineGain(int8_t gain) {
+void MPU9150::setXFineGain(int8_t gain) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_X_FINE_GAIN, gain);
 }
 
 // Y_FINE_GAIN register
 
-int8_t MPU9150X::getYFineGain() {
+int8_t MPU9150::getYFineGain() {
     I2Cdev::readByte(devAddr, MPU9150_RA_Y_FINE_GAIN, buffer);
     return buffer[0];
 }
-void MPU9150X::setYFineGain(int8_t gain) {
+void MPU9150::setYFineGain(int8_t gain) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_Y_FINE_GAIN, gain);
 }
 
 // Z_FINE_GAIN register
 
-int8_t MPU9150X::getZFineGain() {
+int8_t MPU9150::getZFineGain() {
     I2Cdev::readByte(devAddr, MPU9150_RA_Z_FINE_GAIN, buffer);
     return buffer[0];
 }
-void MPU9150X::setZFineGain(int8_t gain) {
+void MPU9150::setZFineGain(int8_t gain) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_Z_FINE_GAIN, gain);
 }
 
 // XA_OFFS_* registers
 
-int16_t MPU9150X::getXAccelOffset() {
+int16_t MPU9150::getXAccelOffset() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_XA_OFFS_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
-void MPU9150X::setXAccelOffset(int16_t offset) {
+void MPU9150::setXAccelOffset(int16_t offset) {
     I2Cdev::writeWord(devAddr, MPU9150_RA_XA_OFFS_H, offset);
 }
 
 // YA_OFFS_* register
 
-int16_t MPU9150X::getYAccelOffset() {
+int16_t MPU9150::getYAccelOffset() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_YA_OFFS_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
-void MPU9150X::setYAccelOffset(int16_t offset) {
+void MPU9150::setYAccelOffset(int16_t offset) {
     I2Cdev::writeWord(devAddr, MPU9150_RA_YA_OFFS_H, offset);
 }
 
 // ZA_OFFS_* register
 
-int16_t MPU9150X::getZAccelOffset() {
+int16_t MPU9150::getZAccelOffset() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_ZA_OFFS_H, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
-void MPU9150X::setZAccelOffset(int16_t offset) {
+void MPU9150::setZAccelOffset(int16_t offset) {
     I2Cdev::writeWord(devAddr, MPU9150_RA_ZA_OFFS_H, offset);
 }
 
 // XG_OFFS_USR* registers
 
-int16_t MPU9150X::getXGyroOffset() {
+int16_t MPU9150::getXGyroOffset() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_XG_OFFS_USRH, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
-void MPU9150X::setXGyroOffset(int16_t offset) {
+void MPU9150::setXGyroOffset(int16_t offset) {
     I2Cdev::writeWord(devAddr, MPU9150_RA_XG_OFFS_USRH, offset);
 }
 
 // YG_OFFS_USR* register
 
-int16_t MPU9150X::getYGyroOffset() {
+int16_t MPU9150::getYGyroOffset() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_YG_OFFS_USRH, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
-void MPU9150X::setYGyroOffset(int16_t offset) {
+void MPU9150::setYGyroOffset(int16_t offset) {
     I2Cdev::writeWord(devAddr, MPU9150_RA_YG_OFFS_USRH, offset);
 }
 
 // ZG_OFFS_USR* register
 
-int16_t MPU9150X::getZGyroOffset() {
+int16_t MPU9150::getZGyroOffset() {
     I2Cdev::readBytes(devAddr, MPU9150_RA_ZG_OFFS_USRH, 2, buffer);
     return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
-void MPU9150X::setZGyroOffset(int16_t offset) {
+void MPU9150::setZGyroOffset(int16_t offset) {
     I2Cdev::writeWord(devAddr, MPU9150_RA_ZG_OFFS_USRH, offset);
 }
 
 // INT_ENABLE register (DMP functions)
 
-bool MPU9150X::getIntPLLReadyEnabled() {
+bool MPU9150::getIntPLLReadyEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_PLL_RDY_INT_BIT, buffer);
     return buffer[0];
 }
-void MPU9150X::setIntPLLReadyEnabled(bool enabled) {
+void MPU9150::setIntPLLReadyEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_PLL_RDY_INT_BIT, enabled);
 }
-bool MPU9150X::getIntDMPEnabled() {
+bool MPU9150::getIntDMPEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_DMP_INT_BIT, buffer);
     return buffer[0];
 }
-void MPU9150X::setIntDMPEnabled(bool enabled) {
+void MPU9150::setIntDMPEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_INT_ENABLE, MPU9150_INTERRUPT_DMP_INT_BIT, enabled);
 }
 
 // DMP_INT_STATUS
 
-bool MPU9150X::getDMPInt5Status() {
+bool MPU9150::getDMPInt5Status() {
     I2Cdev::readBit(devAddr, MPU9150_RA_DMP_INT_STATUS, MPU9150_DMPINT_5_BIT, buffer);
     return buffer[0];
 }
-bool MPU9150X::getDMPInt4Status() {
+bool MPU9150::getDMPInt4Status() {
     I2Cdev::readBit(devAddr, MPU9150_RA_DMP_INT_STATUS, MPU9150_DMPINT_4_BIT, buffer);
     return buffer[0];
 }
-bool MPU9150X::getDMPInt3Status() {
+bool MPU9150::getDMPInt3Status() {
     I2Cdev::readBit(devAddr, MPU9150_RA_DMP_INT_STATUS, MPU9150_DMPINT_3_BIT, buffer);
     return buffer[0];
 }
-bool MPU9150X::getDMPInt2Status() {
+bool MPU9150::getDMPInt2Status() {
     I2Cdev::readBit(devAddr, MPU9150_RA_DMP_INT_STATUS, MPU9150_DMPINT_2_BIT, buffer);
     return buffer[0];
 }
-bool MPU9150X::getDMPInt1Status() {
+bool MPU9150::getDMPInt1Status() {
     I2Cdev::readBit(devAddr, MPU9150_RA_DMP_INT_STATUS, MPU9150_DMPINT_1_BIT, buffer);
     return buffer[0];
 }
-bool MPU9150X::getDMPInt0Status() {
+bool MPU9150::getDMPInt0Status() {
     I2Cdev::readBit(devAddr, MPU9150_RA_DMP_INT_STATUS, MPU9150_DMPINT_0_BIT, buffer);
     return buffer[0];
 }
 
 // INT_STATUS register (DMP functions)
 
-bool MPU9150X::getIntPLLReadyStatus() {
+bool MPU9150::getIntPLLReadyStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_PLL_RDY_INT_BIT, buffer);
     return buffer[0];
 }
-bool MPU9150X::getIntDMPStatus() {
+bool MPU9150::getIntDMPStatus() {
     I2Cdev::readBit(devAddr, MPU9150_RA_INT_STATUS, MPU9150_INTERRUPT_DMP_INT_BIT, buffer);
     return buffer[0];
 }
 
 // USER_CTRL register (DMP functions)
 
-bool MPU9150X::getDMPEnabled() {
+bool MPU9150::getDMPEnabled() {
     I2Cdev::readBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_DMP_EN_BIT, buffer);
     return buffer[0];
 }
-void MPU9150X::setDMPEnabled(bool enabled) {
+void MPU9150::setDMPEnabled(bool enabled) {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_DMP_EN_BIT, enabled);
 }
-void MPU9150X::resetDMP() {
+void MPU9150::resetDMP() {
     I2Cdev::writeBit(devAddr, MPU9150_RA_USER_CTRL, MPU9150_USERCTRL_DMP_RESET_BIT, true);
 }
 
 // BANK_SEL register
 
-void MPU9150X::setMemoryBank(uint8_t bank, bool prefetchEnabled, bool userBank) {
+void MPU9150::setMemoryBank(uint8_t bank, bool prefetchEnabled, bool userBank) {
     bank &= 0x1F;
     if (userBank) bank |= 0x20;
     if (prefetchEnabled) bank |= 0x40;
@@ -2935,20 +2934,20 @@ void MPU9150X::setMemoryBank(uint8_t bank, bool prefetchEnabled, bool userBank) 
 
 // MEM_START_ADDR register
 
-void MPU9150X::setMemoryStartAddress(uint8_t address) {
+void MPU9150::setMemoryStartAddress(uint8_t address) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_MEM_START_ADDR, address);
 }
 
 // MEM_R_W register
 
-uint8_t MPU9150X::readMemoryByte() {
+uint8_t MPU9150::readMemoryByte() {
     I2Cdev::readByte(devAddr, MPU9150_RA_MEM_R_W, buffer);
     return buffer[0];
 }
-void MPU9150X::writeMemoryByte(uint8_t data) {
+void MPU9150::writeMemoryByte(uint8_t data) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_MEM_R_W, data);
 }
-void MPU9150X::readMemoryBlock(uint8_t *data, uint16_t dataSize, uint8_t bank, uint8_t address) {
+void MPU9150::readMemoryBlock(uint8_t *data, uint16_t dataSize, uint8_t bank, uint8_t address) {
     setMemoryBank(bank);
     setMemoryStartAddress(address);
     uint8_t chunkSize;
@@ -2979,7 +2978,7 @@ void MPU9150X::readMemoryBlock(uint8_t *data, uint16_t dataSize, uint8_t bank, u
         }
     }
 }
-bool MPU9150X::writeMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank, uint8_t address, bool verify, bool useProgMem) {
+bool MPU9150::writeMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank, uint8_t address, bool verify, bool useProgMem) {
     setMemoryBank(bank);
     setMemoryStartAddress(address);
     uint8_t chunkSize;
@@ -3056,10 +3055,10 @@ bool MPU9150X::writeMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t 
     if (useProgMem) free(progBuffer);
     return true;
 }
-bool MPU9150X::writeProgMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank, uint8_t address, bool verify) {
+bool MPU9150::writeProgMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank, uint8_t address, bool verify) {
     return writeMemoryBlock(data, dataSize, bank, address, verify, true);
 }
-bool MPU9150X::writeDMPConfigurationSet(const uint8_t *data, uint16_t dataSize, bool useProgMem) {
+bool MPU9150::writeDMPConfigurationSet(const uint8_t *data, uint16_t dataSize, bool useProgMem) {
     uint8_t *progBuffer, success, special;
     uint16_t i, j;
     if (useProgMem) {
@@ -3136,26 +3135,26 @@ bool MPU9150X::writeDMPConfigurationSet(const uint8_t *data, uint16_t dataSize, 
     if (useProgMem) free(progBuffer);
     return true;
 }
-bool MPU9150X::writeProgDMPConfigurationSet(const uint8_t *data, uint16_t dataSize) {
+bool MPU9150::writeProgDMPConfigurationSet(const uint8_t *data, uint16_t dataSize) {
     return writeDMPConfigurationSet(data, dataSize, true);
 }
 
 // DMP_CFG_1 register
 
-uint8_t MPU9150X::getDMPConfig1() {
+uint8_t MPU9150::getDMPConfig1() {
     I2Cdev::readByte(devAddr, MPU9150_RA_DMP_CFG_1, buffer);
     return buffer[0];
 }
-void MPU9150X::setDMPConfig1(uint8_t config) {
+void MPU9150::setDMPConfig1(uint8_t config) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_DMP_CFG_1, config);
 }
 
 // DMP_CFG_2 register
 
-uint8_t MPU9150X::getDMPConfig2() {
+uint8_t MPU9150::getDMPConfig2() {
     I2Cdev::readByte(devAddr, MPU9150_RA_DMP_CFG_2, buffer);
     return buffer[0];
 }
-void MPU9150X::setDMPConfig2(uint8_t config) {
+void MPU9150::setDMPConfig2(uint8_t config) {
     I2Cdev::writeByte(devAddr, MPU9150_RA_DMP_CFG_2, config);
 }

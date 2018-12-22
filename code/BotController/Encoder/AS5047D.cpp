@@ -82,6 +82,18 @@ float AS5047D::getAngle() {
 	return currentAngle;
 }
 
+float AS5047D::resetAngle() {
+	float result = 0;
+	if (currentAngle > TWO_PI) {
+		result = -TWO_PI*(floor(currentAngle / TWO_PI));
+	}
+	if (currentAngle < -TWO_PI) {
+		result = TWO_PI*(floor(-currentAngle / TWO_PI));
+	}
+	currentAngle += result;
+	return result;
+}
+
 float AS5047D::getSensorRead() {
 	return ((float)lastSensorRead)/((float)resolution)*TWO_PI;
 }

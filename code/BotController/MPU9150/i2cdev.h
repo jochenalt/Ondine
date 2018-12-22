@@ -51,7 +51,7 @@ THE SOFTWARE.
 // I2C interface implementation setting
 // -----------------------------------------------------------------------------
 #ifndef I2CDEV_IMPLEMENTATION
-#define I2CDEV_IMPLEMENTATION       I2CDEV_T3
+#define I2CDEV_IMPLEMENTATION       I2CDEV_ARDUINO_WIRE
 //#define I2CDEV_IMPLEMENTATION       I2CDEV_BUILTIN_SBWIRE
 //#define I2CDEV_IMPLEMENTATION       I2CDEV_BUILTIN_FASTWIRE
 #endif // I2CDEV_IMPLEMENTATION
@@ -82,7 +82,7 @@ THE SOFTWARE.
         #include "Arduino.h"
     #endif
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-        #include <Wire.h>
+		#include <i2c_t3-v9.1/i2c_t3-v9.1.h>
     #endif
     #if I2CDEV_IMPLEMENTATION == I2CDEV_I2CMASTER_LIBRARY
         #include <I2C.h>
@@ -91,7 +91,7 @@ THE SOFTWARE.
 		#include "SBWire.h"
 	#endif
 	#if I2CDEV_IMPLEMENTATION == I2CDEV_T3
-		#include <i2c_t3-v9.1/i2c_t3-v9.1.h>aaa
+		#include <i2c_t3-v9.1/i2c_t3-v9.1.h>
 		extern i2c_t3* i2cbus;
 	#endif
 #endif

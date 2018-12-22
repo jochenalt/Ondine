@@ -53,6 +53,8 @@ public:
 	void setMotorSpeed(float speed /* [rev/s] */);
 	float getMotorSpeed();
 	float getIntegratedMotorAngle();
+	// bring angle into interval -2PI..2PI, return the difference
+	float resetAngle() ;
 
 	// set speed of wheel including the gear box
 	void setSpeed(float speed /* [rev/s] */);
@@ -95,6 +97,7 @@ private:
 
 	// set PWM value (=torque) to PWM pins that are connected to L6234 driver
 	void sendPWMDuty(float torque);
+
 
 	bool enabled = false;
 	bool reverse = false;

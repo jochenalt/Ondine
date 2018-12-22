@@ -79,6 +79,9 @@ void BallDrive::getSpeed(uint32_t now_us, const IMUSample &sample, BotMovement &
 
 		lastSpeedX = current.x.speed;
 		lastSpeedY = current.y.speed;
+
+		// make angle small to stay within good resolution of float
+		engine.resetAngle();
 	} else {
 		lastSpeedX = current.x.speed;
 		lastSpeedY = current.y.speed;

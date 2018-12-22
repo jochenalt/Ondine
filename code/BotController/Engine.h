@@ -32,6 +32,7 @@ public:
 
 	// get the change of angles since last invocation of getWheelChange or resetWheelAngleChange
 	void getWheelAngleChange(float wheelAngleChange[3] /* [rad] */);
+	void resetAngle();
 
 	void setup(MenuController* menuCtrl);
 	void loop(uint32_t now_us);

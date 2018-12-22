@@ -9,7 +9,6 @@
 #define STATECONTROLLER_H_
 
 #include <Filter/FIRFilter.h>
-#include <Filter/IIRFilter.h>
 #include <Filter/ComplementaryFilter.h>
 
 #include <types.h>

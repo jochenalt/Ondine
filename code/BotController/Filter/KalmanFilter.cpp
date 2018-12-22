@@ -54,7 +54,6 @@ void KalmanFilter::update(float newAngle /* rad */, float newRate /* rad/s */, f
     bias  += K1 * y;
 
     // Update the error covariance
-    // (strange: most implementations in the internet forget to save the variables before using it)
     float P00saved = P00;
     float P01saved = P01;
 
