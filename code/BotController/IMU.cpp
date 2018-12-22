@@ -270,7 +270,6 @@ void IMU::loop(uint32_t now_us) {
 
 			// compute dT used in filters
 			dT = timeLoop.dT(now_us);
-			logger->println("A");delay(100);
 
 			// read raw values
 			int status = mpu9250->readFifo();
@@ -278,16 +277,13 @@ void IMU::loop(uint32_t now_us) {
 				fatalError("loop IMU status error ");
 				loggingln(status);
 			}
-			logger->println("B");delay(100);
 
 			// fetch all IMU samples since the last loop and filter them by average low pass
 			int noOfSamples = mpu9250->getFifoSize();
-			logger->println("C");delay(100);
 
 			// check if FIFO buffer did not overflow.
 			// FIFO needs to be reinitialized then, other wise there's rubbish data
 			if (mpu9250->fifoOverflow()) {
-				logger->println("D");delay(100);
 
 				// reset and re-initialize FIFO
 				mpu9250->resetFifo();
@@ -299,11 +295,8 @@ void IMU::loop(uint32_t now_us) {
 				noOfSamples = mpu9250->getFifoSize();
 				if (noOfSamples == 0)
 					fatalError("IMU lost loop");
-				logger->println("E");delay(100);
 
 			}
-			logger->println("F");delay(100);
-			logger->println(noOfSamples);
 			if (noOfSamples > 0) {
 				float accelSamples[3][noOfSamples]; // dont be scared, this has typically a size of 3*4=12
 				float gyroSamples[3][noOfSamples];
@@ -319,7 +312,6 @@ void IMU::loop(uint32_t now_us) {
 						gyroFilter[dim].update(gyroSamples[dim][i]);
 					}
 				}
-				logger->println("G");delay(100);
 
 				// turn the coordinate system of the IMU into the one of the bot:
 				// front wheel points to the x-axis, y-axis is
@@ -350,7 +342,6 @@ void IMU::loop(uint32_t now_us) {
 					currentSample.plane[i].angle = kalman[i].getAngle();
 					currentSample.plane[i].angularVelocity = kalman[i].getRate();
 				}
-				logger->println("H");delay(100);
 
 				// indicate that new value is available
 				// next call of isNewValueAvailable will return true
@@ -390,7 +381,6 @@ void IMU::loop(uint32_t now_us) {
 			}
 		}
 	}
-	logger->println("K");delay(100);
 }
 
 // returns true once when a new value is available.
