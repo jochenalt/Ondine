@@ -99,14 +99,14 @@ void ControlPlane::reset () {
 							 SampleFrequency, 	/* 200 Hz */
 							 15.0f  			/* low pass cut off frequency */);
 			outputSpeedFilter.init(FIR::LOWPASS,
-					        5,SampleFrequency, 80);
+					        5,SampleFrequency, 20);
 
 			posFilter.init(FIR::LOWPASS,
                              1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
                              1.0e-4f             /* supression in stop band is -40db */,
                              SampleFrequency,     /* 200 Hz */
                              100.0f               /* low pass cut off frequency */);
-            outputSpeedFilter2.init(100.0, SampleFrequency);
+            outputSpeedFilter2.init(500.0, SampleFrequency);
 }
 
 float ControlPlane::getBodyPos() {
@@ -221,7 +221,8 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// get rid of trembling by a FIR filter 5th order with 15Hz
 		// filteredSpeed = outputSpeedFilter.update(speed);
-		filteredSpeed = outputSpeedFilter2.update(speed);
+		// filteredSpeed = outputSpeedFilter2.update(speed);
+		filteredSpeed = speed;
 
 
 		if (doLogging) {

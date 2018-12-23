@@ -36,8 +36,9 @@ const float MaxWheelAcceleration = 100;								// [rev/s^2]
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
 const int IMUSamplingFrequency = 1000;								// [Hz] sampling time of IMU
 const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
-const int IMUSamplesPerLoop = IMUSamplingFrequency/SampleFrequency;	// [#] should be odd to allow FIF lowpasses
-const float SamplingTime 					= 1.0/SampleFrequency; 	// [s] sampling time
+const int SampleTime_us = 1000000/SampleFrequency;					// [us] time per loop
+const int IMUSamplesPerLoop = IMUSamplingFrequency/SampleFrequency;	// [#]
+const float SamplingTime 	= 1.0/SampleFrequency; 	                // [s] sampling time
 
 
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house
@@ -53,6 +54,19 @@ const int MaxBrushlessDriverFrequency = 1000;
 const int BrushlessDriverPWMPins[3][3] = {  { 2,    3,   4},   // motor 1, PWM1, PWM2, PWM3
 											{ 5,    6,   7},   // motor 2, PWM1, PWM2, PWM3
 											{ 8,    9,   10}}; // motor 3, PWM1, PWM2, PWM3
+
+
+// motor with ID 0 is supposed to point forward, motor 1
+//                          ^
+//   1/  ---                |x
+//      |   |-| 0      y<-----
+//   2\  ---                |
+//
+const int MotorSequenceIdx [3] =  { 2,0,1 };
+
+
+// array that assigns the motors pins to the right order
+const bool MotorDirection[3] = { true, true, true };
 
 // all L6234 are connected to one common enable pin
 #define BRUSHLESS_DRIVER_ENABLE_PIN  24

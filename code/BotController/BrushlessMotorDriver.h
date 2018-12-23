@@ -53,8 +53,6 @@ public:
 	void setMotorSpeed(float speed /* [rev/s] */);
 	float getMotorSpeed();
 	float getIntegratedMotorAngle();
-	// bring angle into interval -2PI..2PI, return the difference
-	float resetAngle() ;
 
 	// set speed of wheel including the gear box
 	void setSpeed(float speed /* [rev/s] */);
@@ -66,6 +64,8 @@ public:
 
 	virtual void printHelp();
 	virtual void menuLoop(char ch, bool continously);
+
+	float resetAngle();
 private:
 
 	// PINs for Drotek L6234 EN, IN1, IN2, IN3
@@ -88,7 +88,7 @@ private:
 	// called by loop, turns the magnetic field along the passed time
 	void turnReferenceAngle(float dT);
 
-	// return absolute angle of rotor's position relative to
+	// return absolute angle [rad] of rotor's position relative to
 	// motor's winding A (that's normalized during calibration)
 	float getEncoderAngle();
 
@@ -97,7 +97,6 @@ private:
 
 	// set PWM value (=torque) to PWM pins that are connected to L6234 driver
 	void sendPWMDuty(float torque);
-
 
 	bool enabled = false;
 	bool reverse = false;

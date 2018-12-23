@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 #include "SPI.h"     // SPI library
 #include <i2c_t3-v9.1/i2c_t3-v9.1.h>
 
-class MPU9250X {
+class MPU9250{
   public:
     enum GyroRange
     {
@@ -42,7 +42,7 @@ class MPU9250X {
       ACCEL_RANGE_2G,
       ACCEL_RANGE_4G,
       ACCEL_RANGE_8G,
-      ACCEL_RANGE_16G
+      ACCEL_RANGE_16G    
     };
     enum DlpfBandwidth
     {
@@ -70,8 +70,8 @@ class MPU9250X {
       LP_ACCEL_ODR_250HZ = 10,
       LP_ACCEL_ODR_500HZ = 11
     };
-    MPU9250X(i2c_t3* bus,uint8_t address);
-    MPU9250X(SPIClass &bus,uint8_t csPin);
+    MPU9250(i2c_t3* bus,uint8_t address);
+    MPU9250(SPIClass &bus,uint8_t csPin);
     int begin();
     int setAccelRange(AccelRange range);
     int setGyroRange(GyroRange range);
@@ -91,7 +91,7 @@ class MPU9250X {
     float getMagY_uT();
     float getMagZ_uT();
     float getTemperature_C();
-
+    
     int calibrateGyro();
     float getGyroBiasX_rads();
     float getGyroBiasY_rads();
@@ -187,7 +187,7 @@ class MPU9250X {
     float _avgs;
     // transformation matrix
     /* transform the accel and gyro axes to match the magnetometer axes */
-    const int16_t tX[3] = {0,  1,  0};
+    const int16_t tX[3] = {0,  1,  0}; 
     const int16_t tY[3] = {1,  0,  0};
     const int16_t tZ[3] = {0,  0, -1};
     // constants
@@ -216,8 +216,7 @@ class MPU9250X {
     const uint8_t ACCEL_DLPF_10 = 0x05;
     const uint8_t ACCEL_DLPF_5 = 0x06;
     const uint8_t ACCEL_DLPF_460 = 0x07;
-
-    const uint8_t CONFIGURATION = 0x1A;
+    const uint8_t CONFIG = 0x1A;
     const uint8_t GYRO_DLPF_184 = 0x01;
     const uint8_t GYRO_DLPF_92 = 0x02;
     const uint8_t GYRO_DLPF_41 = 0x03;
@@ -226,7 +225,6 @@ class MPU9250X {
     const uint8_t GYRO_DLPF_5 = 0x06;
     const uint8_t GYRO_DLPF_3600 = 0x07;
     const uint8_t GYRO_DLPF_250 = 0x00;
-
     const uint8_t SMPLRT_DIV = 0x19;
     const uint8_t INT_PIN_CFG = 0x37;
     const uint8_t INT_ENABLE = 0x38;
@@ -266,7 +264,7 @@ class MPU9250X {
     const uint8_t FIFO_READ = 0x74;
     // AK8963 registers
     const uint8_t AK8963_I2C_ADDR = 0x0C;
-    const uint8_t AK8963_HXL = 0x03;
+    const uint8_t AK8963_HXL = 0x03; 
     const uint8_t AK8963_CNTL1 = 0x0A;
     const uint8_t AK8963_PWR_DOWN = 0x00;
     const uint8_t AK8963_CNT_MEAS1 = 0x12;
@@ -285,15 +283,14 @@ class MPU9250X {
     int whoAmIAK8963();
 };
 
-class MPU9250FIFO: public MPU9250X {
+class MPU9250FIFO: public MPU9250 {
   public:
-    using MPU9250X::MPU9250X;
+    using MPU9250::MPU9250;
     int enableFifo(bool accel,bool gyro,bool mag,bool temp);
     int resetFifo();
     int readFifo();
     int getFifoSize() { return _aSize; };
     bool fifoOverflow() { return _aSize >= 42; };
-
     void getFifoAccel_mss(int dimension, size_t *size,float* data);
     void getFifoGyro_rads(int dimension, size_t *size,float* data);
 

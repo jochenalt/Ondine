@@ -119,7 +119,7 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	float  lVz = pOmegaZ * BallRadius;
 
 	// compute wheel's speed in rad/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
-	wheelSpeed[0] = ((m01_11 + m02_12) * pVx	         + (-m02_02) * pVy           + ( -m01_21 - m02_22         ) * lVz)  ;
+	wheelSpeed[0] = ((m01_11 + m02_12) * pVx	       + (-m02_02) * pVy           + ( -m01_21 - m02_22         ) * lVz)  ;
 	wheelSpeed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
 	wheelSpeed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
 

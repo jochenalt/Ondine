@@ -16,14 +16,9 @@ void Engine::setup(MenuController* menuCtrl) {
 	registerMenuController(menuCtrl);
 
 	// initialize all brushless motors and their encoders
-	// (in case sequence of motors in schematics differs from sequence of motors used in code)
-	static int MotorSequenceIdx [3] =  { 0,1,2 };
-
-	// array that assigns the motors pins to the right order
-	static bool ReverseDirection[3] = { true, true, true };
 	for (int i = 0;i<3;i++) {
 		int idx = MotorSequenceIdx[i];
-		wheel[i].setup(i, menuCtrl, ReverseDirection[idx]); // first call initializes the SPI bus
+		wheel[i].setup(i, menuCtrl, MotorDirection[idx]); // first call initializes the SPI bus
 		wheel[i].setupMotor(BRUSHLESS_DRIVER_ENABLE_PIN,
 							BrushlessDriverPWMPins[idx][0],
 							BrushlessDriverPWMPins[idx][1],
@@ -36,6 +31,7 @@ void Engine::loop(uint32_t now_us) {
 	for (int i = 0;i<3;i++) {
 		wheel[i].loop(now_us);
 	}
+
 }
 
 void Engine::setWheelSpeed(float revPerSec[3]) {
@@ -69,13 +65,6 @@ void Engine::getWheelAngleChange(float wheelAngleChange[3]) {
 		lastWheelAngle[i] = angle;
 	}
 }
-
-void Engine::resetAngle() {
-	for (int i = 0;i<3;i++) {
-		float difference = wheel[i].resetAngle();
-		lastWheelAngle[i] += difference;
-	}
-}
 void Engine::enable(bool doIt) {
 	if (doIt) {
 		bool ok = true;
@@ -103,6 +92,15 @@ void Engine::enable(bool doIt) {
 		enabled = false;
 	}
 }
+
+
+void Engine::resetAngle() {
+    for (int i = 0;i<3;i++) {
+        float difference = wheel[i].resetAngle();
+        lastWheelAngle[i] += difference;
+    }
+}
+
 
 void Engine::printHelp() {
 	loggingln();

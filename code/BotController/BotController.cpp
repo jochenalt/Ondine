@@ -161,21 +161,8 @@ void BotController::loop() {
 	// performance measurement
 	uint32_t start_us = micros();
 
-	// drive motors
-	ballDrive.loop(start_us);
-
-	// give other libraries some time
-	yield();
-
-	// react on serial line
-	menuController.loop();
-
 	// check if new IMU orientation is there
 	imu.loop(start_us);
-	IMUSample sensorSample = imu.getSample();
-
-	// drive the lifter
-	lifter.loop();
 
 	// run main balance loop. Timing is determined by IMU that sends an
 	// interrupt everytime a new value is there.
@@ -183,7 +170,8 @@ void BotController::loop() {
 	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
 			// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
-			ballDrive.getSpeed(start_us, sensorSample,currentMovement);
+		IMUSample sensorSample = imu.getSample();
+		ballDrive.getSpeed(start_us, sensorSample,currentMovement);
 
 			// call balance and speed controller
 			state.update(dT, sensorSample, currentMovement, targetBotMovement);
@@ -245,7 +233,19 @@ void BotController::loop() {
 				}
 			}
 	} else
-		delayMicroseconds(100); // ensure that next dT > 0
+		delayMicroseconds(50); // ensure that next dT > 0
+
+	// drive motors
+	ballDrive.loop(start_us);
+
+	// give other libraries some time
+	yield();
+
+	// react on serial line
+	menuController.loop();
+
+	// drive the lifter
+	lifter.loop();
 }
 
 

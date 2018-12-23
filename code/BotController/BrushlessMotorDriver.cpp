@@ -80,9 +80,9 @@ void MotorConfig::initDefaultValues() {
 	pid_lifter.Ki = 0.005;
 	pid_lifter.Kd = 0.0;
 
-	phaseAAngle[0] = radians(229.4);
-	phaseAAngle[1] = radians(234.3);
-	phaseAAngle[2] = radians(126.8);
+	phaseAAngle[0] = radians(229);
+	phaseAAngle[1] = radians(232);
+	phaseAAngle[2] = radians(127);
 }
 
 void MotorConfig::print() {
@@ -102,6 +102,13 @@ void MotorConfig::print() {
 	logging(pid_speed.Ki,3);
 	logging(",");
 	logging(pid_speed.Kd,4);
+	loggingln(")");
+	logging("   motorID=(");
+	logging(MotorSequenceIdx[0]);
+	logging(",");
+	logging(MotorSequenceIdx[1]);
+	logging(",");
+	logging(MotorSequenceIdx[2]);
 	loggingln(")");
 	logging("   rotorAngle=(");
 	logging(degrees(phaseAAngle[0]),1);
@@ -247,6 +254,8 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 			// compute position error as input for PID controller
 			float errorAngle = referenceAngle - getEncoderAngle() ;
+			// if (abs(errorAngle) > radians(45))
+			//	currentReferenceMotorSpeed = 0;
 
 			// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
@@ -272,40 +281,6 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 				float angleDiff =  (getEncoderAngle()-measurementAngle);
 				measurementAngle = getEncoderAngle();
 				measuredMotorSpeed= angleDiff/(0.1*TWO_PI);
-			}
-
-			if (abs(errorAngle) > radians(20)) {
-				logging(" error in motor=");
-				logging(motorNo);
-				logging(degrees(advanceAngle));
-				logging(" sr=");
-				logging(speedRatio);
-				logging(" co=");
-				logging(degrees(controlOutput));
-
-				logging(" enc=");
-				logging(degrees(getEncoderAngle()));
-
-				logging(" e=");
-				logging(degrees(errorAngle));
-				logging(" ref=");
-				logging(degrees(referenceAngle));
-				logging(" mag=");
-				logging(degrees(magneticFieldAngle));
-				logging(" v=");
-				logging(getSpeed(),1);
-
-				logging(" ms=");
-				logging(measuredMotorSpeed,2);
-				logging(" tv=");
-				logging(targetMotorSpeed,1);
-				logging(" torque=");
-				logging(torque,2);
-				logging(" dT=");
-				logging(dT,4);
-				logging(" t=");
-				logging(micros());
-				loggingln();
 			}
 
 			/*
@@ -345,7 +320,7 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 								loggingln();
 				}
 			}
-				*/
+			*/
 
 			return true;
 	}
@@ -358,7 +333,7 @@ void BrushlessMotorDriver::setMotorSpeed(float speed /* rotations per second */)
 }
 
 float BrushlessMotorDriver::getMotorSpeed() {
-	return (reverse?-1.0:1.0)*measuredMotorSpeed;
+	return measuredMotorSpeed;
 }
 
 float BrushlessMotorDriver::getIntegratedMotorAngle() {
@@ -378,18 +353,11 @@ float BrushlessMotorDriver::getIntegratedAngle() {
 }
 
 float BrushlessMotorDriver::getEncoderAngle() {
-	return magEncoder.getAngle() - 	motorConfig.phaseAAngle[motorNo];
+	return magEncoder.getAngle() - 	motorConfig.phaseAAngle[MotorSequenceIdx[motorNo]];
 }
 
 void BrushlessMotorDriver::readEncoderAngle() {
 	magEncoder.readAngle();
-}
-
-float BrushlessMotorDriver::resetAngle() {
-	float difference = magEncoder.resetAngle();
-	magneticFieldAngle += difference;
-	referenceAngle += difference;
-	return difference;
 }
 
 void BrushlessMotorDriver::enable(bool doit) {
@@ -406,6 +374,14 @@ void BrushlessMotorDriver::enable(bool doit) {
 		return;
 	}
 }
+
+float BrushlessMotorDriver::resetAngle() {
+    float difference = magEncoder.resetAngle();
+    magneticFieldAngle += difference;
+    referenceAngle += difference;
+    return difference;
+}
+
 
 void BrushlessMotorDriver::calibrate() {
 	logging("calibrating motor[");
@@ -428,7 +404,7 @@ void BrushlessMotorDriver::calibrate() {
 	magneticFieldAngle = 0;
 	sendPWMDuty(0.0);
 
-	motorConfig.phaseAAngle[motorNo] = nullAngle;
+	motorConfig.phaseAAngle[MotorSequenceIdx[motorNo]] = nullAngle;
 	enable(false);
 }
 

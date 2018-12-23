@@ -9,15 +9,7 @@
 #define IMU_IMUCONTROLLER_H_
 
 #include <libraries/MenuController.h>
-#define MPU9250
-
-#ifdef MPU9250
 #include <MPU9250/MPU9250.h>
-#endif
-
-#ifdef MPU9150
-#include <MPU9150/MPU9150.h>
-#endif
 #include <Filter/KalmanFilter.h>
 #include <Filter/ComplementaryFilter.h>
 #include <Filter/FIRFilter.h>
@@ -108,8 +100,10 @@ private:
 	void updateFilter();
 	MPU9250FIFO* mpu9250 = NULL;
 	KalmanFilter kalman[3]; // one kalman filter per dimension
+	// Average accelFilter[3];
 	FIR::Filter accelFilter[3];
 	FIR::Filter gyroFilter[3];
+	// Average gyroFilter[3];
 
 	float noiseVariance = 0.1; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
 
@@ -122,7 +116,6 @@ private:
 	TimePassedBy logTimer;
 	TimeLoop timeLoop;
 	bool enabled = false;
-	matrix33_t nullRot;
 };
 
 #endif /* IMU_IMUCONTROLLER_H_ */
