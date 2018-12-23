@@ -92,7 +92,7 @@ private:
 	TimePassedBy performanceLogTimer;
 	BotMode mode = OFF;
 	TimePassedBy logTimer;
-	float avrLoopTime = 0;
+	uint32_t avrLoopTime_us = 0;
 };
 
 #endif /* BOTCONTROLLER_H_ */

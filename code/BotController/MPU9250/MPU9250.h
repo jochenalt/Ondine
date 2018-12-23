@@ -46,8 +46,6 @@ class MPU9250{
     };
     enum DlpfBandwidth
     {
-      DLPF_BANDWIDTH_HIGH,
-	  DLPF_BANDWIDTH_250HZ,
       DLPF_BANDWIDTH_184HZ,
       DLPF_BANDWIDTH_92HZ,
       DLPF_BANDWIDTH_41HZ,

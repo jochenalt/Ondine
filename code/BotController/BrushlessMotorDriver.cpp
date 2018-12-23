@@ -254,8 +254,7 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 			// compute position error as input for PID controller
 			float errorAngle = referenceAngle - getEncoderAngle() ;
-			// if (abs(errorAngle) > radians(45))
-			//	currentReferenceMotorSpeed = 0;
+
 
 			// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
 			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
@@ -271,7 +270,6 @@ bool BrushlessMotorDriver::loop(uint32_t now_us) {
 
 			// set magnetic field relative to rotor's position
 			magneticFieldAngle = getEncoderAngle() + advanceAngle + radians(90);
-
 
 			// send new pwm value to motor
 			sendPWMDuty(min(abs(torque),1.0));

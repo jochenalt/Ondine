@@ -67,12 +67,12 @@ void StateControllerConfig::initDefaultValues() {
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
-	angleWeight				= 31; // 39.0;
+	angleWeight				= 21; // 39.0;
 	intAngleWeight 			= 0;
-	angularSpeedWeight		= 20; // 21.00;
+	angularSpeedWeight		= 18.5; // 21.00;
 
-	ballPositionWeight		= 3; // 14.2;
-	ballPosIntegratedWeight = 6.5; // -0.0;
+	ballPositionWeight		= 4.5; // 14.2;
+	ballPosIntegratedWeight = 0.0; // -0.0;
 	ballVelocityWeight		= 2.0; // 12.0;
 	ballAccelWeight			= floatPrecision;	// 0
 	omegaWeight				= floatPrecision;
@@ -80,33 +80,33 @@ void StateControllerConfig::initDefaultValues() {
 
 
 void ControlPlane::reset () {
-			lastTargetAngle = 0;
-			lastAngle = 0;
-			lastBallPos = 0;
-			lastBallSpeed = 0;
-			lastTargetBodyPos = 0;
-			lastTargetBallPos = 0;
-			filteredSpeed = 0;
-			speed = 0;
-			accel = 0;
-			error = 0;
-			posErrorIntegrated = 0;
+		lastTargetAngle = 0;
+		lastAngle = 0;
+		lastBallPos = 0;
+		lastBallSpeed = 0;
+		lastTargetBodyPos = 0;
+		lastTargetBallPos = 0;
+		filteredSpeed = 0;
+		speed = 0;
+		accel = 0;
+		error = 0;
+		posErrorIntegrated = 0;
 
-			// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
-			outputSpeedFilter.init(FIR::LOWPASS,
-					         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
-							 1.0e-4f 			/* supression in stop band is -40db */,
-							 SampleFrequency, 	/* 200 Hz */
-							 15.0f  			/* low pass cut off frequency */);
-			outputSpeedFilter.init(FIR::LOWPASS,
-					        5,SampleFrequency, 20);
+		// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
+		outputSpeedFilter.init(FIR::LOWPASS,
+				         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
+						 1.0e-4f 			/* supression in stop band is -40db */,
+						 SampleFrequency, 	/* 200 Hz */
+						 15.0f  			/* low pass cut off frequency */);
+		outputSpeedFilter.init(FIR::LOWPASS,
+				        10,SampleFrequency, 50);
 
-			posFilter.init(FIR::LOWPASS,
-                             1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
-                             1.0e-4f             /* supression in stop band is -40db */,
-                             SampleFrequency,     /* 200 Hz */
-                             100.0f               /* low pass cut off frequency */);
-            outputSpeedFilter2.init(500.0, SampleFrequency);
+		posFilter.init(FIR::LOWPASS,
+                            1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
+                            1.0e-4f             /* supression in stop band is -40db */,
+                            SampleFrequency,     /* 200 Hz */
+                            15.0f               /* low pass cut off frequency */);
+        outputSpeedFilter2.init(500.0, SampleFrequency);
 }
 
 float ControlPlane::getBodyPos() {
@@ -126,8 +126,6 @@ float ControlPlane::getPosError() {
 float ControlPlane::getTiltError() {
 	return totalTiltError;
 }
-
-
 
 void ControlPlane::update(bool doLogging, float dT,
 		const State& current, const State& target,
@@ -150,7 +148,9 @@ void ControlPlane::update(bool doLogging, float dT,
 		// compute current state variables angle, angular velocity, position, speed, accelst arget angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 		float angle = sensor.angle;
+
 		float angularVelocity = sensor.angularVelocity;
+
 		// float angularVelocity = (angle - lastAngle)/dT;
 
 		float ballPos   		= current.pos;
@@ -164,22 +164,22 @@ void ControlPlane::update(bool doLogging, float dT,
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
-		float error_tilt			= (angle-targetAngle);
-		tiltErrorIntegrated 			+= error_tilt*dT;
+		float error_angle			= (angle-targetAngle);
+		error_int_angle 			+= error_angle*dT;
 		const float maxTiltError = radians(10);
-		tiltErrorIntegrated 			=
-					constrain(tiltErrorIntegrated,
+		error_int_angle 			=
+					constrain(error_int_angle,
 								-maxTiltError,
 								+maxTiltError);
 
 		float gradient = 1.0;
-		error_tilt = error_tilt + sgn(error_tilt)*abs(error_tilt*error_tilt*gradient);
+		error_angle = error_angle + sgn(error_angle)*abs(error_angle*error_angle*gradient);
 		float error_angular_speed	= (angularVelocity-targetAngularVelocity);
 
 		float posError 	= (ballPos - targetBallPos);
 		// float posError 	= (bodyPos - targetBallPos);
 
-		//posError = posFilter.update(posError);
+		// posError = posFilter.update(posError);
 		const float posErrorLimitAngle = 0.10; // [m]
 		posError = constrain (posError,
 								-posErrorLimitAngle,
@@ -196,12 +196,14 @@ void ControlPlane::update(bool doLogging, float dT,
 		float error_centripedal     = targetOmega * target.speed;
 
 		// sum up all weighted errors
-		totalTiltError = config.angleWeight*error_tilt + config.angularSpeedWeight*error_angular_speed + config.intAngleWeight *tiltErrorIntegrated;
-		totalPositionError =      config.ballPositionWeight*posError
-								+ config.ballPosIntegratedWeight*posErrorIntegrated
-								+ config.ballVelocityWeight*speedError
-								+ config.ballAccelWeight*accelError
-								+ config.omegaWeight * error_centripedal;
+		totalTiltError 		=     config.angleWeight			* error_angle
+								+ config.angularSpeedWeight		* error_angular_speed
+								+ config.intAngleWeight 		* error_int_angle;
+		totalPositionError 	=     config.ballPositionWeight		* posError
+								+ config.ballPosIntegratedWeight* posErrorIntegrated
+								+ config.ballVelocityWeight		* speedError
+								+ config.ballAccelWeight		* accelError
+								+ config.omegaWeight 			* error_centripedal;
 
 		error =	totalTiltError + totalPositionError;
 
@@ -221,8 +223,8 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// get rid of trembling by a FIR filter 5th order with 15Hz
 		// filteredSpeed = outputSpeedFilter.update(speed);
-		// filteredSpeed = outputSpeedFilter2.update(speed);
-		filteredSpeed = speed;
+		filteredSpeed = outputSpeedFilter2.update(speed);
+		//filteredSpeed = speed;
 
 
 		if (doLogging) {
@@ -288,7 +290,6 @@ void StateController::update(float dT,
 							 const BotMovement& currentMovement,
 							 const BotMovement& targetBotMovement) {
 
-	uint32_t start = millis();
 	// ramp up target speed and omega with a trapezoid profile of constant acceleration
 	rampedTargetMovement.rampUp(targetBotMovement, dT);
 	bool doLogging = logTimer.isDue_ms(1000,millis());
@@ -310,8 +311,6 @@ void StateController::update(float dT,
 	if (doLogging && memory.persistentMem.logConfig.debugStateLog) {
 		loggingln();
 	}
-	uint32_t end = millis();
-	avrLoopTime = (avrLoopTime + ((float)(end - start)*0.001))*0.5;
 }
 
 float StateController::getSpeedX() {

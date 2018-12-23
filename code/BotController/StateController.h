@@ -53,11 +53,11 @@ class ControlPlane {
 		float lastBodySpeed = 0;
 		float lastBodyAccel = 0;
 		float error = 0;
-		float accel =0;
+		float accel = 0;
 		float speed = 0;			// speed in x direction [m/s]
 		float filteredSpeed = 0;
 		float posErrorIntegrated = 0;
-		float tiltErrorIntegrated = 0;
+		float error_int_angle = 0;
 
 		float totalTiltError = 0;
 		float totalPositionError = 0;
@@ -130,16 +130,11 @@ public:
 	float getAccelY() {
 		return planeY.getAccel();
 	}
-
-	// return average time consumed by update in [s]
-	float getAvrLoopTime() { return avrLoopTime; };
-
 private:
 	ControlPlane planeX;
 	ControlPlane planeY;
 
 	BotMovement rampedTargetMovement;
-	float avrLoopTime = 0;
 	TimePassedBy logTimer;
 
 };

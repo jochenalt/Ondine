@@ -124,7 +124,6 @@ void BrushedMotorDriver::setMotorSpeed(float speed) {
 void BrushedMotorDriver::setMotorPower(float powerRatio) {
 	float torque = constrain(powerRatio, -1.0, 1.0);
 	bool direction = (torque > 0);
-	// analogWrite(in2Pin, speed/MaxSpeed*((1<<pwmResolution)-1) );
 	int maxPWM = ((1<<pwmResolutionBits)-1);
 	int pwmValue = abs(torque*maxPWM);
 	if (!direction)

@@ -36,7 +36,7 @@ void IMUConfig::initDefaultValues() {
 	// these null values can be calibrated and set in EEPROM
 	nullOffsetX = radians(-1.0);
 	nullOffsetY = radians(3.2);
-	kalmanNoiseVariance = 0.1; // noise variance, default is 0.03, the higher the more noise is filtered
+	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
 void IMUConfig::print() {
@@ -136,8 +136,12 @@ void IMU::setup(MenuController *newMenuCtrl) {
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
 
 	// doI2CPortScan(F("I2C"),IMUWire , logger);
+#ifdef FIFO
 	mpu9250 = new MPU9250FIFO(IMUWire,IMU_I2C_ADDRESS);
+#else
+	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS);
 
+#endif
 	int status = mpu9250->begin();
 	if (status < 0) {
 		fatalError("I2C-IMU setup failed ");
@@ -158,7 +162,11 @@ void IMU::setup(MenuController *newMenuCtrl) {
 
 int IMU::init() {
 	// enable FIFO mode
+#ifdef FIFO
 	int status = mpu9250->enableFifo(true,true,false,false);
+#else
+	int status = 0;
+#endif
 	enabled = true;
 
 	// setting the accelerometer full scale range to +/-2G
@@ -172,8 +180,12 @@ int IMU::init() {
 
 	// set update rate of IMU to 200 Hz
 	// the interrupt indicating new data will fire with that frequency
+#ifdef FIFO
 	status = status | mpu9250->setSrd(1000/IMUSamplingFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
+#else
+	status = status | mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
 
+#endif
 	mpu9250->setGyroBiasX_rads(0);
 	mpu9250->setGyroBiasY_rads(0);
 	mpu9250->setGyroBiasZ_rads(0);
@@ -199,15 +211,19 @@ int IMU::init() {
 	kalman[Dimension::Y].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 	kalman[Dimension::Z].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 
+#ifdef FIFO
 	const int taps = IMUSamplesPerLoop;
 	const float CutOffFrequency = SampleFrequency;
-
 	accelFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
 	accelFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency );
 	accelFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	gyroFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	gyroFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	gyroFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	// gyroFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	// gyroFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	// gyroFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
+	gyroFilter[Dimension::X].init(IMUSamplesPerLoop);
+	gyroFilter[Dimension::Y].init(IMUSamplesPerLoop);
+	gyroFilter[Dimension::Z].init(IMUSamplesPerLoop);
+#endif
 
 	timeLoop.init();
 
@@ -258,11 +274,16 @@ void IMU::calibrate() {
 }
 
 void IMU::loop(uint32_t now_us) {
-	if (mpu9250 && enabled && (newDataCounter >= IMUSamplesPerLoop) && ((now_us - timeLoop.lastCall_us) >= SampleTime_us)) {
+	if (mpu9250 && enabled &&
+#ifdef FIFO
+			(newDataCounter >= IMUSamplesPerLoop) &&
+#endif
+			(newDataCounter > 0) && ((now_us - timeLoop.lastCall_us) >= SampleTime_us)) {
 
 			newDataCounter = 0;
 			dT = timeLoop.dT(now_us);
 
+#ifdef FIFO
 			// read raw values
 			int status = mpu9250->readFifo();
 			if (status != 1) {
@@ -304,71 +325,80 @@ void IMU::loop(uint32_t now_us) {
 						gyroFilter[dim].update(gyroSamples[dim][i]);
 					}
 				}
+			}
+#else
+		// read raw values
+		delayMicroseconds(100);
+		int status = mpu9250->readSensor();
+		if (status != 1) {
+			fatalError("loop IMU status error ");
+			loggingln(status);
+		}
 
-				// turn the coordinate system of the IMU into the one of the bot:
-				// front wheel points to the x-axis, y-axis is
-				// for use of the kalman filter, we need to break the convention and
-				// denote the coordsystem for angular velocity in the direction of the according axis
-				// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
-				float accelX = accelFilter[Dimension::X].get();
-				float accelY = accelFilter[Dimension::Y].get();
-				float accelZ = accelFilter[Dimension::Z].get();
+		// turn the coordinate system of the IMU into the one of the bot:
+		// front wheel points to the x-axis, y-axis is
+		// for use of the kalman filter, we need to break the convention and
+		// denote the coordsystem for angular velocity in the direction of the according axis
+		// I.e. the angular velocity in the x-axis denotes the speed of the tilt angle in direction of x
+		float accelX = mpu9250->getAccelX_mss();
+		float accelY = mpu9250->getAccelY_mss();
+		float accelZ = mpu9250->getAccelZ_mss();
 
-				float tilt[3] = {
-						atan2f(-accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX,
-						atan2f(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY,
-						accelZ };
+		float angularVelocity[3] = {
+					mpu9250->getGyroY_rads(),
+					-mpu9250->getGyroX_rads(),
+					mpu9250->getGyroZ_rads() };
+#endif
 
-				float angularVelocity[3] = {
-							gyroFilter[Dimension::Y].get(),
-							-gyroFilter[Dimension::X].get(),
-							gyroFilter[Dimension::Z].get() };
+		float tilt[3] = {
+					atan2f(-accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX,
+					atan2f(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY,
+					accelZ };
+		for (int i = 0;i<3;i++) {
+			// invoke kalman filter per plane
+			kalman[i].update(tilt[i], angularVelocity[i], dT);
+			currentSample.plane[i].angle = kalman[i].getAngle();
+			currentSample.plane[i].angularVelocity = kalman[i].getRate();
+		}
 
-				for (int i = 0;i<3;i++) {
-					// invoke kalman filter per plane
-					kalman[i].update(tilt[i], angularVelocity[i], dT);
-					currentSample.plane[i].angle = kalman[i].getAngle();
-					currentSample.plane[i].angularVelocity = kalman[i].getRate();
-				}
+		// indicate that new value is available
+		// next call of isNewValueAvailable will return true
+		// (but only once)
+		valueIsUpdated = true;
 
-				// indicate that new value is available
-				// next call of isNewValueAvailable will return true
-				// (but only once)
-				valueIsUpdated = true;
-
-				if (logIMUValues) {
-					if (logTimer.isDue_ms(50,millis())) {
-						logging("dT=");
-						logging(((float)(micros()-now_us))/1000.0,2);
-						logging("a=(X:");
-						logging(degrees(tilt[Dimension::X]),2,2);
-						logging("/");
-						logging(degrees(angularVelocity[Dimension::X]),2,2);
-						logging(" Y:");
-						logging(degrees(tilt[Dimension::Y]),2,2);
-						logging("/");
-						logging(degrees(angularVelocity[Dimension::Y]),2,2);
-						logging(" Z:");
-						logging(degrees(tilt[Dimension::Z]),2,2);
-						logging("/");
-						logging(degrees(angularVelocity[Dimension::Z]),2,2);
-
-						logging(" angle=(");
-						logging(degrees(getAngleRad(Dimension::X)),2,2);
-						logging(",");
-						logging(degrees(getAngleRad(Dimension::Y)),2,2);
-						logging(")");
-						logging(" #=");
-						logging(noOfSamples);
-
-						logging(" f=");
-						logging(timeLoop.getAverageFrequency());
-						loggingln("Hz");
-					}
-				}
+		if (logIMUValues) {
+			if (logTimer.isDue_ms(50,millis())) {
+				logging("dT=");
+				logging(((float)(micros()-now_us))/1000.0,2);
+				logging("a=(X:");
+				logging(degrees(tilt[Dimension::X]),2,2);
+				logging("/");
+				logging(degrees(angularVelocity[Dimension::X]),2,2);
+				logging(" Y:");
+				logging(degrees(tilt[Dimension::Y]),2,2);
+				logging("/");
+				logging(degrees(angularVelocity[Dimension::Y]),2,2);
+				logging(" Z:");
+				logging(degrees(tilt[Dimension::Z]),2,2);
+				logging("/");
+				logging(degrees(angularVelocity[Dimension::Z]),2,2);
+				logging(" angle=(");
+				logging(degrees(getAngleRad(Dimension::X)),2,2);
+				logging(",");
+				logging(degrees(getAngleRad(Dimension::Y)),2,2);
+				logging(")");
+#ifdef FIFO
+				logging(" #=");
+				logging(noOfSamples);
+#endif
+				logging(" f=");
+				logging(timeLoop.getAverageFrequency());
+				loggingln("Hz");
 			}
 		}
+	}
 }
+
 
 // returns true once when a new value is available.
 bool IMU::isNewValueAvailable(float &dT) {

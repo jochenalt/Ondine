@@ -253,15 +253,6 @@ int MPU9250::setDlpfBandwidth(DlpfBandwidth bandwidth) {
   // use low speed SPI for register setting
   _useSPIHS = false;
   switch(bandwidth) {
-	  case DLPF_BANDWIDTH_250HZ: {
-		if(writeRegister(ACCEL_CONFIG2,ACCEL_DLPF_184) < 0){ // setting accel bandwidth to 184Hz
-		  return -1;
-		}
-		if(writeRegister(CONFIG,GYRO_DLPF_250) < 0){ // setting gyro bandwidth to 184Hz
-		  return -2;
-		}
-		break;
-	  }
   	  case DLPF_BANDWIDTH_184HZ: {
       if(writeRegister(ACCEL_CONFIG2,ACCEL_DLPF_184) < 0){ // setting accel bandwidth to 184Hz
         return -1;

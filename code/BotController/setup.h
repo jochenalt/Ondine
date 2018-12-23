@@ -15,7 +15,7 @@ const float BallWeight = 0.1;										// [kg]
 const float WheelRadius = 0.035;									// [m]
 const float BallRadius = 0.090;										// [m]
 const float WheelAngleRad= radians(45.0);							// [rad] 	mounting angle of wheels against horizontal base platform
-const float CentreOfGravityHeight = 0.200; 							// [m] 		center of gravity height from ground
+const float CentreOfGravityHeight = 0.150; 							// [m] 		center of gravity height from ball centre
 const float MaxBotSpeed = 1.8; 										// [m/s] 	max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] 	max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot
@@ -23,7 +23,7 @@ const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] 	max acceleration acceler
 const float MaxTiltAngle = radians(15);								// [rad] 	max tilt angle, 15°
 const float MaxBotAccel= tan(MaxTiltAngle)*Gravity;					// [m/s^2] 	max acceleration of bot
 const float MaxWheelSpeed = 4.0;									// [rev/s]
-const float MaxWheelAcceleration = 100;								// [rev/s^2]
+const float MaxWheelAcceleration = 50;								// [rev/s^2]
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy
 
@@ -31,14 +31,19 @@ const float MaxWheelAcceleration = 100;								// [rev/s^2]
 #define POWER_RELAY_PIN 0 			// HIGH turns on power to the motors
 
 // --- IMU ---
+
 // possible values of sample frequency depend on IMU MP9150 are 1000/n with n=0..32,
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz, 500Hz, 1000 Hz
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
+#ifdef FIFO
 const int IMUSamplingFrequency = 1000;								// [Hz] sampling time of IMU
-const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
-const int SampleTime_us = 1000000/SampleFrequency;					// [us] time per loop
 const int IMUSamplesPerLoop = IMUSamplingFrequency/SampleFrequency;	// [#]
+const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
+#else
+const int SampleFrequency = 333;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
+#endif
 const float SamplingTime 	= 1.0/SampleFrequency; 	                // [s] sampling time
+const int SampleTime_us = 1000000/SampleFrequency;					// [us] time per loop
 
 
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house

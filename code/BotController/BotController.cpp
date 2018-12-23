@@ -161,6 +161,15 @@ void BotController::loop() {
 	// performance measurement
 	uint32_t start_us = micros();
 
+	// drive motors
+	ballDrive.loop(start_us);
+
+	// react on serial line
+	menuController.loop();
+
+	// drive the lifter
+	lifter.loop();
+
 	// check if new IMU orientation is there
 	imu.loop(start_us);
 
@@ -173,16 +182,17 @@ void BotController::loop() {
 		IMUSample sensorSample = imu.getSample();
 		ballDrive.getSpeed(start_us, sensorSample,currentMovement);
 
-			// call balance and speed controller
-			state.update(dT, sensorSample, currentMovement, targetBotMovement);
+		// call balance and speed controller
+		state.update(dT, sensorSample, currentMovement, targetBotMovement);
 
-			// apply kinematics to compute wheel speed out of x,y, omega
-			// and set speed of each wheel
-			ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
+		// apply kinematics to compute wheel speed out of x,y, omega
+		// and set speed of each wheel
+		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
 								sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
-			uint32_t end_us= micros();
-			avrLoopTime = (((float)(end_us-start_us))/1000000.0 + avrLoopTime)/2.0;
+
+		uint32_t end_us= micros();
+		avrLoopTime_us = ((end_us-start_us) + avrLoopTime_us)/2.0;
 
 			if (logTimer.isDue_ms(250,millis())) {
 				if (memory.persistentMem.logConfig.debugBalanceLog) {
@@ -227,25 +237,16 @@ void BotController::loop() {
 				if (memory.persistentMem.logConfig.performanceLog) {
 					logger->print(" f=");
 					logger->print(1.0/dT,0);
-					logger->print("Hz, cpu=");
-					logger->print((avrLoopTime / SamplingTime) * 100.0,0);
+					logger->print("Hz, ");
+					logger->print(avrLoopTime_us);
+					logger->print("us, cpu=");
+					logger->print(((float)(avrLoopTime_us*100.0) / SampleTime_us),0);
 					logger->println("%)");
 				}
 			}
 	} else
 		delayMicroseconds(50); // ensure that next dT > 0
 
-	// drive motors
-	ballDrive.loop(start_us);
-
-	// give other libraries some time
-	yield();
-
-	// react on serial line
-	menuController.loop();
-
-	// drive the lifter
-	lifter.loop();
 }
 
 

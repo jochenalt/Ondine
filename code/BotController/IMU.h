@@ -77,12 +77,13 @@ public:
 	IMUSample& getSample() { return currentSample; };
 	void enable(bool doIt) {
 		enabled = doIt;
+#ifdef FIFO
 		if (doIt) {
 			mpu9250->enableFifo(true,true,false,false);
 		}
 		else
 			mpu9250->enableFifo(false,false,false,false);
-
+#endif
 	}
 
 
@@ -98,14 +99,17 @@ private:
 	float getAngleRad(Dimension dim);
 	float getAngularVelocity(Dimension dim);
 	void updateFilter();
+#ifdef FIFO
 	MPU9250FIFO* mpu9250 = NULL;
-	KalmanFilter kalman[3]; // one kalman filter per dimension
 	// Average accelFilter[3];
 	FIR::Filter accelFilter[3];
-	FIR::Filter gyroFilter[3];
-	// Average gyroFilter[3];
-
-	float noiseVariance = 0.1; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
+	// FIR::Filter gyroFilter[3];
+	Average gyroFilter[3];
+#else
+	MPU9250* mpu9250 = NULL;
+#endif
+	KalmanFilter kalman[3]; // one kalman filter per dimension
+	float noiseVariance = 0.03; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
 
 	IMUSample currentSample;
 	bool valueIsUpdated = false;
