@@ -78,13 +78,15 @@ class MPU9250{
     int enableDataReadyInterrupt();
     int disableDataReadyInterrupt();
     int enableWakeOnMotion(float womThresh_mg,LpAccelOdr odr);
-    int readSensor();
+    int readSensor(bool onlyAccelAndGyro = false);
     float getAccelX_mss();
     float getAccelY_mss();
     float getAccelZ_mss();
     float getGyroX_rads();
     float getGyroY_rads();
     float getGyroZ_rads();
+    void getAccel_mss(float accel[3]);
+    void getGyor_rads(float gyro[3]);
     float getMagX_uT();
     float getMagY_uT();
     float getMagZ_uT();

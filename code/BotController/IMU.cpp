@@ -36,7 +36,7 @@ void IMUConfig::initDefaultValues() {
 	// these null values can be calibrated and set in EEPROM
 	nullOffsetX = radians(-1.0);
 	nullOffsetY = radians(3.2);
-	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
+	kalmanNoiseVariance = 0.01; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
 void IMUConfig::print() {
@@ -132,16 +132,12 @@ void IMU::setup(MenuController *newMenuCtrl) {
 
 	// initialize high speed I2C to IMU
 	IMUWire = &Wire;
-	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_1200);
+	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_2000);
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
 
 	// doI2CPortScan(F("I2C"),IMUWire , logger);
-#ifdef FIFO
-	mpu9250 = new MPU9250FIFO(IMUWire,IMU_I2C_ADDRESS);
-#else
 	mpu9250 = new MPU9250(IMUWire,IMU_I2C_ADDRESS);
 
-#endif
 	int status = mpu9250->begin();
 	if (status < 0) {
 		fatalError("I2C-IMU setup failed ");
@@ -161,12 +157,7 @@ void IMU::setup(MenuController *newMenuCtrl) {
 }
 
 int IMU::init() {
-	// enable FIFO mode
-#ifdef FIFO
-	int status = mpu9250->enableFifo(true,true,false,false);
-#else
 	int status = 0;
-#endif
 	enabled = true;
 
 	// setting the accelerometer full scale range to +/-2G
@@ -180,12 +171,8 @@ int IMU::init() {
 
 	// set update rate of IMU to 200 Hz
 	// the interrupt indicating new data will fire with that frequency
-#ifdef FIFO
-	status = status | mpu9250->setSrd(1000/IMUSamplingFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
-#else
 	status = status | mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
 
-#endif
 	mpu9250->setGyroBiasX_rads(0);
 	mpu9250->setGyroBiasY_rads(0);
 	mpu9250->setGyroBiasZ_rads(0);
@@ -211,27 +198,12 @@ int IMU::init() {
 	kalman[Dimension::Y].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 	kalman[Dimension::Z].setNoiseVariance(imuConfig.kalmanNoiseVariance);
 
-#ifdef FIFO
-	const int taps = IMUSamplesPerLoop;
-	const float CutOffFrequency = SampleFrequency;
-	accelFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	accelFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency );
-	accelFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	// gyroFilter[Dimension::X].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	// gyroFilter[Dimension::Y].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	// gyroFilter[Dimension::Z].init(FIR::LOWPASS,taps, IMUSamplingFrequency, CutOffFrequency);
-	gyroFilter[Dimension::X].init(IMUSamplesPerLoop);
-	gyroFilter[Dimension::Y].init(IMUSamplesPerLoop);
-	gyroFilter[Dimension::Z].init(IMUSamplesPerLoop);
-#endif
-
 	timeLoop.init();
 
 	return status;
 }
 
 void IMU::calibrate() {
-	/*
 	loggingln("calibrate imu");
 	int status = mpu9250->calibrateAccel();
 	if (status != 1) {
@@ -254,85 +226,36 @@ void IMU::calibrate() {
 		loggingln(status);
 		fatalError("fatal error");
 	}
-	// init();
-	*/
+	init();
+
 	// measure for 1s, run kalman filter and take final orientation as null value
 	uint32_t now = millis();
 	imuConfig.nullOffsetX = 0;
 	imuConfig.nullOffsetY = 0;
 
-
 	// let kalman filter run and calibrate for 1s
 	while (millis() - now < 2000) {
 		loop(micros());
 	}
-
 	imuConfig.nullOffsetX = kalman[Dimension::X].getAngle();
 	imuConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
 
 	imuConfig.print();
+
+	init();
 }
 
 void IMU::loop(uint32_t now_us) {
 	if (mpu9250 && enabled &&
-#ifdef FIFO
-			(newDataCounter >= IMUSamplesPerLoop) &&
-#endif
 			(newDataCounter > 0) && ((now_us - timeLoop.lastCall_us) >= SampleTime_us)) {
-
 			newDataCounter = 0;
 			dT = timeLoop.dT(now_us);
 
-#ifdef FIFO
-			// read raw values
-			int status = mpu9250->readFifo();
-			if (status != 1) {
-				fatalError("loop IMU status error ");
-				loggingln(status);
-			}
-
-			// fetch all IMU samples since the last loop and filter them by average low pass
-			int noOfSamples = mpu9250->getFifoSize();
-
-			// check if FIFO buffer did not overflow.
-			// FIFO needs to be reinitialized then, other wise there's rubbish data
-			if (mpu9250->fifoOverflow()) {
-
-				// reset and re-initialize FIFO
-				mpu9250->resetFifo();
-				status = mpu9250->enableFifo(true, true, false, false);
-
-				// try again, maybe we get another value
-				// (if not, this loop is lost)
-				status = mpu9250->readFifo();
-				noOfSamples = mpu9250->getFifoSize();
-				if (noOfSamples == 0)
-					fatalError("IMU lost loop");
-			}
-
-			if (noOfSamples > 0) {
-				float accelSamples[3][noOfSamples]; // dont be scared, this has typically a size of 3*4=12
-				float gyroSamples[3][noOfSamples];
-
-				size_t noOfSamplesDummy;
-				// fetch all samples from FIFO queue read already
-
-				for (int dim = 0;dim<3;dim++) {
-					mpu9250->getFifoAccel_mss(dim, &noOfSamplesDummy,&accelSamples[dim][0]);
-					mpu9250->getFifoGyro_rads(dim, &noOfSamplesDummy,&gyroSamples[dim][0]);
-					for (int i = 0;i<noOfSamples;i++) {
-						accelFilter[dim].update(accelSamples[dim][i]);
-						gyroFilter[dim].update(gyroSamples[dim][i]);
-					}
-				}
-			}
-#else
 		// read raw values
-		delayMicroseconds(100);
-		int status = mpu9250->readSensor();
+		int status = mpu9250->readSensor(true);
 		if (status != 1) {
-			fatalError("loop IMU status error ");
 			loggingln(status);
+			fatalError("readSensor");
 		}
 
 		// turn the coordinate system of the IMU into the one of the bot:
@@ -345,18 +268,19 @@ void IMU::loop(uint32_t now_us) {
 		float accelZ = mpu9250->getAccelZ_mss();
 
 		float angularVelocity[3] = {
-					mpu9250->getGyroY_rads(),
+					+mpu9250->getGyroY_rads(),
 					-mpu9250->getGyroX_rads(),
-					mpu9250->getGyroZ_rads() };
-#endif
+					+mpu9250->getGyroZ_rads() };
 
 		float tilt[3] = {
 					atan2f(-accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX,
 					atan2f(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY,
 					accelZ };
+
 		for (int i = 0;i<3;i++) {
 			// invoke kalman filter per plane
 			kalman[i].update(tilt[i], angularVelocity[i], dT);
+
 			currentSample.plane[i].angle = kalman[i].getAngle();
 			currentSample.plane[i].angularVelocity = kalman[i].getRate();
 		}
@@ -369,16 +293,22 @@ void IMU::loop(uint32_t now_us) {
 		if (logIMUValues) {
 			if (logTimer.isDue_ms(50,millis())) {
 				logging("dT=");
-				logging(((float)(micros()-now_us))/1000.0,2);
-				logging("a=(X:");
+				logging(((float)(micros()-now_us)));
+				logging("us a=(X:");
+				logging(accelX,2);
+				logging("/");
 				logging(degrees(tilt[Dimension::X]),2,2);
 				logging("/");
 				logging(degrees(angularVelocity[Dimension::X]),2,2);
 				logging(" Y:");
+				logging(accelY,2);
+				logging("/");
 				logging(degrees(tilt[Dimension::Y]),2,2);
 				logging("/");
 				logging(degrees(angularVelocity[Dimension::Y]),2,2);
 				logging(" Z:");
+				logging(accelZ,2);
+				logging("/");
 				logging(degrees(tilt[Dimension::Z]),2,2);
 				logging("/");
 				logging(degrees(angularVelocity[Dimension::Z]),2,2);

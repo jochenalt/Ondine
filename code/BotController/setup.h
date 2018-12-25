@@ -35,16 +35,9 @@ const float MaxWheelAcceleration = 50;								// [rev/s^2]
 // possible values of sample frequency depend on IMU MP9150 are 1000/n with n=0..32,
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz, 500Hz, 1000 Hz
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
-#ifdef FIFO
-const int IMUSamplingFrequency = 1000;								// [Hz] sampling time of IMU
-const int IMUSamplesPerLoop = IMUSamplingFrequency/SampleFrequency;	// [#]
 const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
-#else
-const int SampleFrequency = 333;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
-#endif
 const float SamplingTime 	= 1.0/SampleFrequency; 	                // [s] sampling time
 const int SampleTime_us = 1000000/SampleFrequency;					// [us] time per loop
-
 
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house
 #define IMU_I2C_ADDRESS 0x69										// default MPU9050 i2c address
@@ -68,7 +61,6 @@ const int BrushlessDriverPWMPins[3][3] = {  { 2,    3,   4},   // motor 1, PWM1,
 //   2\  ---                |
 //
 const int MotorSequenceIdx [3] =  { 2,0,1 };
-
 
 // array that assigns the motors pins to the right order
 const bool MotorDirection[3] = { true, true, true };

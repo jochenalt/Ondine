@@ -455,23 +455,41 @@ int MPU9250FIFO::enableFifo(bool accel,bool gyro,bool mag,bool temp) {
 }
 
 /* reads the most current data from MPU9250 and stores in buffer */
-int MPU9250::readSensor() {
+int MPU9250::readSensor(bool onlyAccelAndGyro) {
   _useSPIHS = true; // use the high speed SPI for data readout
   // grab the data from the MPU9250
-  if (readRegisters(ACCEL_OUT, 21, _buffer) < 0) {
-    return -1;
+  if (onlyAccelAndGyro) {
+	  if (readRegisters(ACCEL_OUT,6, _buffer) < 0) {
+		return -1;
+	  }
+	  if (readRegisters(GYRO_OUT,6, &(_buffer[8])) < 0) {
+		return -1;
+	  }
+
+  } else {
+	  if (readRegisters(ACCEL_OUT, 21, _buffer) < 0) {
+		return -1;
+	  }
   }
+
   // combine into 16 bit values
   _axcounts = (((int16_t)_buffer[0]) << 8) | _buffer[1];  
   _aycounts = (((int16_t)_buffer[2]) << 8) | _buffer[3];
   _azcounts = (((int16_t)_buffer[4]) << 8) | _buffer[5];
-  _tcounts = (((int16_t)_buffer[6]) << 8) | _buffer[7];
+  if (!onlyAccelAndGyro) {
+	  _tcounts = (((int16_t)_buffer[6]) << 8) | _buffer[7];
+  	  _hxcounts = (((int16_t)_buffer[15]) << 8) | _buffer[14];
+  	  _hycounts = (((int16_t)_buffer[17]) << 8) | _buffer[16];
+  	  _hzcounts = (((int16_t)_buffer[19]) << 8) | _buffer[18];
+  	  _hx = (((float)(_hxcounts) * _magScaleX) - _hxb)*_hxs;
+  	  _hy = (((float)(_hycounts) * _magScaleY) - _hyb)*_hys;
+  	  _hz = (((float)(_hzcounts) * _magScaleZ) - _hzb)*_hzs;
+  	  _t = ((((float) _tcounts) - _tempOffset)/_tempScale) + _tempOffset;
+  }
+
   _gxcounts = (((int16_t)_buffer[8]) << 8) | _buffer[9];
   _gycounts = (((int16_t)_buffer[10]) << 8) | _buffer[11];
   _gzcounts = (((int16_t)_buffer[12]) << 8) | _buffer[13];
-  _hxcounts = (((int16_t)_buffer[15]) << 8) | _buffer[14];
-  _hycounts = (((int16_t)_buffer[17]) << 8) | _buffer[16];
-  _hzcounts = (((int16_t)_buffer[19]) << 8) | _buffer[18];
   // transform and convert to float values
   _ax = (((float)(tX[0]*_axcounts + tX[1]*_aycounts + tX[2]*_azcounts) * _accelScale) - _axb)*_axs;
   _ay = (((float)(tY[0]*_axcounts + tY[1]*_aycounts + tY[2]*_azcounts) * _accelScale) - _ayb)*_ays;
@@ -479,12 +497,21 @@ int MPU9250::readSensor() {
   _gx = ((float)(tX[0]*_gxcounts + tX[1]*_gycounts + tX[2]*_gzcounts) * _gyroScale) - _gxb;
   _gy = ((float)(tY[0]*_gxcounts + tY[1]*_gycounts + tY[2]*_gzcounts) * _gyroScale) - _gyb;
   _gz = ((float)(tZ[0]*_gxcounts + tZ[1]*_gycounts + tZ[2]*_gzcounts) * _gyroScale) - _gzb;
-  _hx = (((float)(_hxcounts) * _magScaleX) - _hxb)*_hxs;
-  _hy = (((float)(_hycounts) * _magScaleY) - _hyb)*_hys;
-  _hz = (((float)(_hzcounts) * _magScaleZ) - _hzb)*_hzs;
-  _t = ((((float) _tcounts) - _tempOffset)/_tempScale) + _tempOffset;
   return 1;
 }
+
+void MPU9250::getAccel_mss(float accel[3]) {
+	accel[0] = _ax;
+	accel[1] = _ay;
+	accel[2] = _az;
+}
+
+void MPU9250::getGyor_rads(float gyro[3]) {
+	gyro[0] = _gx;
+	gyro[1] = _gy;
+	gyro[2] = _gz;
+}
+
 
 /* returns the accelerometer measurement in the x direction, m/s/s */
 float MPU9250::getAccelX_mss() {

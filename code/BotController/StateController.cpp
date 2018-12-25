@@ -223,8 +223,8 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// get rid of trembling by a FIR filter 5th order with 15Hz
 		// filteredSpeed = outputSpeedFilter.update(speed);
-		filteredSpeed = outputSpeedFilter2.update(speed);
-		//filteredSpeed = speed;
+		//filteredSpeed = outputSpeedFilter2.update(speed);
+		filteredSpeed = speed;
 
 
 		if (doLogging) {

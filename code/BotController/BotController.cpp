@@ -194,7 +194,7 @@ void BotController::loop() {
 		uint32_t end_us= micros();
 		avrLoopTime_us = ((end_us-start_us) + avrLoopTime_us)/2.0;
 
-			if (logTimer.isDue_ms(250,millis())) {
+			if (logTimer.isDue_ms(100,millis())) {
 				if (memory.persistentMem.logConfig.debugBalanceLog) {
 					logging("a=(");
 					logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
