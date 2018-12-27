@@ -158,95 +158,94 @@ void BotController::setTarget(const BotMovement& target) {
 }
 
 void BotController::loop() {
-	// performance measurement
-	uint32_t start_us = micros();
+	if (mainTimer.isDue_ms(SampleTime_us,micros())) {
+		// performance measurement
+		uint32_t start_us = micros();
 
-	// drive motors
-	ballDrive.loop(start_us);
+		// drive motors
+		ballDrive.loop();
 
-	// react on serial line
-	menuController.loop();
+		// react on serial line
+		menuController.loop();
 
-	// drive the lifter
-	lifter.loop();
+		// drive the lifter
+		lifter.loop();
 
-	// check if new IMU orientation is there
-	imu.loop(start_us);
+		// check if new IMU orientation is there
+		imu.loop();
 
-	// run main balance loop. Timing is determined by IMU that sends an
-	// interrupt everytime a new value is there.
-	float dT = 0; // set by isNewValueAvailable
-	if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
+		// run main balance loop. Timing is determined by IMU that sends an
+		// interrupt everytime a new value is there.
+		float dT = 0; // set by isNewValueAvailable
+		if ((mode == BALANCING) && imu.isNewValueAvailable(dT)) {
 
-			// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
-		IMUSample sensorSample = imu.getSample();
-		ballDrive.getSpeed(start_us, sensorSample,currentMovement);
+				// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
+			IMUSample sensorSample = imu.getSample();
+			ballDrive.getSpeed(sensorSample,currentMovement);
 
-		// call balance and speed controller
-		state.update(dT, sensorSample, currentMovement, targetBotMovement);
+			// call balance and speed controller
+			state.update(dT, sensorSample, currentMovement, targetBotMovement);
 
-		// apply kinematics to compute wheel speed out of x,y, omega
-		// and set speed of each wheel
-		ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
-								sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
+			// apply kinematics to compute wheel speed out of x,y, omega
+			// and set speed of each wheel
+			ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
+									sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
 
+			uint32_t end_us= micros();
+			avrLoopTime_us = ((end_us-start_us) + avrLoopTime_us)/2.0;
 
-		uint32_t end_us= micros();
-		avrLoopTime_us = ((end_us-start_us) + avrLoopTime_us)/2.0;
-
-			if (logTimer.isDue_ms(100,millis())) {
-				if (memory.persistentMem.logConfig.debugBalanceLog) {
-					logging("a=(");
-					logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
-					logging(",");
-					logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
-					logging(",");
-					logging(currentMovement.x.pos,2,3);
-					logging(",");
-					logging(currentMovement.x.speed,2,3);
-					logging("|");
-					logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
-					logging(",");
-					logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
-					logging(",");
-					logging(currentMovement.y.pos,2,3);
-					logging(",");
-					logging(currentMovement.y.speed,2,3);
-					logging(") ");
-					// currentMovement.print();
-					logging(" state=(");
-					logging(state.getTiltErrorX(),2,3);
-					logging(",");
-					logging(state.getPosErrorX(),2,3);
-					logging(",");
-					logging(state.getSpeedX(),2,3);
-					logging(",");
-					logging(state.getAccelX(),2,3);
-					logging("|");
-					logging(state.getTiltErrorY(),2,3);
-					logging(",");
-					logging(state.getPosErrorY(),2,3);
-					logging(",");
-					logging(state.getSpeedY(),2,3);
-					logging(",");
-					logging(state.getAccelY(),2,3);
-					logging("|");
-					logging(state.getOmega(),2,3);
-					logging(")");
+				if (logTimer.isDue_ms(200,millis())) {
+					if (memory.persistentMem.logConfig.debugBalanceLog) {
+						logging("a=(");
+						logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
+						logging(",");
+						logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
+						logging(",");
+						logging(currentMovement.x.pos,2,3);
+						logging(",");
+						logging(currentMovement.x.speed,2,3);
+						logging("|");
+						logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
+						logging(",");
+						logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
+						logging(",");
+						logging(currentMovement.y.pos,2,3);
+						logging(",");
+						logging(currentMovement.y.speed,2,3);
+						logging(") ");
+						// currentMovement.print();
+						logging(" state=(");
+						logging(state.getTiltErrorX(),2,3);
+						logging(",");
+						logging(state.getPosErrorX(),2,3);
+						logging(",");
+						logging(state.getSpeedX(),2,3);
+						logging(",");
+						logging(state.getAccelX(),2,3);
+						logging("|");
+						logging(state.getTiltErrorY(),2,3);
+						logging(",");
+						logging(state.getPosErrorY(),2,3);
+						logging(",");
+						logging(state.getSpeedY(),2,3);
+						logging(",");
+						logging(state.getAccelY(),2,3);
+						logging("|");
+						logging(state.getOmega(),2,3);
+						logging(")");
+					}
+					if (memory.persistentMem.logConfig.performanceLog) {
+						logger->print(" f=");
+						logger->print(1.0/dT,0);
+						logger->print("Hz, ");
+						logger->print(avrLoopTime_us);
+						logger->print("us, cpu=");
+						logger->print(((float)(avrLoopTime_us*100.0) / SampleTime_us),0);
+						logger->println("%)");
+					}
 				}
-				if (memory.persistentMem.logConfig.performanceLog) {
-					logger->print(" f=");
-					logger->print(1.0/dT,0);
-					logger->print("Hz, ");
-					logger->print(avrLoopTime_us);
-					logger->print("us, cpu=");
-					logger->print(((float)(avrLoopTime_us*100.0) / SampleTime_us),0);
-					logger->println("%)");
-				}
-			}
-	} else
-		delayMicroseconds(50); // ensure that next dT > 0
-
+		}
+	}
 }
 
 

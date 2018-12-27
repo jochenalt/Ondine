@@ -262,8 +262,6 @@ void State::reset() {
 	accel = 0;
 }
 
-
-
 // return Rz * Ry * Rz
 void computeZYXRotationMatrix(float eulerX, float eulerY, float eulerZ, matrix33_t& m) {
 	float  sinX = sin(eulerX);

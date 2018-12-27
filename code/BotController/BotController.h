@@ -93,6 +93,8 @@ private:
 	BotMode mode = OFF;
 	TimePassedBy logTimer;
 	uint32_t avrLoopTime_us = 0;
+	TimePassedBy mainTimer;
 };
+
 
 #endif /* BOTCONTROLLER_H_ */

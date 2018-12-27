@@ -52,8 +52,9 @@ void BallDrive::setSpeed(float speedX, float speedY, float omega,
 
 // compute the current speed since the last invocation.
 // returns 0 when called first (assuming the we start without motion)
-void BallDrive::getSpeed(uint32_t now_us, const IMUSample &sample, BotMovement &current) {
+void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 
+	uint32_t now_us = micros();
 	if ((now_us > lastCall_us) && (lastCall_us > 0))  {
 		float dT = ((float)(now_us - lastCall_us))/1000000.0; // [s]
 		lastCall_us = now_us;
@@ -63,9 +64,9 @@ void BallDrive::getSpeed(uint32_t now_us, const IMUSample &sample, BotMovement &
 		engine.getWheelAngleChange(angleChange);
 
 		float currentWheelSpeed[3]; // [rev/s]
-		currentWheelSpeed[0] = angleChange[0]  / (TWO_PI * dT);
-		currentWheelSpeed[1] = angleChange[1]  / (TWO_PI * dT);
-		currentWheelSpeed[2] = angleChange[2]  / (TWO_PI * dT);
+		currentWheelSpeed[0] = angleChange[0]; //   / (TWO_PI * dT);
+		currentWheelSpeed[1] = angleChange[1]; //   / (TWO_PI * dT);
+		currentWheelSpeed[2] = angleChange[2]; //   / (TWO_PI * dT);
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		kinematics.computeActualSpeed(  currentWheelSpeed,
@@ -90,10 +91,10 @@ void BallDrive::getSpeed(uint32_t now_us, const IMUSample &sample, BotMovement &
 	}
 }
 
-void BallDrive::loop(uint32_t now_us) {
+void BallDrive::loop() {
 	// drive the motors
 	// due to use of brushless motors, this requires permanent invokation of loop
-	engine.loop(now_us);
+	engine.loop();
 
 }
 
@@ -202,7 +203,7 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		logging(")");
 
 		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
-		getSpeed(micros(), a, menuMovement);
+		getSpeed(a, menuMovement);
 		menuMovement.print();
 
 		logger->println(" >");

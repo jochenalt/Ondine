@@ -13,17 +13,17 @@ const float Gravity_mm = Gravity*1000.0;							// [mm/s^2]
 // --- mechanical constants ---
 const float BallWeight = 0.1;										// [kg]
 const float WheelRadius = 0.035;									// [m]
-const float BallRadius = 0.090;										// [m]
-const float WheelAngleRad= radians(45.0);							// [rad] 	mounting angle of wheels against horizontal base platform
-const float CentreOfGravityHeight = 0.150; 							// [m] 		center of gravity height from ball centre
-const float MaxBotSpeed = 1.8; 										// [m/s] 	max speed of bot
-const float MaxBotOmega= 6.0; 										// [rad/s] 	max vertical turn speed of bot
-const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] max omega aceleration of bot
-const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] 	max acceleration acceleration of bot
-const float MaxTiltAngle = radians(15);								// [rad] 	max tilt angle, 15°
-const float MaxBotAccel= tan(MaxTiltAngle)*Gravity;					// [m/s^2] 	max acceleration of bot
+const float BallRadius = 0.09;										// [m]
+const float WheelAngleRad= radians(45.0);							// [rad] 		mounting angle of wheels against horizontal base platform
+const float CentreOfGravityHeight = 0.050; 							// [m] 			center of gravity height from ball centre
+const float MaxBotSpeed = 1.8; 										// [m/s] 		max speed of bot
+const float MaxBotOmega= 6.0; 										// [rad/s] 		max vertical turn speed of bot
+const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] 	max omega aceleration of bot
+const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] 		max acceleration acceleration of bot
+const float MaxTiltAngle = radians(5);								// [rad] 		max tilt angle, 15°
+const float MaxBotAccel= 10.0*tan(MaxTiltAngle)*Gravity;					// [m/s^2] 		max acceleration of bot
 const float MaxWheelSpeed = 4.0;									// [rev/s]
-const float MaxWheelAcceleration = 50;								// [rev/s^2]
+const float MaxWheelAcceleration = 500;								// [rev/s^2]
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy
 
@@ -37,16 +37,15 @@ const float MaxWheelAcceleration = 50;								// [rev/s^2]
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
 const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
 const float SamplingTime 	= 1.0/SampleFrequency; 	                // [s] sampling time
-const int SampleTime_us = 1000000/SampleFrequency;					// [us] time per loop
+const uint32_t SampleTime_us = 1000000/SampleFrequency;				// [us] time per loop
+const int maxLoopFactor = 4;
+
 
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house
 #define IMU_I2C_ADDRESS 0x69										// default MPU9050 i2c address
 
 // ---  Brushless motors   ---
 const int pwmResolutionBits = 10;
-
-// timing of wave form in brushless motors is measured in [ms], so max frequency to recompute PWM wave is 1000Hz
-const int MaxBrushlessDriverFrequency = 1000;
 
 // Teensy PWM Pins that drive input lines of Drotek L6234 breakout
 const int BrushlessDriverPWMPins[3][3] = {  { 2,    3,   4},   // motor 1, PWM1, PWM2, PWM3

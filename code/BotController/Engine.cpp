@@ -27,9 +27,9 @@ void Engine::setup(MenuController* menuCtrl) {
 	}
 }
 
-void Engine::loop(uint32_t now_us) {
+void Engine::loop() {
 	for (int i = 0;i<3;i++) {
-		wheel[i].loop(now_us);
+		wheel[i].loop();
 	}
 
 }

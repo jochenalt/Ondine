@@ -98,15 +98,12 @@ void ControlPlane::reset () {
 						 1.0e-4f 			/* supression in stop band is -40db */,
 						 SampleFrequency, 	/* 200 Hz */
 						 15.0f  			/* low pass cut off frequency */);
-		outputSpeedFilter.init(FIR::LOWPASS,
-				        10,SampleFrequency, 50);
 
 		posFilter.init(FIR::LOWPASS,
                             1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
                             1.0e-4f             /* supression in stop band is -40db */,
                             SampleFrequency,     /* 200 Hz */
                             15.0f               /* low pass cut off frequency */);
-        outputSpeedFilter2.init(500.0, SampleFrequency);
 }
 
 float ControlPlane::getBodyPos() {
@@ -151,16 +148,17 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		float angularVelocity = sensor.angularVelocity;
 
-		// float angularVelocity = (angle - lastAngle)/dT;
+		angularVelocity = (angle - lastAngle)/dT;
 
-		float ballPos   		= current.pos;
-		float ballSpeed 		= current.speed;
-		float bodyPos			= ballPos + angle* CentreOfGravityHeight;
-		float bodySpeed 		= (bodyPos - lastBodyPos)/dT;
+		float bodyPos   		= current.pos;
+		float bodySpeed 		= current.speed;
 		float bodyAccel 		= (bodySpeed - lastBodySpeed)/dT;
+		float ballPos			= bodyPos - angle* (CentreOfGravityHeight + BallRadius*2.0);
+		float ballSpeed 		= (ballPos - lastBallPos)/dT;
+		float ballAccel 		= (ballSpeed - lastBallSpeed)/dT;
 
 		float targetBodyPos 	= target.pos;
-		float targetBallPos	 	= target.pos - targetAngle * CentreOfGravityHeight;
+		float targetBallPos	 	= target.pos - targetAngle * (CentreOfGravityHeight + BallRadius*2.0);
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
@@ -172,7 +170,7 @@ void ControlPlane::update(bool doLogging, float dT,
 								-maxTiltError,
 								+maxTiltError);
 
-		float gradient = 1.0;
+		float gradient = 0.0;
 		error_angle = error_angle + sgn(error_angle)*abs(error_angle*error_angle*gradient);
 		float error_angular_speed	= (angularVelocity-targetAngularVelocity);
 
@@ -211,20 +209,19 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// outcome of controller is force to be applied to the ball
 		// F = m*a
-		float force = error;
-		accel = constrain(force,-MaxBotAccel, MaxBotAccel);
+		float force = error * BallWeight;
+		float accel = force;
+		// accel = constrain(force,-MaxBotAccel, MaxBotAccel);
 
 		// accelerate if not on max speed already
-		if ((sgn(speed) != sgn(accel)) ||
-			(abs(speed) < MaxBotSpeed)) {
-			speed += accel * dT;
-			speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
-		}
+		speed += accel * dT;
+		speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
 
 		// get rid of trembling by a FIR filter 5th order with 15Hz
 		// filteredSpeed = outputSpeedFilter.update(speed);
-		//filteredSpeed = outputSpeedFilter2.update(speed);
 		filteredSpeed = speed;
+		if (outputSpeedFilter.get_error_flag() != 0)
+			fatalError("outputfilter error flag");
 
 
 		if (doLogging) {

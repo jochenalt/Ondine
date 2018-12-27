@@ -24,7 +24,7 @@ public:
 	virtual ~BallDrive() {};
 
 	void setup(MenuController* menuCtrl);
-	void loop(uint32_t now_us);
+	void loop();
 
 	void enable(bool doit) {
 		engine.enable(doit);
@@ -56,7 +56,7 @@ public:
 	void setSpeed(float speedX /* [m/s] */,float speedY /* [m/s] */, float omega, float angleX, float angleY);
 
 	// return speed as measured by encoders (might be different from speed set in method above)
-	void getSpeed(uint32_t now_us /* [s] */, const IMUSample &sample,BotMovement &current);
+	void getSpeed(const IMUSample &sample,BotMovement &current);
 
 	// return tilt angles as set in setSpeed
 	void getSetAngle(float &angleX, float &angleY);

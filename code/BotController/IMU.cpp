@@ -132,7 +132,7 @@ void IMU::setup(MenuController *newMenuCtrl) {
 
 	// initialize high speed I2C to IMU
 	IMUWire = &Wire;
-	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_2000);
+	IMUWire->begin(I2C_MASTER, 0, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_800);
 	IMUWire->setDefaultTimeout(4000); // 4ms default timeout
 
 	// doI2CPortScan(F("I2C"),IMUWire , logger);
@@ -160,18 +160,19 @@ int IMU::init() {
 	int status = 0;
 	enabled = true;
 
-	// setting the accelerometer full scale range to +/-2G
-	status = status | mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
-
-	// setting the gyroscope full scale range to +/-500 deg/s
-	status = status | mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
-
-	// setting low pass bandwith
-	status = mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // kalman filter does the rest
 
 	// set update rate of IMU to 200 Hz
 	// the interrupt indicating new data will fire with that frequency
 	status = status | mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
+
+	// setting low pass bandwith
+	status = status | mpu9250->setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ); // kalman filter does the rest
+
+	// setting the accelerometer full scale range to +/-2G
+	status = mpu9250->setAccelRange(MPU9250::ACCEL_RANGE_2G);
+
+	// setting the gyroscope full scale range to +/-500 deg/s
+	status = status | mpu9250->setGyroRange(MPU9250::GYRO_RANGE_250DPS);
 
 	mpu9250->setGyroBiasX_rads(0);
 	mpu9250->setGyroBiasY_rads(0);
@@ -235,7 +236,7 @@ void IMU::calibrate() {
 
 	// let kalman filter run and calibrate for 1s
 	while (millis() - now < 2000) {
-		loop(micros());
+		loop();
 	}
 	imuConfig.nullOffsetX = kalman[Dimension::X].getAngle();
 	imuConfig.nullOffsetY = kalman[Dimension::Y].getAngle();
@@ -245,9 +246,9 @@ void IMU::calibrate() {
 	init();
 }
 
-void IMU::loop(uint32_t now_us) {
-	if (mpu9250 && enabled &&
-			(newDataCounter > 0) && ((now_us - timeLoop.lastCall_us) >= SampleTime_us)) {
+void IMU::loop() {
+	uint32_t now_us = micros();
+	if (mpu9250 && enabled && (newDataCounter > 0)) {
 			newDataCounter = 0;
 			dT = timeLoop.dT(now_us);
 

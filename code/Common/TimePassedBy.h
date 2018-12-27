@@ -42,7 +42,7 @@ class TimePassedBy {
 
 	// true, if at least <ms> milliseconds passed since last invocation that returned true.
 	// returns the actual passed time in addition
-	bool isDue_ms(uint16_t ms, uint16_t &passed_ms, uint32_t now) {
+	bool isDue_ms(uint32_t ms, uint32_t &passed_ms, uint32_t now) {
 		passed_ms = now-mLastCall_ms;
 		if (passed_ms>=ms) {
 			mLastCall_ms = now;
@@ -63,7 +63,7 @@ class TimePassedBy {
 	};
 
 	bool isDue() {
-		uint16_t passed_ms;
+		uint32_t passed_ms;
 		return isDue_ms(mRate, passed_ms, millis());
 	}
 
@@ -80,8 +80,8 @@ class TimePassedBy {
 		return int32_t(mLastCall_ms + mRate);
 	}
 
-	bool isDue_ms(uint16_t ms, uint32_t now) {
-		uint16_t passed_ms;
+	bool isDue_ms(uint32_t ms, uint32_t now) {
+		uint32_t passed_ms;
 		return isDue_ms(ms, passed_ms,now);
 	}
 

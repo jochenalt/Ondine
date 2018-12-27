@@ -80,9 +80,9 @@ void MotorConfig::initDefaultValues() {
 	pid_lifter.Ki = 0.005;
 	pid_lifter.Kd = 0.0;
 
-	phaseAAngle[0] = radians(229);
-	phaseAAngle[1] = radians(232);
-	phaseAAngle[2] = radians(127);
+	phaseAAngle[0] = radians(245);
+	phaseAAngle[1] = radians(223);
+	phaseAAngle[2] = radians(140);
 }
 
 void MotorConfig::print() {
@@ -238,49 +238,46 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 }
 
 // call me as often as possible
-bool BrushlessMotorDriver::loop(uint32_t now_us) {
+bool BrushlessMotorDriver::loop() {
 
 	readEncoderAngle();
 	if (enabled) {
 
 		// frequency of motor control is 1000Hz max
-		float dT = timeLoop.dT(now_us);
+		float dT = timeLoop.dT();
 
-			// turn reference angle along the given speed
-			turnReferenceAngle(dT);
+		// turn reference angle along the given speed
+		turnReferenceAngle(dT);
 
-			// read new angle from sensor
-			readEncoderAngle();
+		// read new angle from sensor
+		readEncoderAngle();
 
-			// compute position error as input for PID controller
-			float errorAngle = referenceAngle - getEncoderAngle() ;
+		// compute position error as input for PID controller
+		float errorAngle = referenceAngle - getEncoderAngle() ;
 
+		// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
+		// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
+		float speedRatio = min(abs(currentReferenceMotorSpeed)/maxRevolutionSpeed,1.0);
+		float controlOutput = pid.update(motorConfig.pid_position, motorConfig.pid_speed,
+										-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
+										errorAngle,  dT);
 
-			// carry out gain scheduled PID controller. Outcome is used to compute magnetic field angle (between -90° and +90°) and torque.
-			// if pid's outcome is 0, magnetic field is like encoder's angle, and torque is 0
-			float speedRatio = min(abs(currentReferenceMotorSpeed)/maxRevolutionSpeed,1.0);
-			float controlOutput = pid.update(motorConfig.pid_position, motorConfig.pid_speed,
-											-maxAngleError /* min */,maxAngleError /* max */, speedRatio,
-											errorAngle,  dT);
+		// torque is max at -90/+90 degrees
+		float advanceAngle = radians(90) * sigmoid(40.0 /* derivation at 0 */, controlOutput/maxAngleError);
+		float torque = abs(controlOutput)/maxAngleError;
 
-			// torque is max at -90/+90 degrees
-			float advanceAngle = radians(90) * sigmoid(40.0 /* derivation at 0 */, controlOutput/maxAngleError);
+		// set magnetic field relative to rotor's position
+		magneticFieldAngle = getEncoderAngle() + advanceAngle + radians(90);
 
-			float torque = abs(controlOutput)/maxAngleError;
+		// send new pwm value to motor
+		sendPWMDuty(min(abs(torque),1.0));
 
-			// set magnetic field relative to rotor's position
-			magneticFieldAngle = getEncoderAngle() + advanceAngle + radians(90);
-
-			// send new pwm value to motor
-			sendPWMDuty(min(abs(torque),1.0));
-
-			if (measurementTimer.isDue_ms(100, millis())) {
-				// low pass current motor speed before returning in BrushlessMototDriver::getSpeed
-				float angleDiff =  (getEncoderAngle()-measurementAngle);
-				measurementAngle = getEncoderAngle();
-				measuredMotorSpeed= angleDiff/(0.1*TWO_PI);
-			}
-
+		if (measurementTimer.isDue_ms(100, millis())) {
+			// low pass current motor speed before returning in BrushlessMototDriver::getSpeed
+			float angleDiff =  (getEncoderAngle()-measurementAngle);
+			measurementAngle = getEncoderAngle();
+			measuredMotorSpeed= angleDiff/(0.1*TWO_PI);
+		}
 			/*
 			if (motorNo == 0) {
 				static TimePassedBy t;
@@ -532,7 +529,7 @@ void BrushlessMotorDriver::menuLoop(char ch, bool continously) {
 		}
 		if (cmd) {
 			delay(1);
-			loop(micros());
+			loop();
 			logging("v_set=");
 			logging(menuSpeed,1);
             logging(" rev/s v=");

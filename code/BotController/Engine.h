@@ -34,7 +34,7 @@ public:
 	void getWheelAngleChange(float wheelAngleChange[3] /* [rad] */);
 
 	void setup(MenuController* menuCtrl);
-	void loop(uint32_t now_us);
+	void loop();
 
 	void enable(bool doit);
 	bool isEnabled() { return enabled; };

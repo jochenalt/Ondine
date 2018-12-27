@@ -47,7 +47,7 @@ public:
 	void calibrate();
 
 	// engine loop, returns true, if engine did something
-	bool loop(uint32_t now_us );
+	bool loop();
 
 	// set speed of motor
 	void setMotorSpeed(float speed /* [rev/s] */);

@@ -68,7 +68,7 @@ public:
 
 	void setNoiseVariance(float noiseVariance);
 
-	void loop(uint32_t now_us);
+	void loop();
 
 	bool isValid();
 	// stateful method to indicate that a new value from IMU is available. returns true only once per new value
