@@ -24,7 +24,6 @@ public:
 	void print();
 	float angleWeight;
 	float angularSpeedWeight;
-	float intAngleWeight;
 	float ballPosIntegratedWeight;
 	float ballPositionWeight;
 	float ballVelocityWeight;
@@ -55,7 +54,6 @@ class ControlPlane {
 		float error = 0;
 		float accel = 0;
 		float speed = 0;			// speed in x direction [m/s]
-		float filteredSpeed = 0;
 		float posErrorIntegrated = 0;
 		float error_int_angle = 0;
 

@@ -25,11 +25,6 @@ void StateControllerConfig::print() {
 	logging(defValue.angleWeight,2,2);
 	logging("]");
 	logging(",");
-	logging(intAngleWeight,2,2);
-	logging("[");
-	logging(defValue.intAngleWeight,2,2);
-	logging("])");
-	logging(",");
 	logging(angularSpeedWeight,2,2);
 	logging("[");
 	logging(defValue.angularSpeedWeight,2,2);
@@ -67,13 +62,12 @@ void StateControllerConfig::initDefaultValues() {
 	// initialize the weights used for the state controller per
 	// basic values can be tried out  via https://robotic-controls.com/learn/inverted-pendulum-controls
 	// with mc = 1.2 kg, mb = 0.1 kg, L = 0.15
-	angleWeight				= 21; // 39.0;
-	intAngleWeight 			= 0;
-	angularSpeedWeight		= 18.5; // 21.00;
+	angleWeight				= 9; // 39.0;
+	angularSpeedWeight		= 3.0; // 21.00;
 
-	ballPositionWeight		= 4.5; // 14.2;
-	ballPosIntegratedWeight = 0.0; // -0.0;
-	ballVelocityWeight		= 2.0; // 12.0;
+	ballPositionWeight		= 0.3; // 14.2;
+	ballPosIntegratedWeight = 0.75; // -0.0;
+	ballVelocityWeight		= 1.2; // 12.0;
 	ballAccelWeight			= floatPrecision;	// 0
 	omegaWeight				= floatPrecision;
 }
@@ -86,7 +80,6 @@ void ControlPlane::reset () {
 		lastBallSpeed = 0;
 		lastTargetBodyPos = 0;
 		lastTargetBallPos = 0;
-		filteredSpeed = 0;
 		speed = 0;
 		accel = 0;
 		error = 0;
@@ -95,10 +88,9 @@ void ControlPlane::reset () {
 		// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
 		outputSpeedFilter.init(FIR::LOWPASS,
 				         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
-						 1.0e-4f 			/* supression in stop band is -40db */,
+						 1.0e-5f 			/* supression in stop band is -40db */,
 						 SampleFrequency, 	/* 200 Hz */
 						 15.0f  			/* low pass cut off frequency */);
-
 		posFilter.init(FIR::LOWPASS,
                             1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
                             1.0e-4f             /* supression in stop band is -40db */,
@@ -145,20 +137,17 @@ void ControlPlane::update(bool doLogging, float dT,
 		// compute current state variables angle, angular velocity, position, speed, accelst arget angularVelocity out of acceleration
 		float targetAngularVelocity = (targetAngle - lastTargetAngle)*dT;
 		float angle = sensor.angle;
-
 		float angularVelocity = sensor.angularVelocity;
-
-		angularVelocity = (angle - lastAngle)/dT;
 
 		float bodyPos   		= current.pos;
 		float bodySpeed 		= current.speed;
 		float bodyAccel 		= (bodySpeed - lastBodySpeed)/dT;
-		float ballPos			= bodyPos - angle* (CentreOfGravityHeight + BallRadius*2.0);
+		float ballPos			= bodyPos - angle* (CentreOfGravityHeight);
 		float ballSpeed 		= (ballPos - lastBallPos)/dT;
 		float ballAccel 		= (ballSpeed - lastBallSpeed)/dT;
 
 		float targetBodyPos 	= target.pos;
-		float targetBallPos	 	= target.pos - targetAngle * (CentreOfGravityHeight + BallRadius*2.0);
+		float targetBallPos	 	= target.pos - targetAngle * (CentreOfGravityHeight);
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
@@ -195,8 +184,7 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// sum up all weighted errors
 		totalTiltError 		=     config.angleWeight			* error_angle
-								+ config.angularSpeedWeight		* error_angular_speed
-								+ config.intAngleWeight 		* error_int_angle;
+								+ config.angularSpeedWeight		* error_angular_speed;
 		totalPositionError 	=     config.ballPositionWeight		* posError
 								+ config.ballPosIntegratedWeight* posErrorIntegrated
 								+ config.ballVelocityWeight		* speedError
@@ -208,18 +196,14 @@ void ControlPlane::update(bool doLogging, float dT,
 
 
 		// outcome of controller is force to be applied to the ball
-		// F = m*a
-		float force = error * BallWeight;
-		float accel = force;
-		// accel = constrain(force,-MaxBotAccel, MaxBotAccel);
-
-		// accelerate if not on max speed already
-		speed += accel * dT;
-		speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
+		// F = m*a -> a = F/m
+		float accel = error / BallWeight;
+		accel = constrain(accel,-MaxBotAccel, MaxBotAccel);
 
 		// get rid of trembling by a FIR filter 5th order with 15Hz
-		// filteredSpeed = outputSpeedFilter.update(speed);
-		filteredSpeed = speed;
+		speed += outputSpeedFilter.update( accel * dT);
+		speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
+
 		if (outputSpeedFilter.get_error_flag() != 0)
 			fatalError("outputfilter error flag");
 
@@ -261,8 +245,6 @@ void ControlPlane::update(bool doLogging, float dT,
 				logging(accel,3,3);
 				logging(",");
 				logging(speed,3,3);
-				logging(",");
-				logging(filteredSpeed,3,3);
 				logging(")");
 			}
 	};
@@ -311,10 +293,10 @@ void StateController::update(float dT,
 }
 
 float StateController::getSpeedX() {
-	return planeX.filteredSpeed;
+	return planeX.speed;
 }
 float StateController::getSpeedY() {
-	return planeY.filteredSpeed;
+	return planeY.speed;
 }
 
 float StateController::getOmega() {
@@ -356,10 +338,10 @@ void StateController::menuLoop(char ch, bool continously) {
 			printHelp();
 			break;
 		case 'b':
-			BotController::getInstance().balanceMode(BotController::getInstance().isBalancing()?
+			BotController::getInstance()->balanceMode(BotController::getInstance()->isBalancing()?
 											BotController::BotMode::OFF:
 											BotController::BotMode::BALANCING);
-			if (BotController::getInstance().isBalancing())
+			if (BotController::getInstance()->isBalancing())
 				loggingln("balancing mode on");
 			else
 				loggingln("balancing mode off");
@@ -385,26 +367,13 @@ void StateController::menuLoop(char ch, bool continously) {
 			cmd = true;
 			break;
 		case 'w':
-			config.intAngleWeight -= continously?2.0:0.5;
-			config.intAngleWeight = max(config.intAngleWeight, floatPrecision);
-
-			config.print();
-			cmd =true;
-			break;
-		case 'W':
-			config.intAngleWeight += continously?2.0:0.5;
-			config.print();
-			cmd = true;
-			break;
-
-		case 'e':
 			config.angularSpeedWeight -= continously?2.0:0.5;
 			config.angularSpeedWeight = max(config.angularSpeedWeight, floatPrecision);
 
 			config.print();
 			cmd =true;
 			break;
-		case 'E':
+		case 'W':
 			config.angularSpeedWeight += continously?2.0:0.5;
 			config.print();
 			cmd = true;

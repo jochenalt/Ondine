@@ -119,29 +119,9 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	float  lVz = pOmegaZ * BallRadius;
 
 	// compute wheel's speed in rad/s by (wheel0,wheel1,wheel2) = Construction-Matrix * Tilt-Compensation Matrix * (Vx, Vy, Omega)
-	wheelSpeed[0] = ((m01_11 + m02_12) * pVx	       + (-m02_02) * pVy           + ( -m01_21 - m02_22         ) * lVz)  ;
-	wheelSpeed[1] = ((m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
-	wheelSpeed[2] = ((-m10_10+ m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
-
-	// convert rad/s in rev/s
-	wheelSpeed[0] /= TWO_PI;
-	wheelSpeed[1] /= TWO_PI;
-	wheelSpeed[2] /= TWO_PI;
-
-	/*
-	// if one wheel's speed exceeds max speed
-	// reduce all speeds by same factor to comply with the max speed restriction
-	// but without changing the direction of movement
-	float highestWheelSpeed = max(max(abs(wheelSpeed[0]), abs(wheelSpeed[1])), abs(wheelSpeed[2]));
-	if (highestWheelSpeed > MaxWheelSpeed) {
-			float factor = MaxWheelSpeed / highestWheelSpeed;
-			for (int j = 0;j<3;j++)
-				wheelSpeed[j] *= factor;
-			// logging("wheel speed reduced by ");
-			// loggingln(factor,1,2);
-			// fatalError("speed exceeds limit");
-	}
-	*/
+	wheelSpeed[0] = (( m01_11          + m02_12) * pVx  + (         -m02_02) * pVy  + (          -m01_21 - m02_22) * lVz)  ;
+	wheelSpeed[1] = (( m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
+	wheelSpeed[2] = ((-m10_10 + m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
 }
 
 // compute actual speed in the coord-system of the IMU out of the encoder's data depending on the given tilt
@@ -166,7 +146,7 @@ void Kinematix::computeActualSpeed( float wheelSpeed[3],
 	float m22_20 = trm[2][2] * icm[2][0];
 
 	// compute inverse kinematics
-	vx    =         ( m11_10 + m12_20)           * wheelSpeed[0]
+	vx    =         ( m11_10          + m12_20)  * wheelSpeed[0]
 			      + ( m10_01 + m11_11 + m12_20)  * wheelSpeed[1]
 				  + (-m10_01 + m11_11 + m12_20)  * wheelSpeed[2];
 	vy    =         (-m02_20)                    * wheelSpeed[0]
@@ -179,10 +159,8 @@ void Kinematix::computeActualSpeed( float wheelSpeed[3],
 
 
 void Kinematix::setup() {
-	// create construction matrix and its inverse
 	setupConstructionMatrix();
 }
-
 
 void Kinematix::testKinematics() {
 	

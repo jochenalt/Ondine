@@ -68,8 +68,8 @@ void precomputeSVPMWave() {
 
 void MotorConfig::initDefaultValues() {
 	// at slow speeds PID controller is aggressively keeping the position
-	pid_position.Kp = 0.2;
-	pid_position.Ki = 0.2;
+	pid_position.Kp = 0.1;
+	pid_position.Ki = 0.1;
 	pid_position.Kd = 0.0000;
 
 	pid_speed.Kp = 0.1;
@@ -80,9 +80,9 @@ void MotorConfig::initDefaultValues() {
 	pid_lifter.Ki = 0.005;
 	pid_lifter.Kd = 0.0;
 
-	phaseAAngle[0] = radians(245);
-	phaseAAngle[1] = radians(223);
-	phaseAAngle[2] = radians(140);
+	phaseAAngle[0] = radians(228);
+	phaseAAngle[1] = radians(230);
+	phaseAAngle[2] = radians(127);
 }
 
 void MotorConfig::print() {
@@ -223,9 +223,10 @@ void BrushlessMotorDriver::reset() {
 
 	currentReferenceMotorSpeed = 0;		// [rev/s]
 	measuredMotorSpeed = 0;				// [rev/s]
+	measurementAngle = 0;
 	pid.reset();
+	timeLoop.init();
 }
-
 
 // set the pwm values matching the current magnetic field angle
 void BrushlessMotorDriver::sendPWMDuty(float torque) {
@@ -240,17 +241,23 @@ void BrushlessMotorDriver::sendPWMDuty(float torque) {
 // call me as often as possible
 bool BrushlessMotorDriver::loop() {
 
+	// read new angle from encoder
 	readEncoderAngle();
 	if (enabled) {
+
+		if (timeLoop.firstCall()) {
+			// dont do anything at first call, since we do not yet have a time difference
+			timeLoop.dT();
+			measurementAngle = getEncoderAngle();
+			currentReferenceMotorSpeed = 0;
+			return false;
+		}
 
 		// frequency of motor control is 1000Hz max
 		float dT = timeLoop.dT();
 
 		// turn reference angle along the given speed
 		turnReferenceAngle(dT);
-
-		// read new angle from sensor
-		readEncoderAngle();
 
 		// compute position error as input for PID controller
 		float errorAngle = referenceAngle - getEncoderAngle() ;

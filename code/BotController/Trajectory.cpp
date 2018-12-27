@@ -64,7 +64,7 @@ void Trajectory::loop() {
 		}
 
 		// @TODO implement trapezoid profile towards target
-		BotController::getInstance().setTarget(current);
+		BotController::getInstance()->setTarget(current);
 	}
 
 	lastLoopTime = now;

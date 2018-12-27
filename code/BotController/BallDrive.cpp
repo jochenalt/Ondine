@@ -64,9 +64,9 @@ void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 		engine.getWheelAngleChange(angleChange);
 
 		float currentWheelSpeed[3]; // [rev/s]
-		currentWheelSpeed[0] = angleChange[0]; //   / (TWO_PI * dT);
-		currentWheelSpeed[1] = angleChange[1]; //   / (TWO_PI * dT);
-		currentWheelSpeed[2] = angleChange[2]; //   / (TWO_PI * dT);
+		currentWheelSpeed[0] = angleChange[0] / (TWO_PI * dT);
+		currentWheelSpeed[1] = angleChange[1] / (TWO_PI * dT);
+		currentWheelSpeed[2] = angleChange[2] / (TWO_PI * dT);
 
 		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
 		kinematics.computeActualSpeed(  currentWheelSpeed,
@@ -85,8 +85,16 @@ void BallDrive::getSpeed(const IMUSample &sample, BotMovement &current) {
 		// engine.resetAngle();
 
 	} else {
+		current.x.pos = 0;
+		current.y.pos = 0;
+		current.x.speed = 0;
+		current.y.speed = 0;
+		current.x.accel = 0;
+		current.y.accel = 0;
+
 		lastSpeedX = current.x.speed;
 		lastSpeedY = current.y.speed;
+
 		lastCall_us = now_us;
 	}
 }

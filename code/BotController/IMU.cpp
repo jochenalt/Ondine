@@ -34,9 +34,9 @@ inline void imuInterrupt() {
 
 void IMUConfig::initDefaultValues() {
 	// these null values can be calibrated and set in EEPROM
-	nullOffsetX = radians(-1.0);
-	nullOffsetY = radians(3.2);
-	kalmanNoiseVariance = 0.01; // noise variance, default is 0.03, the higher the more noise is filtered
+	nullOffsetX = radians(-1.4);
+	nullOffsetY = radians(-3.0);
+	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
 void IMUConfig::print() {
@@ -160,7 +160,6 @@ int IMU::init() {
 	int status = 0;
 	enabled = true;
 
-
 	// set update rate of IMU to 200 Hz
 	// the interrupt indicating new data will fire with that frequency
 	status = status | mpu9250->setSrd(1000/SampleFrequency-1); // datasheet: Data Output Rate = 1000 / (1 + SRD)*
@@ -246,11 +245,31 @@ void IMU::calibrate() {
 	init();
 }
 
+void IMU::enable(bool doIt) {
+	enabled = doIt;
+	if (enabled) {
+		newDataCounter = 0;
+		timeLoop.init();
+		valueIsUpdated = false;
+	}
+}
+
+
 void IMU::loop() {
+	// in first loop dont do anything, since we do not have a delta tim yet
+	if (timeLoop.firstCall()) {
+		if (newDataCounter > 0) {
+			// very first meaurement, just store the time
+			timeLoop.dT();
+			valueIsUpdated = false;
+			newDataCounter = 0;
+		}
+		return;
+	}
 	uint32_t now_us = micros();
 	if (mpu9250 && enabled && (newDataCounter > 0)) {
-			newDataCounter = 0;
-			dT = timeLoop.dT(now_us);
+		newDataCounter = 0;
+		dT = timeLoop.dT(now_us);
 
 		// read raw values
 		int status = mpu9250->readSensor(true);
@@ -318,10 +337,6 @@ void IMU::loop() {
 				logging(",");
 				logging(degrees(getAngleRad(Dimension::Y)),2,2);
 				logging(")");
-#ifdef FIFO
-				logging(" #=");
-				logging(noOfSamples);
-#endif
 				logging(" f=");
 				logging(timeLoop.getAverageFrequency());
 				loggingln("Hz");
@@ -329,7 +344,6 @@ void IMU::loop() {
 		}
 	}
 }
-
 
 // returns true once when a new value is available.
 bool IMU::isNewValueAvailable(float &dT) {

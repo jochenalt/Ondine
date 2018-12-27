@@ -15,15 +15,16 @@ const float BallWeight = 0.1;										// [kg]
 const float WheelRadius = 0.035;									// [m]
 const float BallRadius = 0.09;										// [m]
 const float WheelAngleRad= radians(45.0);							// [rad] 		mounting angle of wheels against horizontal base platform
-const float CentreOfGravityHeight = 0.050; 							// [m] 			center of gravity height from ball centre
+const float CentreOfGravityHeight = 0.200; 							// [m] 			center of gravity height from ball centre
 const float MaxBotSpeed = 1.8; 										// [m/s] 		max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] 		max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] 	max omega aceleration of bot
 const float MaxBotAccelAccel= 0.1;							 		// [m/s^3] 		max acceleration acceleration of bot
-const float MaxTiltAngle = radians(5);								// [rad] 		max tilt angle, 15°
-const float MaxBotAccel= 10.0*tan(MaxTiltAngle)*Gravity;					// [m/s^2] 		max acceleration of bot
+const float MaxTiltAngle = radians(10);								// [rad] 		max tilt angle, 15°
+const float Gs = 5.0;												// []			how many Gs of Bot acceleration
+const float MaxBotAccel= Gs*tan(MaxTiltAngle)*Gravity;				// [m/s^2] 		max acceleration of bot
 const float MaxWheelSpeed = 4.0;									// [rev/s]
-const float MaxWheelAcceleration = 500;								// [rev/s^2]
+const float MaxWheelAcceleration = 1000;								// [rev/s^2]
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy
 
@@ -35,10 +36,9 @@ const float MaxWheelAcceleration = 500;								// [rev/s^2]
 // possible values of sample frequency depend on IMU MP9150 are 1000/n with n=0..32,
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz, 500Hz, 1000 Hz
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
-const int SampleFrequency = 200;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
+const int SampleFrequency = 250;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
 const float SamplingTime 	= 1.0/SampleFrequency; 	                // [s] sampling time
 const uint32_t SampleTime_us = 1000000/SampleFrequency;				// [us] time per loop
-const int maxLoopFactor = 4;
 
 
 #define IMU_INTERRUPT_PIN 20										// pin that listens to interrupts coming from IMU when a new measurement is in da house

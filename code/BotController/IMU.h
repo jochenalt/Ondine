@@ -76,17 +76,7 @@ public:
 	bool isNewValueAvailable(float &dT /* time since last call in [s] */);
 
 	IMUSample& getSample() { return currentSample; };
-	void enable(bool doIt) {
-		enabled = doIt;
-#ifdef FIFO
-		if (doIt) {
-			mpu9250->enableFifo(true,true,false,false);
-		}
-		else
-			mpu9250->enableFifo(false,false,false,false);
-#endif
-	}
-
+	void enable(bool doIt);
 
 	// call when stable and upright before starting up
 	void calibrate();
@@ -102,14 +92,12 @@ private:
 	void updateFilter();
 	MPU9250* mpu9250 = NULL;
 	KalmanFilter kalman[3]; // one kalman filter per dimension
-	float noiseVariance = 0.03; // noise variance used in Kalman filter. The bigger, the more noise, default is 0.03;
-
 	IMUSample currentSample;
 	bool valueIsUpdated = false;
-	bool logIMUValues = false;
-	float sampleRate_us = 0;
-
 	float dT = 0;
+
+	bool logIMUValues = false;
+
 	TimePassedBy logTimer;
 	TimeLoop timeLoop;
 	bool enabled = false;

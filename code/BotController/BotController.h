@@ -23,9 +23,9 @@ public:
 	enum BotMode { OFF, BALANCING };
 
 	// singleton
-	static BotController& getInstance() {
+	static BotController* getInstance() {
 		static BotController instance;
-		return instance;
+		return &instance;
 	}
 
 	// to be called before anything else happens.

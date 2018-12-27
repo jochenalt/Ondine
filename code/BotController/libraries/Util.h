@@ -42,6 +42,9 @@ public:
 	void init() {
 		lastCall_us = 0;
 	}
+	bool firstCall() {
+		return lastCall_us == 0;
+	}
 	float dT() {
 		return dT(micros());
 	}

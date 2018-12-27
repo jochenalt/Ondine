@@ -18,7 +18,7 @@ PatternBlinker ledBlinker(LED_PIN, 50 /* ms */); // one bit in the patterns abov
 HardwareSerial* logger = &Serial5;			// UART used to log
 HardwareSerial* command = &Serial5;			// UART used to log
 
-BotController& botController = BotController::getInstance();
+BotController* botController = BotController::getInstance();
 
 i2c_t3* Wires[3] = { &Wire, &Wire1, &Wire2};
 i2c_t3* IMUWire = NULL;
@@ -28,7 +28,7 @@ I2CSlave* i2cSlave = new I2CSlave(&Wire1);
 void setup()
 {
 	// command input comes via UART or I2C from ESP86266
-	command->begin(230400);
+	command->begin(460800);
 	uint32_t now = millis();
 	// let the LED blink two times to indicate that setup is starting now
 	digitalWrite(LED_PIN,LOW);
@@ -42,9 +42,9 @@ void setup()
 	digitalWrite(LED_PIN,LOW);
 	ledBlinker.set(DefaultPattern,sizeof(DefaultPattern));
 
-	botController.setup(); 	// this takes 4.5s seconds (mainly due to IMU initialization)
+	BotController::getInstance()->setup(); 	// this takes 4.5s seconds (mainly due to IMU initialization)
 
-	// initialize LED_PIN after botController.setup()
+	// initialize LED_PIN after BotController::getInstance()->setup()
 	// since SPI does use it default wise for SCK, but this is remapped
 	pinMode(LED_PIN, OUTPUT);
 
@@ -63,7 +63,7 @@ void loop()
 {
 	uint32_t now = millis();
 	ledBlinker.loop(now);    	// LED on Teensy board and LED on power switch
-	botController.loop();		// do the balancing business
+	BotController::getInstance()->loop();		// do the balancing business
 	i2cSlave->loop();			// execute commands from webserver that came in via I2C
 	memory.loop(now);
 }

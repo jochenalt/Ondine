@@ -51,6 +51,7 @@ class Kinematix {
 	private:
 		// compute the tilt rotation matrix, used in kinematics and inverse kinematics
 		void computeTiltRotationMatrix(float pTiltX, float  pTiltY);
+
 		// pre-compute kinematics so that during the loop just a couple of multiplications are required.
 		void setupConstructionMatrix();
 		
