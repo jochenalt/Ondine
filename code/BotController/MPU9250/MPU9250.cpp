@@ -708,7 +708,7 @@ int MPU9250::calibrateGyro() {
   if (setGyroRange(GYRO_RANGE_250DPS) < 0) {
     return -1;
   }
-  if (setDlpfBandwidth(DLPF_BANDWIDTH_20HZ) < 0) {
+  if (setDlpfBandwidth(DLPF_BANDWIDTH_92HZ) < 0) {
     return -2;
   }
   if (setSrd(19) < 0) {
@@ -724,7 +724,7 @@ int MPU9250::calibrateGyro() {
     _gxbD += (getGyroX_rads() + _gxb)/((double)_numSamples);
     _gybD += (getGyroY_rads() + _gyb)/((double)_numSamples);
     _gzbD += (getGyroZ_rads() + _gzb)/((double)_numSamples);
-    delay(20);
+    delay(11);
   }
   _gxb = (float)_gxbD;
   _gyb = (float)_gybD;

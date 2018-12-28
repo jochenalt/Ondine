@@ -47,7 +47,7 @@ using namespace FIR;
 // Handles LPF and HPF case
 void Filter::init(filterType filt_t, float allowedRipple, float supression, float SamplingFrequency, float FilterFrequency) {
 	// computation according to
-	float numberOfTaps = 2.0/3.0 * log10(1.0/(10.0*allowedRipple*supression)*SamplingFrequency/FilterFrequency);
+	float numberOfTaps = 2.0/3.0 * log10(1.0/(10.0*allowedRipple*supression))*SamplingFrequency/FilterFrequency;
 	init(filt_t, numberOfTaps, SamplingFrequency, FilterFrequency);
 }
 

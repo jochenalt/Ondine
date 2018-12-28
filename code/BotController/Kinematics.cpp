@@ -24,7 +24,7 @@ void logMatrix(float m[3][3]) {
 	logger->print(m[2][2],4);logger->println("|");
 }
 
-// compute construction matrix cm and compute its inverse matrix
+// compute construction matrix Kinematix::cm and compute its inverse matrix Kinematix::icm
 void Kinematix::setupConstructionMatrix() {
 		float a = -1.0/WheelRadius;
 		float cos_phi = cos(WheelAngleRad);
@@ -68,7 +68,7 @@ void Kinematix::computeTiltRotationMatrix(float pTiltX, float pTiltY) {
 	// do it only if tilt angles have changed
 	// This is actually important, since forward
 	// and inverse kinematics is done once per loop with identical angles,
-	// so this really doubles performance
+	// so this doubles performance
 	if  (tiltCompensationMatrixComputed &&
 		(lastTiltX == pTiltX) &&
 		(lastTiltY == pTiltY))
@@ -122,6 +122,11 @@ void Kinematix::computeWheelSpeed( float pVx /* mm */, float pVy /* mm */, float
 	wheelSpeed[0] = (( m01_11          + m02_12) * pVx  + (         -m02_02) * pVy  + (          -m01_21 - m02_22) * lVz)  ;
 	wheelSpeed[1] = (( m10_10 + m11_11 + m02_12) * pVx  + (-m10_00 - m02_02) * pVy  + ( -m10_20 - m11_21 - m02_22) * lVz) ;
 	wheelSpeed[2] = ((-m10_10 + m11_11 + m02_12) * pVx  + ( m10_00 - m02_02) * pVy  + (  m10_20 - m11_21 - m02_22) * lVz) ;
+
+	// outcome is [rad/s], convert to [rev/s]
+	wheelSpeed[0] /= TWO_PI;
+	wheelSpeed[1] /= TWO_PI;
+	wheelSpeed[2] /= TWO_PI;
 }
 
 // compute actual speed in the coord-system of the IMU out of the encoder's data depending on the given tilt

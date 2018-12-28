@@ -34,8 +34,8 @@ inline void imuInterrupt() {
 
 void IMUConfig::initDefaultValues() {
 	// these null values can be calibrated and set in EEPROM
-	nullOffsetX = radians(-1.4);
-	nullOffsetY = radians(-3.0);
+	nullOffsetX = radians(-1.7);
+	nullOffsetY = radians(-1.0);
 	kalmanNoiseVariance = 0.03; // noise variance, default is 0.03, the higher the more noise is filtered
 }
 
@@ -266,10 +266,10 @@ void IMU::loop() {
 		}
 		return;
 	}
-	uint32_t now_us = micros();
 	if (mpu9250 && enabled && (newDataCounter > 0)) {
 		newDataCounter = 0;
-		dT = timeLoop.dT(now_us);
+		uint32_t startLoop_us = micros();
+		dT = timeLoop.dT(startLoop_us);
 
 		// read raw values
 		int status = mpu9250->readSensor(true);
@@ -313,7 +313,7 @@ void IMU::loop() {
 		if (logIMUValues) {
 			if (logTimer.isDue_ms(50,millis())) {
 				logging("dT=");
-				logging(((float)(micros()-now_us)));
+				logging(((float)(micros()-startLoop_us)));
 				logging("us a=(X:");
 				logging(accelX,2);
 				logging("/");

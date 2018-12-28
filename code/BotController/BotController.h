@@ -23,10 +23,7 @@ public:
 	enum BotMode { OFF, BALANCING };
 
 	// singleton
-	static BotController* getInstance() {
-		static BotController instance;
-		return &instance;
-	}
+	static BotController* getInstance(bool init = false);
 
 	// to be called before anything else happens.
 	// initializes motors, imu, state controller, everything
@@ -73,6 +70,8 @@ public:
 		currentMovement.reset();
 	}
 
+	BotMovement& getCurrentMovement() { return currentMovement; };
+
 	void setTarget(const BotMovement& target);
 
 	bool isBalancing() {
@@ -83,7 +82,6 @@ private:
 	BotController() {};
 
 	BallDrive ballDrive;
-	MenuController menuController;
 	IMU imu;
 	StateController state;
 	BotMovement currentMovement;
@@ -94,6 +92,8 @@ private:
 	TimePassedBy logTimer;
 	uint32_t avrLoopTime_us = 0;
 	TimePassedBy mainTimer;
+
+	MenuController menuController;
 };
 
 

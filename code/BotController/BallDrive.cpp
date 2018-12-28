@@ -7,6 +7,7 @@
 
 #include <BallDrive.h>
 #include <types.h>
+#include <BotController.h>
 
 void BallDrive::setup(MenuController* menuCtrl) {
 	// register out menu
@@ -42,7 +43,7 @@ void BallDrive::setSpeed(float speedX, float speedY, float omega,
 		 	 	 	 	 float angleX, float angleY) {
 
 	// apply kinematics to compute wheel speed out of x,y, omega
-	float  newWheelSpeed[3] = { 0, 0, 0}; // [rev/s]
+	float  newWheelSpeed[3] = { 0, 0, 0}; // [rev/s]]
 	kinematics.computeWheelSpeed(speedX, speedY, omega,
  							angleX,angleY,
 							newWheelSpeed);
@@ -119,22 +120,22 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		cmd = true;
 		break;
 	case 'q':
-		menuSpeedX += 0.001;
+		menuSpeedX += 0.01;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'a':
-		menuSpeedX -= 0.001;
+		menuSpeedX -= 0.01;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 'w':
-		menuSpeedY += 0.001;
+		menuSpeedY += 0.01;
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
 	case 's':
-		menuSpeedY -= (0.001);
+		menuSpeedY -= (0.01);
 		setSpeed(menuSpeedX, menuSpeedY,  menuOmega,  menuAngleX,  menuAngleY);
 		cmd = true;
 		break;
@@ -208,11 +209,9 @@ void BallDrive::menuLoop(char ch, bool continously) {
 		logging(degrees(menuAngleX),4,0);
 		logging(",");
 		logging(degrees(menuAngleY),4,0);
-		logging(")");
+		logging(") ");
 
-		IMUSample a(IMUSamplePlane(menuAngleX,0), IMUSamplePlane(menuAngleY,0),IMUSamplePlane(0,menuOmega));
-		getSpeed(a, menuMovement);
-		menuMovement.print();
+		BotController::getInstance()->getCurrentMovement().print();
 
 		logger->println(" >");
 	}

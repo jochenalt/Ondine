@@ -87,15 +87,20 @@ void ControlPlane::reset () {
 
 		// add an FIR Filter with 15Hz to the output of the controller in order to increase gain of state controller
 		outputSpeedFilter.init(FIR::LOWPASS,
-				         1.0e-3f  			/* allowed ripple in passband in amplitude is 0.1% */,
-						 1.0e-5f 			/* supression in stop band is -40db */,
+				         1.0e-2f  			/* allowed ripple in passband in amplitude is 1% */,
+						 1.0e-4f 			/* supression above cut off frequency is -40db */,
 						 SampleFrequency, 	/* 200 Hz */
-						 15.0f  			/* low pass cut off frequency */);
+						 50.0f  			/* low pass cut off frequency */);
+		if (outputSpeedFilter.get_error_flag() != 0) {
+			logging("FIR error=");
+			loggingln(outputSpeedFilter.get_error_flag());
+		}
+
 		posFilter.init(FIR::LOWPASS,
-                            1.0e-3f              /* allowed ripple in passband in amplitude is 0.1% */,
-                            1.0e-4f             /* supression in stop band is -40db */,
-                            SampleFrequency,     /* 200 Hz */
-                            15.0f               /* low pass cut off frequency */);
+                            1.0e-2f				/* allowed ripple in passband in amplitude is 1% */,
+                            1.0e-3f				/* supression in stop band is -30db */,
+                            SampleFrequency,	/* 200 Hz */
+                            15.0f				/* low pass cut off frequency */);
 }
 
 float ControlPlane::getBodyPos() {
@@ -197,7 +202,7 @@ void ControlPlane::update(bool doLogging, float dT,
 
 		// outcome of controller is force to be applied to the ball
 		// F = m*a -> a = F/m
-		float accel = error / BallWeight;
+		float accel = error;// / BallWeight;
 		accel = constrain(accel,-MaxBotAccel, MaxBotAccel);
 
 		// get rid of trembling by a FIR filter 5th order with 15Hz
