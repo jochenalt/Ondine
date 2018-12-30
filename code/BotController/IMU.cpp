@@ -293,11 +293,18 @@ void IMU::loop() {
 					+mpu9250->getGyroZ_rads() };
 
 		float tilt[3] = {
-					atan2f(-accelX, sqrt(accelZ*accelZ + accelY*accelY)) - imuConfig.nullOffsetX,
-					atan2f(-accelY, sqrt(accelZ*accelZ + accelX*accelX)) - imuConfig.nullOffsetY,
+					asinf(-constrain(accelX, -Gravity, + Gravity)/Gravity) - imuConfig.nullOffsetX,
+					asinf(-constrain(accelY, -Gravity, + Gravity)/Gravity) - imuConfig.nullOffsetY,
 					accelZ };
 
-		for (int i = 0;i<3;i++) {
+
+		/*
+		float tilt[3] = {
+					atan2f(-accelX, accelZ) - imuConfig.nullOffsetX,
+					atan2f(-accelY, accelZ) - imuConfig.nullOffsetY,
+					accelZ };
+					*/
+		for (int i = 0;i<2;i++) {
 			// invoke kalman filter per plane
 			kalman[i].update(tilt[i], angularVelocity[i], dT);
 

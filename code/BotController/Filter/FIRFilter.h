@@ -120,6 +120,8 @@
 
 #define MAX_NUM_FILTER_TAPS 1000
 
+#include "Arduino.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>

@@ -8,6 +8,8 @@
 #ifndef ENGINE_H_
 #define ENGINE_H_
 
+#include <Arduino.h>
+
 #include <BrushlessMotorDriver.h>
 #include <libraries/MenuController.h>
 #include <Kinematics.h>

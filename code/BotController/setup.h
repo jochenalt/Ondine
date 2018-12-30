@@ -2,8 +2,8 @@
 #define SETUP_H_
 
 
-#include <math.h>
 #include <Arduino.h>
+#include <math.h>
 
 // --- general constants ---
 const float OneMicrosecond_s = 0.000001;
@@ -15,7 +15,7 @@ const float BallWeight = 0.1;										// [kg]
 const float WheelRadius = 0.035;									// [m]
 const float BallRadius = 0.09;										// [m]
 const float WheelAngleRad= radians(45.0);							// [rad] 		mounting angle of wheels against horizontal base platform
-const float CentreOfGravityHeight = 0.200; 							// [m] 			center of gravity height from ball centre
+const float CentreOfGravityHeight = 0.280; 							// [m] 			center of gravity height from ball centre
 const float MaxBotSpeed = 1.8; 										// [m/s] 		max speed of bot
 const float MaxBotOmega= 6.0; 										// [rad/s] 		max vertical turn speed of bot
 const float MaxBotOmegaAccel= 0.1; 									// [rad/s^2] 	max omega aceleration of bot
@@ -24,7 +24,7 @@ const float MaxTiltAngle = radians(10);								// [rad] 		max tilt angle, 15°
 const float Gs = 5.0;												// []			how many Gs of Bot acceleration
 const float MaxBotAccel= Gs*tan(MaxTiltAngle)*Gravity;				// [m/s^2] 		max acceleration of bot
 const float MaxWheelSpeed = 4.0;									// [rev/s]
-const float MaxWheelAcceleration = 1000;								// [rev/s^2]
+const float MaxWheelAcceleration = 1000;							// [rev/s^2]
 // --- Teensy ---
 #define LED_PIN 13					// blinking LED on Teensy
 
@@ -37,6 +37,7 @@ const float MaxWheelAcceleration = 1000;								// [rev/s^2]
 // i.e. 90Hz, 100Hz, 111Hz, 125Hz, 142Hz, 166 Hz, 200Hz, 250Hz, 333Hz, 500Hz, 1000 Hz
 // cpu-wise, Teensy 3.5 is capable of going up to 333 Hz
 const int SampleFrequency = 250;									// [Hz] main frequency loop. IMUSamplingFrequency is a multiple of SampleFrequency
+const int MotorSampleFactor = 4;
 const float SamplingTime 	= 1.0/SampleFrequency; 	                // [s] sampling time
 const uint32_t SampleTime_us = 1000000/SampleFrequency;				// [us] time per loop
 

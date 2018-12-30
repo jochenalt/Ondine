@@ -2,6 +2,8 @@
 #ifndef __TYPES_H_
 #define __TYPES_H_
 
+#include "Arduino.h"
+
 // used as rotation matrix
 typedef float matrix33_t[3][3];
 

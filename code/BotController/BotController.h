@@ -8,6 +8,7 @@
 #ifndef BOTCONTROLLER_H_
 #define BOTCONTROLLER_H_
 
+#include <Arduino.h>
 #include <types.h>
 #include <libraries/MenuController.h>
 #include <StateController.h>
@@ -78,6 +79,7 @@ public:
 		return mode == BALANCING;
 	}
 	StateController& getStateController() { return state; };
+
 private:
 	BotController() {};
 
@@ -94,6 +96,7 @@ private:
 	TimePassedBy mainTimer;
 
 	MenuController menuController;
+	int loopCaller = 0;
 };
 
 

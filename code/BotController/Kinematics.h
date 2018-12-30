@@ -15,6 +15,8 @@
 #ifndef KINEMATIX_H_
 #define KINEMATIX_H_
 
+#include <Arduino.h>
+
 #include "libraries/MenuController.h"
 #include "types.h"
 

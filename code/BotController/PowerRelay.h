@@ -7,6 +7,7 @@
 
 #ifndef POWERRELAY_H_
 #define POWERRELAY_H_
+#include <Arduino.h>
 
 class PowerRelay {
 public:

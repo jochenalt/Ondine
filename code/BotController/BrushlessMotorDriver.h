@@ -8,6 +8,8 @@
 #ifndef BLDCCONTROLLER_H_
 #define BLDCCONTROLLER_H_
 
+#include <Arduino.h>
+
 #include <libraries/MenuController.h>
 #include <libraries/PIDController.h>
 #include <Filter/ComplementaryFilter.h>

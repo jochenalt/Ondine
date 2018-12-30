@@ -1,6 +1,5 @@
 #include "Arduino.h"
 #include <libraries/I2CSlave.h>
-#include "libraries/MenuController.h"
 
 #include <BrushlessMotorDriver.h>
 #include "Engine.h"
@@ -16,9 +15,7 @@ static uint8_t DefaultPattern[3] = { 0b11001000, 0b00001100, 0b10000000 };	// ni
 PatternBlinker ledBlinker(LED_PIN, 50 /* ms */); // one bit in the patterns above is active for 100ms
 
 HardwareSerial* logger = &Serial5;			// UART used to log
-HardwareSerial* command = &Serial5;			// UART used to log
 
-BotController* botController = BotController::getInstance();
 
 i2c_t3* Wires[3] = { &Wire, &Wire1, &Wire2};
 i2c_t3* IMUWire = NULL;
@@ -27,10 +24,10 @@ I2CSlave* i2cSlave = new I2CSlave(&Wire1);
 
 void setup()
 {
-	// command input comes via UART or I2C from ESP86266
-	command->begin(460800);
+	logger->begin(460800);
 	uint32_t now = millis();
-	// let the LED blink two times to indicate that setup is starting now
+
+	// let the LED blink two times to indicate startup
 	digitalWrite(LED_PIN,LOW);
 	delay(30);
 	digitalWrite(LED_PIN,HIGH);
@@ -42,28 +39,29 @@ void setup()
 	digitalWrite(LED_PIN,LOW);
 	ledBlinker.set(DefaultPattern,sizeof(DefaultPattern));
 
-	BotController::getInstance()->setup(); 	// this takes 4.5s seconds (mainly due to IMU initialization)
+	// initialize configuration values coming from EEPROM
+	memory.setup();
+
+	// join the i2c bus with the webserver
+	i2cSlave->setup();
+
+	// this takes 3.5s seconds (mainly due to IMU initialization)
+	BotController::getInstance()->setup();
 
 	// initialize LED_PIN after BotController::getInstance()->setup()
 	// since SPI does use it default wise for SCK, but this is remapped
 	pinMode(LED_PIN, OUTPUT);
 
-	i2cSlave->setup(); 		// join the i2c bus with the webserver
-
-	// initialize configuration values coming from EEPROM
-	memory.setup();
-
-	command->print("ms BotController - h for help ");
-	command->print(millis()-now);
-	command->print("ms setup time");
-	command->println();
+	logger->print("BotController - h for help ");
+	logger->print(millis()-now);
+	logger->print("ms setup time");
+	logger->println();
 }
 
 void loop()
 {
-	uint32_t now = millis();
-	ledBlinker.loop(now);    	// LED on Teensy board and LED on power switch
+	ledBlinker.loop(millis());    				// LED on Teensy board and LED on power switch
 	BotController::getInstance()->loop();		// do the balancing business
-	i2cSlave->loop();			// execute commands from webserver that came in via I2C
-	memory.loop(now);
+	i2cSlave->loop();							// execute commands from webserver that came in via I2C
+	memory.loop(millis());						// check if something happened in memory that is to be saved in EEPROM
 }

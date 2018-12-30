@@ -12,6 +12,8 @@
 #ifndef BALLDRIVE_H_
 #define BALLDRIVE_H_
 
+#include <Arduino.h>
+
 #include <Engine.h>
 #include <libraries/MenuController.h>
 #include <PowerRelay.h>

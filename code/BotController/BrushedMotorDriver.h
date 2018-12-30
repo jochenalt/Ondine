@@ -8,6 +8,7 @@
 #ifndef BRUSHEDMOTORDRIVER_H_
 #define BRUSHEDMOTORDRIVER_H_
 
+#include <Arduino.h>
 
 #include <libraries/MenuController.h>
 #include <libraries/PIDController.h>

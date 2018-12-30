@@ -11,6 +11,7 @@
 #ifndef SPEEDPROFILE_H_
 #define SPEEDPROFILE_H_
 
+#include "Arduino.h"
 #include "setup.h"
 
 typedef float mmPerMillisecond;

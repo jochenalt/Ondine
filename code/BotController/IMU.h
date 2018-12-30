@@ -8,6 +8,8 @@
 #ifndef IMU_IMUCONTROLLER_H_
 #define IMU_IMUCONTROLLER_H_
 
+#include <Arduino.h>
+
 #include <libraries/MenuController.h>
 #include <MPU9250/MPU9250.h>
 #include <Filter/KalmanFilter.h>

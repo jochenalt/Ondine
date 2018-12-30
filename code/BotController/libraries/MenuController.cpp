@@ -21,6 +21,9 @@ void MenuController::setup() {
 	menuSize = 0;
 	activeMenuStackPtr = 0;
 	activeMenuStack[activeMenuStackPtr] = 0;
+	menuSpeed = 0;
+	lastKeyPressed = 0;
+	continousKeyPressCounter = 0;
 }
 
 void MenuController::registerMenu(const Menuable* menu) {

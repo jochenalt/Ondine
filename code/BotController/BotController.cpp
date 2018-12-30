@@ -5,6 +5,7 @@
  *      Author: JochenAlt
  */
 
+#include <Arduino.h>
 #include <AS5047D.h>
 #include <types.h>
 #include <libraries/Util.h>
@@ -22,19 +23,18 @@ const int LifterCurrentSensePin = A22;
 
 const int LifterCPR = 48;
 
-
 BotController* BotController::getInstance(bool init) {
-	static BotController* instance = new BotController();
+	static BotController instance;
 	if (init == true) {
 		loggingln("re-initializing botController");
-		delete instance;
-		instance = new BotController();
+		instance.setup();
 	}
-	return instance;
+	return &instance;
 }
 
 
 void BotController::setup() {
+	menuController.setup();
 	registerMenuController(&menuController);
 
 	ballDrive.setup(&menuController);
@@ -46,14 +46,13 @@ void BotController::setup() {
 
 	performanceLogTimer.setRate(5000);
 
-
+	avrLoopTime_us = 0;
 }
 
 void BotController::printHelp() {
 	logger->println();
 	logger->println("Bot Menu");
 	logger->println();
-	logger->println("r - reset");
 	logger->println("e - ball engine");
 	logger->println("p - engine on/off");
 	logger->println("s - state controller");
@@ -182,102 +181,106 @@ void BotController::setTarget(const BotMovement& target) {
 }
 
 void BotController::loop() {
-	if (mainTimer.isDue_ms(SampleTime_us, micros())) {
+	if (mainTimer.isDue_ms(SampleTime_us/MotorSampleFactor, micros())) {
 		// performance measurement
 		uint32_t loopStart_us = micros();
 
 		// drive motors
 		ballDrive.loop();
 
-		// react on serial line
-		menuController.loop();
+		loopCaller = (loopCaller + 1) % MotorSampleFactor;
+		if (loopCaller == 0) {
 
-		// drive the lifter
-		lifter.loop();
+			// react on serial line
+			menuController.loop();
 
-		// check if new IMU orientation is there
-		imu.loop();
+			// drive the lifter
+			lifter.loop();
 
-		// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
-		IMUSample sensorSample = imu.getSample();
-		ballDrive.getSpeed(sensorSample,currentMovement);
+			// check if new IMU orientation is there
+			imu.loop();
 
-		// run main balance loop. Timing is determined by IMU that sends an
-		// interrupt everytime a new value is there.
-		float dT = 0; // set by isNewValueAvailable
-		if (imu.isNewValueAvailable(dT)) {
-			// call balance and speed controller
-			state.update(dT, sensorSample, currentMovement, targetBotMovement);
+			// apply inverse kinematics to get { speed (x,y), omega } out of wheel speed
+			IMUSample sensorSample = imu.getSample();
+			ballDrive.getSpeed(sensorSample,currentMovement);
 
-			if (mode == BALANCING) {
-				// apply kinematics to compute wheel speed out of x,y, omega
-				// and set speed of each wheel
-				ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
-										sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
+			// run main balance loop. Timing is determined by IMU that sends an
+			// interrupt everytime a new value is there.
+			float dT = 0; // set by isNewValueAvailable
+			if (imu.isNewValueAvailable(dT)) {
+				// call balance and speed controller
+				state.update(dT, sensorSample, currentMovement, targetBotMovement);
+
+				if (mode == BALANCING) {
+					// apply kinematics to compute wheel speed out of x,y, omega
+					// and set speed of each wheel
+					ballDrive.setSpeed( state.getSpeedX(), state.getSpeedY(), state.getOmega(),
+											sensorSample.plane[Dimension::X].angle,sensorSample.plane[Dimension::Y].angle);
+				}
 			}
-		}
 
-		uint32_t loopEnd_us= micros();
-		avrLoopTime_us = ((loopEnd_us-loopStart_us) + avrLoopTime_us)/2.0;
+			uint32_t loopEnd_us= micros();
+			avrLoopTime_us = ((loopEnd_us-loopStart_us) + avrLoopTime_us)/2.0;
 
-		bool logline = false;
-		if (logTimer.isDue_ms(200,millis())) {
-			if (memory.persistentMem.logConfig.debugBalanceLog) {
-				logline  = true;
-				logging("a=(");
-				logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
-				logging(",");
-				logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
-				logging(",");
-				logging(currentMovement.x.pos,2,3);
-				logging(",");
-				logging(currentMovement.x.speed,2,3);
-				logging("|");
-				logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
-				logging(",");
-				logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
-				logging(",");
-				logging(currentMovement.y.pos,2,3);
-				logging(",");
-				logging(currentMovement.y.speed,2,3);
-				logging(") ");
+			bool logline = false;
+			if (logTimer.isDue_ms(200,millis())) {
+				if (memory.persistentMem.logConfig.debugBalanceLog) {
+					logline  = true;
+					logging("a=(");
+					logging(degrees(sensorSample.plane[Dimension::X].angle),3,1);
+					logging(",");
+					logging(degrees(sensorSample.plane[Dimension::X].angularVelocity),3,1);
+					logging(",");
+					logging(currentMovement.x.pos,2,3);
+					logging(",");
+					logging(currentMovement.x.speed,2,3);
+					logging("|");
+					logging(degrees(sensorSample.plane[Dimension::Y].angle),3,1);
+					logging(",");
+					logging(degrees(sensorSample.plane[Dimension::Y].angularVelocity),3,1);
+					logging(",");
+					logging(currentMovement.y.pos,2,3);
+					logging(",");
+					logging(currentMovement.y.speed,2,3);
+					logging(") ");
+				}
+				if ((mode == BALANCING) && memory.persistentMem.logConfig.debugBalanceLog) {
+					logline  = true;
+
+					logging(" state=(");
+					logging(state.getTiltErrorX(),2,3);
+					logging(",");
+					logging(state.getPosErrorX(),2,3);
+					logging(",");
+					logging(state.getSpeedX(),2,3);
+					logging(",");
+					logging(state.getAccelX(),2,3);
+					logging("|");
+					logging(state.getTiltErrorY(),2,3);
+					logging(",");
+					logging(state.getPosErrorY(),2,3);
+					logging(",");
+					logging(state.getSpeedY(),2,3);
+					logging(",");
+					logging(state.getAccelY(),2,3);
+					logging("|");
+					logging(state.getOmega(),2,3);
+					logging(")");
+				}
+				if (memory.persistentMem.logConfig.performanceLog) {
+					logline  = true;
+
+					logger->print(" f=");
+					logger->print(1.0/dT,0);
+					logger->print("Hz, ");
+					logger->print(avrLoopTime_us);
+					logger->print("us, cpu=");
+					logger->print(((float)(avrLoopTime_us*100.0) / SampleTime_us),0);
+					logger->print("%)");
+				}
+				if (logline)
+					logger->println();
 			}
-			if ((mode == BALANCING) && memory.persistentMem.logConfig.debugBalanceLog) {
-				logline  = true;
-
-				logging(" state=(");
-				logging(state.getTiltErrorX(),2,3);
-				logging(",");
-				logging(state.getPosErrorX(),2,3);
-				logging(",");
-				logging(state.getSpeedX(),2,3);
-				logging(",");
-				logging(state.getAccelX(),2,3);
-				logging("|");
-				logging(state.getTiltErrorY(),2,3);
-				logging(",");
-				logging(state.getPosErrorY(),2,3);
-				logging(",");
-				logging(state.getSpeedY(),2,3);
-				logging(",");
-				logging(state.getAccelY(),2,3);
-				logging("|");
-				logging(state.getOmega(),2,3);
-				logging(")");
-			}
-			if (memory.persistentMem.logConfig.performanceLog) {
-				logline  = true;
-
-				logger->print(" f=");
-				logger->print(1.0/dT,0);
-				logger->print("Hz, ");
-				logger->print(avrLoopTime_us);
-				logger->print("us, cpu=");
-				logger->print(((float)(avrLoopTime_us*100.0) / SampleTime_us),0);
-				logger->print("%)");
-			}
-			if (logline)
-				logger->println();
 		}
 	}
 }

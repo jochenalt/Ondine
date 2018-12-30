@@ -8,6 +8,8 @@
 #ifndef STATECONTROLLER_H_
 #define STATECONTROLLER_H_
 
+#include "Arduino.h"
+
 #include <Filter/FIRFilter.h>
 #include <Filter/ComplementaryFilter.h>
 

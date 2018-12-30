@@ -8,6 +8,8 @@
 #ifndef KALMAN_KALMAN_H_
 #define KALMAN_KALMAN_H_
 
+#include "Arduino.h"
+
 class KalmanFilter {
 public:
     KalmanFilter();

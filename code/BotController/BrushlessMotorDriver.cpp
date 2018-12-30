@@ -17,7 +17,7 @@ const float maxAngleError = radians(10);						// limit for PID controller
 const float minTorqueRatio = 0.1;								// minimum percentage of torque when in position
 const float maxAdvancePhaseAngle = radians(10);					// maximum phase between voltage and current due to EMF
 const float RevPerSecondPerVolt = 4;							// motor constant of Maxon EC max 40 W
-const float voltage = 16;										// [V] coming from the battery to server the motors
+const float voltage = 20;										// [V] coming from the battery to server the motors
 const float maxRevolutionSpeed = voltage*RevPerSecondPerVolt; 	// [rev/s]
 
 
@@ -270,7 +270,7 @@ bool BrushlessMotorDriver::loop() {
 										errorAngle,  dT);
 
 		// torque is max at -90/+90 degrees
-		float advanceAngle = radians(90) * sigmoid(40.0 /* derivation at 0 */, controlOutput/maxAngleError);
+		float advanceAngle = radians(90) * sigmoid(100.0 /* derivation at 0 */, controlOutput/maxAngleError);
 		float torque = abs(controlOutput)/maxAngleError;
 
 		// set magnetic field relative to rotor's position

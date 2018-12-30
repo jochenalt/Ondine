@@ -33,12 +33,10 @@ class MenuController {
 	friend class Menuable;
 public:
 	MenuController() {};
-	~MenuController() {};
+	virtual ~MenuController() {};
 
 	void loop();
 	void setup();
-
-
 	void registerMenu(const Menuable* menu);
 	void pushMenu(const Menuable* menu);
 	void popMenu();

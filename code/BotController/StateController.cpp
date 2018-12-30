@@ -90,7 +90,7 @@ void ControlPlane::reset () {
 				         1.0e-2f  			/* allowed ripple in passband in amplitude is 1% */,
 						 1.0e-4f 			/* supression above cut off frequency is -40db */,
 						 SampleFrequency, 	/* 200 Hz */
-						 50.0f  			/* low pass cut off frequency */);
+						 15.0f  			/* low pass cut off frequency */);
 		if (outputSpeedFilter.get_error_flag() != 0) {
 			logging("FIR error=");
 			loggingln(outputSpeedFilter.get_error_flag());
@@ -144,22 +144,22 @@ void ControlPlane::update(bool doLogging, float dT,
 		float angle = sensor.angle;
 		float angularVelocity = sensor.angularVelocity;
 
-		float bodyPos   		= current.pos;
-		float bodySpeed 		= current.speed;
-		float bodyAccel 		= (bodySpeed - lastBodySpeed)/dT;
-		float ballPos			= bodyPos - angle* (CentreOfGravityHeight);
-		float ballSpeed 		= (ballPos - lastBallPos)/dT;
+		float ballPos   		= current.pos;
+		float ballSpeed 		= current.speed;
 		float ballAccel 		= (ballSpeed - lastBallSpeed)/dT;
+		float bodyPos			= bodyPos + angle* (CentreOfGravityHeight);
+		float bodySpeed 		= (bodyPos - lastBodyPos)/dT;
+		float bodyAccel 		= (bodySpeed - lastBodySpeed)/dT;
 
 		float targetBodyPos 	= target.pos;
 		float targetBallPos	 	= target.pos - targetAngle * (CentreOfGravityHeight);
 		float targetBallSpeed 	= (targetBallPos - lastTargetBallPos)/dT;
 
 		// compute errors for PD(angle) and PID(position)
-		float error_angle			= (angle-targetAngle);
-		error_int_angle 			+= error_angle*dT;
+		float error_angle		= (angle-targetAngle);
+		error_int_angle 		+= error_angle*dT;
 		const float maxTiltError = radians(10);
-		error_int_angle 			=
+		error_int_angle 		=
 					constrain(error_int_angle,
 								-maxTiltError,
 								+maxTiltError);
@@ -168,8 +168,7 @@ void ControlPlane::update(bool doLogging, float dT,
 		error_angle = error_angle + sgn(error_angle)*abs(error_angle*error_angle*gradient);
 		float error_angular_speed	= (angularVelocity-targetAngularVelocity);
 
-		float posError 	= (ballPos - targetBallPos);
-		// float posError 	= (bodyPos - targetBallPos);
+		float posError 	= (bodyPos - targetBodyPos);
 
 		// posError = posFilter.update(posError);
 		const float posErrorLimitAngle = 0.10; // [m]
@@ -205,8 +204,11 @@ void ControlPlane::update(bool doLogging, float dT,
 		float accel = error;// / BallWeight;
 		accel = constrain(accel,-MaxBotAccel, MaxBotAccel);
 
+		float deltaSpeed = accel*dT;
 		// get rid of trembling by a FIR filter 5th order with 15Hz
-		speed += outputSpeedFilter.update( accel * dT);
+		// speed += outputSpeedFilter.update( deltaSpeed);
+		speed += deltaSpeed;
+
 		speed = constrain(speed, -MaxBotSpeed, + MaxBotSpeed);
 
 		if (outputSpeedFilter.get_error_flag() != 0)
@@ -216,15 +218,19 @@ void ControlPlane::update(bool doLogging, float dT,
 		if (doLogging) {
 				if (memory.persistentMem.logConfig.debugStateLog) {
 					logging("imu=(");
-					logging(sensor.angle,2,3);
+					logging(degrees(sensor.angle),2,3);
 					logging(",");
-					logging(sensor.angularVelocity,2,3);
+					logging(degrees(sensor.angularVelocity),2,3);
+					logging(",");
+					logging(totalPositionError,2,3);
 					logging(") ");
 
 					logging(" p(");
 					logging(current.pos,2,3);
 					logging(",");
 					logging(current.speed,2,3);
+					logging(",");
+					logging(totalPositionError,2,3);
 					logging(")");
 
 					logging(" error=");
@@ -278,15 +284,14 @@ void StateController::update(float dT,
 	rampedTargetMovement.rampUp(targetBotMovement, dT);
 	bool doLogging = logTimer.isDue_ms(1000,millis());
 	if (doLogging && memory.persistentMem.logConfig.debugStateLog)
-		logging("   planeX:");
+		logging(" planeX:");
 	planeX.update(doLogging, dT,
 					currentMovement.x, rampedTargetMovement.x,
 					currentMovement.omega, rampedTargetMovement.omega,
 					sensorSample.plane[Dimension::X]);
 
 	if (doLogging && memory.persistentMem.logConfig.debugStateLog) {
-		loggingln();
-		logging("   planeY:");
+		logging(" planeY:");
 	}
 	planeY.update(doLogging, dT,
 					currentMovement.y, rampedTargetMovement.y,
